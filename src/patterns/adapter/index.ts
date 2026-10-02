@@ -1,0 +1,198 @@
+import type { PatternDefinition } from '@/types/pattern'
+
+export const pattern: PatternDefinition = {
+  slug: 'adapter',
+  name: 'Adapter',
+  category: 'structural',
+  order: 1,
+  summary: 'Wrap an incompatible interface so existing client code can use it unchanged.',
+  intent:
+    'Convert the interface of a class into another interface clients expect. Adapter lets classes work together that could not otherwise because of incompatible interfaces.',
+  problem:
+    'Your checkout code is written against a clean PaymentProcessor interface, but the payment provider you were just handed only exposes a legacy, cents-based API with a completely different method name and shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.',
+  solution:
+    'Introduce an Adapter that implements the interface your client already expects, and holds an instance of the incompatible class internally. The adapter translates each call — converting arguments, invoking the legacy method, and converting the result back — so neither the client nor the legacy class needs to know about the other.',
+  analogy:
+    'A travel power plug adapter does not change what your laptop charger does, and it does not change the wall socket. It just sits between them, translating one physical shape into the other.',
+  whenToUse: [
+    'You want to use an existing class but its interface does not match what the rest of your code expects.',
+    'You are integrating a third-party or legacy library you cannot modify.',
+    'You want to create a reusable class that cooperates with unrelated or unforeseen classes.',
+  ],
+  pros: [
+    'Lets incompatible interfaces work together without changing either side.',
+    'Single Responsibility: the translation logic lives in one place.',
+    'Open/Closed: new adapters can be introduced without touching existing client code.',
+  ],
+  cons: [
+    'Adds an extra layer of indirection and a class to maintain.',
+    'Can hide a poor underlying API rather than fixing the real problem.',
+  ],
+  realWorld: [
+    'Array.from() adapting iterables and array-likes to the Array interface',
+    'Node.js streams adapters between callback and Promise-based APIs',
+    'ORMs adapting different database drivers to one query interface',
+    'Payment SDKs wrapping each provider’s raw HTTP API behind a common interface',
+  ],
+  related: ['decorator', 'facade', 'proxy'],
+  participants: [
+    {
+      id: 'paymentProcessor',
+      label: 'PaymentProcessor',
+      role: 'Target interface',
+      kind: 'interface',
+      x: 420,
+      y: 80,
+      description: 'The interface the client code already depends on: a single charge(amount) method that returns a receipt string.',
+    },
+    {
+      id: 'client',
+      label: 'Client',
+      role: 'Client',
+      kind: 'client',
+      x: 140,
+      y: 230,
+      description: 'Checkout code that only knows about PaymentProcessor. It never sees LegacyStripeGateway directly.',
+    },
+    {
+      id: 'adapter',
+      label: 'StripeAdapter',
+      role: 'Adapter',
+      kind: 'class',
+      x: 420,
+      y: 230,
+      width: 170,
+      description: 'Implements PaymentProcessor and holds a LegacyStripeGateway. Converts dollars to cents on the way in, and the legacy result back to a receipt on the way out.',
+    },
+    {
+      id: 'adaptee',
+      label: 'LegacyStripeGateway',
+      role: 'Adaptee',
+      kind: 'class',
+      x: 660,
+      y: 230,
+      width: 180,
+      description: 'The existing, incompatible class: cents-based, with a chargeCents() method and its own result shape. Cannot be modified.',
+    },
+  ],
+  relations: [
+    {
+      id: 'client-call',
+      from: 'client',
+      to: 'adapter',
+      type: 'calls',
+      label: 'charge($)',
+      description: 'The client calls charge() exactly as it would on any PaymentProcessor, unaware an adapter is involved.',
+      code: 'usage',
+    },
+    {
+      id: 'adapter-impl',
+      from: 'adapter',
+      to: 'paymentProcessor',
+      type: 'implements',
+      description: 'StripeAdapter implements the PaymentProcessor interface so it can stand in for it anywhere.',
+      code: 'adapter',
+    },
+    {
+      id: 'wraps',
+      from: 'adapter',
+      to: 'adaptee',
+      type: 'wraps',
+      label: 'wraps',
+      description: 'The adapter stores a reference to the legacy gateway and delegates to it internally.',
+      bend: 30,
+      code: 'adapter',
+    },
+    {
+      id: 'delegate',
+      from: 'adapter',
+      to: 'adaptee',
+      type: 'calls',
+      label: 'chargeCents()',
+      description: 'charge() converts the amount to cents and calls the legacy chargeCents() method.',
+      bend: -30,
+      code: 'charge',
+    },
+  ],
+  steps: [
+    {
+      title: 'Adapter wraps the legacy gateway',
+      description: 'A StripeAdapter is constructed around the existing LegacyStripeGateway instance. From here on, the gateway is only reachable through the adapter.',
+      highlight: ['adapter', 'wraps', 'adaptee'],
+      notes: { adapter: 'wraps gateway' },
+      code: 'adapter',
+    },
+    {
+      title: 'Client calls the common interface',
+      description: 'Checkout code calls charge(4.50) on what it believes is a plain PaymentProcessor.',
+      highlight: ['client', 'client-call', 'adapter'],
+      packets: [{ relation: 'client-call', label: '$4.50' }],
+      notes: { client: '$4.50' },
+      code: 'usage',
+    },
+    {
+      title: 'Adapter translates the call',
+      description: 'charge() converts 4.50 dollars into 450 cents and calls the legacy chargeCents() method with the translated value.',
+      highlight: ['adapter', 'delegate', 'adaptee'],
+      packets: [{ relation: 'delegate', label: '450¢' }],
+      notes: { adaptee: '450¢' },
+      code: 'charge',
+    },
+    {
+      title: 'Legacy gateway processes and returns',
+      description: 'The legacy gateway does its own thing and returns its own result shape, in cents.',
+      highlight: ['adaptee', 'delegate'],
+      packets: [{ relation: 'delegate', label: 'ok, 450¢', reverse: true }],
+      code: 'chargeCents',
+    },
+    {
+      title: 'Result flows back translated',
+      description: 'The adapter converts the legacy result back into a plain receipt string and returns it to the client, which never had to know the gateway existed.',
+      highlight: ['adapter', 'client-call', 'client'],
+      packets: [{ relation: 'client-call', label: 'charged $4.50', reverse: true }],
+      notes: { client: 'receipt' },
+      code: 'charge',
+    },
+  ],
+  code: `
+// [paymentProcessor]
+interface PaymentProcessor {
+  charge(amount: number): string
+}
+// [/paymentProcessor]
+
+// [adaptee]
+class LegacyStripeGateway {
+  // [chargeCents]
+  chargeCents(cents: number): { ok: boolean; cents: number } {
+    console.log(\`legacy gateway: charging \${cents}¢\`)
+    return { ok: true, cents }
+  }
+  // [/chargeCents]
+}
+// [/adaptee]
+
+// [adapter]
+class StripeAdapter implements PaymentProcessor {
+  constructor(private gateway: LegacyStripeGateway) {}
+
+  // [charge]
+  charge(amount: number): string {
+    const cents = Math.round(amount * 100)
+    const result = this.gateway.chargeCents(cents)
+    return result.ok ? \`charged $\${(result.cents / 100).toFixed(2)}\` : 'failed'
+  }
+  // [/charge]
+}
+// [/adapter]
+
+// [usage]
+// Usage
+function checkout(processor: PaymentProcessor, amount: number) {
+  console.log(processor.charge(amount))
+}
+
+checkout(new StripeAdapter(new LegacyStripeGateway()), 4.5)
+// [/usage]
+`,
+}

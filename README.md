@@ -1,6 +1,6 @@
 # design-patterns
 
-An interactive, animated guide to the top 10 software design patterns, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+An interactive, animated guide to the top 20 software design patterns, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern has:
 
@@ -10,7 +10,7 @@ Every pattern has:
 
 | Creational | Structural | Behavioral |
 | --- | --- | --- |
-| Singleton, Factory Method, Builder | Adapter, Decorator, Facade, Proxy | Observer, Strategy, Command |
+| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator |
 
 ## Getting started
 
@@ -65,4 +65,4 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 ### Custom visualisations
 
-The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `step`, `stepIndex`, `selectedId`, `onSelect`). Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `singleton`, `builder`, `decorator` and `strategy`.
+The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `step`, `stepIndex`, `selectedId`, `onSelect`). Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `singleton`, `builder`, `decorator`, `strategy`, `composite`, `flyweight`, `iterator`, `state` and `chain-of-responsibility`.

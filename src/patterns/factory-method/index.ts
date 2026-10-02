@@ -34,7 +34,7 @@ export const pattern: PatternDefinition = {
     'UI toolkit Button factories that return platform-specific buttons (Windows, macOS, Web)',
     'Framework "create" hooks that let app code supply its own object type (e.g. a custom HttpClient)',
   ],
-  related: ['builder', 'singleton', 'strategy'],
+  related: ['abstract-factory', 'prototype', 'builder', 'template-method'],
   participants: [
     {
       id: 'transport',

@@ -37,7 +37,7 @@ export const pattern: PatternDefinition = {
     'String interning — identical string literals share one underlying instance in languages like Java and Python.',
     'Map libraries caching a handful of marker/icon objects reused across thousands of pins.',
   ],
-  related: ['proxy', 'composite', 'factory-method'],
+  related: ['object-pool', 'proxy', 'composite', 'factory-method'],
 
   participants: [
     {

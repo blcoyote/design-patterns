@@ -8,7 +8,7 @@ import type { PatternDefinition } from '@/types/pattern'
 export const pattern: PatternDefinition = {
   slug: 'my-pattern', // must match the folder name; used in the URL (#/patterns/my-pattern)
   name: 'My Pattern',
-  category: 'behavioral', // 'creational' | 'structural' | 'behavioral'
+  category: 'behavioral', // 'creational' | 'structural' | 'behavioral' | 'architectural'
   order: 99, // position within the category
   summary: 'One line shown on cards and in search.',
   intent: 'The GoF-style intent statement.',

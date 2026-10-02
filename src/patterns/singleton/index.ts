@@ -35,7 +35,7 @@ export const pattern: PatternDefinition = {
     'java.lang.Runtime.getRuntime() in Java',
     'A single Redux/Zustand store instance per application',
   ],
-  related: ['facade', 'abstract-factory', 'flyweight'],
+  related: ['dependency-injection', 'facade', 'abstract-factory', 'flyweight'],
   participants: [
     {
       id: 'config',

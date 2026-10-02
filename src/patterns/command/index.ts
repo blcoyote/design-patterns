@@ -34,7 +34,7 @@ export const pattern: PatternDefinition = {
     'GUI menu items and toolbar buttons bound to an action object',
     'Redux actions dispatched to a store, replayed for time-travel debugging',
   ],
-  related: ['chain-of-responsibility', 'observer', 'strategy', 'prototype'],
+  related: ['chain-of-responsibility', 'memento', 'unit-of-work', 'observer', 'strategy'],
   participants: [
     {
       id: 'command',

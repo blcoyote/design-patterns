@@ -34,7 +34,7 @@ export const pattern: PatternDefinition = {
     'An SDK\'s top-level client class hiding networking, auth and retry logic',
     'Operating system system calls facading kernel subsystems',
   ],
-  related: ['adapter', 'mediator', 'abstract-factory', 'proxy'],
+  related: ['adapter', 'mediator', 'repository', 'proxy'],
   participants: [
     {
       id: 'client',

@@ -26,7 +26,10 @@ The build uses relative paths and hash routing, so `dist/` can be served from an
 
 ### Deployment
 
-`.github/workflows/deploy.yml` lints, tests and builds on every push and pull request to `main`, and deploys `dist/` to GitHub Pages on pushes to `main` (or a manual run). One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+- `.github/workflows/ci.yml` runs on every pull request (or manually): lint, type-check, tests and a production build, with `dist/` uploaded as an artifact.
+- `.github/workflows/deploy.yml` runs on pushes to `main` (or manually): lint, tests, build, then deploys `dist/` to GitHub Pages.
+
+One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
 ## Project structure
 

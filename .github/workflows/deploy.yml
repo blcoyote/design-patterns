@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -34,15 +32,12 @@ jobs:
       - run: npm run build
 
       - uses: actions/configure-pages@v6
-        if: github.event_name != 'pull_request'
 
       - uses: actions/upload-pages-artifact@v5
-        if: github.event_name != 'pull_request'
         with:
           path: dist
 
   deploy:
-    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:

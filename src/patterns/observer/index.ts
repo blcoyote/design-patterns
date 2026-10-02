@@ -221,4 +221,98 @@ ticker.setPrice(101.5) // all three react
 ticker.unsubscribe(alert)
 ticker.setPrice(99) // only chart + log
 `,
+  csharp: `
+// In production C# you'd often reach for the built-in event/EventHandler<T>
+// or IObservable<T>/IObserver<T> instead of hand-rolling this, but we keep
+// the explicit pattern structure here for clarity.
+
+// [observer]
+interface IObserver
+{
+    void Update(decimal price);
+}
+// [/observer]
+
+// [subject]
+class StockTicker
+{
+    private readonly List<IObserver> _observers = new();
+    private decimal _price;
+
+    // [subscribe]
+    public void Subscribe(IObserver observer)
+    {
+        _observers.Add(observer);
+    }
+    // [/subscribe]
+
+    // [unsubscribe]
+    public void Unsubscribe(IObserver observer)
+    {
+        _observers.Remove(observer);
+    }
+    // [/unsubscribe]
+
+    // [setPrice]
+    public void SetPrice(decimal price)
+    {
+        _price = price;
+        Notify();
+    }
+    // [/setPrice]
+
+    // [notify]
+    private void Notify()
+    {
+        foreach (var observer in _observers) observer.Update(_price);
+    }
+    // [/notify]
+}
+// [/subject]
+
+// [concrete]
+// [chart]
+class PriceChart : IObserver
+{
+    public void Update(decimal price)
+    {
+        Console.WriteLine($"chart: plot {price}");
+    }
+}
+// [/chart]
+
+// [alert]
+class PriceAlert(decimal limit) : IObserver
+{
+    public void Update(decimal price)
+    {
+        if (price > limit) Console.WriteLine($"warning: price above {limit}!");
+    }
+}
+// [/alert]
+
+// [logger]
+class AuditLog : IObserver
+{
+    public List<decimal> Entries { get; } = new();
+
+    public void Update(decimal price)
+    {
+        Entries.Add(price);
+    }
+}
+// [/logger]
+// [/concrete]
+
+// Usage
+var ticker = new StockTicker();
+var alert = new PriceAlert(100);
+ticker.Subscribe(new PriceChart());
+ticker.Subscribe(alert);
+ticker.Subscribe(new AuditLog());
+
+ticker.SetPrice(101.5m); // all three react
+ticker.Unsubscribe(alert);
+ticker.SetPrice(99m); // only chart + log
+`,
 }

@@ -59,7 +59,8 @@ src/
    - show small `notes` badges under participants,
    - highlight a `code` region.
 4. Mark regions in `code` with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
-5. Run `npm test` — it reports unknown ids, missing code regions and broken `related` links.
+5. Optionally add a `csharp` field with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as `code` — `npm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
+6. Run `npm test` — it reports unknown ids, missing code regions and broken `related` links.
 
 That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up automatically. No other file needs to change.
 

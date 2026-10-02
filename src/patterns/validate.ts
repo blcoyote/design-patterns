@@ -5,6 +5,7 @@ import type { PatternDefinition } from '@/types/pattern'
 export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): string[] {
   const errors: string[] = []
   const { regions } = parseCode(p.code)
+  const csRegions = p.csharp ? parseCode(p.csharp).regions : null
   const participantIds = new Set(p.participants.map((x) => x.id))
   const relationIds = new Set(p.relations.map((x) => x.id))
   const ids = new Set([...participantIds, ...relationIds])
@@ -13,7 +14,9 @@ export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): 
     errors.push('participant/relation ids must be unique')
   }
   const checkRegion = (where: string, region?: string) => {
-    if (region && !regions[region]) errors.push(`${where}: unknown code region "${region}"`)
+    if (!region) return
+    if (!regions[region]) errors.push(`${where}: unknown code region "${region}"`)
+    if (csRegions && !csRegions[region]) errors.push(`${where}: unknown csharp code region "${region}"`)
   }
 
   for (const part of p.participants) checkRegion(`participant ${part.id}`, part.code)

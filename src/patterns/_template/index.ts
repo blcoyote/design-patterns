@@ -57,6 +57,23 @@ new Service().run()
 // [/usage]
 `,
 
+  // Optional: a C# example shown as a second tab next to TypeScript. Must use
+  // the SAME region ids as `code` above (`npm test` checks this).
+  // csharp: `
+  // // [service]
+  // class Service
+  // {
+  //     public void Run() { }
+  // }
+  // // [/service]
+  //
+  // // [usage]
+  // // [client]
+  // new Service().Run();
+  // // [/client]
+  // // [/usage]
+  // `,
+
   // Optional: a custom scene. Create Visualization.tsx next to this file and set
   // Visualization: MyVisualization,
 }

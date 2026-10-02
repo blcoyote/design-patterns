@@ -93,6 +93,12 @@ export interface PatternDefinition {
    * markers are stripped before display and used for highlighting.
    */
   code: string
+  /**
+   * Optional C# example, shown as a second tab next to TypeScript. Use the
+   * same `// [id]` … `// [/id]` markers, with the SAME region ids as `code`,
+   * so participant/relation/step highlighting works in either language.
+   */
+  csharp?: string
   /** Diagram viewBox, defaults to "0 0 800 460". */
   viewBox?: string
   /** Optional custom scene replacing the generic diagram. */

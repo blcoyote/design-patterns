@@ -23,6 +23,17 @@ describe('pattern registry', () => {
   it.each(patterns.map((p) => [p.slug, p] as const))('%s code has no unclosed or stray markers', (_slug, p) => {
     expect(parseCode(p.code).text).not.toMatch(/\/\/ \[\/?[\w-]+\]/)
   })
+
+  const withCSharp = patterns.filter((p) => p.csharp)
+  it.each(withCSharp.map((p) => [p.slug, p] as const))('%s csharp code has no unclosed or stray markers', (_slug, p) => {
+    expect(parseCode(p.csharp!).text).not.toMatch(/\/\/ \[\/?[\w-]+\]/)
+  })
+
+  it.each(withCSharp.map((p) => [p.slug, p] as const))('%s csharp regions match the typescript regions', (_slug, p) => {
+    const tsRegionIds = Object.keys(parseCode(p.code).regions).sort()
+    const csRegionIds = Object.keys(parseCode(p.csharp!).regions).sort()
+    expect(csRegionIds).toEqual(tsRegionIds)
+  })
 })
 
 describe('parseCode', () => {

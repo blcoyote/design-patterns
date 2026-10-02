@@ -20,6 +20,8 @@ function emit() {
 }
 
 function subscribe(listener: () => void) {
+  // storage events fired while nothing was subscribed were missed — resync on (re)subscribe
+  cached = readStored()
   listeners.add(listener)
   const onStorage = (e: StorageEvent) => {
     if (e.key === STORAGE_KEY || e.key === null) {

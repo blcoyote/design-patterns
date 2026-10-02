@@ -34,7 +34,7 @@ export const pattern: PatternDefinition = {
     'ORMs adapting different database drivers to one query interface',
     'Payment SDKs wrapping each provider’s raw HTTP API behind a common interface',
   ],
-  related: ['decorator', 'facade', 'proxy'],
+  related: ['bridge', 'decorator', 'facade', 'proxy'],
   participants: [
     {
       id: 'paymentProcessor',

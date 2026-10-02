@@ -35,7 +35,7 @@ export const pattern: PatternDefinition = {
     'SQL query builders (Knex, TypeORM QueryBuilder)',
     'UI layout builders that chain .add()/.with() calls before a final .build()',
   ],
-  related: ['factory-method', 'singleton', 'facade'],
+  related: ['abstract-factory', 'factory-method', 'composite'],
   participants: [
     {
       id: 'builder',

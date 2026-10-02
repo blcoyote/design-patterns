@@ -36,7 +36,7 @@ export const pattern: PatternDefinition = {
     'GUI menus: a menu holds menu items and other (sub)menus behind the same interface',
     'Bill-of-materials and org-chart trees that total cost or headcount recursively',
   ],
-  related: ['decorator', 'iterator', 'flyweight', 'chain-of-responsibility'],
+  related: ['decorator', 'iterator', 'visitor', 'interpreter', 'flyweight'],
   participants: [
     {
       id: 'component',

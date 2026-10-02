@@ -36,7 +36,7 @@ export const pattern: PatternDefinition = {
     'Game character states (Standing, Jumping, Crouching, Dead)',
     'Document and order workflow engines (Draft → InReview → Published/Rejected)',
   ],
-  related: ['strategy', 'singleton', 'flyweight', 'bridge'],
+  related: ['strategy', 'circuit-breaker', 'singleton', 'flyweight', 'bridge'],
   participants: [
     {
       id: 'documentState',

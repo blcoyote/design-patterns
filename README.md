@@ -1,6 +1,6 @@
 # design-patterns
 
-An interactive, animated guide to the top 20 software design patterns, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+An interactive, animated guide to all 23 Gang of Four design patterns plus 7 common architectural patterns, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern has:
 
@@ -8,9 +8,9 @@ Every pattern has:
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
 - a TypeScript example, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
-| Creational | Structural | Behavioral |
-| --- | --- | --- |
-| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator |
+| Creational | Structural | Behavioral | Architectural |
+| --- | --- | --- | --- |
+| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool |
 
 ## Getting started
 
@@ -51,7 +51,7 @@ src/
 
 ## Adding a pattern
 
-1. Copy `src/patterns/_template/` to `src/patterns/<slug>/` and set `slug` to the folder name.
+1. Copy `src/patterns/_template/` to `src/patterns/<slug>/` and set `slug` to the folder name. Pick a `category` (`creational`, `structural`, `behavioral` or `architectural`); new categories go in `Category` (`src/types/pattern.ts`) and `src/patterns/categories.ts`.
 2. Fill in the text fields, the `participants` (boxes) and `relations` (arrows). Coordinates are box centres in an 800 × 460 viewBox.
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
@@ -65,4 +65,4 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 ### Custom visualisations
 
-The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `step`, `stepIndex`, `selectedId`, `onSelect`). Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `singleton`, `builder`, `decorator`, `strategy`, `composite`, `flyweight`, `iterator`, `state` and `chain-of-responsibility`.
+The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `step`, `stepIndex`, `selectedId`, `onSelect`). Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite` or `circuit-breaker` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).

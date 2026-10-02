@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-export type Category = 'creational' | 'structural' | 'behavioral'
+export type Category = 'creational' | 'structural' | 'behavioral' | 'architectural'
 
 export type ParticipantKind = 'class' | 'interface' | 'abstract' | 'client' | 'object'
 

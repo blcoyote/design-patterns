@@ -40,6 +40,15 @@ export const categories: Record<Category, CategoryMeta> = {
     dot: 'bg-purple-400',
     text: 'text-purple-300',
   },
+  architectural: {
+    id: 'architectural',
+    label: 'Architectural',
+    description: 'Patterns beyond the GoF book for structuring applications, data access and resilience.',
+    color: '#fbbf24',
+    badge: 'bg-amber-400/10 text-amber-300 ring-amber-400/30',
+    dot: 'bg-amber-400',
+    text: 'text-amber-300',
+  },
 }
 
-export const categoryOrder: Category[] = ['creational', 'structural', 'behavioral']
+export const categoryOrder: Category[] = ['creational', 'structural', 'behavioral', 'architectural']

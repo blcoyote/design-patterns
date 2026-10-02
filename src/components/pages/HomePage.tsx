@@ -111,12 +111,14 @@ function FilterChip({ active, onClick, children }: { active: boolean; onClick: (
 
 /** Decorative animated graph: one hub per category exchanging messages. */
 function HeroGraphic() {
-  const nodes = categoryOrder.map((c, i) => ({ ...categories[c], x: [80, 320, 200][i], y: [70, 70, 230][i] }))
-  const edges = [
-    [0, 1],
-    [1, 2],
-    [2, 0],
-  ] as const
+  const positions = [
+    { x: 80, y: 70 },
+    { x: 320, y: 70 },
+    { x: 320, y: 230 },
+    { x: 80, y: 230 },
+  ]
+  const nodes = categoryOrder.map((c, i) => ({ ...categories[c], ...positions[i % positions.length] }))
+  const edges = nodes.map((_, i) => [i, (i + 1) % nodes.length] as const)
 
   return (
     <svg viewBox="0 0 400 300" className="mx-auto w-full max-w-md" aria-hidden>

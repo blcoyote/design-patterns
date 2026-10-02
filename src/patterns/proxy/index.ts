@@ -1,4 +1,6 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'proxy',
@@ -172,113 +174,6 @@ export const pattern: PatternDefinition = {
       code: 'getVideo',
     },
   ],
-  code: `
-// [videoService]
-interface VideoService {
-  getVideo(id: string): Video
-}
-// [/videoService]
-
-interface Video {
-  id: string
-  url: string
-}
-
-// [realService]
-class RealVideoService implements VideoService {
-  getVideo(id: string): Video {
-    console.log(\`fetching video \${id} from the network...\`)
-    // Pretend this is a slow call to a remote API.
-    return { id, url: \`https://cdn.example.com/\${id}.mp4\` }
-  }
-}
-// [/realService]
-
-// [proxy]
-class CachingVideoProxy implements VideoService {
-  private real: RealVideoService | null = null
-  private cache = new Map<string, Video>()
-
-  // [getVideo]
-  getVideo(id: string): Video {
-    const cached = this.cache.get(id)
-    if (cached) return cached
-
-    // [lazyCreate]
-    if (!this.real) {
-      this.real = new RealVideoService()
-    }
-    // [/lazyCreate]
-
-    // [forward]
-    const video = this.real.getVideo(id)
-    this.cache.set(id, video)
-    // [/forward]
-
-    return video
-  }
-  // [/getVideo]
-}
-// [/proxy]
-
-// Usage
-const client: VideoService = new CachingVideoProxy()
-
-client.getVideo('v1') // cache miss: lazily creates RealVideoService, fetches, caches
-client.getVideo('v1') // cache hit: served from the cache, RealVideoService untouched
-`,
-  csharp: `
-// Usage
-IVideoService client = new CachingVideoProxy();
-
-client.GetVideo("v1"); // cache miss: lazily creates RealVideoService, fetches, caches
-client.GetVideo("v1"); // cache hit: served from the cache, RealVideoService untouched
-
-// [videoService]
-interface IVideoService
-{
-    Video GetVideo(string id);
-}
-// [/videoService]
-
-record Video(string Id, string Url);
-
-// [realService]
-class RealVideoService : IVideoService
-{
-    public Video GetVideo(string id)
-    {
-        Console.WriteLine($"fetching video {id} from the network...");
-        // Pretend this is a slow call to a remote API.
-        return new Video(id, $"https://cdn.example.com/{id}.mp4");
-    }
-}
-// [/realService]
-
-// [proxy]
-class CachingVideoProxy : IVideoService
-{
-    private RealVideoService? _real;
-    private readonly Dictionary<string, Video> _cache = new();
-
-    // [getVideo]
-    public Video GetVideo(string id)
-    {
-        if (_cache.TryGetValue(id, out var cached)) return cached;
-
-        // [lazyCreate]
-        _real ??= new RealVideoService();
-        // [/lazyCreate]
-
-        // [forward]
-        var video = _real.GetVideo(id);
-        _cache[id] = video;
-        // [/forward]
-
-        return video;
-    }
-    // [/getVideo]
-}
-// [/proxy]
-`,
+  code: tsExample,
+  csharp: csExample,
 }

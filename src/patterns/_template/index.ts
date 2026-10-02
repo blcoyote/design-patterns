@@ -4,6 +4,8 @@
  * See README.md → "Adding a pattern" for details.
  */
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw' // optional: delete along with `csharp` below
 
 export const pattern: PatternDefinition = {
   slug: 'my-pattern', // must match the folder name; used in the URL (#/patterns/my-pattern)
@@ -42,39 +44,15 @@ export const pattern: PatternDefinition = {
     },
   ],
 
+  // Example code lives in example.ts / example.cs next to this file.
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-// [service]
-class Service {
-  run() {}
-}
-// [/service]
-
-// [usage]
-// [client]
-new Service().run()
-// [/client]
-// [/usage]
-`,
+  code: tsExample,
 
   // Optional: a C# example shown as a second tab next to TypeScript. Must use
-  // the SAME region ids as `code` above (`npm test` checks this).
+  // the SAME region ids as example.ts (`npm test` checks this).
   // NOTE: C# top-level statements must appear before any type declarations
-  // in the file, so usage code goes FIRST here even though TS puts it last.
-  // csharp: `
-  // // [usage]
-  // // [client]
-  // new Service().Run();
-  // // [/client]
-  // // [/usage]
-  //
-  // // [service]
-  // class Service
-  // {
-  //     public void Run() { }
-  // }
-  // // [/service]
-  // `,
+  // in the file, so usage code goes FIRST in example.cs even though TS puts it last.
+  csharp: csExample,
 
   // Optional: a custom scene. Create Visualization.tsx next to this file and set
   // Visualization: MyVisualization,

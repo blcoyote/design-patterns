@@ -1,4 +1,6 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
 import { CompositeVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -249,106 +251,7 @@ export const pattern: PatternDefinition = {
       code: 'usage',
     },
   ],
-  code: `
-// [component]
-interface FileSystemItem {
-  getSize(): number
-}
-// [/component]
-
-// [file]
-class File implements FileSystemItem {
-  constructor(private name: string, private size: number) {}
-
-  getSize(): number {
-    return this.size
-  }
-}
-// [/file]
-
-// [folder]
-class Folder implements FileSystemItem {
-  private children: FileSystemItem[] = []
-
-  constructor(private name: string) {}
-
-  add(item: FileSystemItem): void {
-    this.children.push(item)
-  }
-
-  getSize(): number {
-    // Delegate to every child and combine — works whether each child
-    // is a leaf File or another, deeper Folder.
-    return this.children.reduce((total, child) => total + child.getSize(), 0)
-  }
-}
-// [/folder]
-
-// [usage]
-// [build]
-const root = new Folder('root')
-const docs = new Folder('docs')
-
-root.add(docs)
-root.add(new File('readme.md', 1100))
-docs.add(new File('photo.jpg', 2400))
-docs.add(new File('logo.png', 800))
-// [/build]
-
-// One call, regardless of how deep the tree underneath root actually is.
-console.log(root.getSize()) // 4300
-// [/usage]
-`,
-  csharp: `
-// [usage]
-// [build]
-var root = new Folder("root");
-var docs = new Folder("docs");
-
-root.Add(docs);
-root.Add(new File("readme.md", 1100));
-docs.Add(new File("photo.jpg", 2400));
-docs.Add(new File("logo.png", 800));
-// [/build]
-
-// One call, regardless of how deep the tree underneath root actually is.
-Console.WriteLine(root.GetSize()); // 4300
-// [/usage]
-
-// [component]
-interface IFileSystemItem
-{
-    int GetSize();
-}
-// [/component]
-
-// [file]
-class File(string name, int size) : IFileSystemItem
-{
-    public string Name { get; } = name;
-    public int GetSize() => size;
-}
-// [/file]
-
-// [folder]
-class Folder(string name) : IFileSystemItem
-{
-    public string Name { get; } = name;
-    private readonly List<IFileSystemItem> _children = new();
-
-    public void Add(IFileSystemItem item)
-    {
-        _children.Add(item);
-    }
-
-    public int GetSize()
-    {
-        // Delegate to every child and combine — works whether each child
-        // is a leaf File or another, deeper Folder.
-        return _children.Sum(child => child.GetSize());
-    }
-}
-// [/folder]
-`,
+  code: tsExample,
+  csharp: csExample,
   Visualization: CompositeVisualization,
 }

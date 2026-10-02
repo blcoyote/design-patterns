@@ -70,7 +70,7 @@ export const pattern: PatternDefinition = {
       x: 620,
       y: 110,
       description:
-        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — the content lives in a module-private WeakMap that only TextEditor reads from, so even HistoryShelf has no way to peek inside.',
+        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor can read it (a module-private WeakMap in TypeScript, a private nested class in C#), so even HistoryShelf has no way to peek inside.',
     },
     {
       id: 'history',
@@ -128,8 +128,8 @@ export const pattern: PatternDefinition = {
       from: 'editor',
       to: 'memento',
       type: 'calls',
-      label: 'mementoState.get()',
-      description: 'Inside restore(), TextEditor is the only code that reads the module-private WeakMap keyed by the memento, recovering the content it sealed away earlier.',
+      label: 'unseal()',
+      description: 'Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, or by casting to its private nested ConcreteMemento in C#), recovering the content it sealed away earlier.',
       bend: 24,
       code: 'getState',
     },
@@ -224,11 +224,11 @@ export const pattern: PatternDefinition = {
     {
       title: 'The editor restores itself',
       description:
-        'The client calls editor.restore(memento). Only now, inside restore(), does TextEditor look the memento up in the module-private WeakMap — the only way to unseal the snapshot — and overwrite its own content with it.',
+        'The client calls editor.restore(memento). Only now, inside restore(), does TextEditor unseal the memento — something only it can do — and overwrite its own content with it.',
       highlight: ['client', 'client-restore', 'editor', 'editor-read', 'memento'],
       packets: [
         { relation: 'client-restore', label: 'restore(memento)' },
-        { relation: 'editor-read', label: 'mementoState.get()' },
+        { relation: 'editor-read', label: 'unseal()' },
       ],
       notes: { editor: 'content: "Hello"' },
       code: 'restore',
@@ -236,7 +236,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Encapsulation, intact',
       description:
-        'HistoryShelf stored and returned a memento without ever having any way to read its content; only TextEditor — the originator — can look it up in the WeakMap. That narrow interface is the whole pattern.',
+        'HistoryShelf stored and returned a memento without ever having any way to read its content; only TextEditor — the originator — can unseal it. That narrow interface is the whole pattern.',
       highlight: ['memento', 'editor-read', 'history'],
       notes: { memento: 'sealed', history: 'never peeks' },
       code: 'memento',

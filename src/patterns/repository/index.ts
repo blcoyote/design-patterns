@@ -9,7 +9,7 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: 'Hide persistence behind a collection-like interface so domain code never sees SQL.',
   intent:
-    'Mediate between the domain/application layer and the data store with an interface that looks like an in-memory collection of objects — findById, findByCustomer, add, remove — so the rest of the application can work with domain objects without knowing how, or where, they are actually stored.',
+    'Mediate between the domain/application layer and the data store with an interface that looks like an in-memory collection of objects — findById, findByCustomer, add, save, remove — so the rest of the application can work with domain objects without knowing how, or where, they are actually stored.',
   problem:
     'Without a boundary, SQL strings, ORM query builders and connection handling creep into services and controllers, so every piece of code that needs an Order ends up knowing the shape of the orders table. The same query gets copy-pasted in three places, unit tests require a real database just to exercise business logic, and swapping or upgrading the data store means hunting down every call site that touches it.',
   solution:
@@ -61,7 +61,7 @@ export const pattern: PatternDefinition = {
       x: 400,
       y: 90,
       width: 230,
-      description: 'Declares a collection-like contract — findById, findByCustomer, add, remove — expressed purely in terms of domain objects, with no hint of SQL or any other storage technology.',
+      description: 'Declares a collection-like contract — findById, findByCustomer, add, save, remove — expressed purely in terms of domain objects, with no hint of SQL or any other storage technology.',
     },
     {
       id: 'sqlOrderRepository',
@@ -175,7 +175,7 @@ export const pattern: PatternDefinition = {
       title: 'Two implementations satisfy the same contract',
       description: 'SqlOrderRepository and InMemoryOrderRepository both implement OrderRepository, which is exactly what lets either one be handed to OrderService without it noticing.',
       highlight: ['orderRepository', 'sqlOrderRepository', 'sqlImpl', 'inMemoryOrderRepository', 'memImpl'],
-      notes: { orderRepository: 'findById, findByCustomer, add, remove' },
+      notes: { orderRepository: 'findById, findByCustomer, add, save, remove' },
       code: 'orderRepository',
     },
     {

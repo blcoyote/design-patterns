@@ -251,7 +251,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'The cooldown elapses',
-      description: 'On the next call after cooldownMs has passed, the breaker switches to Half-Open. It is willing to find out whether RemoteService has recovered — but only with a single trial call.',
+      description: 'When the first call arrives after cooldownMs has passed, the breaker switches to Half-Open and lets that same call through as the single trial. It is willing to find out whether RemoteService has recovered — but only with that one call.',
       highlight: ['cooldown', 'halfOpen', 'state-halfOpen'],
       packets: [{ relation: 'cooldown', label: 'cooldown elapsed' }],
       notes: { breaker: 'HALF_OPEN', halfOpen: 'trial pending' },
@@ -259,7 +259,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'One trial request gets through',
-      description: 'The next call is allowed to reach RemoteService — Half-Open permits exactly one attempt, to test whether the dependency has actually recovered.',
+      description: 'That call is allowed to reach RemoteService — Half-Open permits exactly one attempt, to test whether the dependency has actually recovered. Any other call arriving while it is in flight still fails fast.',
       highlight: ['request', 'forward', 'service', 'halfOpen', 'state-halfOpen'],
       packets: [
         { relation: 'request', label: 'call(fn)' },

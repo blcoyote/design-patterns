@@ -28,7 +28,7 @@ abstract class ReportGenerator(IReadOnlyList<string> records)
     // [fetch]
     // Concrete step — implemented once here and inherited unmodified by
     // every subclass; nothing below overrides it.
-    protected virtual List<string> FetchData()
+    protected List<string> FetchData()
     {
         return [.. records];
     }

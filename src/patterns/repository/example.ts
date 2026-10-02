@@ -13,7 +13,7 @@ interface OrderRepository {
   findById(id: string): Order | undefined
   findByCustomer(customerId: string): Order[]
   add(order: Order): void
-  save(order: Order): void // persists changes to an already-added Order (an upsert)
+  save(order: Order): void // persists changes to an already-added Order
   remove(id: string): void
 }
 // [/orderRepository]

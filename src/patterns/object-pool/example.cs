@@ -1,5 +1,6 @@
 // [usage]
-var pool = new ObjectPool<PooledConnection>(() => new PooledConnection(new RawDatabaseSocket(Environment.TickCount64)), 3);
+long nextSocketId = 0;
+var pool = new ObjectPool<PooledConnection>(() => new PooledConnection(new RawDatabaseSocket(++nextSocketId)), 3);
 
 // [clientA]
 var connA = await pool.AcquireAsync(); // pool is empty — lazily creates connection #1

@@ -92,7 +92,7 @@ export const pattern: PatternDefinition = {
       type: 'implements',
       label: 'extends',
       bend: 25,
-      description: 'CsvReportGenerator extends ReportGenerator, inheriting the fixed generate() skeleton and supplying its own fetchData()/exportData().',
+      description: 'CsvReportGenerator extends ReportGenerator, inheriting the fixed generate() skeleton and supplying its own exportData().',
       code: 'csvReport',
     },
     {

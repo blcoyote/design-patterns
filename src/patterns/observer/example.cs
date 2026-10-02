@@ -37,7 +37,7 @@ class StockTicker
     // [unsubscribe]
     public void Unsubscribe(IObserver observer)
     {
-        _observers.Remove(observer);
+        _observers.RemoveAll(o => o == observer);
     }
     // [/unsubscribe]
 

@@ -81,7 +81,7 @@ class ValidationHandler : Handler
     // [validation]
     public override HttpResponse Handle(HttpRequest req)
     {
-        if (req.Body is not null && req.Body is not IDictionary<string, object>)
+        if (req.Body is not null && (req.Body is string or decimal || req.Body.GetType().IsPrimitive))
         {
             return new HttpResponse(422, "Invalid payload");
         }

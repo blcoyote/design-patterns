@@ -30,10 +30,9 @@ class StockTicker {
 
   // [notify]
   private notify() {
-    // observers is reassigned (not mutated in place) by unsubscribe, so an
-    // observer that unsubscribes itself mid-notify doesn't affect the
-    // array we're already looping over here.
-    for (const o of this.observers) o.update(this.price)
+    // Loop over a snapshot so an observer that subscribes or unsubscribes
+    // mid-notify doesn't affect the round we're already delivering.
+    for (const o of [...this.observers]) o.update(this.price)
   }
   // [/notify]
 }

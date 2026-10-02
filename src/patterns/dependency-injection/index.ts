@@ -311,7 +311,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Tests skip the container entirely',
       description: 'A unit test just calls new OrderService(fakeRepo, new FakeEmailSender()) directly — no container involved. OrderService never notices the difference: it only ever depended on the OrderRepository and EmailSender interfaces.',
-      highlight: ['service-holds-repo', 'service-holds-email', 'orderRepository', 'smtpEmailSender', 'emailSender'],
+      highlight: ['service-holds-repo', 'service-holds-email', 'orderRepository', 'emailSender'],
       notes: { orderService: 'wired by hand (test)' },
       code: 'test',
     },

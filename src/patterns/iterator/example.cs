@@ -64,22 +64,23 @@ class Playlist : IEnumerable<Song>
 // [playlistIterator]
 class PlaylistIterator(Playlist playlist) : IEnumerator<Song>
 {
-    private int _cursor = -1;
+    private int _cursor = 0;
 
     // [next]
     public bool MoveNext()
     {
-        if (_cursor + 1 >= playlist.Length) return false;
+        if (_cursor >= playlist.Length) return false;
+        Current = playlist.At(_cursor)!;
         _cursor++;
         return true;
     }
 
-    public Song Current => playlist.At(_cursor)!;
+    public Song Current { get; private set; } = null!;
     // [/next]
 
     object IEnumerator.Current => Current!;
 
-    public void Reset() => _cursor = -1;
+    public void Reset() => _cursor = 0;
 
     public void Dispose()
     {

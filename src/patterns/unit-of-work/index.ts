@@ -240,7 +240,7 @@ export const pattern: PatternDefinition = {
         'In another operation, the UPDATE to a Customer violates a constraint partway through the flush — before the removed-list deletes even run. The UnitOfWork catches the failure, issues ROLLBACK instead of COMMIT: the Order INSERT that already ran is undone, and the Cart DELETE further down the list never runs at all.',
       highlight: ['unitOfWork', 'flush', 'database'],
       packets: [{ relation: 'flush', label: 'ROLLBACK', reverse: true }],
-      notes: { unitOfWork: 'pending restored', database: 'ROLLBACK ✗' },
+      notes: { unitOfWork: 'pending kept', database: 'ROLLBACK ✗' },
       code: 'commit',
     },
   ],

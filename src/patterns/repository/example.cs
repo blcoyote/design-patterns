@@ -25,7 +25,7 @@ interface IOrderRepository
     Order? FindById(string id);
     IReadOnlyList<Order> FindByCustomer(string customerId);
     void Add(Order order);
-    void Save(Order order); // persists changes to an already-added Order (an upsert)
+    void Save(Order order); // persists changes to an already-added Order
     void Remove(string id);
 }
 // [/orderRepository]

@@ -35,7 +35,7 @@ class StripeAdapter(LegacyStripeGateway gateway) : IPaymentProcessor
     // [charge]
     public string Charge(decimal amount)
     {
-        var cents = (int)Math.Round(amount * 100);
+        var cents = (int)Math.Round(amount * 100, MidpointRounding.AwayFromZero);
         var result = gateway.ChargeCents(cents);
         var dollars = result.Cents / 100m;
         return result.Ok ? $"charged ${dollars.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)}" : "failed";

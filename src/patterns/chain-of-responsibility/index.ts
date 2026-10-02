@@ -193,9 +193,9 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Still under the limit',
-      description: "RateLimitHandler counts this client at 7 requests in its current one-minute window — well under the cap of 100 — so it also forwards the request onward. A different client's count is tracked separately and would not be affected.",
+      description: "RateLimitHandler counts this client at 1 request in its current one-minute window — well under the cap of 100 — so it also forwards the request onward. A different client's count is tracked separately and would not be affected.",
       highlight: ['rateLimitHandler'],
-      notes: { rateLimitHandler: '7/100 ✓' },
+      notes: { rateLimitHandler: '1/100 ✓' },
       code: 'rateLimit',
     },
     {

@@ -91,7 +91,8 @@ class ObjectPool<T extends Poolable> {
 // [/pool]
 
 // [usage]
-const pool = new ObjectPool<PooledConnection>(() => new PooledConnection(new RawDatabaseSocket(Date.now())), 3)
+let nextSocketId = 0
+const pool = new ObjectPool<PooledConnection>(() => new PooledConnection(new RawDatabaseSocket(++nextSocketId)), 3)
 
 // [clientA]
 const connA = await pool.acquire() // pool is empty — lazily creates connection #1

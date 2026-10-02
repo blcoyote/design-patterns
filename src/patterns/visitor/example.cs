@@ -117,12 +117,12 @@ class JsonExporter : IShapeVisitor
 
     public void VisitCircle(Circle circle)
     {
-        _parts.Add($"{{\"type\":\"circle\",\"r\":{circle.Radius}}}");
+        _parts.Add(FormattableString.Invariant($"{{\"type\":\"circle\",\"r\":{circle.Radius}}}"));
     }
 
     public void VisitRectangle(Rectangle rectangle)
     {
-        _parts.Add($"{{\"type\":\"rectangle\",\"w\":{rectangle.Width},\"h\":{rectangle.Height}}}");
+        _parts.Add(FormattableString.Invariant($"{{\"type\":\"rectangle\",\"w\":{rectangle.Width},\"h\":{rectangle.Height}}}"));
     }
 
     public void VisitGroup(Group group)

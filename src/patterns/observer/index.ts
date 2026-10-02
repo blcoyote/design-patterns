@@ -35,7 +35,7 @@ export const pattern: PatternDefinition = {
     'React state libraries (Redux store.subscribe, Zustand, MobX)',
     'Node.js EventEmitter',
   ],
-  related: ['command', 'strategy'],
+  related: ['mediator', 'command', 'strategy'],
   participants: [
     {
       id: 'observer',

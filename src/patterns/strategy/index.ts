@@ -36,7 +36,7 @@ export const pattern: PatternDefinition = {
     'Payment processing: choosing between card, wallet, or bank-transfer gateways',
     'Compression libraries that let you pick zip, gzip, or brotli at call time',
   ],
-  related: ['command', 'observer', 'factory-method'],
+  related: ['state', 'template-method', 'command', 'bridge'],
   participants: [
     {
       id: 'routeStrategy',

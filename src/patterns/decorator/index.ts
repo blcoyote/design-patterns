@@ -36,7 +36,7 @@ export const pattern: PatternDefinition = {
     'UI component libraries wrapping a component with tooltip/draggable/resizable behaviour',
     'HTTP middleware chains wrapping a request handler',
   ],
-  related: ['adapter', 'facade', 'proxy', 'strategy'],
+  related: ['adapter', 'composite', 'facade', 'proxy', 'strategy'],
   participants: [
     {
       id: 'coffee',

@@ -313,6 +313,7 @@ class CircuitBreaker {
   private state: BreakerState = 'CLOSED'
   private failureCount = 0
   private nextAttempt = 0
+  private trialInFlight = false
 
   constructor(
     private readonly failureThreshold: number,
@@ -330,8 +331,14 @@ class CircuitBreaker {
       this.state = 'HALF_OPEN' // cooldown elapsed: let exactly one trial through
       // [/halfOpenCheck]
     }
+    // Only one probe at a time: while it is in flight, everyone else keeps failing fast.
+    if (this.state === 'HALF_OPEN' && this.trialInFlight) {
+      throw new Error('circuit half-open — trial in progress')
+    }
     // [/openCheck]
 
+    const isTrial = this.state === 'HALF_OPEN'
+    if (isTrial) this.trialInFlight = true
     try {
       // [invoke]
       const result = await fn()
@@ -350,6 +357,8 @@ class CircuitBreaker {
       }
       // [/onFailure]
       throw err
+    } finally {
+      if (isTrial) this.trialInFlight = false
     }
   }
   // [/call]

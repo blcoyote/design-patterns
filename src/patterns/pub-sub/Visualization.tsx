@@ -38,11 +38,19 @@ const NOTIFY_RELATION: Record<string, Partial<Record<TopicId, string>>> = {
 /** y-position of each topic's lane in the 800×460 viewBox, aligned with its publisher. */
 const LANE_Y: Record<TopicId, number> = { 'order.placed': 150, 'user.signedUp': 330 }
 
-/** Builds a full "publish this topic" step from the subscription table, so it stays in sync with the diagram data. */
-function scenarioStep(topic: TopicId): Step {
+/** Title of the narrative step after which InventoryService is no longer subscribed. */
+const UNSUBSCRIBE_STEP_TITLE = 'InventoryService unsubscribes'
+
+/**
+ * Builds a full "publish this topic" step from the subscription table, so it stays in sync with the
+ * diagram data. `inventoryUnsubscribed` mirrors the live subscription state at the current step.
+ */
+function scenarioStep(topic: TopicId, inventoryUnsubscribed: boolean): Step {
   const pub = TOPIC_PUBLISHER[topic]
   const subscriberIds = Object.keys(SUBSCRIPTIONS)
-  const reached = subscriberIds.filter((id) => SUBSCRIPTIONS[id].includes(topic))
+  const reached = subscriberIds.filter(
+    (id) => SUBSCRIPTIONS[id].includes(topic) && !(id === 'inventoryService' && inventoryUnsubscribed),
+  )
 
   const highlight = [pub.participant, pub.relation, 'eventBus', ...reached.flatMap((id) => [NOTIFY_RELATION[id][topic]!, id])]
   const packets: Packet[] = [
@@ -81,7 +89,9 @@ export function PubSubVisualization({ pattern, step, stepIndex, selectedId, onSe
   const [replayToken, setReplayToken] = useState(0)
   const override = pickedOverride?.forStep === stepIndex ? pickedOverride.topic : null
 
-  const effectiveStep = override ? scenarioStep(override) : step
+  const unsubscribeIndex = pattern.steps.findIndex((s) => s.title === UNSUBSCRIBE_STEP_TITLE)
+  const inventoryUnsubscribed = unsubscribeIndex !== -1 && stepIndex >= unsubscribeIndex
+  const effectiveStep = override ? scenarioStep(override, inventoryUnsubscribed) : step
   const activeTopic = override ?? topicFromStep(step)
   const animationKey = override ? `override-${override}-${replayToken}` : stepIndex
 

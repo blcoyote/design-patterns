@@ -275,7 +275,10 @@ class Context {
   constructor(private bindings: Record<string, number>) {}
 
   lookup(name: string): number {
-    return this.bindings[name]
+    const value = this.bindings[name]
+    // Fail loudly instead of letting undefined turn later arithmetic into NaN.
+    if (value === undefined) throw new Error('Unbound variable: ' + name)
+    return value
   }
 }
 // [/context]

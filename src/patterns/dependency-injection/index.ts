@@ -223,7 +223,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Resolve OrderController',
       description:
-        'The app asks the container to resolve OrderController. The container looks at its constructor, sees it needs an OrderService, and must build that first — and recursively, whatever OrderService needs.',
+        'The app asks the container to resolve OrderController. The container looks up the provider registered for it, sees it needs an OrderService, and must build that first — and recursively, whatever OrderService needs.',
       highlight: ['container', 'orderController'],
       notes: { container: 'resolving OrderController' },
       code: 'container',
@@ -352,13 +352,25 @@ class OrderController {
 // [/orderController]
 
 // [container]
-// A container is nothing magical: a map of factories plus a resolve() that
-// builds each dependency once, bottom-up, and caches it as a singleton.
+// A container is nothing magical: a map of providers (each listing the keys it
+// needs) plus a resolve() that builds those dependencies first, recursively,
+// and caches every result as a singleton.
 class Container {
+  private providers = new Map<string, { deps: string[]; create: (...deps: any[]) => unknown }>()
   private singletons = new Map<string, unknown>()
 
-  resolve<T>(key: string, factory: () => T): T {
-    if (!this.singletons.has(key)) this.singletons.set(key, factory())
+  register(key: string, deps: string[], create: (...deps: any[]) => unknown) {
+    this.providers.set(key, { deps, create })
+  }
+
+  resolve<T>(key: string): T {
+    if (!this.singletons.has(key)) {
+      const provider = this.providers.get(key)
+      if (!provider) throw new Error('No provider registered for ' + key)
+      // Build whatever it needs first (recursively), then construct it.
+      const args = provider.deps.map((dep) => this.resolve(dep))
+      this.singletons.set(key, provider.create(...args))
+    }
     return this.singletons.get(key) as T
   }
 }
@@ -367,17 +379,19 @@ class Container {
 // [usage]
 const container = new Container()
 
-const config = container.resolve('config', () => new Config())
-const orderRepository = container.resolve('orderRepository', () => new OrderRepository(config))
-const emailSender = container.resolve('emailSender', () => new SmtpEmailSender())
-const orderService = container.resolve('orderService', () => new OrderService(orderRepository, emailSender))
-const orderController = container.resolve('orderController', () => new OrderController(orderService))
+container.register('config', [], () => new Config())
+container.register('orderRepository', ['config'], (config: Config) => new OrderRepository(config))
+container.register('emailSender', [], () => new SmtpEmailSender())
+container.register('orderService', ['orderRepository', 'emailSender'], (repo: OrderRepository, email: EmailSender) => new OrderService(repo, email))
+container.register('orderController', ['orderService'], (service: OrderService) => new OrderController(service))
 
+// Ask only for the root — the container works out the rest of the graph.
+const orderController = container.resolve<OrderController>('orderController')
 orderController.handle('A-1001', 'ada@example.com')
 // [/usage]
 
 // [test]
-// Swapping an implementation needs no change to OrderService — only the wiring:
+// Swapping an implementation needs no change to OrderService — only the registration:
 class FakeEmailSender implements EmailSender {
   sent: string[] = []
   send(to: string, subject: string) {
@@ -385,8 +399,9 @@ class FakeEmailSender implements EmailSender {
   }
 }
 
-const fakeEmailSender = new FakeEmailSender()
-const testService = new OrderService(orderRepository, fakeEmailSender)
+const testContainer = new Container()
+// ...same registrations as above, except the email provider returns the fake:
+testContainer.register('emailSender', [], () => new FakeEmailSender())
 // [/test]
 `,
 

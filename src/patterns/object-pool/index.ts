@@ -338,8 +338,8 @@ class ConnectionPool {
       return Promise.resolve(reused)
     }
     if (this.created < this.maxSize) {
-      this.created++
-      const conn = this.factory() // lazy creation — only ever up to maxSize
+      const conn = this.factory() // lazy creation — if this throws, no slot is used up
+      this.created++ // only count it once the connection actually exists
       this.inUse.add(conn)
       return Promise.resolve(conn)
     }
@@ -350,7 +350,9 @@ class ConnectionPool {
 
   // [release]
   release(conn: PooledConnection): void {
-    this.inUse.delete(conn)
+    if (!this.inUse.delete(conn)) {
+      throw new Error('release() called with a connection that is not checked out from this pool')
+    }
     conn.reset() // scrub borrower state before anyone else sees this object
     const next = this.waiting.shift()
     if (next) {

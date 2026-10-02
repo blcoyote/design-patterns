@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useRef, useState } from 'react'
 import { Diagram } from '@/components/viz/Diagram'
+import { onActivate } from '@/lib/a11y'
 import { categories } from '@/patterns/categories'
 import type { Packet, VisualizationProps } from '@/types/pattern'
 
@@ -125,7 +126,8 @@ export function MementoVisualization({ pattern, step, stepIndex, selectedId, onS
   const EDITOR_CENTER = { x: 150, y: 95 }
   const SHELF_X = 560
   const SHELF_BASE_Y = 150
-  const CARD_GAP = 38
+  // Squeeze the stack together as it grows so every snapshot stays inside the viewBox.
+  const CARD_GAP = Math.min(38, (SHELF_BASE_Y - 56) / Math.max(1, live.shelf.length - 1))
 
   return (
     <div>
@@ -147,7 +149,7 @@ export function MementoVisualization({ pattern, step, stepIndex, selectedId, onS
         <svg
           viewBox="0 0 760 190"
           className="h-auto w-full select-none rounded-lg bg-slate-950/40 ring-1 ring-slate-800"
-          role="img"
+          role="group"
           aria-label={`Editor content ${truncate(live.content)}, history shelf holding ${live.shelf.length} snapshot${live.shelf.length === 1 ? '' : 's'}`}
         >
           {/* Editor mockup */}
@@ -160,6 +162,7 @@ export function MementoVisualization({ pattern, step, stepIndex, selectedId, onS
               e.stopPropagation()
               onSelect('editor')
             }}
+            onKeyDown={onActivate(() => onSelect('editor'))}
           >
             <rect
               x={20}
@@ -215,6 +218,7 @@ export function MementoVisualization({ pattern, step, stepIndex, selectedId, onS
                     e.stopPropagation()
                     onSelect('memento')
                   }}
+                  onKeyDown={onActivate(() => onSelect('memento'))}
                   initial={reduceMotion ? { opacity: 0 } : { x: EDITOR_CENTER.x, y: EDITOR_CENTER.y, opacity: 0, scale: 0.6 }}
                   animate={{ x: target.x, y: target.y, opacity: 1, scale: 1 }}
                   exit={reduceMotion ? { opacity: 0 } : { x: EDITOR_CENTER.x, y: EDITOR_CENTER.y, opacity: 0, scale: 0.6 }}

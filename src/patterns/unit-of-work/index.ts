@@ -312,10 +312,12 @@ class UnitOfWork {
 
   // [registerRemoved]
   registerRemoved(entity: Entity) {
-    // Never made it to the db, or no longer needs to — either way, drop it from the other lists.
+    const wasNew = this.newObjects.includes(entity)
+    // Whatever it was before, there is nothing left to insert or update.
     this.newObjects = this.newObjects.filter((e) => e !== entity)
     this.dirtyObjects = this.dirtyObjects.filter((e) => e !== entity)
-    this.removedObjects.push(entity)
+    // A row that was never inserted has nothing to delete.
+    if (!wasNew && !this.removedObjects.includes(entity)) this.removedObjects.push(entity)
   }
   // [/registerRemoved]
   // [/register]

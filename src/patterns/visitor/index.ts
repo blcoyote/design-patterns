@@ -347,6 +347,10 @@ class Group implements Shape {
     this.children.push(shape)
   }
 
+  get childCount(): number {
+    return this.children.length
+  }
+
   // [groupAccept]
   accept(visitor: ShapeVisitor): void {
     for (const child of this.children) child.accept(visitor) // hop 1, per child
@@ -388,8 +392,11 @@ class JsonExporter implements ShapeVisitor {
     this.parts.push(\`{"type":"rectangle","w":\${rectangle.width},"h":\${rectangle.height}}\`)
   }
 
-  visitGroup(_group: Group): void {
-    this.parts = [\`{"type":"group","children":[\${this.parts.join(',')}]}\`]
+  visitGroup(group: Group): void {
+    // Every child (leaf or nested group) left exactly one entry behind, so this
+    // group's children are the last childCount entries — siblings stay untouched.
+    const children = this.parts.splice(this.parts.length - group.childCount)
+    this.parts.push(\`{"type":"group","children":[\${children.join(',')}]}\`)
   }
 
   toJSON(): string {

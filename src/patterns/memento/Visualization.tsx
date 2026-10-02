@@ -56,7 +56,7 @@ function synthStep(action: Action, after: LiveState) {
         packets: [
           { relation: 'client-pop', label: '⇒ memento', reverse: true },
           { relation: 'client-restore', label: 'restore(memento)' },
-          { relation: 'editor-read', label: 'getState()' },
+          { relation: 'editor-read', label: 'mementoState.get()' },
         ] as Packet[],
         notes: { history: `shelf: ${after.shelf.length}`, editor: `content: ${truncate(after.content)}` } as Record<string, string>,
       }

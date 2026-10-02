@@ -32,8 +32,8 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     'Undo/redo stacks in text editors and image editors (Ctrl+Z / Ctrl+Shift+Z)',
-    'Database transaction savepoints and rollback',
-    'Git commits — immutable snapshots a working tree can be reset back to',
+    'Database transaction savepoints and rollback (memento-like, though usually implemented at a lower level)',
+    'Git commits — memento-like immutable snapshots a working tree can be reset back to',
     'Game save states and level checkpoints',
   ],
   related: ['command', 'prototype', 'state'],
@@ -68,7 +68,7 @@ export const pattern: PatternDefinition = {
       x: 620,
       y: 110,
       description:
-        'A sealed snapshot of the editor’s content at one moment in time. Its only accessor, getState(), is meant to be called by TextEditor alone — everyone else just passes the object around.',
+        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — the content lives in a module-private WeakMap that only TextEditor reads from, so even HistoryShelf has no way to peek inside.',
     },
     {
       id: 'history',
@@ -126,8 +126,8 @@ export const pattern: PatternDefinition = {
       from: 'editor',
       to: 'memento',
       type: 'calls',
-      label: 'getState()',
-      description: 'Inside restore(), TextEditor calls the one method the memento exposes, getState(), to recover the content it sealed away earlier.',
+      label: 'mementoState.get()',
+      description: 'Inside restore(), TextEditor is the only code that reads the module-private WeakMap keyed by the memento, recovering the content it sealed away earlier.',
       bend: 24,
       code: 'getState',
     },
@@ -195,7 +195,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'The caretaker files it away',
       description:
-        'The client hands the memento to history.push(). The shelf stores the object on its stack without ever calling a method that would reveal what is inside it.',
+        'The client hands the memento to shelf.push(). The shelf stores the object on its stack without ever calling a method that would reveal what is inside it.',
       highlight: ['client', 'client-push', 'history', 'history-holds', 'memento'],
       packets: [{ relation: 'client-push', label: 'push(memento)' }],
       notes: { history: 'shelf: 1' },
@@ -213,7 +213,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Undo: the shelf hands back the last checkpoint',
       description:
-        'The client calls history.pop(). The most recently saved memento comes back off the stack — still sealed, still unread by the caretaker.',
+        'The client calls shelf.pop(). The most recently saved memento comes back off the stack — still sealed, still unread by the caretaker.',
       highlight: ['client', 'client-pop', 'history', 'history-holds', 'memento'],
       packets: [{ relation: 'client-pop', label: '⇒ memento', reverse: true }],
       notes: { history: 'shelf: 0' },
@@ -222,11 +222,11 @@ export const pattern: PatternDefinition = {
     {
       title: 'The editor restores itself',
       description:
-        'The client calls editor.restore(memento). Only now, inside restore(), does TextEditor call memento.getState() — the one method that unseals the snapshot — and overwrite its own content with it.',
+        'The client calls editor.restore(memento). Only now, inside restore(), does TextEditor look the memento up in the module-private WeakMap — the only way to unseal the snapshot — and overwrite its own content with it.',
       highlight: ['client', 'client-restore', 'editor', 'editor-read', 'memento'],
       packets: [
         { relation: 'client-restore', label: 'restore(memento)' },
-        { relation: 'editor-read', label: 'getState()' },
+        { relation: 'editor-read', label: 'mementoState.get()' },
       ],
       notes: { editor: 'content: "Hello"' },
       code: 'restore',
@@ -234,7 +234,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Encapsulation, intact',
       description:
-        'HistoryShelf stored and returned a memento without ever reading or copying its content; only TextEditor — the originator — ever calls getState(). That narrow interface is the whole pattern.',
+        'HistoryShelf stored and returned a memento without ever having any way to read its content; only TextEditor — the originator — can look it up in the WeakMap. That narrow interface is the whole pattern.',
       highlight: ['memento', 'editor-read', 'history'],
       notes: { memento: 'sealed', history: 'never peeks' },
       code: 'memento',
@@ -244,16 +244,15 @@ export const pattern: PatternDefinition = {
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: `
 // [memento]
-class EditorMemento {
-  constructor(private readonly content: string) {}
+// EditorMemento exposes nothing publicly, not even a getter — TypeScript's
+// \`private\` only blocks access at compile time, so a field would still be
+// readable via (memento as any).content. Instead the content lives in a
+// module-private WeakMap, keyed by the memento instance. Nothing outside
+// this module can reach that map, so HistoryShelf has no way to read a
+// memento's content even if it wanted to — it only ever shuffles tokens.
+class EditorMemento {}
 
-  // Intended for TextEditor's eyes only — HistoryShelf never calls this.
-  // [getState]
-  getState(): string {
-    return this.content
-  }
-  // [/getState]
-}
+const mementoState = new WeakMap<EditorMemento, string>()
 // [/memento]
 
 // [editor]
@@ -268,13 +267,17 @@ class TextEditor {
 
   // [save]
   save(): EditorMemento {
-    return new EditorMemento(this.content)
+    const memento = new EditorMemento()
+    mementoState.set(memento, this.content)
+    return memento
   }
   // [/save]
 
   // [restore]
   restore(memento: EditorMemento) {
-    this.content = memento.getState()
+    // [getState]
+    this.content = mementoState.get(memento)!
+    // [/getState]
   }
   // [/restore]
 
@@ -306,15 +309,15 @@ class HistoryShelf {
 // [client]
 // Usage
 const editor = new TextEditor()
-const history = new HistoryShelf()
+const shelf = new HistoryShelf()
 
 editor.type('Hello')
-history.push(editor.save()) // checkpoint #1: "Hello"
+shelf.push(editor.save()) // checkpoint #1: "Hello"
 
 editor.type(', world!')
 console.log(editor.text) // "Hello, world!"
 
-editor.restore(history.pop()!) // undo back to checkpoint #1
+editor.restore(shelf.pop()!) // undo back to checkpoint #1
 console.log(editor.text) // "Hello"
 // [/client]
 `,

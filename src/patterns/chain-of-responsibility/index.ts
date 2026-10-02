@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   problem:
     'An incoming API request has to survive several unrelated checks — authentication, rate limiting, payload validation — before it reaches the code that actually answers it. Wiring all of that into one big handleRequest() method means every new check edits the same tangled function, and the caller has no way to reorder, skip, or reuse just one of the checks elsewhere.',
   solution:
-    'Each check becomes its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either resolves the request itself — rejecting it, say — or, when it has nothing to say about it, forwards it on by calling next.handle(request). The caller only ever talks to the first handler and never needs to know how many links the chain actually has, or in what order.',
+    'Each check becomes its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either resolves the request itself — rejecting it, say — or, when it has nothing to say about it, forwards it on by calling next.handle(request). The caller only ever talks to the first handler and never needs to know how many links the chain actually has, or in what order. This middleware-style example is the pipeline/filter variant, where several links may run and each one decides whether to reject or pass the request on; the classic GoF form instead stops at exactly one handler that fully handles the request. Either way, Chain of Responsibility differs from Decorator in intent: a decorator always runs and always forwards to wrap behavior around the call, while a chain link may stop the request outright.',
   analogy:
     'A support call that keeps getting escalated: the first-line agent handles what they can, and anything they cannot resolve gets passed to the next tier, then the next, until someone with the right authority deals with it — or everyone in the chain has had a turn and it is finally turned away.',
   whenToUse: [
@@ -34,7 +34,7 @@ export const pattern: PatternDefinition = {
     'Express/Koa/Connect middleware pipelines (app.use(...))',
     'Java Servlet Filters and the ASP.NET Core middleware pipeline',
     'DOM event bubbling — a click walks up the ancestor chain until something calls stopPropagation()',
-    'Logging frameworks (Log4j, SLF4J) where a logger can handle a message or pass it up to its parent',
+    "Java's ClassLoader delegation model, where each loader asks its parent to resolve a class before trying to load it itself",
   ],
   related: ['decorator', 'command', 'observer', 'mediator'],
 
@@ -76,7 +76,7 @@ export const pattern: PatternDefinition = {
       x: 300,
       y: 280,
       width: 180,
-      description: 'Counts requests per client in a sliding window. Over the limit, it rejects with 429; otherwise it forwards the request unchanged.',
+      description: "Tracks each client's own fixed one-minute window and request count. Over the cap within that window, it rejects with 429; otherwise it forwards the request unchanged — one client's traffic never affects another's.",
     },
     {
       id: 'validationHandler',
@@ -86,7 +86,7 @@ export const pattern: PatternDefinition = {
       x: 500,
       y: 280,
       width: 180,
-      description: 'Checks the request body against the expected shape for its path. A malformed payload is rejected; a well-formed one is forwarded.',
+      description: 'Checks that the request body, if present, is a non-null object rather than a primitive — a stand-in for full shape validation. A malformed payload is rejected; a well-formed one is forwarded.',
     },
     {
       id: 'controller',
@@ -191,7 +191,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Still under the limit',
-      description: 'RateLimitHandler counts this client at 7 requests in the last minute — well under the cap of 100 — so it also forwards the request onward.',
+      description: "RateLimitHandler counts this client at 7 requests in its current one-minute window — well under the cap of 100 — so it also forwards the request onward. A different client's count is tracked separately and would not be affected.",
       highlight: ['rateLimitHandler'],
       notes: { rateLimitHandler: '7/100 ✓' },
       code: 'rateLimit',
@@ -238,13 +238,14 @@ export const pattern: PatternDefinition = {
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: `
-interface Request {
+interface HttpRequest {
   path: string
+  clientId: string
   token?: string
   body?: unknown
 }
 
-interface Response {
+interface HttpResponse {
   status: number
   body: string
 }
@@ -258,7 +259,7 @@ abstract class Handler {
     return handler
   }
 
-  handle(req: Request): Response {
+  handle(req: HttpRequest): HttpResponse {
     if (this.next) return this.next.handle(req)
     return { status: 404, body: 'No handler matched' }
   }
@@ -268,7 +269,7 @@ abstract class Handler {
 // [authHandler]
 class AuthHandler extends Handler {
   // [auth]
-  handle(req: Request): Response {
+  handle(req: HttpRequest): HttpResponse {
     if (!req.token || req.token === 'expired') {
       return { status: 401, body: 'Unauthorized' }
     }
@@ -280,12 +281,23 @@ class AuthHandler extends Handler {
 
 // [rateLimitHandler]
 class RateLimitHandler extends Handler {
-  private requestsThisMinute = 0
+  private static readonly WINDOW_MS = 60_000
+  private static readonly LIMIT = 100
+
+  // Each client gets its own fixed window — one client going over the cap
+  // never affects any other client's count.
+  private readonly windows = new Map<string, { windowStart: number; count: number }>()
 
   // [rateLimit]
-  handle(req: Request): Response {
-    this.requestsThisMinute++
-    if (this.requestsThisMinute > 100) {
+  handle(req: HttpRequest): HttpResponse {
+    const now = Date.now()
+    let window = this.windows.get(req.clientId)
+    if (!window || now - window.windowStart >= RateLimitHandler.WINDOW_MS) {
+      window = { windowStart: now, count: 0 }
+      this.windows.set(req.clientId, window)
+    }
+    window.count++
+    if (window.count > RateLimitHandler.LIMIT) {
       return { status: 429, body: 'Too Many Requests' }
     }
     return super.handle(req)
@@ -297,8 +309,8 @@ class RateLimitHandler extends Handler {
 // [validationHandler]
 class ValidationHandler extends Handler {
   // [validation]
-  handle(req: Request): Response {
-    if (req.body !== undefined && typeof req.body !== 'object') {
+  handle(req: HttpRequest): HttpResponse {
+    if (req.body !== undefined && (req.body === null || typeof req.body !== 'object')) {
       return { status: 422, body: 'Invalid payload' }
     }
     return super.handle(req) // no body to check, or it already looks fine
@@ -309,7 +321,7 @@ class ValidationHandler extends Handler {
 
 // [controller]
 class Controller extends Handler {
-  handle(req: Request): Response {
+  handle(req: HttpRequest): HttpResponse {
     // The terminal link: it never calls next, it just answers.
     return { status: 200, body: \`handled \${req.path}\` }
   }
@@ -320,8 +332,8 @@ class Controller extends Handler {
 const chain = new AuthHandler()
 chain.setNext(new RateLimitHandler()).setNext(new ValidationHandler()).setNext(new Controller())
 
-chain.handle({ path: '/orders/42', token: 'abc123' }) // { status: 200, body: 'handled /orders/42' }
-chain.handle({ path: '/orders/42', token: 'expired' }) // { status: 401, ... } — stops at AuthHandler
+chain.handle({ path: '/orders/42', clientId: 'client-1', token: 'abc123' }) // { status: 200, body: 'handled /orders/42' }
+chain.handle({ path: '/orders/42', clientId: 'client-1', token: 'expired' }) // { status: 401, ... } — stops at AuthHandler
 // [/entry]
 `,
   Visualization: ChainOfResponsibilityVisualization,

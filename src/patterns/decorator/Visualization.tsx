@@ -62,10 +62,11 @@ function buildGeometry(relations: Relation[]): Record<string, EdgeGeometry> {
     milkExtends: edgeBetween(milkBox, coffeeDecoratorBox, bendOf('milkExtends')),
     decoratorImpl: edgeBetween(coffeeDecoratorBox, coffeeBox, bendOf('decoratorImpl')),
     simpleImpl: edgeBetween(coreBox, coffeeBox, bendOf('simpleImpl')),
+    wrappee: edgeBetween(coffeeDecoratorBox, coffeeBox, bendOf('wrappee')),
   }
 }
 
-const LEGEND_RELATIONS = ['sugarExtends', 'milkExtends', 'decoratorImpl', 'simpleImpl'] as const
+const LEGEND_RELATIONS = ['sugarExtends', 'milkExtends', 'decoratorImpl', 'simpleImpl', 'wrappee'] as const
 const LIVE_RELATIONS = ['wrapsMilk', 'wrapsCoffee', 'call'] as const
 
 interface LayerProps {

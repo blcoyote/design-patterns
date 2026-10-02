@@ -14,16 +14,18 @@ interface FieldState {
   body: string | null
 }
 
-/** What the blueprint shows at each step of the story. */
+/** What the blueprint shows at each step of the story. Steps 0-2 drive
+ * HttpRequestBuilder; steps 3-4 drive CurlCommandBuilder with the exact same
+ * recipe, to make the "different representation" payoff visible. */
 const FIELDS_BY_STEP: FieldState[] = [
   { method: null, url: '/api/items', headers: null, query: null, body: null },
   { method: 'POST', url: '/api/items', headers: 'Content-Type', query: null, body: '{ name: … }' },
   { method: 'POST', url: '/api/items', headers: 'Content-Type', query: null, body: '{ name: … }' },
   { method: 'POST', url: '/api/items', headers: 'Content-Type', query: null, body: '{ name: … }' },
-  { method: 'GET', url: '/api/items', headers: null, query: 'q=pizza', body: null },
+  { method: 'POST', url: '/api/items', headers: 'Content-Type', query: null, body: '{ name: … }' },
 ]
 
-const CARD = { x: 610, y: 250, width: 180, height: 164 }
+const CARD = { x: 400, y: 270, width: 180, height: 164 }
 const ROW_LABELS: Array<{ key: keyof Omit<FieldState, 'url'>; label: string }> = [
   { key: 'method', label: 'method' },
   { key: 'headers', label: 'headers' },
@@ -31,24 +33,28 @@ const ROW_LABELS: Array<{ key: keyof Omit<FieldState, 'url'>; label: string }> =
   { key: 'body', label: 'body' },
 ]
 
-/** Builder: a blueprint card next to HttpRequest fills in field-by-field, then locks and
- * flies into the product once build() runs. */
+/** Builder: a blueprint card between the two concrete builders fills in
+ * field-by-field, then flies into whichever product (HttpRequest or the curl
+ * command) the active builder is assembling once getResult() runs. */
 export function BuilderVisualization({ pattern, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
   const color = categories[pattern.category].color
   const reduceMotion = useReducedMotion()
   const byId = new Map(pattern.participants.map((p) => [p.id, p]))
-  const request = byId.get('request')
+
+  const usingCurl = stepIndex >= 3
+  const activeProductId = usingCurl ? 'curlCommand' : 'request'
+  const product = byId.get(activeProductId)
   const fields = FIELDS_BY_STEP[Math.min(stepIndex, FIELDS_BY_STEP.length - 1)]
   const filledCount = ROW_LABELS.filter((r) => fields[r.key]).length
-  const isBuildStep = stepIndex === 3
-  const isFreshProduct = stepIndex === 4
+  const isBuildStep = stepIndex === 2 || stepIndex === 4
+  const blueprintLabel = usingCurl ? '«blueprint» curl command' : '«blueprint» HttpRequest'
 
   const select = (id: string) => (e: ReactMouseEvent | ReactKeyboardEvent) => {
     e.stopPropagation()
     onSelect(id)
   }
 
-  const targetBox = request ? boxOf(request) : null
+  const targetBox = product ? boxOf(product) : null
 
   return (
     <Diagram
@@ -68,11 +74,11 @@ export function BuilderVisualization({ pattern, step, stepIndex, selectedId, onS
           <motion.g
             role="button"
             tabIndex={0}
-            aria-label={`HttpRequest blueprint — ${filledCount} of 4 optional fields set`}
-            aria-pressed={selectedId === 'request'}
+            aria-label={`${usingCurl ? 'curl command' : 'HttpRequest'} blueprint — ${filledCount} of 4 optional parts set`}
+            aria-pressed={selectedId === activeProductId}
             className="cursor-pointer outline-none"
-            onClick={select('request')}
-            onKeyDown={onActivate(() => onSelect('request'))}
+            onClick={select(activeProductId)}
+            onKeyDown={onActivate(() => onSelect(activeProductId))}
             initial={false}
             animate={
               isBuildStep && targetBox && !reduceMotion
@@ -95,12 +101,12 @@ export function BuilderVisualization({ pattern, step, stepIndex, selectedId, onS
                 rx={12}
                 fill="#0f172a"
                 initial={false}
-                animate={{ stroke: isBuildStep || isFreshProduct ? color : '#334155' }}
+                animate={{ stroke: isBuildStep ? color : '#334155' }}
                 strokeWidth={isBuildStep ? 2.5 : 1.5}
-                strokeDasharray={isBuildStep || isFreshProduct ? undefined : '5 4'}
+                strokeDasharray={isBuildStep ? undefined : '5 4'}
               />
               <text y={-CARD.height / 2 + 18} textAnchor="middle" className="fill-slate-400 text-[10px] font-mono select-none">
-                «blueprint» HttpRequest
+                {blueprintLabel}
               </text>
               {isBuildStep && (
                 <AnimatePresence>
@@ -122,7 +128,7 @@ export function BuilderVisualization({ pattern, step, stepIndex, selectedId, onS
                 </AnimatePresence>
               )}
 
-              {/* url: always present — the one field the constructor requires up front. */}
+              {/* url: always present — the one piece passed to the builder's constructor. */}
               <g transform={`translate(0 ${-CARD.height / 2 + 40})`}>
                 <text x={-CARD.width / 2 + 14} textAnchor="start" className="fill-slate-500 text-[10px] font-mono select-none">
                   url

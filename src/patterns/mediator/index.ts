@@ -150,7 +150,7 @@ export const pattern: PatternDefinition = {
       to: 'dialog',
       type: 'calls',
       label: 'notify()',
-      description: 'Whenever the username changes, the field calls notify(this, "changed") on its mediator — it never touches the submit button itself.',
+      description: 'Whenever the username changes, the field calls notify(this, \'changed\') on its mediator, passing itself as the sender — it never touches the submit button itself.',
       bend: 20,
       code: 'username',
     },
@@ -160,7 +160,7 @@ export const pattern: PatternDefinition = {
       to: 'dialog',
       type: 'calls',
       label: 'notify()',
-      description: 'Whenever the checkbox is toggled, it calls notify(this, "toggled") on its mediator — it never touches the password field itself.',
+      description: 'Whenever the checkbox is toggled, it calls notify(this, \'toggled\') on its mediator, passing itself as the sender — it never touches the password field itself.',
       bend: 20,
       code: 'checkbox',
     },
@@ -168,9 +168,9 @@ export const pattern: PatternDefinition = {
       id: 'enable-submit',
       from: 'dialog',
       to: 'submit',
-      type: 'notifies',
+      type: 'calls',
       label: 'setEnabled()',
-      description: 'Having decided the username is non-empty, the dialog tells the submit button to enable itself.',
+      description: 'Having decided the username is non-empty, the dialog calls setEnabled() directly on the submit button it owns.',
       bend: 20,
       code: 'enable',
     },
@@ -178,9 +178,9 @@ export const pattern: PatternDefinition = {
       id: 'focus-password',
       from: 'dialog',
       to: 'password',
-      type: 'notifies',
+      type: 'calls',
       label: 'focus()',
-      description: 'Having decided remember-me was checked, the dialog tells the password field to focus itself.',
+      description: 'Having decided remember-me was checked, the dialog calls focus() directly on the password field it owns.',
       bend: 20,
       code: 'focus',
     },
@@ -206,13 +206,13 @@ export const pattern: PatternDefinition = {
       title: 'User types a username',
       description: 'UsernameField.type() stores the new value locally, then reports the change to its mediator instead of reaching for the submit button directly.',
       highlight: ['username', 'notify-username', 'dialog'],
-      packets: [{ relation: 'notify-username', label: "notify('username','changed')" }],
+      packets: [{ relation: 'notify-username', label: "notify(this, 'changed')" }],
       notes: { username: 'value: "ada"' },
       code: 'username',
     },
     {
       title: 'Dialog routes the event',
-      description: 'LoginDialog.notify() inspects the sender and event, and decides what, if anything, needs to change elsewhere in the dialog.',
+      description: "LoginDialog.notify() checks whether sender is the widget it cares about — e.g. sender === this.username — together with the event, and decides what, if anything, needs to change elsewhere in the dialog.",
       highlight: ['dialog'],
       notes: { dialog: 'routing event' },
       code: 'notify',
@@ -229,7 +229,7 @@ export const pattern: PatternDefinition = {
       title: 'User checks "remember me"',
       description: 'Toggling the checkbox calls notify() again, this time with a different sender and event — the same single entry point handles every widget.',
       highlight: ['checkbox', 'notify-checkbox', 'dialog'],
-      packets: [{ relation: 'notify-checkbox', label: "notify('checkbox','toggled')" }],
+      packets: [{ relation: 'notify-checkbox', label: "notify(this, 'toggled')" }],
       notes: { checkbox: 'checked' },
       code: 'checkbox',
     },
@@ -243,7 +243,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'No widget knows about any other',
-      description: 'Every cross-widget rule lives inside LoginDialog. Swap in a different mediator and the exact same four widgets behave completely differently.',
+      description: "Every cross-widget rule lives inside LoginDialog, and each colleague only ever holds a reference typed as Mediator — never as LoginDialog itself. Wire the same four widgets to a different class that implements Mediator, and they would run against it unchanged.",
       highlight: ['username', 'password', 'checkbox', 'submit', 'dialog'],
       notes: { dialog: 'central hub' },
       code: 'dialog',
@@ -253,28 +253,35 @@ export const pattern: PatternDefinition = {
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: `
 // [mediatorIface]
+// A marker interface every widget satisfies, so the mediator can accept
+// "some colleague" without depending on any concrete widget class.
+interface Colleague {}
+
 interface Mediator {
-  notify(sender: string, event: string): void
+  notify(sender: Colleague, event: string): void
 }
 // [/mediatorIface]
 
 // [dialog]
 class LoginDialog implements Mediator {
   // [holds]
-  private username = new UsernameField(this)
-  private password = new PasswordField(this)
-  private checkbox = new RememberMeCheckbox(this)
-  private submit = new SubmitButton(this)
+  // Exposed read-only so a caller can drive the demo widgets directly
+  // (dialog.username.type(...)) — the dialog still owns construction and
+  // wiring, which is all Mediator actually requires.
+  readonly username = new UsernameField(this)
+  readonly password = new PasswordField(this)
+  readonly checkbox = new RememberMeCheckbox(this)
+  readonly submit = new SubmitButton(this)
   // [/holds]
 
   // [notify]
-  notify(sender: string, event: string) {
-    if (sender === 'username' && event === 'changed') {
+  notify(sender: Colleague, event: string) {
+    if (sender === this.username && event === 'changed') {
       // [enable]
       this.submit.setEnabled(this.username.value.length > 0)
       // [/enable]
     }
-    if (sender === 'checkbox' && event === 'toggled') {
+    if (sender === this.checkbox && event === 'toggled') {
       // [focus]
       if (this.checkbox.checked) this.password.focus()
       // [/focus]
@@ -285,19 +292,19 @@ class LoginDialog implements Mediator {
 // [/dialog]
 
 // [username]
-class UsernameField {
+class UsernameField implements Colleague {
   value = ''
   constructor(private mediator: Mediator) {}
 
   type(value: string) {
     this.value = value
-    this.mediator.notify('username', 'changed')
+    this.mediator.notify(this, 'changed')
   }
 }
 // [/username]
 
 // [password]
-class PasswordField {
+class PasswordField implements Colleague {
   constructor(private mediator: Mediator) {}
 
   focus() {
@@ -307,19 +314,19 @@ class PasswordField {
 // [/password]
 
 // [checkbox]
-class RememberMeCheckbox {
+class RememberMeCheckbox implements Colleague {
   checked = false
   constructor(private mediator: Mediator) {}
 
   toggle() {
     this.checked = !this.checked
-    this.mediator.notify('checkbox', 'toggled')
+    this.mediator.notify(this, 'toggled')
   }
 }
 // [/checkbox]
 
 // [submit]
-class SubmitButton {
+class SubmitButton implements Colleague {
   enabled = false
   constructor(private mediator: Mediator) {}
 
@@ -333,6 +340,9 @@ class SubmitButton {
 // [usage]
 // Usage — widgets are only ever handed the mediator, never each other
 const dialog = new LoginDialog()
+
+dialog.username.type('ada') // submit: enabled = true
+dialog.checkbox.toggle() // password: focused
 // [/usage]
 `,
 

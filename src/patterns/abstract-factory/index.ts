@@ -29,7 +29,7 @@ export const pattern: PatternDefinition = {
     'Can introduce a lot of interfaces and classes for what might otherwise be a simple set of objects.',
   ],
   realWorld: [
-    'javax.xml.parsers.DocumentBuilderFactory / XPathFactory in Java, which build a matching family of XML parsing components',
+    'ADO.NET\'s DbProviderFactory, which creates a matching Connection, Command and Parameter for one database provider',
     'Cross-platform UI toolkits whose look-and-feel engine (e.g. Java Swing\'s UIManager) swaps an entire family of native-looking widgets at once',
     'Database-agnostic ORMs whose "dialect" object creates matching Connection, QueryBuilder and Schema classes for Postgres vs MySQL',
     'Cloud SDK abstractions that create a matching family of Storage/Queue/Secrets clients per provider (AWS vs GCP vs Azure)',
@@ -208,7 +208,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: "Families can't be mixed",
-      description: "Because each concrete factory only ever returns its own matching products, there is no code path that pairs a DarkButton with a LightCheckbox — consistency is enforced by construction, not by convention.",
+      description: "Because each concrete factory only ever returns its own matching products, there is no code path that pairs a DarkButton with a LightCheckbox — as long as the client builds from one factory, consistency is enforced by construction, not by convention.",
       highlight: ['uiFactory', 'lightFactory', 'darkFactory'],
       code: 'uiFactory',
     },
@@ -288,6 +288,8 @@ function renderDialog(factory: UIFactory) {
   return [button.render(), checkbox.render()]
 }
 // [/client]
+
+declare function getUserTheme(): 'light' | 'dark'
 
 const theme: 'light' | 'dark' = getUserTheme()
 const factory: UIFactory = theme === 'dark' ? new DarkFactory() : new LightFactory()

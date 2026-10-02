@@ -21,7 +21,7 @@ export const pattern: PatternDefinition = {
   ],
   pros: [
     'Guarantees a single instance and a well-known access point to it.',
-    'The instance is created lazily, only when first requested.',
+    'Can be created lazily, only when first requested.',
     'Centralizes state that genuinely is global, instead of scattering it.',
   ],
   cons: [
@@ -33,7 +33,7 @@ export const pattern: PatternDefinition = {
     'A single application-wide configuration object (process.env wrappers, feature-flag stores).',
     'Database connection pools and caches shared across an app.',
     'java.lang.Runtime.getRuntime() in Java',
-    'A single Redux/Zustand store instance per application',
+    'A single Redux/Zustand store per application — singleton-like by convention, not by enforced construction',
   ],
   related: ['dependency-injection', 'facade', 'abstract-factory', 'flyweight'],
   participants: [
@@ -114,7 +114,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Same object, everywhere',
-      description: 'Both services hold a reference to the identical AppConfig object: a change one of them makes is immediately visible to the other.',
+      description: 'PaymentService calls updateApiUrl() on its config reference. Because UserService holds a reference to that exact same AppConfig object, it immediately sees the new value too.',
       highlight: ['userService', 'paymentService', 'config'],
       notes: { userService: 'shares state', paymentService: 'shares state' },
       code: 'usage',
@@ -128,7 +128,8 @@ class AppConfig {
   private readonly settings = new Map<string, string>()
 
   // [class]
-  // A private constructor blocks \`new AppConfig()\` from outside this file.
+  // A private constructor blocks \`new AppConfig()\` from outside this class
+  // (TypeScript enforces this at compile time only).
   private constructor() {
     this.settings.set('apiUrl', 'https://api.example.com')
   }
@@ -170,6 +171,10 @@ class PaymentService {
   apiUrl(): string | undefined {
     return this.config.get('apiUrl')
   }
+
+  updateApiUrl(url: string): void {
+    this.config.set('apiUrl', url)
+  }
 }
 // [/paymentService]
 
@@ -180,6 +185,9 @@ const payments = new PaymentService()
 
 users.apiUrl() // "https://api.example.com"
 payments.apiUrl() // the exact same value, from the exact same object
+
+payments.updateApiUrl('https://updated.example.com')
+users.apiUrl() // "https://updated.example.com" — set via PaymentService, seen through UserService
 
 // new AppConfig() // compile error: constructor is private
 // [/usage]

@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   order: 5,
   summary: 'Let an object change its behavior by swapping the internal state object that defines it.',
   intent:
-    'Allow an object to alter its behavior when its internal state changes, so it appears to change its class — all without the object or its clients writing a single conditional.',
+    'Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.',
   problem:
     'A document’s behavior depends on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. Encoding this as one method full of if (status === "draft") … else if (status === "inReview") … grows every time a stage or an action is added, and nothing stops a caller from triggering a transition that should be impossible.',
   solution:
@@ -22,8 +22,8 @@ export const pattern: PatternDefinition = {
   ],
   pros: [
     'Replaces sprawling conditionals with small, focused classes — one per state.',
-    'Makes illegal transitions hard to reach by accident: a state only implements the transitions that make sense from it.',
-    'New states can be added without touching the existing ones (Open/Closed).',
+    'Each state decides which actions it honours; invalid ones are absorbed (or could throw) instead of being handled ad hoc by callers.',
+    'State-specific behaviour is localized to one class, but adding a state still means updating every existing state that can transition into it.',
   ],
   cons: [
     'Overkill for objects with only two or three simple states.',
@@ -32,7 +32,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     'TCP connection states (Listen, SynReceived, Established, Closed, …)',
-    'UI widgets: a button’s Idle/Hover/Pressed/Disabled states',
+    'Media players: a playback engine’s Stopped/Playing/Paused/Buffering states',
     'Game character states (Standing, Jumping, Crouching, Dead)',
     'Document and order workflow engines (Draft → InReview → Published/Rejected)',
   ],

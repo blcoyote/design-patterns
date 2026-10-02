@@ -31,9 +31,8 @@ export const pattern: PatternDefinition = {
     'The extra accept()/visit() indirection makes the call flow harder to follow than a plain virtual method call.',
   ],
   realWorld: [
-    'Compiler ASTs: a single Visitor walks Node/Expression/Statement classes to type-check, optimize, or generate code.',
-    'ESLint and Babel plugins, which visit AST nodes (visitIdentifier, visitFunctionDeclaration, …) without editing the parser.',
-    'XML/DOM traversal and XPath-style evaluators built around a visitor walking the node tree.',
+    'Compiler ASTs: Roslyn\'s CSharpSyntaxVisitor and javac\'s TreeVisitor use true double dispatch (an accept() method per node type) to type-check, optimize, or generate code.',
+    'ESLint and Babel plugins do visitor-style AST traversal, but dispatch by looking up node.type as a string key rather than by double dispatch.',
     'Serialization frameworks that add a new output format as a new visitor instead of new methods on every model class.',
   ],
   related: ['composite', 'iterator', 'interpreter'],
@@ -257,7 +256,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Hop 2: Circle calls back the matching method',
       description:
-        'Inside its own accept(), Circle calls visitor.visitCircle(this). Because the visitor is an AreaCalculator, that call lands on AreaCalculator.visitCircle — chosen purely by the visitor’s concrete class.',
+        'Inside its own accept(), Circle calls visitor.visitCircle(this). The two dispatches together pick the pair that runs: Circle’s own type picked the visitCircle method name, and the visitor’s concrete class — AreaCalculator — picks which implementation of it executes.',
       highlight: ['dispatchCircle', 'areaCalculator'],
       packets: [{ relation: 'dispatchCircle', label: 'visitCircle(this)' }],
       notes: { areaCalculator: '+28.27' },
@@ -399,7 +398,9 @@ class JsonExporter implements ShapeVisitor {
     this.parts.push(\`{"type":"group","children":[\${children.join(',')}]}\`)
   }
 
-  toJSON(): string {
+  // Named result(), not toJSON() — toJSON() is a special method name that
+  // JSON.stringify() auto-invokes, which would collide with this class's own purpose.
+  result(): string {
     return this.parts[0] ?? '{}'
   }
 }
@@ -420,7 +421,7 @@ console.log(areaCalculator.total) // ≈ 40.27
 
 const exporter = new JsonExporter()
 group.accept(exporter)
-console.log(exporter.toJSON()) // {"type":"group","children":[...]}
+console.log(exporter.result()) // {"type":"group","children":[...]}
 `,
   Visualization: VisitorVisualization,
 }

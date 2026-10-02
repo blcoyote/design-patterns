@@ -21,13 +21,13 @@ export const pattern: PatternDefinition = {
     'You want to add or remove a reaction to an event without touching the code that raises it.',
   ],
   pros: [
-    "Publishers and subscribers are fully decoupled — neither side references the other's type.",
+    'Publishers and subscribers are decoupled from each other — neither references the other\'s type — though both are still coupled to the topic/payload contract.',
     'New subscribers can be added, or removed, without changing a single publisher.',
     'One topic can fan out to any number of handlers, including zero.',
   ],
   cons: [
     'Harder to trace: reading publish("order.placed", …) alone does not tell you what will run.',
-    'Delivery order and timing are usually unspecified, and one slow handler can delay the others unless dispatch is made async.',
+    'Delivery order and timing are implementation-defined, and one slow handler can delay the others unless dispatch is made async.',
     'A typo in a topic name fails silently — nothing was subscribed, nothing happens, no error.',
   ],
   realWorld: [
@@ -171,7 +171,7 @@ export const pattern: PatternDefinition = {
       to: 'analyticsService',
       type: 'notifies',
       label: 'order.placed',
-      description: "The same publish() call also reaches AnalyticsService's order.placed handler, in no particular guaranteed order relative to the others.",
+      description: "The same publish() call also reaches AnalyticsService's order.placed handler; ordering is implementation-defined (this bus dispatches synchronously, in subscription order).",
       code: 'dispatch',
       bend: 18,
     },
@@ -290,7 +290,7 @@ export const pattern: PatternDefinition = {
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: `
-interface EventMap {
+type EventMap = {
   'order.placed': { orderId: string; total: number }
   'user.signedUp': { userId: string; email: string }
 }

@@ -59,19 +59,21 @@ new Service().run()
 
   // Optional: a C# example shown as a second tab next to TypeScript. Must use
   // the SAME region ids as `code` above (`npm test` checks this).
+  // NOTE: C# top-level statements must appear before any type declarations
+  // in the file, so usage code goes FIRST here even though TS puts it last.
   // csharp: `
+  // // [usage]
+  // // [client]
+  // new Service().Run();
+  // // [/client]
+  // // [/usage]
+  //
   // // [service]
   // class Service
   // {
   //     public void Run() { }
   // }
   // // [/service]
-  //
-  // // [usage]
-  // // [client]
-  // new Service().Run();
-  // // [/client]
-  // // [/usage]
   // `,
 
   // Optional: a custom scene. Create Visualization.tsx next to this file and set

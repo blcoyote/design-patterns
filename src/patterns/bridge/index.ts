@@ -9,9 +9,9 @@ export const pattern: PatternDefinition = {
   intent:
     'Decouple an abstraction from its implementation so that the two can evolve, and vary, independently of one another.',
   problem:
-    'A remote control needs to work with many kinds of devices — TVs, radios, maybe a projector next year — and there are also several kinds of remotes: a basic one and an advanced one with extra buttons. Modeling this with inheritance alone (BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote…) multiplies every new remote type by every new device type, and adding one more of either doubles the class count.',
+    'A remote control needs to work with many kinds of devices — TVs, radios, maybe a projector next year — and there are also several kinds of remotes: a basic one and an advanced one with extra buttons. Modeling this with inheritance alone (BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote…) multiplies every new remote type by every new device type: with M remote kinds and N device kinds you need M × N subclasses, so each new device or remote adds a whole row or column of classes.',
   solution:
-    "Split the two dimensions into separate hierarchies. RemoteControl (the abstraction) holds a reference to a Device (the implementor interface) instead of extending a concrete device class. New remotes extend RemoteControl; new devices implement Device. Either hierarchy can grow on its own, and any remote can be paired with any device at runtime through the reference that bridges them.",
+    "Split the two dimensions into separate hierarchies. RemoteControl (the abstraction) holds a reference to a Device (the implementor interface) instead of extending a concrete device class. New remotes extend RemoteControl; new devices implement Device. Either hierarchy can grow on its own, and any remote can be paired with any device at runtime through the reference that bridges them. Bridge is a structural split of two hierarchies decided up front at design time, which is different from Strategy, where a single class swaps out one interchangeable algorithm.",
   analogy:
     'A universal remote and the appliances it points at. The remote does not care whether it is pointed at a TV or a radio — it just sends "power" and "volume" signals through the same bridge, and the appliance on the other end decides how to act on them.',
   whenToUse: [
@@ -172,6 +172,16 @@ export const pattern: PatternDefinition = {
       code: 'usage',
     },
     {
+      id: 'client-sets-device',
+      from: 'client',
+      to: 'remoteControl',
+      type: 'calls',
+      label: 'setDevice(radio)',
+      description: 'The client swaps the implementor at runtime by calling setDevice() on the already-constructed remote, pointing the same bridge reference at a different Device.',
+      bend: 20,
+      code: 'setDevice',
+    },
+    {
       id: 'client-creates-advanced',
       from: 'client',
       to: 'advancedRemote',
@@ -214,11 +224,11 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Swap the implementor',
-      description: 'Without changing a single line of RemoteControl, the client builds a new one around a Radio instead. The abstraction hierarchy never had to know Radio existed.',
-      highlight: ['client', 'client-creates-remote', 'remoteControl', 'bridge', 'radio', 'radio-impl'],
-      packets: [{ relation: 'client-creates-remote', label: 'new RemoteControl(radio)' }],
+      description: 'Without changing a single line of RemoteControl, the client calls setDevice() on the very same remote to point its bridge reference at a Radio instead. The abstraction hierarchy never had to know Radio existed, and no new RemoteControl had to be built.',
+      highlight: ['client', 'client-sets-device', 'remoteControl', 'bridge', 'radio', 'radio-impl'],
+      packets: [{ relation: 'client-sets-device', label: 'setDevice(radio)' }],
       notes: { remoteControl: 'device: Radio' },
-      code: 'usage',
+      code: 'setDevice',
     },
     {
       title: 'Same call, different device',
@@ -331,6 +341,12 @@ class RemoteControl {
     else this.device.turnOn()
   }
   // [/togglePower]
+
+  // [setDevice]
+  setDevice(device: Device) {
+    this.device = device
+  }
+  // [/setDevice]
 }
 // [/remoteControl]
 
@@ -346,10 +362,10 @@ class AdvancedRemoteControl extends RemoteControl {
 
 // [usage]
 // Usage
-let remote = new RemoteControl(new TV())
+const remote = new RemoteControl(new TV())
 remote.togglePower() // tv: on
 
-remote = new RemoteControl(new Radio())
+remote.setDevice(new Radio())
 remote.togglePower() // radio: on
 
 const advanced = new AdvancedRemoteControl(new TV())

@@ -33,7 +33,7 @@ export const pattern: PatternDefinition = {
   realWorld: [
     'Netflix Hystrix — the library that popularized the pattern for service-to-service calls',
     'Resilience4j\'s CircuitBreaker module for the JVM',
-    'Polly\'s CircuitBreakerPolicy for .NET',
+    'Polly for .NET (v8 resilience pipelines via AddCircuitBreaker; v7 CircuitBreakerPolicy)',
     'Envoy and Istio outlier detection, which ejects unhealthy upstream hosts from the load-balancing pool',
   ],
   related: ['state', 'proxy', 'decorator'],
@@ -57,7 +57,7 @@ export const pattern: PatternDefinition = {
       x: 340,
       y: 230,
       width: 170,
-      description: 'Wraps every call to RemoteService. Tracks a failure count and a current mode (Closed, Open or Half-Open) and decides, before each call, whether RemoteService gets touched at all.',
+      description: 'Wraps every call to RemoteService. Tracks a failure count and a current mode (Closed, Open or Half-Open) and decides, before each call, whether RemoteService gets touched at all. Here the modes are a plain string enum switched on in one class, not separate State objects (see the State pattern) — fine at this size, worth revisiting if the transition logic grows.',
     },
     {
       id: 'service',
@@ -162,7 +162,7 @@ export const pattern: PatternDefinition = {
       to: 'halfOpen',
       type: 'notifies',
       label: 'cooldown elapsed',
-      description: 'Once cooldownMs has passed since the trip, the breaker moves itself to Half-Open — no external caller triggers this, the breaker checks it on the next incoming call.',
+      description: 'On the next call after cooldownMs has passed since the trip, the breaker switches itself to Half-Open — no external caller triggers this directly, it is checked lazily when that call arrives.',
       bend: 40,
       code: 'halfOpenCheck',
     },
@@ -249,7 +249,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'The cooldown elapses',
-      description: 'After cooldownMs has passed, the breaker moves itself to Half-Open. It is willing to find out whether RemoteService has recovered — but only with a single trial call.',
+      description: 'On the next call after cooldownMs has passed, the breaker switches to Half-Open. It is willing to find out whether RemoteService has recovered — but only with a single trial call.',
       highlight: ['cooldown', 'halfOpen', 'state-halfOpen'],
       packets: [{ relation: 'cooldown', label: 'cooldown elapsed' }],
       notes: { breaker: 'HALF_OPEN', halfOpen: 'trial pending' },
@@ -314,6 +314,9 @@ class CircuitBreaker {
   private failureCount = 0
   private nextAttempt = 0
   private trialInFlight = false
+  // Bumped on every state transition, so a slow call that started in an
+  // earlier state can't drive a transition it never actually observed.
+  private generation = 0
 
   constructor(
     private readonly failureThreshold: number,
@@ -329,6 +332,7 @@ class CircuitBreaker {
       }
       // [halfOpenCheck]
       this.state = 'HALF_OPEN' // cooldown elapsed: let exactly one trial through
+      this.generation++
       // [/halfOpenCheck]
     }
     // Only one probe at a time: while it is in flight, everyone else keeps failing fast.
@@ -338,22 +342,28 @@ class CircuitBreaker {
     // [/openCheck]
 
     const isTrial = this.state === 'HALF_OPEN'
+    const callGeneration = this.generation // only *this* call's own outcome may move that generation on
     if (isTrial) this.trialInFlight = true
     try {
       // [invoke]
       const result = await fn()
       // [/invoke]
       // [onSuccess]
-      this.failureCount = 0
-      this.state = 'CLOSED'
+      if (callGeneration === this.generation) {
+        this.failureCount = 0
+        this.state = 'CLOSED'
+      }
       // [/onSuccess]
       return result
     } catch (err) {
       // [onFailure]
-      this.failureCount++
-      if (this.state === 'HALF_OPEN' || this.failureCount >= this.failureThreshold) {
-        this.state = 'OPEN'
-        this.nextAttempt = Date.now() + this.cooldownMs
+      if (callGeneration === this.generation) {
+        this.failureCount++
+        if (this.state === 'HALF_OPEN' || this.failureCount >= this.failureThreshold) {
+          this.state = 'OPEN'
+          this.nextAttempt = Date.now() + this.cooldownMs
+          this.generation++
+        }
       }
       // [/onFailure]
       throw err

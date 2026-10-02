@@ -25,7 +25,7 @@ export const pattern: PatternDefinition = {
     'Relationships can be established at runtime.',
   ],
   cons: [
-    'Observers are notified in an unspecified order.',
+    'Clients shouldn\'t rely on notification order.',
     'Forgotten subscriptions cause memory leaks (the "lapsed listener" problem).',
     'Cascading updates can be hard to trace and debug.',
   ],
@@ -105,7 +105,7 @@ export const pattern: PatternDefinition = {
   steps: [
     {
       title: 'Observers subscribe',
-      description: 'Each observer registers itself with the ticker. The ticker just stores them in a list of Observer.',
+      description: 'The client subscribes each observer with the ticker. The ticker just stores them in a list of Observer.',
       highlight: ['subject', 'holds', 'chart', 'alert', 'logger'],
       notes: { subject: 'observers: 3' },
       code: 'subscribe',
@@ -176,6 +176,9 @@ class StockTicker {
 
   // [notify]
   private notify() {
+    // observers is reassigned (not mutated in place) by unsubscribe, so an
+    // observer that unsubscribes itself mid-notify doesn't affect the
+    // array we're already looping over here.
     for (const o of this.observers) o.update(this.price)
   }
   // [/notify]
@@ -226,6 +229,18 @@ ticker.setPrice(99) // only chart + log
 // or IObservable<T>/IObserver<T> instead of hand-rolling this, but we keep
 // the explicit pattern structure here for clarity.
 
+// Usage (top-level statements must come before type declarations in a
+// C# file, so this runs first even though it reads last).
+var ticker = new StockTicker();
+var alert = new PriceAlert(100);
+ticker.Subscribe(new PriceChart());
+ticker.Subscribe(alert);
+ticker.Subscribe(new AuditLog());
+
+ticker.SetPrice(101.5m); // all three react
+ticker.Unsubscribe(alert);
+ticker.SetPrice(99m); // only chart + log
+
 // [observer]
 interface IObserver
 {
@@ -264,7 +279,10 @@ class StockTicker
     // [notify]
     private void Notify()
     {
-        foreach (var observer in _observers) observer.Update(_price);
+        // ToArray() snapshots the list so an observer that unsubscribes
+        // itself during notification doesn't mutate the collection we're
+        // iterating over.
+        foreach (var observer in _observers.ToArray()) observer.Update(_price);
     }
     // [/notify]
 }
@@ -303,16 +321,5 @@ class AuditLog : IObserver
 }
 // [/logger]
 // [/concrete]
-
-// Usage
-var ticker = new StockTicker();
-var alert = new PriceAlert(100);
-ticker.Subscribe(new PriceChart());
-ticker.Subscribe(alert);
-ticker.Subscribe(new AuditLog());
-
-ticker.SetPrice(101.5m); // all three react
-ticker.Unsubscribe(alert);
-ticker.SetPrice(99m); // only chart + log
 `,
 }

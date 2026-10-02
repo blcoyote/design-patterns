@@ -6,35 +6,34 @@ export const pattern: PatternDefinition = {
   name: 'Unit of Work',
   category: 'architectural',
   order: 3,
-  summary: 'Collect every insert, update and delete from a business operation, then flush them to the database together — or not at all.',
+  summary: 'Collect every insert, update and delete from a business operation, then commit them as a single transaction — or not at all.',
   intent:
     'Track every object created, changed, or deleted during a business transaction, and coordinate writing out all of those changes as a single unit — so either all of them persist, or none do.',
   problem:
-    'A checkout operation touches half a dozen rows: a new Order is inserted, the Customer\'s loyalty points are updated, a stale Cart is deleted. Saving each of those the instant it changes means a crash halfway through leaves the database in a state no business rule allows — an Order with no matching Cart cleanup, points awarded for a purchase that never actually completed. Nothing holds the whole operation together, and every write is also its own round trip to the database.',
+    'A checkout operation touches half a dozen rows: a new Order is inserted, the Customer\'s loyalty points are updated, a stale Cart is deleted. Saving each of those the instant it changes means a crash halfway through leaves the database in a state no business rule allows — an Order with no matching Cart cleanup, points awarded for a purchase that never actually completed. Nothing holds the whole operation together as one transaction.',
   solution:
     'Give each business operation a UnitOfWork. Instead of saving anything the moment it changes, application code just reports what happened — registerNew, registerDirty, registerRemoved — and the UnitOfWork keeps each object in the right pending list. Only when the caller calls commit() does it open a single database transaction, flush every pending insert, update and delete through it, and commit. If any single write fails, the whole transaction rolls back and none of the changes take effect.',
   analogy:
     'A restaurant order pad: a server does not walk to the kitchen after jotting down each item — they collect the whole table\'s order first, then send it in as one ticket. If the kitchen cannot make one of the dishes, the whole ticket is handed back rather than half the meal silently never arriving.',
   whenToUse: [
     'A single business operation touches several objects that must be saved together or not at all.',
-    'You want to batch a flurry of small writes into one round trip instead of one query per change.',
+    'You want every write from one business operation to succeed or fail together, as a single transaction.',
     'You need one place to decide the order writes happen in (inserts before updates before deletes, say) independent of when the application code made each change.',
   ],
   pros: [
     'Changes commit as one atomic transaction — a partial failure leaves no partial state behind.',
-    'Batches many small writes into a single round trip instead of a query per change.',
+    'Opens the door to batching: once every change is collected in one place, an ORM can combine them into fewer round trips (this example still issues one statement per entity; batching is a further optimization on top).',
     'Decouples "what changed", tracked by the UnitOfWork as it happens, from "when it gets written", decided once by commit().',
   ],
   cons: [
     'Adds bookkeeping — every mutation has to be registered instead of just saved directly.',
     'A long-lived Unit of Work can accumulate large pending lists and hold locks or memory longer than it should.',
-    'Easy to forget to register a change, which produces a silent write that never actually happens.',
+    'Easy to forget to register a change, which produces a silent write that never actually happens — real ORMs (EF Core, Hibernate, SQLAlchemy) avoid this by tracking changes automatically instead of relying on manual register calls.',
   ],
   realWorld: [
     'Entity Framework Core\'s DbContext — SaveChanges() flushes every tracked Added/Modified/Deleted entity in one transaction.',
     'Hibernate / NHibernate\'s Session, which batches inserts, updates and deletes and flushes them together.',
     'SQLAlchemy\'s Session object, which tracks pending objects until session.commit().',
-    'Martin Fowler\'s Patterns of Enterprise Application Architecture, which names and formalizes this pattern.',
   ],
   related: ['repository', 'command', 'memento'],
 
@@ -236,7 +235,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'A different commit fails — and rolls back',
       description:
-        'In another operation, the UPDATE to a Customer violates a constraint partway through the flush. The UnitOfWork catches the failure, issues ROLLBACK instead of COMMIT, and the database ends up exactly as it was — the Order insert and Cart delete from the same batch are undone right along with it.',
+        'In another operation, the UPDATE to a Customer violates a constraint partway through the flush — before the removed-list deletes even run. The UnitOfWork catches the failure, issues ROLLBACK instead of COMMIT: the Order INSERT that already ran is undone, and the Cart DELETE further down the list never runs at all.',
       highlight: ['unitOfWork', 'flush', 'database'],
       packets: [{ relation: 'flush', label: 'ROLLBACK', reverse: true }],
       notes: { unitOfWork: 'pending restored', database: 'ROLLBACK ✗' },
@@ -297,14 +296,22 @@ class UnitOfWork {
   constructor(private db: Database) {}
 
   // [register]
+  // Note: entities are tracked by reference (Array.includes uses ===), so the
+  // very same object instance must be passed to every register*() call for an
+  // entity. Real Unit of Work implementations pair this with an Identity Map
+  // so a given row only ever has one in-memory instance to begin with.
+
   // [registerNew]
   registerNew(entity: Entity) {
-    this.newObjects.push(entity)
+    // Guards against double-registering the same still-unsaved entity as new.
+    if (!this.newObjects.includes(entity)) this.newObjects.push(entity)
   }
   // [/registerNew]
 
   // [registerDirty]
   registerDirty(entity: Entity) {
+    // Skips entities already queued as new (nothing to UPDATE yet) or already
+    // marked dirty (no point queuing the same UPDATE twice).
     const alreadyTracked = this.newObjects.includes(entity) || this.dirtyObjects.includes(entity)
     if (!alreadyTracked) this.dirtyObjects.push(entity)
   }
@@ -326,6 +333,10 @@ class UnitOfWork {
   commit() {
     this.db.beginTransaction()
     try {
+      // One statement per entity, in order: this example trades round trips
+      // for simplicity. The atomicity guarantee comes from the single
+      // transaction wrapping all of them, not from how many statements it took
+      // to get there — a real ORM can batch these into fewer round trips.
       for (const entity of this.newObjects) this.db.insert(entity)
       for (const entity of this.dirtyObjects) this.db.update(entity)
       for (const entity of this.removedObjects) this.db.delete(entity)

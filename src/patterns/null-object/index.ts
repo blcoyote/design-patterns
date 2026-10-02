@@ -29,12 +29,13 @@ export const pattern: PatternDefinition = {
     'Can hide real bugs: a missing dependency sometimes should be a loud error, not a silent no-op.',
     'Adds a class that does nothing observable, which can confuse readers unfamiliar with the pattern.',
     'Does not help when callers need a meaningful return value — a safe default return is a smaller cousin of this, not a true Null Object.',
+    'Only works when "do nothing" is itself a genuinely sensible default; if no neutral behavior exists, forcing one in is the wrong fix.',
   ],
   realWorld: [
     'NullLogger / NOPLogger implementations in logging frameworks (SLF4J\'s NOPLogger, many Node logging libs)',
     'Python\'s logging.NullHandler — attached by libraries so "no handler configured" never warns or crashes',
-    'A no-op AbortSignal or EventTarget used as a safe default instead of undefined',
-    'Optional/Maybe types in functional languages, where "nothing" is a value that responds to the same operations as "something"',
+    'A never-aborting `new AbortController().signal` used as a safe default instead of undefined',
+    '.NET\'s NullLogger.Instance, Stream.Null, Go\'s io.Discard, and Java\'s Collections.emptyList() — do-nothing implementations used as defaults instead of null',
   ],
   related: ['strategy', 'singleton', 'proxy', 'state'],
 
@@ -268,7 +269,11 @@ class ReportGeneratorBefore {
 
     // [forgotten]
     if (result.warnings.length > 0) {
-      // forgot the null check every other call site remembered:
+      // forgot the null check every other call site remembered. In plain JS,
+      // or any non-strict codebase, this compiles fine and crashes at runtime;
+      // strict TS instead refuses to compile it, forcing a guard (or "!"/"?.")
+      // at every single call site — exactly the clutter Null Object removes.
+      // @ts-expect-error — strict null checks catch what a guard would miss at runtime
       this.logger.warn(\`report has \${result.warnings.length} warnings\`)
     }
     // [/forgotten]

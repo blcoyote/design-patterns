@@ -11,7 +11,7 @@ export const pattern: PatternDefinition = {
   problem:
     'Your checkout code is written against a clean PaymentProcessor interface, but the payment provider you were just handed only exposes a legacy, cents-based API with a completely different method name and shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.',
   solution:
-    'Introduce an Adapter that implements the interface your client already expects, and holds an instance of the incompatible class internally. The adapter translates each call — converting arguments, invoking the legacy method, and converting the result back — so neither the client nor the legacy class needs to know about the other.',
+    'Introduce an Adapter that implements the interface your client already expects, and holds an instance of the incompatible class internally. The adapter translates each call — converting arguments, invoking the legacy method, and converting the result back — so neither the client nor the legacy class needs to know about the other. This is the object adapter form, built on composition and holding the adaptee as a field; a class adapter instead inherits from the adaptee, which only works in languages with multiple inheritance and ties the adapter to one concrete adaptee class.',
   analogy:
     'A travel power plug adapter does not change what your laptop charger does, and it does not change the wall socket. It just sits between them, translating one physical shape into the other.',
   whenToUse: [
@@ -29,8 +29,8 @@ export const pattern: PatternDefinition = {
     'Can hide a poor underlying API rather than fixing the real problem.',
   ],
   realWorld: [
-    'Array.from() adapting iterables and array-likes to the Array interface',
-    'Node.js streams adapters between callback and Promise-based APIs',
+    'Node.js util.promisify()/util.callbackify() adapting between callback-based and Promise-based function signatures',
+    'Node.js Readable.toWeb()/Readable.fromWeb() adapting between Node streams and the Web Streams API',
     'ORMs adapting different database drivers to one query interface',
     'Payment SDKs wrapping each provider’s raw HTTP API behind a common interface',
   ],

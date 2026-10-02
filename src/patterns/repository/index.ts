@@ -188,7 +188,7 @@ export const pattern: PatternDefinition = {
       title: 'Repository builds a SQL query',
       description: 'SqlOrderRepository.findById() turns the request into a parameterized SELECT and sends it to the Database.',
       highlight: ['sqlOrderRepository', 'query', 'database'],
-      packets: [{ relation: 'query', label: "SELECT * WHERE id='482'" }],
+      packets: [{ relation: 'query', label: 'SELECT … FROM orders WHERE id = ? [482]' }],
       notes: { database: 'running query' },
       code: 'findById',
     },
@@ -243,6 +243,7 @@ interface OrderRepository {
   findById(id: string): Order | undefined
   findByCustomer(customerId: string): Order[]
   add(order: Order): void
+  save(order: Order): void // persists changes to an already-added Order (an upsert)
   remove(id: string): void
 }
 // [/orderRepository]
@@ -276,7 +277,17 @@ class SqlOrderRepository implements OrderRepository {
     this.db.query('INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)', [
       order.id,
       order.customerId,
-      order.total * 100,
+      Math.round(order.total * 100),
+    ])
+  }
+
+  save(order: Order): void {
+    // An update path for an Order already added — see the Unit of Work pattern
+    // for batching several such changes into a single transaction.
+    this.db.query('UPDATE orders SET customer_id = ?, total_cents = ? WHERE id = ?', [
+      order.customerId,
+      Math.round(order.total * 100),
+      order.id,
     ])
   }
 
@@ -308,6 +319,10 @@ class InMemoryOrderRepository implements OrderRepository {
     this.orders.set(order.id, order)
   }
 
+  save(order: Order): void {
+    this.orders.set(order.id, order) // Map.set already overwrites, so add and save coincide here
+  }
+
   remove(id: string): void {
     this.orders.delete(id)
   }
@@ -331,7 +346,10 @@ const service = new OrderService(new SqlOrderRepository(new Database()))
 console.log(service.getReceipt('482'))
 
 // Tests: the exact same service, wired to an in-memory stand-in — no database involved
-const testService = new OrderService(new InMemoryOrderRepository())
+const fakeRepo = new InMemoryOrderRepository()
+fakeRepo.add(new Order('482', 'cst-9', 42))
+const testService = new OrderService(fakeRepo)
+console.log(testService.getReceipt('482')) // reads straight out of the Map, no SQL involved
 // [/usage]
 `,
 

@@ -32,7 +32,7 @@ export const pattern: PatternDefinition = {
     'jQuery wrapping raw DOM APIs behind a simpler interface',
     'A checkout() service that coordinates inventory, payment and shipping subsystems',
     'An SDK\'s top-level client class hiding networking, auth and retry logic',
-    'Operating system system calls facading kernel subsystems',
+    'The C standard library (e.g. fopen/fread) facading raw OS syscalls',
   ],
   related: ['adapter', 'mediator', 'repository', 'proxy'],
   participants: [
@@ -228,12 +228,20 @@ class Screen {
 
 // [facade]
 class HomeTheaterFacade {
-  constructor(
-    private amp: Amplifier,
-    private dvd: DvdPlayer,
-    private projector: Projector,
-    private screen: Screen,
-  ) {}
+  private amp: Amplifier
+  private dvd: DvdPlayer
+  private projector: Projector
+  private screen: Screen
+
+  // The facade builds its own subsystem instances by default, so the client
+  // never has to know they exist — but a caller that already has one (for
+  // testing, or to reuse an existing amplifier) can still inject it.
+  constructor(amp = new Amplifier(), dvd = new DvdPlayer(), projector = new Projector(), screen = new Screen()) {
+    this.amp = amp
+    this.dvd = dvd
+    this.projector = projector
+    this.screen = screen
+  }
 
   // [watchMovie]
   watchMovie(movie: string) {
@@ -250,7 +258,7 @@ class HomeTheaterFacade {
 
 // [usage]
 // Usage
-const facade = new HomeTheaterFacade(new Amplifier(), new DvdPlayer(), new Projector(), new Screen())
+const facade = new HomeTheaterFacade()
 
 facade.watchMovie('Inception')
 // [/usage]

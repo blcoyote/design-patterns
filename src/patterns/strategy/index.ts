@@ -21,7 +21,7 @@ export const pattern: PatternDefinition = {
     'You want to add new algorithms without touching the code that uses them (Open/Closed).',
   ],
   pros: [
-    'Swaps algorithms at runtime without changing the client or the context.',
+    'Swaps algorithms at runtime without changing the context.',
     'Eliminates large conditional blocks that select between related behaviors.',
     'New strategies can be added without touching existing ones (Open/Closed).',
   ],
@@ -172,7 +172,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Swap to ScenicRoute',
-      description: 'At runtime, the client calls setStrategy() with a different implementation. The navigator itself is never modified.',
+      description: 'At runtime, the client calls setStrategy() with a different implementation. The navigator’s code is never modified.',
       highlight: ['holds', 'scenic'],
       notes: { navigator: 'strategy: scenic' },
       code: 'setStrategy',

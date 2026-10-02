@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   problem:
     'A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any combination, in any order. Subclassing every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee…) explodes combinatorially and has to be fixed at compile time.',
   solution:
-    'Give every add-on the same interface as the thing it decorates, and have each decorator hold a reference to the object it wraps. Calling a method on the outermost decorator runs its own logic and then delegates to the wrapped object — forming a chain that can be built at runtime, in any order, to any depth.',
+    'Give every add-on the same interface as the thing it decorates, and have each decorator hold a reference to the object it wraps. Calling a method on the outermost decorator runs its own logic and then delegates to the wrapped object — forming a chain that can be built at runtime, in any order, to any depth. This is different from Proxy, which controls access to or the lifecycle of a single subject it is usually responsible for creating; a decorator is simply handed a wrappee and only ever adds behaviour around it.',
   analogy:
     'Dressing for cold weather: a shirt, then a sweater over it, then a coat over that. Each layer adds warmth without changing the layers underneath, and you can put on (or take off) exactly the layers you need.',
   whenToUse: [
@@ -31,8 +31,8 @@ export const pattern: PatternDefinition = {
     'Removing a specific decorator from the middle of a stack is awkward.',
   ],
   realWorld: [
-    'Node.js streams piped through transform streams (gzip, encryption)',
-    'Java I/O: BufferedReader wrapping an InputStreamReader',
+    'Java I/O: BufferedInputStream wrapping a FileInputStream to add buffering',
+    '.NET streams: GZipStream or BufferedStream wrapping any Stream to add compression or buffering',
     'UI component libraries wrapping a component with tooltip/draggable/resizable behaviour',
     'HTTP middleware chains wrapping a request handler',
   ],
@@ -139,6 +139,16 @@ export const pattern: PatternDefinition = {
       description: 'MilkDecorator extends CoffeeDecorator, inheriting the delegation logic.',
       bend: -30,
       code: 'milkDecorator',
+    },
+    {
+      id: 'wrappee',
+      from: 'coffeeDecorator',
+      to: 'coffee',
+      type: 'holds',
+      label: 'wrappee: Coffee',
+      description: 'CoffeeDecorator stores its wrapped object typed only as Coffee — the same interface it implements — so any decorator can wrap any Coffee, including another decorator.',
+      bend: 40,
+      code: 'coffeeDecorator',
     },
     {
       id: 'decoratorImpl',

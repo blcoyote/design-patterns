@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
     'A recipe card printed once and reused by every cook: preheat, mix, bake, cool. The steps and their order never change, but each cook can swap in their own mixing technique, or skip the optional glaze step entirely, while the structure of the recipe itself stays exactly as printed.',
   whenToUse: [
     'Several classes implement the same algorithm but differ in only a few steps, and that duplication needs to live in one place.',
-    'You want subclasses to extend specific steps of a behavior while keeping the overall algorithm fixed and un-overridable.',
+    'You want subclasses to extend specific steps of a behavior while the overall algorithm stays fixed. (Enforcing "un-overridable" needs language support TypeScript lacks — Java\'s `final` or C#\'s non-virtual-by-default methods do this; here it\'s only a convention.)',
     'You want optional extension points (hooks) that most subclasses can safely ignore.',
   ],
   pros: [
@@ -30,8 +30,8 @@ export const pattern: PatternDefinition = {
     'Subclasses can violate the skeleton’s assumptions in ways it never anticipated, which is easy to miss until it breaks.',
   ],
   realWorld: [
-    'React class component lifecycle (componentDidMount, render, componentDidUpdate) invoked by the framework in a fixed order',
-    'java.io.InputStream.read() delegating to an abstract single-byte read() that subclasses implement',
+    'java.util.AbstractList, whose concrete iterator/indexOf methods are built from the abstract get() and size() primitives a subclass supplies',
+    'java.io.InputStream.read(byte[], int, int) — the concrete multi-byte overload calls the abstract single-byte read() that subclasses must implement',
     'Test framework base classes that call setUp(), the test body, then tearDown() in a fixed sequence',
     'Abstract HTTP controller base classes that fix request validation and logging, leaving handle() to subclasses',
   ],
@@ -46,7 +46,7 @@ export const pattern: PatternDefinition = {
       y: 90,
       width: 260,
       description:
-        'Declares generate() as the fixed template method: it calls fetchData() and exportData() (abstract — every subclass must override them) and formatData() (a hook with a default no-op implementation subclasses may override). The order never changes.',
+        'Declares generate() as the fixed template method, calling three kinds of step in order: fetchData() (concrete — implemented once here and inherited unchanged), formatData() (a hook with a default no-op implementation subclasses may override), and exportData() (abstract — every subclass must supply it).',
     },
     {
       id: 'csvReport',
@@ -57,7 +57,7 @@ export const pattern: PatternDefinition = {
       y: 260,
       width: 190,
       description:
-        'Overrides the two required steps to read and write CSV rows. It never overrides the formatData() hook, so the base class’s default — pass the rows through unchanged — runs as-is.',
+        'Overrides only the required exportData() step, to write CSV rows. It never overrides fetchData() or the formatData() hook, so both base-class implementations run exactly as inherited.',
     },
     {
       id: 'pdfReport',
@@ -68,7 +68,7 @@ export const pattern: PatternDefinition = {
       y: 260,
       width: 190,
       description:
-        'Overrides the two required steps for PDF output, and additionally overrides the optional formatData() hook to compress whitespace before export — something CsvReportGenerator does not need.',
+        'Overrides the required exportData() step for PDF output, and additionally overrides the optional formatData() hook to compress whitespace that its raw data deliberately contains — something CsvReportGenerator does not need.',
     },
     {
       id: 'client',
@@ -133,31 +133,42 @@ export const pattern: PatternDefinition = {
       code: 'generate',
     },
     {
-      id: 'dispatch-csv',
+      id: 'dispatch-csv-export',
       from: 'reportGenerator',
       to: 'csvReport',
       type: 'calls',
-      label: 'fetchData() / exportData()',
+      label: 'exportData()',
       bend: -25,
-      description: 'Inside generate(), the inherited skeleton calls fetchData() and exportData(), which resolve polymorphically to CsvReportGenerator’s overrides.',
-      code: 'csvFetch',
+      description:
+        'exportData() is abstract on ReportGenerator, so the call dispatches straight to CsvReportGenerator’s override. fetchData() and formatData(), by contrast, are never dispatched here — CsvReportGenerator doesn’t override either.',
+      code: 'csvExport',
     },
     {
-      id: 'dispatch-pdf',
+      id: 'dispatch-pdf-hook',
       from: 'reportGenerator',
       to: 'pdfReport',
       type: 'calls',
-      label: 'fetchData() / formatData() / exportData()',
+      label: 'formatData(): compress',
       bend: -25,
-      description: 'The same skeleton calls into PdfReportGenerator’s overrides instead — including its overridden formatData() hook.',
+      description: 'The skeleton calls the formatData() hook, which PdfReportGenerator overrides to compress whitespace before export.',
       code: 'pdfHook',
+    },
+    {
+      id: 'dispatch-pdf-export',
+      from: 'reportGenerator',
+      to: 'pdfReport',
+      type: 'calls',
+      label: 'exportData()',
+      bend: -10,
+      description: 'exportData() resolves to PdfReportGenerator’s override instead, wrapping the now-clean rows in a PDF body.',
+      code: 'pdfExport',
     },
   ],
   steps: [
     {
-      title: 'One skeleton, two kinds of steps',
+      title: 'One skeleton, three kinds of steps',
       description:
-        'ReportGenerator fixes the order of generate() once and for all: fetch, format, export. fetchData() and exportData() are abstract and must be overridden; formatData() is a hook with a default implementation that subclasses may override if they need to.',
+        'ReportGenerator fixes the order of generate() once and for all: fetch, format, export. fetchData() is concrete and shared by every subclass; formatData() is a hook with a default implementation subclasses may override; exportData() is abstract and every subclass must supply it.',
       highlight: ['reportGenerator', 'csv-extends', 'csvReport', 'pdf-extends', 'pdfReport'],
       code: 'reportGenerator',
     },
@@ -178,15 +189,15 @@ export const pattern: PatternDefinition = {
       code: 'generate',
     },
     {
-      title: 'Required step: fetchData()',
-      description: 'The skeleton calls this.fetchData(), which resolves to CsvReportGenerator’s override and returns three rows of CSV data.',
-      highlight: ['reportGenerator', 'dispatch-csv', 'csvReport'],
-      packets: [{ relation: 'dispatch-csv', label: 'fetchData()' }],
-      notes: { csvReport: 'rows: 3' },
-      code: 'csvFetch',
+      title: 'Concrete step: fetchData()',
+      description:
+        'The skeleton calls this.fetchData() — a concrete method defined once on ReportGenerator and inherited unmodified by every subclass. For CsvReportGenerator it just returns the three clean CSV rows passed to the constructor.',
+      highlight: ['reportGenerator'],
+      notes: { reportGenerator: 'rows: 3' },
+      code: 'fetch',
     },
     {
-      title: 'Optional hook: formatData()',
+      title: 'Hook: formatData() — CSV uses the default',
       description:
         'The skeleton also calls formatData(), but CsvReportGenerator never overrode it — so the base class’s default implementation runs, passing the rows through unchanged.',
       highlight: ['reportGenerator'],
@@ -194,10 +205,11 @@ export const pattern: PatternDefinition = {
       code: 'hook',
     },
     {
-      title: 'Required step: exportData() returns',
-      description: 'exportData() resolves to CsvReportGenerator’s override, joining the rows into a CSV string that generate() hands back to the caller.',
-      highlight: ['reportGenerator', 'dispatch-csv', 'csvReport'],
-      packets: [{ relation: 'dispatch-csv', label: 'csv text', reverse: true }],
+      title: 'Abstract step: exportData() dispatches to CsvReportGenerator',
+      description:
+        'exportData() has no implementation on ReportGenerator at all — it is abstract. The call dispatches straight to CsvReportGenerator’s override, which joins the rows into a CSV string that generate() hands back to the caller.',
+      highlight: ['reportGenerator', 'dispatch-csv-export', 'csvReport'],
+      packets: [{ relation: 'dispatch-csv-export', label: 'exportData()' }],
       notes: { csvReport: 'exported' },
       code: 'csvExport',
     },
@@ -210,23 +222,35 @@ export const pattern: PatternDefinition = {
       code: 'pdfReport',
     },
     {
-      title: 'Same call, the hook changes the outcome',
+      title: 'Hook override: formatData() compresses whitespace',
       description:
-        'generate() runs again, identical to before, but this time formatData() resolves to PdfReportGenerator’s override and compresses whitespace before exportData() writes the PDF body.',
-      highlight: ['client', 'client-calls', 'reportGenerator', 'dispatch-pdf', 'pdfReport'],
+        'generate() runs again, identical to before. This time formatData() resolves to PdfReportGenerator’s override, which compresses the deliberately messy whitespace in its raw data before exportData() writes the PDF body.',
+      highlight: ['client', 'client-calls', 'reportGenerator', 'dispatch-pdf-hook', 'pdfReport'],
       packets: [
         { relation: 'client-calls', label: 'generate()' },
-        { relation: 'dispatch-pdf', label: 'formatData(): compress' },
+        { relation: 'dispatch-pdf-hook', label: 'formatData(): compress' },
       ],
       notes: { pdfReport: 'compressed' },
       code: 'pdfHook',
+    },
+    {
+      title: 'Abstract step: exportData() dispatches to PdfReportGenerator',
+      description: 'exportData() dispatches to PdfReportGenerator’s override instead, wrapping the now-clean rows in a PDF body.',
+      highlight: ['reportGenerator', 'dispatch-pdf-export', 'pdfReport'],
+      packets: [{ relation: 'dispatch-pdf-export', label: 'exportData()' }],
+      notes: { pdfReport: 'exported' },
+      code: 'pdfExport',
     },
   ],
   code: `
 // [reportGenerator]
 abstract class ReportGenerator {
+  constructor(protected readonly records: string[]) {}
+
   // [generate]
-  // The template method — fixed skeleton, never overridden.
+  // The template method — fixed skeleton. By convention never overridden;
+  // TypeScript has no \`final\` keyword to enforce that (Java's \`final\`, or
+  // C#'s methods being non-virtual by default, would).
   generate(): string {
     const rows = this.fetchData()
     const formatted = this.formatData(rows)
@@ -234,30 +258,34 @@ abstract class ReportGenerator {
   }
   // [/generate]
 
-  // Required step — every subclass must supply its own data source.
-  protected abstract fetchData(): string[]
+  // [fetch]
+  // Concrete step — implemented once here and inherited unmodified by
+  // every subclass; nothing below overrides it.
+  protected fetchData(): string[] {
+    return [...this.records]
+  }
+  // [/fetch]
 
   // [hook]
-  // Optional hook — subclasses may override it; the default is a safe no-op.
+  // Hook — an optional extension point; the default is a safe no-op.
   protected formatData(rows: string[]): string[] {
     return rows
   }
   // [/hook]
 
-  // Required step — every subclass must supply its own export format.
+  // Abstract primitive operation — every subclass must supply its own export format.
   protected abstract exportData(rows: string[]): string
 }
 // [/reportGenerator]
 
 // [csvReport]
 class CsvReportGenerator extends ReportGenerator {
-  // [csvFetch]
-  protected fetchData(): string[] {
-    return ['id,name,total', '1,Widget,42.00', '2,Gadget,17.50']
+  constructor() {
+    super(['id,name,total', '1,Widget,42.00', '2,Gadget,17.50'])
   }
-  // [/csvFetch]
 
-  // formatData() is not overridden — the hook's default above runs unchanged.
+  // fetchData() and formatData() are not overridden — both base-class
+  // implementations above (one concrete, one a hook) run unchanged.
 
   // [csvExport]
   protected exportData(rows: string[]): string {
@@ -269,8 +297,9 @@ class CsvReportGenerator extends ReportGenerator {
 
 // [pdfReport]
 class PdfReportGenerator extends ReportGenerator {
-  protected fetchData(): string[] {
-    return ['Invoice #1042', 'Total due: $59.50']
+  constructor() {
+    // Deliberately messy — the extra spaces are what formatData() below cleans up.
+    super(['  Invoice   #1042  ', '  Total   due:    $59.50  '])
   }
 
   // [pdfHook]
@@ -280,9 +309,11 @@ class PdfReportGenerator extends ReportGenerator {
   }
   // [/pdfHook]
 
+  // [pdfExport]
   protected exportData(rows: string[]): string {
     return \`%PDF-1.4\\n\${rows.join('\\n')}\`
   }
+  // [/pdfExport]
 }
 // [/pdfReport]
 
@@ -292,7 +323,7 @@ const csv: ReportGenerator = new CsvReportGenerator()
 csv.generate() // "id,name,total\\n1,Widget,42.00\\n2,Gadget,17.50"
 
 const pdf: ReportGenerator = new PdfReportGenerator()
-pdf.generate() // "%PDF-1.4\\nInvoice #1042 Total due: $59.50"
+pdf.generate() // "%PDF-1.4\\nInvoice #1042\\nTotal due: $59.50"
 // [/usage]
 `,
 }

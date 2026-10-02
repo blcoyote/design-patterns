@@ -32,10 +32,9 @@ export const pattern: PatternDefinition = {
     'Classes that wrap non-cloneable resources, like open sockets or file handles, need special-case handling.',
   ],
   realWorld: [
-    'Object.create(proto) and structuredClone() in JavaScript',
+    'structuredClone() in JavaScript for deep copies, or `{ ...obj }` / Object.assign() for a shallow copy',
     'java.lang.Object.clone() and the Cloneable marker interface',
     'Editor "duplicate" commands that copy a fully configured shape, layer or component',
-    'Immer/Redux-style state updates that clone-then-modify a draft instead of mutating state in place',
   ],
   related: ['factory-method', 'abstract-factory', 'builder', 'composite'],
 
@@ -84,7 +83,7 @@ export const pattern: PatternDefinition = {
       kind: 'client',
       x: 660,
       y: 150,
-      description: 'Asks the registry for a clone by name, then customizes only the fields it cares about — it never imports Circle or Rectangle.',
+      description: 'Asks the registry for a clone by name, then customizes the Style every shape shares through the Shape interface — only a shape-specific tweak needs a cast to the concrete type.',
       code: 'usage',
     },
   ],
@@ -141,7 +140,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Client asks for a clone',
-      description: 'The client calls registry.clone("circle"). It names a key, not a class — Circle is never imported by client code.',
+      description: 'The client calls registry.clone("circle"). It names a key, not a class — the registry does the construction, not the caller.',
       highlight: ['client', 'client-request', 'registry'],
       packets: [{ relation: 'client-request', label: 'clone("circle")' }],
       code: 'usage',
@@ -172,7 +171,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Customize without touching the original',
-      description: 'The client changes the clone\'s radius and style color. Because the Style was deep-copied, the registered prototype keeps its original values untouched.',
+      description: "The client changes the clone's style color through the Shape interface, and casts to Circle only to tweak its radius. Because the Style was deep-copied, the registered prototype keeps its original values untouched.",
       highlight: ['client', 'circle'],
       notes: { circle: 'prototype unchanged' },
       code: 'usage',
@@ -193,8 +192,8 @@ export const pattern: PatternDefinition = {
       code: 'rectangleClone',
     },
     {
-      title: 'New types need no new classes',
-      description: 'Adding a third shape later means registering one more instance in the registry — no new Creator subclass, no change to client code.',
+      title: 'New presets, or new types',
+      description: 'Registering one more instance in the registry adds a new preset of an existing shape. Adding a genuinely new shape type needs only that one new class implementing Shape — never a parallel Creator subclass or factory change.',
       highlight: ['prototype', 'registry', 'circle', 'rectangle'],
       code: 'registry',
     },
@@ -213,6 +212,7 @@ class Style {
 
 // [prototype]
 interface Shape {
+  style: Style
   clone(): Shape
 }
 // [/prototype]
@@ -270,9 +270,9 @@ const registry = new ShapeRegistry()
 registry.register('circle', new Circle(5, new Style('black', 1)))
 registry.register('rectangle', new Rectangle(10, 20, new Style('blue', 2)))
 
-const myCircle = registry.clone('circle') as Circle
-myCircle.radius = 50
-myCircle.style.color = 'red' // safe: myCircle.style is its own copy
+const myCircle = registry.clone('circle')
+myCircle.style.color = 'red' // safe through the Shape interface alone: style is its own deep copy
+;(myCircle as Circle).radius = 50 // a shape-specific tweak still needs the concrete type
 
 const myRect = registry.clone('rectangle') as Rectangle
 myRect.width = 100

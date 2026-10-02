@@ -1,0 +1,100 @@
+import type { ComponentType } from 'react'
+
+export type Category = 'creational' | 'structural' | 'behavioral'
+
+export type ParticipantKind = 'class' | 'interface' | 'abstract' | 'client' | 'object'
+
+/** A box in the diagram: a class, interface, client or runtime object. */
+export interface Participant {
+  id: string
+  label: string
+  /** Short role in the pattern, e.g. "Concrete Observer". */
+  role: string
+  description: string
+  kind?: ParticipantKind
+  /** Centre position in diagram units (default viewBox is 800 × 460). */
+  x: number
+  y: number
+  width?: number
+  /**
+   * Id of the code region to highlight when selected.
+   * Defaults to the participant id if a region with that name exists.
+   */
+  code?: string
+}
+
+export type RelationType = 'calls' | 'creates' | 'implements' | 'wraps' | 'notifies' | 'holds'
+
+/** An arrow between two participants. */
+export interface Relation {
+  id: string
+  from: string
+  to: string
+  type: RelationType
+  label?: string
+  description: string
+  /** Bend the arrow sideways (positive/negative) to avoid overlaps. */
+  bend?: number
+  code?: string
+}
+
+export interface Packet {
+  /** Relation id the packet travels along. */
+  relation: string
+  label?: string
+  /** Travel from `to` back to `from` (e.g. a return value). */
+  reverse?: boolean
+}
+
+/** One frame of the animated scenario. */
+export interface Step {
+  title: string
+  description: string
+  /** Participant and relation ids to highlight in this step. */
+  highlight: string[]
+  packets?: Packet[]
+  /** Small badges shown under participants during this step, keyed by participant id. */
+  notes?: Record<string, string>
+  /** Code region to highlight while this step is active. */
+  code?: string
+}
+
+export interface VisualizationProps {
+  pattern: PatternDefinition
+  step: Step | null
+  stepIndex: number
+  selectedId: string | null
+  onSelect: (id: string | null) => void
+}
+
+export interface PatternDefinition {
+  slug: string
+  name: string
+  category: Category
+  /** Sort order within its category. */
+  order: number
+  /** One line for cards and the sidebar. */
+  summary: string
+  intent: string
+  problem: string
+  solution: string
+  analogy: string
+  whenToUse: string[]
+  pros: string[]
+  cons: string[]
+  realWorld: string[]
+  /** Slugs of related patterns. */
+  related: string[]
+  participants: Participant[]
+  relations: Relation[]
+  steps: Step[]
+  /**
+   * TypeScript example. Mark regions with `// [id]` … `// [/id]` lines;
+   * markers are stripped before display and used for highlighting.
+   */
+  code: string
+  /** Diagram viewBox, defaults to "0 0 800 460". */
+  viewBox?: string
+  /** Optional custom scene replacing the generic diagram. */
+  Visualization?: ComponentType<VisualizationProps>
+}

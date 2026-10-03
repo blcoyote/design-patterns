@@ -12,20 +12,20 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: "Attach new behaviour to an object by wrapping it, layer by layer.",
   intent:
-    'Add behaviour to an object by wrapping it in another object with the same interface, instead of subclassing.',
+    'Add behavior to an object by wrapping it in another object with the same interface, rather than creating a type for every feature combination.',
   problem:
-    "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any mix of them, in any order. If you subclass every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee and so on), the number of classes explodes, and each combination is fixed at compile time.",
+    "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any mix of them, in any order. If a class-based design subclasses every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee and so on), the number of types explodes, and each combination is fixed at compile time. Go has the same combinatorial problem even though it uses structs and embedding rather than class inheritance.",
   solution:
     "Give every add-on the same interface as the thing it decorates, and let each decorator hold a reference to the object it wraps. Calling a method on the outermost decorator runs its own logic and then passes the call on to the wrapped object. This forms a chain you can build at runtime, in any order, to any depth. Decorator is different from Proxy. A proxy controls access to a single subject, and it is usually responsible for creating that subject. A decorator is simply handed the object to wrap and only adds behaviour around it.",
   analogy:
     "Think of dressing for cold weather: a shirt, then a sweater over it, then a coat over that. Each layer adds warmth without changing the layers underneath, and you can put on or take off exactly the layers you need.",
   whenToUse: [
     "You need to add responsibilities to individual objects, not to every instance of a class.",
-    "Subclassing would create a class for every combination of features.",
+    "Static types for every combination of features would multiply quickly.",
     "You want to add or remove behaviour at runtime instead of at compile time.",
   ],
   pros: [
-    "It is more flexible than static inheritance, because you combine behaviours at runtime.",
+    "It is more flexible than static inheritance or embedding, because you combine behaviors at runtime.",
     "You avoid a class for every combination.",
     "Single Responsibility: each decorator handles one concern.",
   ],
@@ -96,12 +96,12 @@ export const pattern: PatternDefinition = {
       id: "coffeeDecorator",
       label: "CoffeeDecorator",
       role: "Base Decorator",
-      kind: "abstract",
+      kind: "class",
       x: 450,
       y: 380,
       width: 170,
       description:
-        "Abstract base that implements Coffee and stores the wrapped Coffee instance. MilkDecorator and SugarDecorator both extend it.",
+        "Class-based tabs use an abstract base that implements Coffee and stores the wrapped instance. Go uses a concrete forwarding struct embedded by MilkDecorator and SugarDecorator.",
     },
   ],
   relations: [
@@ -141,7 +141,7 @@ export const pattern: PatternDefinition = {
       to: "coffeeDecorator",
       type: "implements",
       description:
-        "SugarDecorator extends CoffeeDecorator, inheriting the delegation logic.",
+        "SugarDecorator inherits the base in class-based tabs; Go embeds CoffeeDecorator and calls its forwarding methods explicitly.",
       bend: 30,
       code: "sugarDecorator",
     },
@@ -151,7 +151,7 @@ export const pattern: PatternDefinition = {
       to: "coffeeDecorator",
       type: "implements",
       description:
-        "MilkDecorator extends CoffeeDecorator, inheriting the delegation logic.",
+        "MilkDecorator inherits the base in class-based tabs; Go embeds CoffeeDecorator and calls its forwarding methods explicitly.",
       bend: -30,
       code: "milkDecorator",
     },

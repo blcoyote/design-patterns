@@ -19,9 +19,8 @@ class Money:
 
     @staticmethod
     def of(amount: float, currency: str = "USD") -> "Money":
-        # Python's round() is banker's rounding (round-half-to-even); TS Math.round()
-        # and C# Math.Round(..., AwayFromZero) both round half away from zero, so this
-        # rounds explicitly the same way to keep all four languages in agreement.
+        # Python's round() is banker's rounding, so use half-away-from-zero to
+        # match the explicit TS formula, C# MidpointRounding, and Go math.Round.
         cents = math.floor(amount * 100 + 0.5) if amount >= 0 else -math.floor(-amount * 100 + 0.5)
         return Money(cents, currency)
 

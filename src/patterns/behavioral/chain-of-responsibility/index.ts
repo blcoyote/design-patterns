@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
   problem:
     "An API request has to pass several unrelated checks before the real code answers it: is the caller logged in, are they sending too many requests, is the payload valid? If you put all of that in one big handleRequest() method, every new check means editing the same tangled function. The caller also can't reorder the checks, skip one, or reuse a single check somewhere else.",
   solution:
-    "Turn each check into its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either deals with the request itself (for example by rejecting it) or, if it has nothing to say, passes it on by calling next.handle(request). The caller only talks to the first handler. It doesn't need to know how many links there are or in what order. This middleware-style example is the pipeline/filter variant: several links may run, and each one decides whether to reject the request or pass it on. The classic GoF form instead stops at exactly one handler that fully handles the request. Either way, this differs from Decorator in intent: a decorator always runs and always forwards, to add behavior around the call, while a chain link may stop the request outright.",
+    "Turn each check into its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either deals with the request itself (for example by rejecting it) or, if it has nothing to say, passes it on by calling next.handle(request). The caller only talks to the first handler. It doesn't need to know how many links there are or in what order. This middleware-style example is the pipeline/filter variant: several links may run, and each one decides whether to reject the request or pass it on. The classic GoF form instead stops at exactly one handler that fully handles the request. Class-based tabs share forwarding through an abstract Handler base; Go uses a Handler interface and embeds BaseHandler for that behavior. Either way, this differs from Decorator in intent: a decorator always runs and always forwards, to add behavior around the call, while a chain link may stop the request outright.",
   analogy:
     "Think of a support call that keeps getting escalated. The first-line agent handles what they can and passes the rest to the next tier, and then the next, until someone with the right authority deals with it. If everyone has had a turn and nobody can help, the request is finally turned away.",
   whenToUse: [
@@ -57,11 +57,11 @@ export const pattern: PatternDefinition = {
     {
       id: 'handler',
       label: 'Handler',
-      role: 'Abstract Handler',
+      role: 'Handler abstraction',
       kind: 'abstract',
       x: 400,
       y: 70,
-      description: 'Declares handle(request) and holds a reference to the next handler. Its default handle() just forwards to next when present, or returns a terminal "unhandled" response.',
+      description: 'Defines the common handle(request) contract and forwarding behavior. Class-based tabs use an abstract base with the next reference; Go uses a Handler interface plus an embedded BaseHandler that forwards or returns the terminal "unhandled" response.',
     },
     {
       id: 'authHandler',
@@ -117,7 +117,7 @@ export const pattern: PatternDefinition = {
       from: 'authHandler',
       to: 'handler',
       type: 'implements',
-      description: 'AuthHandler extends the abstract Handler, inheriting its next-pointer and default forwarding behavior.',
+      description: 'Class-based tabs inherit the next pointer and default forwarding behavior; Go AuthHandler embeds BaseHandler to reuse it while implementing Handler.',
       bend: -70,
     },
     {
@@ -125,21 +125,21 @@ export const pattern: PatternDefinition = {
       from: 'rateLimitHandler',
       to: 'handler',
       type: 'implements',
-      description: 'RateLimitHandler extends the abstract Handler the same way every other link does.',
+      description: 'RateLimitHandler shares the common forwarding behavior through the class-based base or Go BaseHandler embedding.',
     },
     {
       id: 'validImpl',
       from: 'validationHandler',
       to: 'handler',
       type: 'implements',
-      description: 'ValidationHandler extends the abstract Handler the same way every other link does.',
+      description: 'ValidationHandler shares the common forwarding behavior through the class-based base or Go BaseHandler embedding.',
     },
     {
       id: 'controllerImpl',
       from: 'controller',
       to: 'handler',
       type: 'implements',
-      description: 'Even the terminal Controller extends Handler, so it fits into the chain just like any other link — it simply never calls next.',
+      description: 'The terminal Controller implements the same Handler contract (through inheritance in class-based tabs, interface implementation in Go) — it fits into the chain but never forwards.',
       bend: 70,
     },
     {

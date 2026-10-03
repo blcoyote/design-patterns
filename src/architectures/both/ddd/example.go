@@ -21,7 +21,7 @@ func NewMoney(cents int, currency string) Money {
 }
 
 func MoneyOf(amount float64, currency string) Money {
-	// math.Round rounds half away from zero, like JS Math.round for positives.
+	// math.Round rounds half away from zero, matching the other language tabs.
 	return Money{cents: int(math.Round(amount * 100)), currency: currency}
 }
 

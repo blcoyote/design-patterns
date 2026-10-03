@@ -76,7 +76,7 @@ func (r *SqlOrderRepository) FindByCustomer(customerID string) []*Order {
 }
 
 func (r *SqlOrderRepository) Add(order *Order) {
-	// math.Round rounds halves away from zero, like JS Math.round.
+	// math.Round rounds halves away from zero, matching the other language tabs.
 	r.db.Query("INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)",
 		[]any{order.ID, order.CustomerID, int(math.Round(order.Total * 100))})
 }

@@ -4,8 +4,7 @@ import "fmt"
 
 // [command]
 type Command interface {
-	Execute() bool
-	Undo(wasOn bool)
+	Execute() func()
 }
 
 // [/command]
@@ -40,15 +39,13 @@ func NewLightOnCommand(light *Light) *LightOnCommand {
 	return &LightOnCommand{light: light}
 }
 
-func (c *LightOnCommand) Execute() bool {
+func (c *LightOnCommand) Execute() func() {
 	wasOn := c.light.On()
 	c.light.TurnOn()
-	return wasOn
-}
-
-func (c *LightOnCommand) Undo(wasOn bool) {
-	if !wasOn {
-		c.light.TurnOff()
+	return func() {
+		if !wasOn {
+			c.light.TurnOff()
+		}
 	}
 }
 
@@ -63,15 +60,13 @@ func NewLightOffCommand(light *Light) *LightOffCommand {
 	return &LightOffCommand{light: light}
 }
 
-func (c *LightOffCommand) Execute() bool {
+func (c *LightOffCommand) Execute() func() {
 	wasOn := c.light.On()
 	c.light.TurnOff()
-	return wasOn
-}
-
-func (c *LightOffCommand) Undo(wasOn bool) {
-	if wasOn {
-		c.light.TurnOn()
+	return func() {
+		if wasOn {
+			c.light.TurnOn()
+		}
 	}
 }
 
@@ -80,12 +75,7 @@ func (c *LightOffCommand) Undo(wasOn bool) {
 // [remote]
 type RemoteButton struct {
 	current Command
-	history []ExecutedCommand
-}
-
-type ExecutedCommand struct {
-	command Command
-	wasOn   bool
+	history []func()
 }
 
 // [setCommand]
@@ -100,10 +90,7 @@ func (r *RemoteButton) Press() {
 	if r.current == nil {
 		return
 	}
-	r.history = append(r.history, ExecutedCommand{
-		command: r.current,
-		wasOn:   r.current.Execute(),
-	})
+	r.history = append(r.history, r.current.Execute())
 }
 
 // [/execute]
@@ -113,9 +100,9 @@ func (r *RemoteButton) UndoLast() {
 	if len(r.history) == 0 {
 		return
 	}
-	executed := r.history[len(r.history)-1]
+	undo := r.history[len(r.history)-1]
 	r.history = r.history[:len(r.history)-1]
-	executed.command.Undo(executed.wasOn)
+	undo()
 }
 
 // [/undo]

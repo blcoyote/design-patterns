@@ -9,27 +9,27 @@ export const pattern: PatternDefinition = {
   name: 'Factory Method',
   category: 'creational',
   order: 2,
-  summary: 'Let subclasses decide which concrete class to instantiate.',
+  summary: 'Delegate product creation through a creator abstraction.',
   intent:
-    'Let subclasses decide which concrete class to create, so the code that needs an object only depends on its interface.',
+    'Let a specialized creator decide which concrete product to create, so client code only depends on the product interface. Class-based versions use a subclass override; Go uses a creator interface and shared function.',
   problem:
-    'A Logistics base class plans deliveries, but the vehicle it needs (truck, ship, plane) depends on the kind of logistics company. If the base class hard-codes `new Truck()`, you cannot add sea or air delivery without rewriting its planning logic.',
+    'A delivery planner needs a vehicle that depends on the kind of logistics company. If the shared planning code hard-codes `new Truck()`, adding sea or air delivery means rewriting that logic instead of supplying a different creator.',
   solution:
-    'Move the "create the vehicle" step into its own method, createTransport(), and make it abstract. Each subclass (RoadLogistics, SeaLogistics) overrides it to return the Transport it needs. The shared planning code in the base class calls createTransport() and never learns which concrete class came back.',
+    'Move the "create the vehicle" step into a factory method, createTransport(), and let each creator supply the Transport it needs. In TypeScript, C#, and Python, subclasses override the method used by shared planning code; Go expresses the same separation with a Logistics interface and a PlanDelivery function that calls CreateTransport().',
   analogy:
     'A logistics company always follows the same planDelivery() routine: pack, route, dispatch. But a road branch dispatches a truck and a sea branch dispatches a ship. The "which vehicle?" step is the factory method, and each branch fills it in its own way.',
   whenToUse: [
     'A class cannot know ahead of time which concrete class of object it will need to create.',
-    'You want subclasses to choose the objects they create, without changing the shared code.',
-    'You want subclasses, not the base class, to pick the concrete product by overriding a single creation method.',
+    'You want specialized creators to choose the objects they create, without changing shared planning code.',
+    'You want product selection to live behind one factory method rather than in the client.',
   ],
   pros: [
     'The creator is not tightly coupled to concrete product classes.',
     'Single Responsibility: the code that creates products lives in one place.',
-    'Open/Closed: add a new product type by adding a new creator subclass, without changing existing code.',
+    'Open/Closed: add a product by providing another creator implementation without changing the shared planning code.',
   ],
   cons: [
-    'You may need a new subclass for every product variant, so the class hierarchy grows.',
+    'Class-based versions may need a new creator subclass for every product variant; Go can add another interface implementation instead.',
     'It adds a layer of indirection, which is overkill if there will only ever be one product type.',
   ],
   realWorld: [
@@ -69,12 +69,12 @@ export const pattern: PatternDefinition = {
     {
       id: 'logistics',
       label: 'Logistics',
-      role: 'Creator (abstract)',
+      role: 'Creator abstraction',
       kind: 'abstract',
       x: 260,
       y: 90,
       width: 180,
-      description: 'Declares the abstract createTransport() factory method and a shared planDelivery() that uses it, without knowing which Transport it gets back.',
+      description: 'Defines the CreateTransport factory contract. Class-based tabs put shared planDelivery() on an abstract Creator; Go uses a Logistics interface and the shared PlanDelivery function.',
     },
     {
       id: 'roadLogistics',
@@ -83,7 +83,7 @@ export const pattern: PatternDefinition = {
       kind: 'class',
       x: 120,
       y: 230,
-      description: 'Overrides createTransport() to return a new Truck.',
+      description: 'Supplies a Truck: by overriding createTransport() in class-based tabs or implementing CreateTransport() in Go.',
     },
     {
       id: 'seaLogistics',
@@ -92,7 +92,7 @@ export const pattern: PatternDefinition = {
       kind: 'class',
       x: 340,
       y: 340,
-      description: 'Overrides createTransport() to return a new Ship.',
+      description: 'Supplies a Ship: by overriding createTransport() in class-based tabs or implementing CreateTransport() in Go.',
     },
     {
       id: 'client',
@@ -101,12 +101,12 @@ export const pattern: PatternDefinition = {
       kind: 'client',
       x: 120,
       y: 400,
-      description: 'Works only against the abstract Logistics type — it calls planDelivery() without knowing or caring which Transport subclass is used underneath.',
+      description: 'Works against the creator abstraction — class-based tabs call planDelivery(), while Go passes a Logistics to PlanDelivery(); neither client depends on the concrete Transport.',
     },
   ],
   relations: [
-    { id: 'road-extends', from: 'roadLogistics', to: 'logistics', type: 'implements', description: 'RoadLogistics extends Logistics and overrides createTransport().' },
-    { id: 'sea-extends', from: 'seaLogistics', to: 'logistics', type: 'implements', description: 'SeaLogistics extends Logistics and overrides createTransport().' },
+    { id: 'road-extends', from: 'roadLogistics', to: 'logistics', type: 'implements', description: 'RoadLogistics subclasses the Creator in class-based tabs and implements Logistics in Go, supplying a Truck from the factory method.' },
+    { id: 'sea-extends', from: 'seaLogistics', to: 'logistics', type: 'implements', description: 'SeaLogistics subclasses the Creator in class-based tabs and implements Logistics in Go, supplying a Ship from the factory method.' },
     { id: 'truck-impl', from: 'truck', to: 'transport', type: 'implements', description: 'Truck implements the Transport interface.' },
     { id: 'ship-impl', from: 'ship', to: 'transport', type: 'implements', description: 'Ship implements the Transport interface.' },
     {
@@ -133,7 +133,7 @@ export const pattern: PatternDefinition = {
       to: 'logistics',
       type: 'calls',
       label: 'planDelivery()',
-      description: 'The client only ever calls planDelivery() on whichever Logistics subclass it was given.',
+      description: 'The client invokes shared delivery planning with a creator: an object method in class-based tabs or the PlanDelivery function in Go.',
       bend: -40,
       code: 'usage',
     },
@@ -149,21 +149,21 @@ export const pattern: PatternDefinition = {
   ],
   steps: [
     {
-      title: 'Shared algorithm, abstract step',
-      description: 'Logistics.planDelivery() is fully implemented and shared by every subclass — except for one step, createTransport(), which is left abstract.',
+      title: 'Shared algorithm, factory step',
+      description: 'Class-based tabs share Logistics.planDelivery() and leave createTransport() abstract. Go keeps the shared algorithm in PlanDelivery(l Logistics), which calls the interface method CreateTransport().',
       highlight: ['logistics'],
       code: 'logistics',
     },
     {
       title: 'Client picks a concrete creator',
-      description: 'The client instantiates a RoadLogistics and calls planDelivery() on it, through the abstract Logistics type.',
+      description: 'The client supplies a RoadLogistics creator to shared planning: a planDelivery() call in class-based tabs or PlanDelivery(logistics) in Go.',
       highlight: ['client', 'client-calls'],
       packets: [{ relation: 'client-calls', label: 'planDelivery()' }],
       code: 'usage',
     },
     {
       title: 'Factory method runs',
-      description: 'Inside planDelivery(), the call to this.createTransport() resolves to RoadLogistics’s override, which builds a Truck.',
+      description: 'Shared planning calls the creator’s factory method: dynamic dispatch selects RoadLogistics’s override in class-based tabs, while Go calls RoadLogistics.CreateTransport() through Logistics.',
       highlight: ['roadLogistics', 'road-creates', 'truck'],
       packets: [{ relation: 'road-creates', label: 'new Truck()' }],
       notes: { truck: 'created' },
@@ -179,7 +179,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Swap the creator, not the algorithm',
-      description: 'Using SeaLogistics instead produces a Ship and sails it — planDelivery() itself never changes.',
+      description: 'Using SeaLogistics instead produces a Ship and sails it — the shared planning algorithm stays unchanged in every tab.',
       highlight: ['seaLogistics', 'sea-creates', 'ship'],
       packets: [{ relation: 'sea-creates', label: 'new Ship()' }],
       notes: { ship: 'created' },

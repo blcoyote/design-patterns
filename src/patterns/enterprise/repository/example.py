@@ -47,8 +47,8 @@ class SqlOrderRepository:
     def add(self, order: Order) -> None:
         self._db.query(
             "INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)",
-            # floor(x + 0.5) matches JS Math.round; Python's round() rounds halves to even.
-            [order.id, order.customer_id, math.floor(order.total * 100 + 0.5)],
+            # Round half away from zero to match the other language tabs.
+            [order.id, order.customer_id, math.floor(abs(order.total * 100) + 0.5) * (-1 if order.total < 0 else 1)],
         )
 
     def save(self, order: Order) -> None:
@@ -56,7 +56,7 @@ class SqlOrderRepository:
         # for batching several such changes into a single transaction.
         self._db.query(
             "UPDATE orders SET customer_id = ?, total_cents = ? WHERE id = ?",
-            [order.customer_id, math.floor(order.total * 100 + 0.5), order.id],
+            [order.customer_id, math.floor(abs(order.total * 100) + 0.5) * (-1 if order.total < 0 else 1), order.id],
         )
 
     def remove(self, id: str) -> None:

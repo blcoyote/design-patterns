@@ -17,7 +17,7 @@ export const pattern: PatternDefinition = {
   problem:
     "Some objects, like a configuration store, a connection pool or a logger, only make sense as one shared instance. If any code can call `new` freely, you can end up with several copies that disagree with each other, waste resources, or overwrite each other's state.",
   solution:
-    "Make the constructor private so outside code cannot call `new` directly. Instead, expose a static getInstance() method: the first call creates the one object and stores it, and every later call returns that same stored object. (How strict \"private\" is depends on the language: TypeScript checks it at compile time only, and Python has no private constructors, so it uses a runtime guard.)",
+    "Restrict direct construction where the language permits, then expose one getInstance() method: the first call creates and stores the object, and later calls return that same object. TypeScript and C# enforce a private constructor, Python uses a runtime guard, and Go relies on an unexported constructor by convention because code in the same package can still construct the struct.",
   analogy:
     'A country has exactly one government at a time. You do not "construct" a new government whenever you need one. You go through the single office that already exists.',
   whenToUse: [
@@ -52,7 +52,7 @@ export const pattern: PatternDefinition = {
       y: 90,
       width: 180,
       description:
-        "Its constructor is off-limits to outside code (private in TS and C#, a runtime guard in Python) and a static field holds the one instance. getInstance() creates it on first call and returns the cached object thereafter.",
+        "A static field holds the shared instance. TypeScript and C# make construction private, Python uses a runtime guard, and Go provides an unexported constructor by convention (same-package code can still use an AppConfig literal). getInstance() creates the instance on first call and returns it thereafter.",
     },
     {
       id: "userService",
@@ -100,9 +100,9 @@ export const pattern: PatternDefinition = {
   ],
   steps: [
     {
-      title: "Private constructor",
+      title: "Restrict construction where possible",
       description:
-        "AppConfig’s constructor is marked private. No outside code can write `new AppConfig()` directly — enforced at compile time in typed languages, or by a runtime guard in Python.",
+        "TypeScript and C# reject direct construction through private constructors, and Python's runtime guard rejects AppConfig(). Go has no private constructor: newAppConfig() is the intended path, but code in package main can still construct AppConfig{} directly.",
       highlight: ["config"],
       notes: { config: "instance: null" },
       code: "class",

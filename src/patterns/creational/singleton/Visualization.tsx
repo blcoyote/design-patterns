@@ -7,11 +7,12 @@ import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import { boxOf } from "@/lib/geometry";
 import { boxExit } from "@/lib/geometry";
+import { useCodeLanguage } from "@/hooks/useCodeLanguage";
 import type { VisualizationProps } from "@/types/pattern";
 
 const CHIP = { x: 590, y: 185 };
 
-/** Singleton: a live instance counter, a blocked `new AppConfig()` attempt, and a single
+/** Singleton: a live instance counter, a language-aware construction attempt, and a single
  * shared "instance" chip that both clients converge on once it is created. */
 export function SingletonVisualization({
   pattern,
@@ -22,6 +23,7 @@ export function SingletonVisualization({
   selectedId,
   onSelect,
 }: VisualizationProps) {
+  const [language] = useCodeLanguage();
   const reduceMotion = useReducedMotion();
   const byId = new Map(pattern.participants.map((p) => [p.id, p]));
   const config = byId.get("config");
@@ -96,7 +98,7 @@ export function SingletonVisualization({
             </AnimatePresence>
           </g>
 
-          {/* Ghost "new AppConfig()" attempt — shaken, then struck through. */}
+          {/* Direct construction is blocked by some languages and only discouraged by Go's convention. */}
           {showAttempt && config && (
             <g transform={`translate(${config.x} ${config.y + 135})`}>
               <motion.g
@@ -123,7 +125,7 @@ export function SingletonVisualization({
                   height={34}
                   rx={8}
                   fill="#1e293b"
-                  stroke="#f43f5e"
+                  stroke={language === "go" ? "#f59e0b" : "#f43f5e"}
                   strokeWidth={1.25}
                   strokeDasharray="4 3"
                   opacity={0.9}
@@ -133,20 +135,30 @@ export function SingletonVisualization({
                   textAnchor="middle"
                   className="fill-slate-300 text-[11px] font-mono select-none"
                 >
-                  new AppConfig()
+                  {language === "go" ? "AppConfig{}" : "new AppConfig()"}
                 </text>
-                <motion.line
-                  x1={-74}
-                  y1={-13}
-                  x2={74}
-                  y2={13}
-                  stroke="#f43f5e"
-                  strokeWidth={2.5}
-                  strokeLinecap="round"
-                  initial={reduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.3, delay: reduceMotion ? 0 : 0.85 }}
-                />
+                {language === "go" ? (
+                  <text
+                    y={32}
+                    textAnchor="middle"
+                    className="fill-amber-300 text-[9px] font-mono select-none"
+                  >
+                    constructible in package
+                  </text>
+                ) : (
+                  <motion.line
+                    x1={-74}
+                    y1={-13}
+                    x2={74}
+                    y2={13}
+                    stroke="#f43f5e"
+                    strokeWidth={2.5}
+                    strokeLinecap="round"
+                    initial={reduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.3, delay: reduceMotion ? 0 : 0.85 }}
+                  />
+                )}
               </motion.g>
             </g>
           )}

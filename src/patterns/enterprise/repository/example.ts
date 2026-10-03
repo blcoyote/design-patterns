@@ -47,7 +47,7 @@ class SqlOrderRepository implements OrderRepository {
     this.db.query('INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)', [
       order.id,
       order.customerId,
-      Math.round(order.total * 100),
+      Math.sign(order.total * 100) * Math.floor(Math.abs(order.total * 100) + 0.5),
     ])
   }
 
@@ -56,7 +56,7 @@ class SqlOrderRepository implements OrderRepository {
     // for batching several such changes into a single transaction.
     this.db.query('UPDATE orders SET customer_id = ?, total_cents = ? WHERE id = ?', [
       order.customerId,
-      Math.round(order.total * 100),
+      Math.sign(order.total * 100) * Math.floor(Math.abs(order.total * 100) + 0.5),
       order.id,
     ])
   }

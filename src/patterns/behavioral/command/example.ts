@@ -1,7 +1,6 @@
 // [command]
 interface Command {
-  execute(): boolean;
-  undo(wasOn: boolean): void;
+  execute(): () => void;
 }
 // [/command]
 
@@ -29,14 +28,12 @@ class Light {
 class LightOnCommand implements Command {
   constructor(private light: Light) {}
 
-  execute(): boolean {
+  execute(): () => void {
     const wasOn = this.light.on;
     this.light.turnOn();
-    return wasOn;
-  }
-
-  undo(wasOn: boolean) {
-    if (!wasOn) this.light.turnOff();
+    return () => {
+      if (!wasOn) this.light.turnOff();
+    };
   }
 }
 // [/onCommand]
@@ -45,14 +42,12 @@ class LightOnCommand implements Command {
 class LightOffCommand implements Command {
   constructor(private light: Light) {}
 
-  execute(): boolean {
+  execute(): () => void {
     const wasOn = this.light.on;
     this.light.turnOff();
-    return wasOn;
-  }
-
-  undo(wasOn: boolean) {
-    if (wasOn) this.light.turnOn();
+    return () => {
+      if (wasOn) this.light.turnOn();
+    };
   }
 }
 // [/offCommand]
@@ -60,7 +55,7 @@ class LightOffCommand implements Command {
 // [remote]
 class RemoteButton {
   private current: Command | null = null;
-  private history: Array<{ command: Command; wasOn: boolean }> = [];
+  private history: Array<() => void> = [];
 
   // [setCommand]
   setCommand(command: Command) {
@@ -71,14 +66,14 @@ class RemoteButton {
   // [execute]
   press() {
     if (!this.current) return;
-    this.history.push({ command: this.current, wasOn: this.current.execute() });
+    this.history.push(this.current.execute());
   }
   // [/execute]
 
   // [undo]
   undoLast() {
-    const executed = this.history.pop();
-    if (executed) executed.command.undo(executed.wasOn);
+    const undo = this.history.pop();
+    undo?.();
   }
   // [/undo]
 }

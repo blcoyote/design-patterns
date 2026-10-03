@@ -18,8 +18,7 @@ remote.UndoLast(); // pops LightOffCommand, calls Undo() -> light turns back on
 // [command]
 interface ICommand
 {
-    bool Execute();
-    void Undo(bool wasOn);
+    Action Execute();
 }
 // [/command]
 
@@ -45,16 +44,14 @@ class Light
 // [onCommand]
 class LightOnCommand(Light light) : ICommand
 {
-    public bool Execute()
+    public Action Execute()
     {
         var wasOn = light.On;
         light.TurnOn();
-        return wasOn;
-    }
-
-    public void Undo(bool wasOn)
-    {
-        if (!wasOn) light.TurnOff();
+        return () =>
+        {
+            if (!wasOn) light.TurnOff();
+        };
     }
 }
 // [/onCommand]
@@ -62,16 +59,14 @@ class LightOnCommand(Light light) : ICommand
 // [offCommand]
 class LightOffCommand(Light light) : ICommand
 {
-    public bool Execute()
+    public Action Execute()
     {
         var wasOn = light.On;
         light.TurnOff();
-        return wasOn;
-    }
-
-    public void Undo(bool wasOn)
-    {
-        if (wasOn) light.TurnOn();
+        return () =>
+        {
+            if (wasOn) light.TurnOn();
+        };
     }
 }
 // [/offCommand]
@@ -80,7 +75,7 @@ class LightOffCommand(Light light) : ICommand
 class RemoteButton
 {
     private ICommand? _current;
-    private readonly List<(ICommand Command, bool WasOn)> _history = new();
+    private readonly List<Action> _history = new();
 
     // [setCommand]
     public void SetCommand(ICommand command)
@@ -93,8 +88,7 @@ class RemoteButton
     public void Press()
     {
         if (_current is null) return;
-        var wasOn = _current.Execute();
-        _history.Add((_current, wasOn));
+        _history.Add(_current.Execute());
     }
     // [/execute]
 
@@ -102,9 +96,9 @@ class RemoteButton
     public void UndoLast()
     {
         if (_history.Count == 0) return;
-        var (command, wasOn) = _history[^1];
+        var undo = _history[^1];
         _history.RemoveAt(_history.Count - 1);
-        command.Undo(wasOn);
+        undo();
     }
     // [/undo]
 }

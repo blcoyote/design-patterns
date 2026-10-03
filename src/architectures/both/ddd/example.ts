@@ -7,7 +7,9 @@ class Money {
   ) {}
 
   static of(amount: number, currency = 'USD'): Money {
-    return new Money(Math.round(amount * 100), currency)
+    const scaled = amount * 100
+    const cents = Math.sign(scaled) * Math.floor(Math.abs(scaled) + 0.5)
+    return new Money(cents, currency)
   }
 
   add(other: Money): Money {

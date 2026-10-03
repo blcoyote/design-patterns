@@ -1,10 +1,9 @@
-from typing import Protocol
+from typing import Callable, Protocol
 
 
 # [command]
 class Command(Protocol):
-    def execute(self) -> bool: ...
-    def undo(self, was_on: bool) -> None: ...
+    def execute(self) -> Callable[[], None]: ...
 # [/command]
 
 
@@ -32,14 +31,13 @@ class LightOnCommand:
     def __init__(self, light: Light) -> None:
         self._light = light
 
-    def execute(self) -> bool:
+    def execute(self) -> Callable[[], None]:
         was_on = self._light.on
         self._light.turn_on()
-        return was_on
-
-    def undo(self, was_on: bool) -> None:
-        if not was_on:
-            self._light.turn_off()
+        def undo() -> None:
+            if not was_on:
+                self._light.turn_off()
+        return undo
 # [/onCommand]
 
 
@@ -48,14 +46,13 @@ class LightOffCommand:
     def __init__(self, light: Light) -> None:
         self._light = light
 
-    def execute(self) -> bool:
+    def execute(self) -> Callable[[], None]:
         was_on = self._light.on
         self._light.turn_off()
-        return was_on
-
-    def undo(self, was_on: bool) -> None:
-        if was_on:
-            self._light.turn_on()
+        def undo() -> None:
+            if was_on:
+                self._light.turn_on()
+        return undo
 # [/offCommand]
 
 
@@ -63,7 +60,7 @@ class LightOffCommand:
 class RemoteButton:
     def __init__(self) -> None:
         self._current: Command | None = None
-        self._history: list[tuple[Command, bool]] = []
+        self._history: list[Callable[[], None]] = []
 
     # [setCommand]
     def set_command(self, command: Command) -> None:
@@ -74,16 +71,15 @@ class RemoteButton:
     def press(self) -> None:
         if self._current is None:
             return
-        was_on = self._current.execute()
-        self._history.append((self._current, was_on))
+        self._history.append(self._current.execute())
     # [/execute]
 
     # [undo]
     def undo_last(self) -> None:
         if not self._history:
             return
-        command, was_on = self._history.pop()
-        command.undo(was_on)
+        undo = self._history.pop()
+        undo()
     # [/undo]
 # [/remote]
 

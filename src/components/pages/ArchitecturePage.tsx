@@ -39,7 +39,7 @@ export function ArchitecturePage() {
         <p className="mt-4 text-lg leading-relaxed text-slate-300">{architecture.intent}</p>
       </header>
 
-      <PatternExplorer key={architecture.slug} pattern={architecture} color={meta.color} initialStep={initialStep} />
+      <PatternExplorer key={`${architecture.slug}:${initialStep ?? 'auto'}`} pattern={architecture} color={meta.color} initialStep={initialStep} />
 
       <CrossReferenceBox
         title={`Commonly used with ${architecture.name}`}

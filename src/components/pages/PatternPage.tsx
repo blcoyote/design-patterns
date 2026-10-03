@@ -37,7 +37,7 @@ export function PatternPage() {
         <p className="mt-4 text-lg leading-relaxed text-slate-300">{pattern.intent}</p>
       </header>
 
-      <PatternExplorer key={pattern.slug} pattern={pattern} color={cat.color} initialStep={initialStep} />
+      <PatternExplorer key={`${pattern.slug}:${initialStep ?? 'auto'}`} pattern={pattern} color={cat.color} initialStep={initialStep} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Section title="The problem">{pattern.problem}</Section>

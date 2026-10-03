@@ -76,7 +76,7 @@ export function AdrExport({
           {subjects.map((s) => (
             <label
               key={s.slug}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition ${
+              className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-white ${
                 chosen === s.slug ? 'bg-slate-800 text-white ring-slate-600' : 'text-slate-400 ring-slate-800 hover:text-white'
               }`}
             >
@@ -92,7 +92,7 @@ export function AdrExport({
             </label>
           ))}
           <label
-            className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition ${
+            className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-white ${
               chosen === NO_PATTERN ? 'bg-slate-800 text-white ring-slate-600' : 'text-slate-400 ring-slate-800 hover:text-white'
             }`}
           >

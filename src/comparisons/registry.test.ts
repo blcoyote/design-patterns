@@ -6,7 +6,7 @@ import { validateComparison } from './validate'
 
 const slugs = comparisons.map((c) => c.slug)
 
-const modules = import.meta.glob<{ comparison: ComparisonDefinition }>(['./*/index.ts', '!./_*/**'], {
+const modules = import.meta.glob<{ comparison: ComparisonDefinition }>(['./**/index.ts', '!./_*/**'], {
   eager: true,
 })
 
@@ -98,5 +98,23 @@ describe('validateComparison', () => {
     }
     const errors = validateComparison(bad, resolveSubject)
     expect(errors.some((e) => e.includes('"nope"'))).toBe(true)
+  })
+
+  it('flags code and step refs whose kind does not match the declared subject', () => {
+    const bad: ComparisonDefinition = {
+      ...base,
+      options: base.options.map((o, i) =>
+        i === 0
+          ? {
+              ...o,
+              code: [{ kind: 'architecture' as const, slug: 'strategy', region: 'holds' }],
+              steps: [{ kind: 'architecture' as const, slug: 'strategy', step: 0 }],
+            }
+          : o,
+      ),
+    }
+    const errors = validateComparison(bad, resolveSubject)
+    expect(errors.some((e) => e.includes('code ref architecture "strategy"'))).toBe(true)
+    expect(errors.some((e) => e.includes('step ref architecture "strategy"'))).toBe(true)
   })
 })

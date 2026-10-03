@@ -15,6 +15,9 @@ export function validateComparison(c: ComparisonDefinition, resolveSubject: Subj
   const errors: string[] = []
   const subjectSlugs = new Set(c.subjects.map((s) => s.slug))
   const defsBySlug = new Map<string, ExplorableDefinition>()
+  const kindBySlug = new Map(c.subjects.map((s) => [s.slug, s.kind]))
+  /** A code/step ref must name a declared subject by both kind and slug. */
+  const defFor = (ref: SubjectRef) => (kindBySlug.get(ref.slug) === ref.kind ? defsBySlug.get(ref.slug) : undefined)
 
   if (subjectSlugs.size !== c.subjects.length) errors.push('subjects: duplicate slug')
 
@@ -49,18 +52,18 @@ export function validateComparison(c: ComparisonDefinition, resolveSubject: Subj
     optionSubjects.add(option.subject)
 
     for (const ref of option.code) {
-      const def = defsBySlug.get(ref.slug)
+      const def = defFor(ref)
       if (!def) {
-        errors.push(`${where}: code ref "${ref.slug}" does not resolve`)
+        errors.push(`${where}: code ref ${ref.kind} "${ref.slug}" is not a declared subject`)
         continue
       }
       checkRegion(`${where}: code ref "${ref.slug}"`, def, ref.region)
     }
 
     for (const ref of option.steps) {
-      const def = defsBySlug.get(ref.slug)
+      const def = defFor(ref)
       if (!def) {
-        errors.push(`${where}: step ref "${ref.slug}" does not resolve`)
+        errors.push(`${where}: step ref ${ref.kind} "${ref.slug}" is not a declared subject`)
         continue
       }
       if (!Number.isInteger(ref.step) || ref.step < 0 || ref.step >= def.steps.length) {

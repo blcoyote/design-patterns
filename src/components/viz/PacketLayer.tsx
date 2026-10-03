@@ -3,6 +3,7 @@ import { useReducedMotion } from "motion/react";
 import type { EdgeGeometry } from "@/lib/geometry";
 import {
   PACKET_HOP,
+  PACKET_REPEAT_DELAY,
   PACKET_STAGGER,
   packetAnimationDuration,
 } from "@/lib/packetTiming";
@@ -47,7 +48,7 @@ function PacketCycle({
     const timeout = window.setTimeout(() => {
       setCompleted([]);
       setCycle((current) => current + 1);
-    }, 900 / speed);
+    }, (PACKET_REPEAT_DELAY * 1000) / speed);
     return () => window.clearTimeout(timeout);
   }, [sequenced, reduceMotion, completed.length, packets.length, speed]);
 
@@ -85,6 +86,7 @@ function PacketCycle({
                 : PACKET_HOP / speed
             }
             repeat={!sequenced}
+            repeatDelay={PACKET_REPEAT_DELAY / speed}
             onComplete={
               sequenced
                 ? () =>

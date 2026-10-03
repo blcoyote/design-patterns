@@ -15,7 +15,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     'A layered architecture shares a service layer and a repository layer across every feature. As the number of features grows, those shared layers accumulate methods that only one feature needs, a change made for one feature risks breaking another that happens to share the same class, and a trivial feature still has to pass through every layer a complex one needs.',
   solution:
-    'Instead of one shared stack, cut the system into slices: PlaceOrder and GetOrder each get their own request type, their own handler, and their own data-access code, with nothing shared between them except cross-cutting infrastructure. A small Mediator routes each request to the one handler registered for it, through a pipeline of behaviours — logging, validation — that wrap every handler the same way, so cross-cutting concerns do not have to be reimplemented inside each slice.',
+    'Instead of one shared stack, cut the system into slices: PlaceOrder and GetOrder each get their own request type, their own handler, their own data-access code and their own validator, with nothing shared between them except cross-cutting infrastructure. A small Mediator routes each request to the one handler registered for it, through a pipeline of behaviours — logging, validation — that wrap every handler the same way. ValidationBehaviour holds no knowledge of PlaceOrder or GetOrder itself: each slice registers its own validator against the behaviour, keyed by its request type, so cross-cutting concerns do not have to be reimplemented inside each slice and the behaviour never has to change when a slice is added.',
   analogy:
     'A food court instead of a single kitchen with stations. A layered kitchen has one prep station, one grill and one plating counter that every dish passes through in the same order. A food court gives each vendor — tacos, sushi, noodles — its own self-contained stall with its own prep and its own counter; a shared order board (the mediator) just tells a customer which stall to walk up to.',
   whenToUse: [
@@ -28,7 +28,7 @@ export const architecture: ArchitectureDefinition = {
     'A feature can be understood, tested and deleted by looking at one slice, instead of hunting across shared layers.',
     'Two slices can use completely different internal shapes — one simple CRUD, one with a rich domain model — without forcing the other to match.',
     'New features add a new slice instead of touching shared service and repository classes, lowering the chance of breaking something unrelated.',
-    'The pipeline still gives every slice the same cross-cutting behaviour (logging, validation) without a shared base class each handler must inherit from.',
+    'The pipeline still gives every slice the same cross-cutting behaviour (logging, validation) without a shared base class each handler must inherit from, and without the shared infrastructure ever naming a specific slice.',
   ],
   cons: [
     'Code that really is common to several slices (the same validation rule, the same formatting) can end up duplicated instead of shared.',
@@ -47,7 +47,7 @@ export const architecture: ArchitectureDefinition = {
     { term: 'Request', description: 'A command (PlaceOrder) or query (GetOrder) sent through the mediator. Each request type has exactly one handler.' },
     { term: 'Handler', description: 'The one class that knows how to carry out a single request. It lives inside its slice; nothing outside the slice calls it directly.' },
     { term: 'Mediator', description: "Looks up the handler registered for a request's type and routes the request to it, so callers never hold a reference to a concrete handler." },
-    { term: 'Pipeline behaviour', description: 'Cross-cutting code (logging, validation) that wraps every handler the mediator dispatches to, without any handler knowing it is there.' },
+    { term: 'Pipeline behaviour', description: 'Cross-cutting code (logging, validation) that wraps every handler the mediator dispatches to, without any handler knowing it is there. ValidationBehaviour stays generic by holding a registry of per-slice validators instead of naming any request type itself.' },
     { term: 'Feature folder', description: "The physical layout that often accompanies this architecture: one folder per slice holding that slice's request, handler and data access together, instead of spreading them across layer folders." },
   ],
   variants: [
@@ -113,7 +113,7 @@ export const architecture: ArchitectureDefinition = {
       x: 400,
       y: 280,
       width: 200,
-      description: 'Checks the request before letting it through. If it is invalid, it never calls next() — the handler simply never runs.',
+      description: "Looks up the validator the incoming request's slice registered for its type and runs it, if one was registered. If that validator rejects the request, ValidationBehaviour never calls next() — the handler simply never runs. It holds no knowledge of PlaceOrder or GetOrder itself.",
       patterns: ['chain-of-responsibility', 'decorator'],
     },
     {
@@ -241,7 +241,7 @@ export const architecture: ArchitectureDefinition = {
       to: 'getOrderHandler',
       type: 'calls',
       label: 'next(request)',
-      description: 'The orderId is present, so ValidationBehaviour calls next(), reaching GetOrderHandler.',
+      description: "ValidationBehaviour runs the GetOrder slice's own validator; the orderId is present, so it calls next(), reaching GetOrderHandler.",
       code: 'validationBehaviour',
     },
     {
@@ -311,7 +311,7 @@ export const architecture: ArchitectureDefinition = {
     },
     {
       title: 'The pipeline validates the request',
-      description: 'ValidationBehaviour checks the command. totalCents is 2500, which is positive, so it calls next() and the chain continues.',
+      description: "ValidationBehaviour runs the PlaceOrder slice's own validator. totalCents is 2500, which is positive, so the validator passes and ValidationBehaviour calls next(), continuing the chain.",
       highlight: ['loggingBehaviour', 'dispatchToValidation', 'validationBehaviour'],
       packets: [{ relation: 'dispatchToValidation', label: 'next(request)' }],
       notes: { validationBehaviour: 'valid' },

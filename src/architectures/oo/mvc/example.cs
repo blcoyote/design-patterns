@@ -95,10 +95,19 @@ class ToggleTodoCommand : ICommand
 // [/command]
 
 // [controller]
-// Controller: translates raw input into a Command run against the Model. It is
-// plugged into the View as a Strategy — swap in a different Controller and the
-// same click behaves differently, without the View changing at all.
-class TodoController
+// Strategy: the interface TodoListView depends on. The View is typed against this,
+// not against TodoController, so any implementation can be swapped in.
+interface ITodoInputController
+{
+    void HandleAddClick(string text);
+    void HandleToggleClick(int id);
+}
+
+// Controller: translates raw input into a Command run against the Model. It
+// implements ITodoInputController, the Strategy that the View is typed against, so
+// a different implementation would handle the same click differently without the
+// View changing at all.
+class TodoController : ITodoInputController
 {
     private readonly TodoModel _model;
     public TodoController(TodoModel model) => _model = model;
@@ -133,9 +142,9 @@ class TodoItemView : IRenderable
 // one happens to be a TodoItemView.
 class TodoListView : ITodoView, IRenderable
 {
-    // Strategy: the View forwards input to whichever Controller it holds, instead of
-    // deciding what a click means itself.
-    public TodoController Controller { get; set; } = null!;
+    // Strategy: the View depends only on the ITodoInputController interface, so any
+    // implementation can be swapped in without the View changing.
+    public ITodoInputController Controller { get; set; } = null!;
     private List<IRenderable> _children = new();
 
     public void Update(TodoModel model)

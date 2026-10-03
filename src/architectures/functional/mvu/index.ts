@@ -11,29 +11,30 @@ export const architecture: ArchitectureDefinition = {
   order: 12,
   summary: 'An immutable model, pure update and view functions, and a tiny runtime loop that dispatches messages between them.',
   intent:
-    'Describe the whole application as one immutable Model, a pure `update(model, msg) -> (model, cmd)` that computes the next Model from a Msg, and a pure `view(model) -> rendered output` — then let a small, deliberately boring runtime own every side effect: dispatching messages, calling update, performing the commands it returns, and re-rendering.',
+    'Describe the whole application as one immutable Model, a pure `update(model, msg) -> (model, cmd)` that computes the next Model from a Msg, and a pure `view(model) -> rendered output` — then let a small, deliberately boring runtime own every side effect: dispatching messages, calling update, re-rendering after every new Model, and performing the commands update returns.',
   problem:
     "A todo list where 'add', 'toggle' and 'save' are each their own method on a stateful class quickly grows hidden coupling: adding an item might also trigger a save, which might also need to update a dirty flag, and nothing stops a handler from mutating the list directly while skipping half of that. Tracing 'why does the UI show this' means reading every method that could have touched the state, in whatever order they happened to run, and undo means manually writing the inverse of every mutation.",
   solution:
-    "Make every change a message — plain data like `{ type: 'add', text }` — and route all of them through one pure function, `update(model, msg) -> (model, cmd)`, that is the only place allowed to compute a new Model. It never performs an effect itself; it returns a command describing one (`{ type: 'save', id }`), which a thin runtime loop executes and may feed back in as another message. `view(model) -> rendered output` is equally pure. Because the Model is immutable and update is pure, every past Model can be kept in a history list for free, which is what makes time-travel debugging — stepping back to an earlier Model and re-rendering it — a few lines of code instead of a redesign.",
+    "Make every change a message — plain data like `{ type: 'add', text }` — and route all of them through one pure function, `update(model, msg) -> (model, cmd)`, that is the only place allowed to compute a new Model. It never performs an effect itself; it returns a command describing one (`{ type: 'save', id }`), which a thin runtime loop executes and may feed back in as another message. `view(model) -> rendered output` is equally pure. Because the Model is immutable, every past Model can be kept in a history list without defensive copies — nothing can mutate an old one later — which makes time-travel debugging (stepping back to an earlier Model and re-rendering it) a few lines of code instead of a redesign. The price is memory: history holds on to every Model it has ever seen.",
   analogy:
-    "A player piano roll. The roll (the message log) is a fixed sequence of holes punched in order; the piano mechanism (update) reads one hole at a time and the only thing it is capable of doing is moving the keys into the next position implied by that hole — it cannot reach out and rewrite the roll, or play a note on its own initiative. Whatever the keys are currently doing (the view) is entirely determined by which hole was read last, which is exactly why you can wind the roll backward to an earlier position and get the identical keys you had there before.",
+    "A flipbook drawn by a strict animator. Each instruction slip (a Msg) goes to the animator (update), who never touches a page already drawn — they draw the next page from the current page plus the slip, and add it to the back of the book (history). What is projected on screen (the view) is just the current page, so flipping back to page 1 shows exactly what was there without redrawing anything — at the price of keeping every page in the book.",
   whenToUse: [
     'UI or application state has gotten hard to reason about because several code paths mutate it directly, in an order that matters.',
-    'You want "what changed, and why" to be answerable by reading a log of messages, not by reconstructing mutation order from a stack trace.',
+    'You want "what changed, and why" to be answerable from the messages that were dispatched, not by reconstructing mutation order from a stack trace.',
     'Undo, redo, or time-travel debugging would be valuable, and you want it to fall out of immutability rather than being hand-built as a feature.',
     'The team already favors pure functions and plain data (TypeScript/Redux-style reducers, Elm, F#, functional React) over stateful classes.',
   ],
   pros: [
     'update and view are pure, so testing a transition is "call update with a literal Model and Msg, assert on the Model and cmds it returns" — no mocks, no partially-initialized objects.',
-    'Every Model the app has ever been in can be kept in a history list essentially for free, which turns time-travel debugging into a few lines of runtime code.',
-    'Messages are a complete, inspectable log of everything that happened to the app — exactly the data a bug report, a replay tool, or an audit trail needs.',
+    'Immutability makes it safe to keep every Model the app has ever been in without defensive copies, which turns time-travel debugging into a few lines of runtime code.',
+    'Every change arrives as a plain Msg through one dispatch(), so logging them there gives a complete, inspectable record of what happened — exactly the data a bug report, a replay tool, or an audit trail needs.',
     'The one-way loop (dispatch → update → render) rules out an entire class of bugs where two different code paths mutate the same state in a different order depending on timing.',
   ],
   cons: [
     'Every state change has to be expressed as a message and a switch/match arm, which is more ceremony than calling a setter for genuinely simple, local UI state.',
     'Commands push side effects to the edge of the program, which means the runtime has to grow a case for every new effect type the update function learns to return.',
     "Large Models and Msg unions that aren't split into smaller sub-loops become one sprawling update function that is hard to navigate.",
+    'History trades memory for time travel: it keeps every Model alive, and each new Model copies whatever collections changed, so a long session grows memory with every dispatch unless history is capped.',
     "Time-travel and history only cover what the Model captures — effects that already fired for real (an email that was sent) can't be undone by stepping the Model backward.",
   ],
   realWorld: [
@@ -48,8 +49,8 @@ export const architecture: ArchitectureDefinition = {
     { term: 'update', description: 'The pure core: (model, msg) -> (model, cmds). Given the same Model and Msg, it always returns the same next Model and the same commands — an explicit, total state machine.' },
     { term: 'view', description: 'A pure function from Model to rendered output. It never mutates anything and never reads anything but the Model it is given.' },
     { term: 'Cmd (command)', description: "A plain description of a side effect to perform — 'save this todo' — returned by update instead of performed by it. The runtime is the only thing that actually carries it out." },
-    { term: 'Runtime loop', description: 'The thin, impure shell: it dispatches messages, calls update, performs whatever Cmds come back (which may dispatch further messages), and re-renders.' },
-    { term: 'History / time-travel', description: 'Because every Model is immutable, the runtime can keep every one it has ever produced in a list and jump back to any of them without recomputing anything.' },
+    { term: 'Runtime loop', description: 'The thin, impure shell: it dispatches a message, calls update, stores and renders the new Model, notifies subscribers, and then performs whatever Cmds came back — which may dispatch further messages and run the loop again.' },
+    { term: 'History / time-travel', description: 'Because every Model is immutable, the runtime can keep every one it has ever produced in a list and jump back to any of them without recomputing anything — a snapshot lookup, not a replay of messages.' },
     { term: 'Subscription', description: 'A listener registered with the runtime that is notified with the freshly rendered output after every dispatch — the piece that actually puts it on screen.' },
   ],
 
@@ -76,7 +77,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: 'memento',
-        why: "Runtime keeps every Model it has produced in a history list; calling timeTravel(index) resumes an earlier one without recomputing it. Because Model is immutable, each snapshot is free to keep — no deep copy is needed to protect it from later mutation.",
+        why: "Runtime keeps every Model it has produced in a history list; calling timeTravel(index) resumes an earlier one without recomputing it. Because Model is immutable, no deep copy is needed to protect a snapshot from later mutation — though keeping all of them still costs memory.",
       },
       {
         slug: 'observer',
@@ -86,7 +87,7 @@ export const architecture: ArchitectureDefinition = {
     architectures: [
       {
         slug: 'mvc',
-        why: 'MVU is often presented as MVC\'s functional successor: it replaces the controller, a mutable Model, and an ad hoc observer wiring with one pure update function and a single, explicit message log.',
+        why: 'MVU is often presented as MVC\'s functional successor: it replaces the controller, a mutable Model, and an ad hoc observer wiring with one pure update function and a single, explicit message flow through dispatch().',
       },
       {
         slug: 'functional-core',
@@ -94,7 +95,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: 'event-sourcing',
-        why: "Runtime's history list is a message log; replaying it through update from the initial Model reconstructs any past Model, the same relationship Event Sourcing's event log has to replaying through evolve.",
+        why: "Both keep history, of different things: Runtime's history stores already-folded Models, so timeTravel is a lookup, while Event Sourcing stores events and rebuilds state by replaying them through evolve. Logging MVU's Msgs instead, and replaying them through update, would turn its history into an event log.",
       },
     ],
   },
@@ -149,7 +150,7 @@ export const architecture: ArchitectureDefinition = {
       x: 570,
       y: 230,
       width: 160,
-      description: 'Every Model the runtime has produced, in order. Immutability makes each entry free to keep — nothing can mutate an old one out from under it.',
+      description: 'Every Model the runtime has produced, in order. Immutability means no entry needs a defensive copy — nothing can mutate an old one out from under it — but every entry stays in memory.',
       patterns: ['memento'],
     },
     {
@@ -246,7 +247,7 @@ export const architecture: ArchitectureDefinition = {
       to: 'view',
       type: 'calls',
       label: 'view(model)',
-      description: 'After the Model settles, the runtime calls the pure view function to render it to text.',
+      description: 'Right after each new Model is stored, the runtime calls the pure view function to render it to text.',
       code: 'view',
     },
     {
@@ -274,7 +275,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: 'One loop: Model, Msg, update, view',
       description:
-        'A Msg is dispatched into Runtime, which calls the pure update() to get the next Model and any Cmds, stores that Model in History, performs the Cmds, and finally renders with the pure view() and notifies Subscribers.',
+        'A Msg is dispatched into Runtime, which calls the pure update() to get the next Model and any Cmds, stores that Model in History, renders it with the pure view() and notifies Subscribers — and only then performs the Cmds, each of which may dispatch another Msg and run the loop again.',
       highlight: ['client', 'msg', 'runtime', 'update', 'history', 'effects', 'view', 'subs'],
     },
     {
@@ -301,35 +302,39 @@ export const architecture: ArchitectureDefinition = {
     {
       title: 'The new model joins the history log',
       description:
-        'The Model update() returned is appended to History. Because Models are immutable, this costs nothing more than keeping a reference — and it is the entire mechanism behind time-travel.',
+        'The Model update() returned is appended to History. Because Models are immutable, appending just keeps a reference — no defensive copy — and that list is the entire mechanism behind time-travel.',
       highlight: ['runtime', 'pushHistory', 'history'],
       packets: [{ relation: 'pushHistory', label: 'push(next)' }],
       notes: { history: 'history: 2 models' },
       code: 'runtime',
     },
     {
-      title: 'The runtime performs the returned command',
-      description:
-        "The Cmd runtime interprets the 'save' effect by simulating it and dispatching the result straight back in as a Saved message — which runs the whole loop again and pushes a third Model onto History.",
-      highlight: ['runtime', 'runCmd', 'effects', 'loopBack'],
-      packets: [
-        { relation: 'runCmd', label: 'perform(save id:1)' },
-        { relation: 'loopBack', label: 'dispatch(saved id:1)', after: 0 },
-      ],
-      notes: { effects: 'save → dispatch(saved)', history: 'history: 3 models' },
-      code: 'runtime',
-    },
-    {
       title: 'The view renders and subscribers are notified',
       description:
-        'With the Model settled at `{ done: false, lastSaved: 1 }`, Runtime calls the pure view() and pushes the rendered text to every subscriber.',
+        'Before any Cmd runs, Runtime calls the pure view() on the new Model and pushes the rendered text to every subscriber. The save has not happened yet, so this first render still says "saved: none yet".',
       highlight: ['runtime', 'render', 'view', 'notify', 'subs'],
       packets: [
         { relation: 'render', label: 'view(model)' },
         { relation: 'notify', label: 'notify(rendered)', after: 0 },
       ],
-      notes: { subs: '"[ ] Buy milk\\n(saved #1)"' },
+      notes: { subs: '"[ ] Buy milk\\n(saved: none yet)"' },
       code: 'view',
+    },
+    {
+      title: 'The runtime performs the command, and the loop runs again',
+      description:
+        "Only now does the runtime perform the returned Cmd. The Cmd runtime simulates the 'save' and dispatches the result straight back in as a Saved message, which runs the whole loop again: update() sets lastSaved, a third Model joins History, and the view renders a second time with `saved #1`.",
+      highlight: ['runtime', 'runCmd', 'effects', 'loopBack', 'callUpdate', 'update', 'pushHistory', 'history', 'render', 'view', 'notify', 'subs'],
+      packets: [
+        { relation: 'runCmd', label: 'perform(save id:1)' },
+        { relation: 'loopBack', label: 'dispatch(saved id:1)', after: 0 },
+        { relation: 'callUpdate', label: 'update(model, saved)', after: 1 },
+        { relation: 'pushHistory', label: 'push(next)', after: 2 },
+        { relation: 'render', label: 'view(model)', after: 3 },
+        { relation: 'notify', label: 'notify(rendered)', after: 4 },
+      ],
+      notes: { history: 'history: 3 models', subs: '"[ ] Buy milk\\n(saved #1)"' },
+      code: 'runtime',
     },
     {
       title: 'Time travel: step back to an earlier model',

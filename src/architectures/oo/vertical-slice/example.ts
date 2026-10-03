@@ -1,12 +1,13 @@
 // --- Shared pipeline infrastructure --------------------------------------
 // Everything in this section is cross-cutting infrastructure: it belongs to
-// no single slice, and every slice is routed through the same instance.
-// PlaceOrderCommand and GetOrderQuery are declared further down, inside their
-// own slice's region — this is a forward reference, which is safe in
-// TypeScript because interfaces live entirely in type space and are resolved
-// regardless of where in the file they are declared.
+// no single slice, and every slice is routed through the same instance. None
+// of it — Request, Mediator, or either behaviour — names PlaceOrder or
+// GetOrder; a slice plugs itself in by registering a handler and, if it
+// needs one, a validator for its own request type.
 
-type Request = PlaceOrderCommand | GetOrderQuery
+interface Request {
+  readonly type: string
+}
 type Next = () => unknown
 
 interface PipelineBehaviour {
@@ -57,17 +58,21 @@ class LoggingBehaviour implements PipelineBehaviour {
 
 // [validationBehaviour]
 class ValidationBehaviour implements PipelineBehaviour {
+  // Validators are registered per request type by the slice that owns that
+  // request — this class holds the registry but knows no request classes.
+  private validators = new Map<string, (request: Request) => void>()
+
+  register<T extends Request>(type: T['type'], validator: (request: T) => void): void {
+    this.validators.set(type, validator as (request: Request) => void)
+  }
+
   handle(request: Request, next: Next): unknown {
     // A behaviour that does not call next() short-circuits the chain: no
     // behaviour after it, and no handler, ever runs for this request. Note
     // that LoggingBehaviour runs before this one, so it has already logged
     // "handling" by the time a request gets rejected here.
-    if (request.type === 'PlaceOrder' && request.totalCents <= 0) {
-      throw new Error('PlaceOrder requires a positive totalCents')
-    }
-    if (request.type === 'GetOrder' && !request.orderId) {
-      throw new Error('GetOrder requires an orderId')
-    }
+    const validator = this.validators.get(request.type)
+    if (validator) validator(request)
     return next()
   }
 }
@@ -99,8 +104,8 @@ class OrdersTable {
 // [/ordersTable]
 
 // --- PlaceOrder slice -------------------------------------------------------
-// This slice's request type, handler and data access, together. Nothing
-// outside this slice needs to know PlaceOrderCommand exists.
+// This slice's request type, handler, data access and validator, together.
+// Nothing outside this slice needs to know PlaceOrderCommand exists.
 
 // [placeOrderStore]
 class PlaceOrderStore {
@@ -129,11 +134,18 @@ class PlaceOrderHandler {
     return { orderId: command.orderId }
   }
 }
+
+function validatePlaceOrder(command: PlaceOrderCommand): void {
+  if (command.totalCents <= 0) {
+    throw new Error('PlaceOrder requires a positive totalCents')
+  }
+}
 // [/placeOrderHandler]
 
 // --- GetOrder slice ---------------------------------------------------------
-// A completely separate request type, handler and data access — it shares no
-// code with the PlaceOrder slice above except the Mediator and the pipeline.
+// A completely separate request type, handler, data access and validator —
+// it shares no code with the PlaceOrder slice above except the Mediator and
+// the pipeline.
 
 // [getOrderStore]
 class GetOrderStore {
@@ -160,6 +172,12 @@ class GetOrderHandler {
     return row
   }
 }
+
+function validateGetOrder(query: GetOrderQuery): void {
+  if (!query.orderId) {
+    throw new Error('GetOrder requires an orderId')
+  }
+}
 // [/getOrderHandler]
 
 // --- Usage: a command through the pipeline, a query through the same one,
@@ -169,8 +187,14 @@ class GetOrderHandler {
 const table = new OrdersTable()
 
 const mediator = new Mediator()
+const validationBehaviour = new ValidationBehaviour()
+// Each slice registers its own validator — ValidationBehaviour never learns
+// PlaceOrderCommand or GetOrderQuery by name.
+validationBehaviour.register<PlaceOrderCommand>('PlaceOrder', validatePlaceOrder)
+validationBehaviour.register<GetOrderQuery>('GetOrder', validateGetOrder)
+
 mediator.use(new LoggingBehaviour())
-mediator.use(new ValidationBehaviour())
+mediator.use(validationBehaviour)
 
 const placeOrderHandler = new PlaceOrderHandler(new PlaceOrderStore(table))
 const getOrderHandler = new GetOrderHandler(new GetOrderStore(table))
@@ -178,9 +202,11 @@ const getOrderHandler = new GetOrderHandler(new GetOrderStore(table))
 mediator.registerHandler<PlaceOrderCommand>('PlaceOrder', (request) => placeOrderHandler.handle(request))
 mediator.registerHandler<GetOrderQuery>('GetOrder', (request) => getOrderHandler.handle(request))
 
-mediator.send<{ orderId: string }>({ type: 'PlaceOrder', orderId: 'order-7', customerId: 'cust-11', totalCents: 2500 })
+const placeOrder: PlaceOrderCommand = { type: 'PlaceOrder', orderId: 'order-7', customerId: 'cust-11', totalCents: 2500 }
+mediator.send<{ orderId: string }>(placeOrder)
 
-const order = mediator.send<OrderRow>({ type: 'GetOrder', orderId: 'order-7' })
+const getOrder: GetOrderQuery = { type: 'GetOrder', orderId: 'order-7' }
+const order = mediator.send<OrderRow>(getOrder)
 console.log(`GetOrder result: ${order.orderId} ${order.customerId} $${(order.totalCents / 100).toFixed(2)}`)
 
 // This PlaceOrder has totalCents: 0. LoggingBehaviour still logs "handling"
@@ -188,8 +214,9 @@ console.log(`GetOrder result: ${order.orderId} ${order.customerId} $${(order.tot
 // ValidationBehaviour then throws instead of calling next(), so
 // PlaceOrderHandler never runs (no "saved" line) and LoggingBehaviour's
 // "handled" line never prints either.
+const invalidPlaceOrder: PlaceOrderCommand = { type: 'PlaceOrder', orderId: 'order-8', customerId: 'cust-12', totalCents: 0 }
 try {
-  mediator.send<{ orderId: string }>({ type: 'PlaceOrder', orderId: 'order-8', customerId: 'cust-12', totalCents: 0 })
+  mediator.send<{ orderId: string }>(invalidPlaceOrder)
 } catch (error) {
   console.log(`rejected: ${(error as Error).message}`)
 }

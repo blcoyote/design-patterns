@@ -9,8 +9,14 @@ using System.Globalization;
 var table = new OrdersTable();
 
 var mediator = new Mediator();
+var validationBehaviour = new ValidationBehaviour();
+// Each slice registers its own validator — ValidationBehaviour never learns
+// PlaceOrderCommand or GetOrderQuery by name.
+validationBehaviour.Register("PlaceOrder", PlaceOrderHandler.Validate);
+validationBehaviour.Register("GetOrder", GetOrderHandler.Validate);
+
 mediator.Use(new LoggingBehaviour());
-mediator.Use(new ValidationBehaviour());
+mediator.Use(validationBehaviour);
 
 var placeOrderHandler = new PlaceOrderHandler(new PlaceOrderStore(table));
 var getOrderHandler = new GetOrderHandler(new GetOrderStore(table));
@@ -40,10 +46,10 @@ catch (ArgumentException ex)
 
 // --- Shared pipeline infrastructure --------------------------------------
 // Everything in this section is cross-cutting infrastructure: it belongs to
-// no single slice, and every slice is routed through the same instance.
-// PlaceOrderCommand and GetOrderQuery are declared further down, inside their
-// own slice's section — C# resolves types regardless of declaration order
-// within a file, so this forward reference is safe.
+// no single slice, and every slice is routed through the same instance. None
+// of it — IRequest, Mediator, or either behaviour — names PlaceOrderCommand
+// or GetOrderQuery; a slice plugs itself in by registering a handler and, if
+// it needs one, a validator for its own request type.
 
 interface IRequest
 {
@@ -110,16 +116,23 @@ class LoggingBehaviour : IPipelineBehaviour
 // [validationBehaviour]
 class ValidationBehaviour : IPipelineBehaviour
 {
+    // Validators are registered per request type by the slice that owns that
+    // request — this class holds the registry but knows no request classes.
+    private readonly Dictionary<string, Action<IRequest>> _validators = new();
+
+    public void Register(string type, Action<IRequest> validator)
+    {
+        _validators[type] = validator;
+    }
+
     public object? Handle(IRequest request, Func<object?> next)
     {
         // A behaviour that does not call next() short-circuits the chain: no
         // behaviour after it, and no handler, ever runs for this request. Note
         // that LoggingBehaviour runs before this one, so it has already logged
         // "handling" by the time a request gets rejected here.
-        if (request is PlaceOrderCommand placeOrder && placeOrder.TotalCents <= 0)
-            throw new ArgumentException("PlaceOrder requires a positive totalCents");
-        if (request is GetOrderQuery getOrder && string.IsNullOrEmpty(getOrder.OrderId))
-            throw new ArgumentException("GetOrder requires an orderId");
+        if (_validators.TryGetValue(request.Type, out var validator))
+            validator(request);
         return next();
     }
 }
@@ -150,8 +163,8 @@ class OrdersTable
 // [/ordersTable]
 
 // --- PlaceOrder slice -------------------------------------------------------
-// This slice's request type, handler and data access, together. Nothing
-// outside this slice needs to know PlaceOrderCommand exists.
+// This slice's request type, handler, data access and validator, together.
+// Nothing outside this slice needs to know PlaceOrderCommand exists.
 
 // [placeOrderStore]
 class PlaceOrderStore
@@ -194,12 +207,20 @@ class PlaceOrderHandler
         _store.Save(new OrderRow(command.OrderId, command.CustomerId, command.TotalCents));
         return new { OrderId = command.OrderId };
     }
+
+    public static void Validate(IRequest request)
+    {
+        var command = (PlaceOrderCommand)request;
+        if (command.TotalCents <= 0)
+            throw new ArgumentException("PlaceOrder requires a positive totalCents");
+    }
 }
 // [/placeOrderHandler]
 
 // --- GetOrder slice ---------------------------------------------------------
-// A completely separate request type, handler and data access — it shares no
-// code with the PlaceOrder slice above except the Mediator and the pipeline.
+// A completely separate request type, handler, data access and validator —
+// it shares no code with the PlaceOrder slice above except the Mediator and
+// the pipeline.
 
 // [getOrderStore]
 class GetOrderStore
@@ -239,6 +260,13 @@ class GetOrderHandler
         var row = _store.FindById(query.OrderId);
         if (row is null) throw new InvalidOperationException($"no order found for {query.OrderId}");
         return row;
+    }
+
+    public static void Validate(IRequest request)
+    {
+        var query = (GetOrderQuery)request;
+        if (string.IsNullOrEmpty(query.OrderId))
+            throw new ArgumentException("GetOrder requires an orderId");
     }
 }
 // [/getOrderHandler]

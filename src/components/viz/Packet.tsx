@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
+import { PACKET_REPEAT_DELAY } from "@/lib/packetTiming";
 import { pointOnQuad, samplePath, type EdgeGeometry } from "@/lib/geometry";
 
 export interface PacketProps {
@@ -10,6 +11,8 @@ export interface PacketProps {
   delay?: number;
   duration?: number;
   repeat?: boolean;
+  /** Seconds to pause between repeats (scale it with the speed control). */
+  repeatDelay?: number;
   onComplete?: () => void;
 }
 
@@ -22,6 +25,7 @@ export function Packet({
   delay = 0,
   duration = 1.4,
   repeat = true,
+  repeatDelay = PACKET_REPEAT_DELAY,
   onComplete,
 }: PacketProps) {
   const reduceMotion = useReducedMotion();
@@ -81,7 +85,7 @@ export function Packet({
         delay,
         ease: "easeInOut",
         repeat: repeat ? Infinity : 0,
-        repeatDelay: 0.9,
+        repeatDelay,
       }}
       onAnimationComplete={onComplete}
     >

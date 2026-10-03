@@ -1,24 +1,28 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Callable, Optional, Protocol
+
 
 # --- Shared pipeline infrastructure --------------------------------------
 # Everything in this section is cross-cutting infrastructure: it belongs to
-# no single slice, and every slice is routed through the same instance.
-# PlaceOrderCommand and GetOrderQuery are declared further down, inside their
-# own slice's section. Python resolves names at call time, not at class-body
-# read time, so Mediator and the behaviours below can refer to them by type
-# hint string / duck typing without needing them defined yet.
+# no single slice, and every slice is routed through the same instance. None
+# of it — Request, Mediator, or either behaviour — names PlaceOrderCommand or
+# GetOrderQuery; a slice plugs itself in by registering a handler and, if it
+# needs one, a validator for its own request type.
+
+
+class Request(Protocol):
+    type: str
 
 
 # [mediator]
 class Mediator:
     def __init__(self) -> None:
-        self._handlers: dict[str, Callable[[object], object]] = {}
+        self._handlers: dict[str, Callable[[Request], object]] = {}
         self._behaviours: list["PipelineBehaviour"] = []
 
-    def register_handler(self, request_type: str, handler: Callable[[object], object]) -> None:
+    def register_handler(self, request_type: str, handler: Callable[[Request], object]) -> None:
         self._handlers[request_type] = handler
 
     # Behaviours run in registration order, outermost first: the first behaviour
@@ -26,8 +30,8 @@ class Mediator:
     def use(self, behaviour: "PipelineBehaviour") -> None:
         self._behaviours.append(behaviour)
 
-    def send(self, request: object) -> object:
-        request_type = getattr(request, "type")
+    def send(self, request: Request) -> object:
+        request_type = request.type
         handler = self._handlers.get(request_type)
         if handler is None:
             raise ValueError(f"no handler registered for {request_type}")
@@ -40,34 +44,42 @@ class Mediator:
 
 
 class PipelineBehaviour:
-    def handle(self, request: object, next_fn: Callable[[], object]) -> object:
+    def handle(self, request: Request, next_fn: Callable[[], object]) -> object:
         raise NotImplementedError
 
 
 # [loggingBehaviour]
 class LoggingBehaviour(PipelineBehaviour):
-    def handle(self, request: object, next_fn: Callable[[], object]) -> object:
-        print(f"LOG: handling {getattr(request, 'type')}")
+    def handle(self, request: Request, next_fn: Callable[[], object]) -> object:
+        print(f"LOG: handling {request.type}")
         # If next_fn() raises (a behaviour further down the chain rejected the
         # request), this line never runs — the exception propagates straight
         # through, and "LOG: handled" never prints.
         result = next_fn()
-        print(f"LOG: handled {getattr(request, 'type')}")
+        print(f"LOG: handled {request.type}")
         return result
 # [/loggingBehaviour]
 
 
 # [validationBehaviour]
 class ValidationBehaviour(PipelineBehaviour):
-    def handle(self, request: object, next_fn: Callable[[], object]) -> object:
+    def __init__(self) -> None:
+        # Validators are registered per request type by the slice that owns
+        # that request — this class holds the registry but knows no request
+        # classes.
+        self._validators: dict[str, Callable[[Request], None]] = {}
+
+    def register(self, request_type: str, validator: Callable[[Request], None]) -> None:
+        self._validators[request_type] = validator
+
+    def handle(self, request: Request, next_fn: Callable[[], object]) -> object:
         # A behaviour that does not call next_fn() short-circuits the chain: no
         # behaviour after it, and no handler, ever runs for this request. Note
         # that LoggingBehaviour runs before this one, so it has already logged
         # "handling" by the time a request gets rejected here.
-        if isinstance(request, PlaceOrderCommand) and request.total_cents <= 0:
-            raise ValueError("PlaceOrder requires a positive totalCents")
-        if isinstance(request, GetOrderQuery) and not request.order_id:
-            raise ValueError("GetOrder requires an orderId")
+        validator = self._validators.get(request.type)
+        if validator is not None:
+            validator(request)
         return next_fn()
 # [/validationBehaviour]
 
@@ -99,8 +111,8 @@ class OrdersTable:
 
 
 # --- PlaceOrder slice -------------------------------------------------------
-# This slice's request type, handler and data access, together. Nothing
-# outside this slice needs to know PlaceOrderCommand exists.
+# This slice's request type, handler, data access and validator, together.
+# Nothing outside this slice needs to know PlaceOrderCommand exists.
 
 
 # [placeOrderStore]
@@ -132,12 +144,18 @@ class PlaceOrderHandler:
             OrderRow(order_id=command.order_id, customer_id=command.customer_id, total_cents=command.total_cents)
         )
         return {"order_id": command.order_id}
+
+
+def validate_place_order(command: PlaceOrderCommand) -> None:
+    if command.total_cents <= 0:
+        raise ValueError("PlaceOrder requires a positive totalCents")
 # [/placeOrderHandler]
 
 
 # --- GetOrder slice ---------------------------------------------------------
-# A completely separate request type, handler and data access — it shares no
-# code with the PlaceOrder slice above except the Mediator and the pipeline.
+# A completely separate request type, handler, data access and validator — it
+# shares no code with the PlaceOrder slice above except the Mediator and the
+# pipeline.
 
 
 # [getOrderStore]
@@ -166,6 +184,11 @@ class GetOrderHandler:
         if row is None:
             raise ValueError(f"no order found for {query.order_id}")
         return row
+
+
+def validate_get_order(query: GetOrderQuery) -> None:
+    if not query.order_id:
+        raise ValueError("GetOrder requires an orderId")
 # [/getOrderHandler]
 
 
@@ -176,8 +199,14 @@ class GetOrderHandler:
 table = OrdersTable()
 
 mediator = Mediator()
+validation_behaviour = ValidationBehaviour()
+# Each slice registers its own validator — ValidationBehaviour never learns
+# PlaceOrderCommand or GetOrderQuery by name.
+validation_behaviour.register("PlaceOrder", validate_place_order)
+validation_behaviour.register("GetOrder", validate_get_order)
+
 mediator.use(LoggingBehaviour())
-mediator.use(ValidationBehaviour())
+mediator.use(validation_behaviour)
 
 place_order_handler = PlaceOrderHandler(PlaceOrderStore(table))
 get_order_handler = GetOrderHandler(GetOrderStore(table))

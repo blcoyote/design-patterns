@@ -15,7 +15,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     'A screen that owns its own state, renders itself, and reads mouse and keyboard events directly ties all three concerns to one class. Adding a second way of displaying the same data — a summary panel alongside the main list — means either duplicating state-tracking logic or reaching into the first screen\'s internals. There is no single place where "what happened" and "what should be shown now" are kept apart.',
   solution:
-    'Give the Model sole ownership of state and business rules, with no knowledge of how — or whether — it is displayed. Let one or more Views read the Model and render it, and have the Model notify its Views whenever it changes (Observer) so a View never has to poll. Route all raw input through a Controller, which decides what the input means and calls the appropriate method on the Model; because a View holds its Controller as an interchangeable collaborator, swapping in a different Controller changes how input is handled without touching the View itself.',
+    'Give the Model sole ownership of state and business rules, with no knowledge of how — or whether — it is displayed. Let one or more Views read the Model and render it, and have the Model notify its Views whenever it changes (Observer) so a View never has to poll. Route all raw input through a Controller, which decides what the input means and calls the appropriate method on the Model; because a View holds its Controller through an interface (Strategy) rather than a concrete class, swapping in a different implementation changes how input is handled without touching the View itself.',
   analogy:
     'A restaurant kitchen (Model) holds the actual state of an order — what has been cooked, what is still waiting. The dining room display and the kitchen printer (two Views) both show that state, but neither one decides what gets cooked. A waiter (Controller) takes the customer\'s spoken request, translates it into an order placed with the kitchen, and the kitchen is the only thing that ever updates the order itself.',
   whenToUse: [
@@ -45,7 +45,7 @@ export const architecture: ArchitectureDefinition = {
   concepts: [
     { term: 'Model', description: 'Owns state and the rules for changing it. Knows nothing about any View or Controller — in this example, TodoModel never imports either.' },
     { term: 'View', description: 'Renders the Model\'s current state and forwards raw input to its Controller. TodoListView and RemainingCountView are both Views over the same TodoModel.' },
-    { term: 'Controller', description: 'Interprets input and decides which operation to invoke on the Model. A View holds its Controller as a Strategy, so a different Controller changes behaviour without the View changing.' },
+    { term: 'Controller', description: 'Interprets input and decides which operation to invoke on the Model. A View holds its Controller through a Strategy interface (TypeScript/C# interface, Python Protocol), so a different implementation changes behaviour without the View changing.' },
     { term: 'Observer notification', description: 'The mechanism — plain subscribe/notify here — by which the Model tells every registered View to refresh. GoF describes this as the Model\'s "dependents" in the original Smalltalk form.' },
     { term: 'Passive vs. active View', description: 'In a "passive View", the Controller pushes rendered data in; in an "active View" (used here), the View pulls from the Model itself once notified. Both are legitimate MVC.' },
   ],
@@ -58,7 +58,7 @@ export const architecture: ArchitectureDefinition = {
   commonlyUsedWith: {
     designPatterns: [
       { slug: 'observer', why: 'TodoModel.notify() iterates a snapshot of its registered TodoView observers and calls update(model) on each — the textbook Observer notification loop.' },
-      { slug: 'strategy', why: 'TodoListView holds a TodoController and forwards every click to it (clickAdd, clickToggle); the Controller is an interchangeable strategy for responding to input, exactly as GoF\'s own discussion of MVC describes it.' },
+      { slug: 'strategy', why: 'TodoListView holds its Controller through an interface (TodoInputController / ITodoInputController / the TodoInputController Protocol) and forwards every click to it (clickAdd, clickToggle); the concrete TodoController is an interchangeable strategy for responding to input, exactly as GoF\'s own discussion of MVC describes it.' },
       { slug: 'composite', why: 'TodoListView and TodoItemView both implement the Renderable interface, and TodoListView.render() joins its children\'s render() through that shared interface without caring which concrete view each child is — the list view is a Composite of item views, as GoF notes MVC views commonly are.' },
       { slug: 'command', why: 'A click is reified as an AddTodoCommand or ToggleTodoCommand object before the Controller runs it, instead of the Controller calling the Model inline.' },
     ],
@@ -88,7 +88,7 @@ export const architecture: ArchitectureDefinition = {
       x: 130,
       y: 190,
       width: 170,
-      description: 'Interprets a click and decides which Command to run against the Model. Plugged into the View as a Strategy, so a different Controller changes behaviour without the View changing.',
+      description: 'Interprets a click and decides which Command to run against the Model. Plugged into the View through a Strategy interface, so a different implementation changes behaviour without the View changing.',
       patterns: ['strategy'],
     },
     {
@@ -162,7 +162,7 @@ export const architecture: ArchitectureDefinition = {
       to: 'controller',
       type: 'calls',
       label: 'handleAddClick(text)',
-      description: 'The View forwards the click to its Controller. Because the Controller is held as a Strategy, swapping it changes how this click is handled without touching TodoListView.',
+      description: 'The View forwards the click to its Controller. Because the Controller is held through a Strategy interface, swapping the implementation changes how this click is handled without touching TodoListView.',
       code: 'listView',
     },
     {
@@ -219,7 +219,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: 'Model, two Views, one Controller',
       description:
-        'TodoModel owns the state. Two Views — TodoListView and RemainingCountView — are both subscribed to it as Observers. TodoController sits between raw input and the Model, plugged into the View as a Strategy.',
+        'TodoModel owns the state. Two Views — TodoListView and RemainingCountView — are both subscribed to it as Observers. TodoController sits between raw input and the Model, plugged into the View through a Strategy interface.',
       highlight: ['user', 'controller', 'command', 'model', 'listView', 'itemView', 'countView'],
     },
     {
@@ -232,7 +232,7 @@ export const architecture: ArchitectureDefinition = {
     },
     {
       title: 'The View delegates to its Controller (Strategy)',
-      description: 'TodoListView does not interpret the click itself — it forwards it to whichever TodoController it holds. A different Controller plugged in here would handle the same click differently.',
+      description: 'TodoListView does not interpret the click itself — it forwards it to whichever controller it holds, typed only as the TodoInputController interface. A different implementation plugged in here would handle the same click differently.',
       highlight: ['listView', 'delegate', 'controller'],
       packets: [{ relation: 'delegate', label: 'handleAddClick("Buy milk")' }],
       notes: { controller: 'interpreting input' },

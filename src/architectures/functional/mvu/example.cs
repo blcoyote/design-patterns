@@ -92,8 +92,8 @@ static class View
 /// <summary>
 /// The imperative shell: a tiny loop that dispatches messages, calls the pure
 /// Update, keeps every resulting model in history (what makes time-travel
-/// possible), performs whatever Cmds come back, and renders + notifies after
-/// every change. It is the only part of the program that does anything impure.
+/// possible), renders + notifies after every change, and only then performs
+/// whatever Cmds came back. It is the only part of the program that does anything impure.
 /// </summary>
 class Runtime
 {

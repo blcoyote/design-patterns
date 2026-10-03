@@ -16,14 +16,17 @@ const CYCLE = [
   { x: 330, y: 150 }, // runtime
   { x: 570, y: 70 }, // update
   { x: 570, y: 230 }, // history
-  { x: 330, y: 330 }, // effects
   { x: 570, y: 390 }, // view
   { x: 90, y: 390 }, // subs
+  { x: 330, y: 330 }, // effects: Cmds run only after the render
   { x: 90, y: 230 }, // back to msg
 ]
 
-/** Which point along CYCLE the loop marker sits at for each step (0-indexed, aligned with pattern.steps). */
-const MARKER_BY_STEP = [0, 0, 1, 2, 3, 4, 5, 6, 0]
+/**
+ * Which point along CYCLE the loop marker sits at for each step (0-indexed, aligned with pattern.steps):
+ * overview, dispatch, update, history, render + notify, Cmd, and time travel back to history.
+ */
+const MARKER_BY_STEP = [0, 1, 2, 3, 5, 6, 3]
 
 function pathD() {
   return CYCLE.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')

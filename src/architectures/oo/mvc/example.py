@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
 
 
 # [model]
@@ -81,10 +82,20 @@ class ToggleTodoCommand(Command):
 
 
 # [controller]
+class TodoInputController(Protocol):
+    """Strategy: the interface TodoListView depends on. The View is typed against
+    this, not against TodoController, so any implementation can be swapped in."""
+
+    def handle_add_click(self, text: str) -> None: ...
+
+    def handle_toggle_click(self, todo_id: int) -> None: ...
+
+
 class TodoController:
-    """Translates raw input into a Command run against the Model. It is plugged into
-    the View as a Strategy — swap in a different Controller and the same click
-    behaves differently, without the View changing at all."""
+    """Translates raw input into a Command run against the Model. It satisfies
+    TodoInputController structurally (no explicit base class needed, per Python's
+    Protocol), the Strategy the View is typed against, so a different implementation
+    would handle the same click differently without the View changing at all."""
 
     def __init__(self, model: TodoModel) -> None:
         self._model = model
@@ -124,9 +135,9 @@ class TodoListView(TodoView, Renderable):
     one happens to be a TodoItemView."""
 
     def __init__(self) -> None:
-        # Strategy: the View forwards input to whichever Controller it holds, instead
-        # of deciding what a click means itself.
-        self.controller: TodoController | None = None
+        # Strategy: the View depends only on the TodoInputController protocol, so any
+        # implementation can be swapped in without the View changing.
+        self.controller: TodoInputController | None = None
         self._children: list[Renderable] = []
 
     def update(self, model: TodoModel) -> None:

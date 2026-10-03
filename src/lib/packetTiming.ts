@@ -4,6 +4,8 @@ import type { Packet, Step } from "@/types/pattern";
 export const PACKET_HOP = 1.4;
 /** Seconds between independent (unsequenced) packets starting at speed 1. */
 export const PACKET_STAGGER = 0.18;
+/** Seconds a packet (or a finished chain) pauses before it plays again, at speed 1. */
+export const PACKET_REPEAT_DELAY = 0.9;
 /** Time a step stays on screen at speed 1, in ms, when its packets finish sooner. */
 export const BASE_STEP_INTERVAL = 3200;
 /** Pause after the last packet lands before the player advances, in ms at speed 1. */

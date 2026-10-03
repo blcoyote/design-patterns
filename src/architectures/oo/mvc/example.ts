@@ -70,11 +70,21 @@ class ToggleTodoCommand implements Command {
 
 // [controller]
 /**
- * Controller: translates raw input into a Command run against the Model. It is
- * plugged into the View as a Strategy — swap in a different Controller and the
- * same click behaves differently, without the View changing at all.
+ * Strategy: the interface TodoListView depends on. The View is typed against this,
+ * not against TodoController, so any implementation can be swapped in.
  */
-class TodoController {
+interface TodoInputController {
+  handleAddClick(text: string): void
+  handleToggleClick(id: number): void
+}
+
+/**
+ * Controller: translates raw input into a Command run against the Model. It
+ * implements TodoInputController, the Strategy that the View is typed against, so
+ * a different implementation would handle the same click differently without the
+ * View changing at all.
+ */
+class TodoController implements TodoInputController {
   constructor(private readonly model: TodoModel) {}
 
   handleAddClick(text: string): void {
@@ -111,9 +121,9 @@ class TodoItemView implements Renderable {
  * one happens to be a TodoItemView.
  */
 class TodoListView implements TodoView, Renderable {
-  // Strategy: the View forwards input to whichever Controller it holds, instead of
-  // deciding what a click means itself.
-  controller!: TodoController
+  // Strategy: the View depends only on the TodoInputController interface, so any
+  // implementation can be swapped in without the View changing.
+  controller!: TodoInputController
   private children: Renderable[] = []
 
   update(model: TodoModel): void {

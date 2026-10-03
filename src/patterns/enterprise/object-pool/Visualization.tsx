@@ -351,7 +351,7 @@ export function ObjectPoolVisualization({
             <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
               waiting
             </span>
-            <div className="flex min-h-[28px] flex-1 flex-wrap items-center gap-1.5 rounded bg-slate-900/60 px-2 py-1">
+            <div className="flex min-h-7 flex-1 flex-wrap items-center gap-1.5 rounded bg-slate-900/60 px-2 py-1">
               {queue.length === 0 && (
                 <span className="text-xs text-slate-600">— none —</span>
               )}
@@ -375,7 +375,7 @@ export function ObjectPoolVisualization({
           </div>
         </div>
 
-        <div className="flex min-w-[200px] flex-col justify-between gap-2 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
+        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
               In use

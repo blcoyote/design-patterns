@@ -117,7 +117,7 @@ export function FlyweightVisualization({
       <div className="flex flex-wrap items-stretch gap-3 border-t border-slate-800 p-3">
         <svg
           viewBox={`0 0 ${PLOT.width} ${PLOT.height}`}
-          className="h-auto min-w-[260px] flex-1 cursor-pointer rounded-lg bg-slate-950/40 outline-none ring-1 ring-slate-800"
+          className="h-auto min-w-65 flex-1 cursor-pointer rounded-lg bg-slate-950/40 outline-none ring-1 ring-slate-800"
           role="button"
           tabIndex={0}
           aria-label={`Rendered forest — ${instanceCount.toLocaleString()} Tree instances sharing ${typeCount} TreeType objects`}
@@ -181,7 +181,7 @@ export function FlyweightVisualization({
           </AnimatePresence>
         </svg>
 
-        <div className="flex min-w-[200px] flex-col justify-between gap-2 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
+        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
               Tree instances

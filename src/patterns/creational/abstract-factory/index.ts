@@ -54,7 +54,7 @@ export const pattern: PatternDefinition = {
       label: "LightFactory",
       role: "Concrete Factory",
       kind: "class",
-      x: 160,
+      x: 120,
       y: 200,
       description:
         "Implements UIFactory for the light theme: every product it creates is the light-themed variant.",
@@ -64,7 +64,7 @@ export const pattern: PatternDefinition = {
       label: "DarkFactory",
       role: "Concrete Factory",
       kind: "class",
-      x: 640,
+      x: 680,
       y: 200,
       description:
         "Implements UIFactory for the dark theme: every product it creates is the dark-themed variant.",
@@ -74,8 +74,8 @@ export const pattern: PatternDefinition = {
       label: "Button",
       role: "Abstract Product A",
       kind: "interface",
-      x: 160,
-      y: 330,
+      x: 400,
+      y: 200,
       description:
         "The abstract product every button variant must implement. Client code only ever calls render() through this interface.",
     },
@@ -84,8 +84,8 @@ export const pattern: PatternDefinition = {
       label: "Checkbox",
       role: "Abstract Product B",
       kind: "interface",
-      x: 640,
-      y: 330,
+      x: 400,
+      y: 350,
       description:
         "The abstract product every checkbox variant must implement, kept separate from Button so each creation method can vary independently.",
     },
@@ -94,8 +94,8 @@ export const pattern: PatternDefinition = {
       label: "Application",
       role: "Client",
       kind: "client",
-      x: 400,
-      y: 410,
+      x: 660,
+      y: 70,
       description:
         "Holds a single UIFactory reference — never a concrete LightFactory or DarkFactory — and builds its whole UI through createButton()/createCheckbox().",
     },
@@ -158,6 +158,7 @@ export const pattern: PatternDefinition = {
       from: "client",
       to: "uiFactory",
       type: "calls",
+      bend: 30,
       label: "createButton() / createCheckbox()",
       description:
         "The client calls createButton()/createCheckbox() on whichever UIFactory it was handed — never on a concrete factory class.",

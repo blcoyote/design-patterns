@@ -64,7 +64,7 @@ function afterStep(loggerId: LoggerId): Step {
 
 interface PathNode {
   id: string;
-  kind: "box" | "diamond" | "crash" | "end";
+  kind: "client" | "box" | "diamond" | "crash" | "end";
   label: string;
   sub?: string;
   tone: "neutral" | "warn" | "danger" | "success";
@@ -75,7 +75,7 @@ function beforeNodes(): PathNode[] {
   return [
     {
       id: "n0",
-      kind: "box",
+      kind: "client",
       label: "Client",
       sub: "logger: null",
       tone: "neutral",
@@ -122,7 +122,7 @@ function afterNodes(loggerId: LoggerId): PathNode[] {
   return [
     {
       id: "n0",
-      kind: "box",
+      kind: "client",
       label: "Client",
       sub: `logger: ${label}`,
       tone: "neutral",
@@ -154,13 +154,14 @@ function afterNodes(loggerId: LoggerId): PathNode[] {
 }
 
 const WIDTH_BY_KIND: Record<PathNode["kind"], number> = {
-  box: 128,
+  client: 128,
+  box: 104,
   diamond: 112,
   crash: 120,
   end: 132,
 };
 const CENTER_Y = 86;
-const XS = [64, 228, 392, 556, 700];
+const XS = [76, 234, 380, 526, 682];
 
 const TONE_STROKE: Record<PathNode["tone"], string> = {
   neutral: "#334155",
@@ -479,7 +480,7 @@ export function NullObjectVisualization({
                     onSelect(node.selectId);
                   }}
                   onKeyDown={onActivate(() => onSelect(node.selectId))}
-                  initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
+                  initial={reduceMotion ? false : { opacity: 0, scale: 0.7, x: XS[i], y: CENTER_Y }}
                   animate={{ opacity: 1, scale: 1, x: XS[i], y: CENTER_Y }}
                   exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
                   transition={

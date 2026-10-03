@@ -103,7 +103,7 @@ export const pattern: PatternDefinition = {
       label: "Config",
       role: "Leaf dependency",
       kind: "class",
-      x: 230,
+      x: 350,
       y: 400,
       description:
         "Holds configuration values such as connection strings. Has no dependencies of its own, so the container can build it first.",

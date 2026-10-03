@@ -69,7 +69,8 @@ class EventStore {
   private subscribers: ((streamId: string, event: Event) => void)[] = []
 
   load(streamId: string): Event[] {
-    return this.streams.get(streamId) ?? []
+    // a copy, so callers cannot mutate the stored history behind append()'s back
+    return [...(this.streams.get(streamId) ?? [])]
   }
 
   append(streamId: string, expectedVersion: number, events: Event[]): void {

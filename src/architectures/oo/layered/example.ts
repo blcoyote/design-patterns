@@ -49,9 +49,9 @@ class OrderService {
 class OrderController {
   constructor(private service: OrderService) {}
 
-  handlePlaceOrder(customerId: string, items: LineItem[]): { status: number; orderId: string } {
+  handlePlaceOrder(customerId: string, items: LineItem[]): { status: number; customerId: string } {
     const order = this.service.placeOrder(customerId, items)
-    return { status: 201, orderId: order.customerId }
+    return { status: 201, customerId: order.customerId }
   }
 
   // [violation]

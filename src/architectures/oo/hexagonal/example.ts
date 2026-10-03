@@ -97,9 +97,9 @@ class NullOrderRepository implements OrderRepository {
 class HttpOrderController {
   constructor(private readonly useCase: PlaceOrderUseCase) {}
 
-  handlePost(body: { customerId: string; items: LineItem[] }): { status: number; orderId: string } {
+  handlePost(body: { customerId: string; items: LineItem[] }): { status: number; customerId: string } {
     const order = this.useCase.execute(body)
-    return { status: 201, orderId: order.customerId }
+    return { status: 201, customerId: order.customerId }
   }
 }
 // [/controller]

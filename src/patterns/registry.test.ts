@@ -110,20 +110,18 @@ describe("pattern registry", () => {
 });
 
 describe("pattern go examples", () => {
-  // Go is optional while the rollout is in progress; the REVIEW task makes it mandatory.
-  const withGo = patterns.filter((p) => p.go);
-  it("keeps go optional until every pattern ships it", () => {
-    expect(withGo.length).toBeLessThanOrEqual(patterns.length);
+  it("every pattern ships a go example", () => {
+    expect(patterns.every((p) => p.go?.trim())).toBe(true);
   });
 
-  it.each(withGo.map((p) => [p.slug, p] as const))(
+  it.each(patterns.map((p) => [p.slug, p] as const))(
     "%s go code has no unclosed or stray markers",
     (_slug, p) => {
       expect(findMarkerErrors(p.go!)).toEqual([]);
     },
   );
 
-  it.each(withGo.map((p) => [p.slug, p] as const))(
+  it.each(patterns.map((p) => [p.slug, p] as const))(
     "%s go is a runnable package main file",
     (_slug, p) => {
       expect(p.go).toMatch(/^package main$/m);
@@ -131,7 +129,7 @@ describe("pattern go examples", () => {
     },
   );
 
-  it.each(withGo.map((p) => [p.slug, p] as const))(
+  it.each(patterns.map((p) => [p.slug, p] as const))(
     "%s go regions match the typescript regions",
     (_slug, p) => {
       const tsRegionIds = Object.keys(parseCode(p.code).regions).sort();

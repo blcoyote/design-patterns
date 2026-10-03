@@ -2,6 +2,7 @@ import type { ArchitectureDefinition } from '@/types/architecture'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
 import pyExample from './example.py?raw'
+import goExample from './example.go?raw'
 import { PipesAndFiltersVisualization } from './Visualization'
 
 export const architecture: ArchitectureDefinition = {
@@ -57,7 +58,7 @@ export const architecture: ArchitectureDefinition = {
     },
     {
       term: 'Lazy stream',
-      description: 'A sequence (generator / IEnumerable / iterator) that computes each element on demand rather than all at once, which is what lets a pipeline process one record at a time.',
+      description: 'A sequence (generator / IEnumerable / iterator / Go iter.Seq) that computes each element on demand rather than all at once, which is what lets a pipeline process one record at a time.',
     },
     {
       term: 'Pull-based evaluation',
@@ -95,7 +96,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: 'iterator',
-        why: 'Every stage — parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines — is a generator function, producing one element at a time on demand instead of materializing arrays between stages.',
+        why: 'Every stage — parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines — is a lazy generator-style function (generator / IEnumerable iterator / Go iter.Seq), producing one element at a time on demand instead of materializing arrays between stages.',
       },
       {
         slug: 'composite',
@@ -129,7 +130,7 @@ export const architecture: ArchitectureDefinition = {
       kind: 'object',
       x: 90,
       y: 110,
-      description: 'Four raw text records, one per order line, including one malformed entry. The source is just a plain array of strings — any iterable would do.',
+      description: 'Four raw text records, one per order line, including one malformed entry. The source is just a plain collection of strings — any iterable would do.',
       code: 'usage',
     },
     {
@@ -286,5 +287,6 @@ export const architecture: ArchitectureDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
   Visualization: PipesAndFiltersVisualization,
 }

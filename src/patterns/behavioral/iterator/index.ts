@@ -2,6 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
+import goExample from "./example.go?raw";
 import { IteratorVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
@@ -16,7 +17,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A Playlist might be backed by an array today and by a linked list, or a lazily fetched page of results, tomorrow. If every caller loops over playlist.songs[i] directly, that internal detail leaks into every call site. The moment the storage changes, all of those loops break.",
   solution:
-    "Give the collection one method that returns an Iterator: a small object whose job is to hand out the next value and say when there are none left. In TypeScript, next() returns a result with a done flag. In C#, MoveNext() returns false. In Python, __next__() raises StopIteration. Callers step through with next() (or let a for...of / foreach / for ... in loop do it for them) without ever knowing whether the elements live in an array, a tree, or are generated on demand.",
+    "Give the collection one method that returns an Iterator: a small object whose job is to hand out the next value and say when there are none left. In TypeScript, next() returns a result with a done flag. In C#, MoveNext() returns false. In Python, __next__() raises StopIteration. In Go, Next() returns the value plus an ok flag. Callers step through with next() (or let a for...of / foreach / for ... in loop do it for them) without ever knowing whether the elements live in an array, a tree, or are generated on demand.",
   analogy:
     "Think of a museum audio guide. You press \"next\" and it describes the next exhibit, in order, one at a time. You never need the floor plan or the storage room. The guide keeps track of your position and gives a clear \"that was the last one\" cue when the tour ends.",
   whenToUse: [
@@ -63,7 +64,7 @@ export const pattern: PatternDefinition = {
       y: 70,
       width: 160,
       description:
-        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python. Any class implementing it works with the language's built-in loop.",
+        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python, GetIterator() in Go (which has no built-in protocol for custom collections). Any class implementing it works with the language's built-in loop.",
     },
     {
       id: "playlist",
@@ -85,7 +86,7 @@ export const pattern: PatternDefinition = {
       y: 70,
       width: 160,
       description:
-        "Declares next(), which returns the next value or signals the end — { value, done } in TS, MoveNext()/Current in C#, __next__() raising StopIteration in Python. Client code only ever talks to objects through this interface, never to a concrete iterator class.",
+        "Declares next(), which returns the next value or signals the end — { value, done } in TS, MoveNext()/Current in C#, __next__() raising StopIteration in Python, Next() returning (value, ok) in Go. Client code only ever talks to objects through this interface, never to a concrete iterator class.",
     },
     {
       id: "playlistIterator",
@@ -144,7 +145,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "[Symbol.iterator]()",
       description:
-        "A for...of loop starts by asking the playlist for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / iter(playlist)).",
+        "A for...of loop starts by asking the playlist for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / iter(playlist) / playlist.GetIterator()).",
       code: "getIterator",
     },
     {
@@ -164,7 +165,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Client starts a for...of loop",
       description:
-        "A for...of loop over playlist implicitly asks it for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / __iter__()). Playlist creates a brand-new PlaylistIterator and hands it back — the loop never touches the song array directly.",
+        "A for...of loop over playlist implicitly asks it for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / __iter__() / GetIterator()). Playlist creates a brand-new PlaylistIterator and hands it back — the loop never touches the song array directly.",
       highlight: [
         "client",
         "clientGetIterator",
@@ -235,7 +236,7 @@ export const pattern: PatternDefinition = {
     {
       title: "next() reports done",
       description:
-        "The cursor has now passed the last song. next() signals the end instead of wrapping back around: TS returns { value: undefined, done: true }, C# MoveNext() returns false, and Python __next__() raises StopIteration — the protocol's agreed end signal, which the loop catches for you.",
+        "The cursor has now passed the last song. next() signals the end instead of wrapping back around: TS returns { value: undefined, done: true }, C# MoveNext() returns false, Python __next__() raises StopIteration, and Go Next() returns ok = false — the protocol's agreed end signal, which the loop catches for you.",
       highlight: ["client", "clientNext", "playlistIterator"],
       packets: [
         { relation: "clientNext", label: "next()" },
@@ -261,6 +262,7 @@ export const pattern: PatternDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
 
   Visualization: IteratorVisualization,
 };

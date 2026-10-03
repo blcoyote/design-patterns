@@ -61,9 +61,9 @@ ReportGeneratorBefore(None).generate(clean_data)
 # Crashes the moment a report has warnings:
 try:
     ReportGeneratorBefore(None).generate(data_with_warnings)
-except AttributeError as exc:
-    print(f"crashed: {exc}")
-# AttributeError: 'NoneType' object has no attribute 'warn'
+except AttributeError:
+    print("crashed: nil logger call")
+# crashed: nil logger call
 # [/before]
 
 # ============================================================

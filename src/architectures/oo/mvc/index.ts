@@ -2,6 +2,7 @@ import type { ArchitectureDefinition } from '@/types/architecture'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
 import pyExample from './example.py?raw'
+import goExample from './example.go?raw'
 import { MvcVisualization } from './Visualization'
 
 export const architecture: ArchitectureDefinition = {
@@ -45,7 +46,7 @@ export const architecture: ArchitectureDefinition = {
   concepts: [
     { term: 'Model', description: 'Owns state and the rules for changing it. Knows nothing about any View or Controller — in this example, TodoModel never imports either.' },
     { term: 'View', description: 'Renders the Model\'s current state and forwards raw input to its Controller. TodoListView and RemainingCountView are both Views over the same TodoModel.' },
-    { term: 'Controller', description: 'Interprets input and decides which operation to invoke on the Model. A View holds its Controller through a Strategy interface (TypeScript/C# interface, Python Protocol), so a different implementation changes behaviour without the View changing.' },
+    { term: 'Controller', description: 'Interprets input and decides which operation to invoke on the Model. A View holds its Controller through a Strategy interface (TypeScript/C#/Go interface, Python Protocol), so a different implementation changes behaviour without the View changing.' },
     { term: 'Observer notification', description: 'The mechanism — plain subscribe/notify here — by which the Model tells every registered View to refresh. GoF describes this as the Model\'s "dependents" in the original Smalltalk form.' },
     { term: 'Passive vs. active View', description: 'In a "passive View", the Controller pushes rendered data in; in an "active View" (used here), the View pulls from the Model itself once notified. Both are legitimate MVC.' },
   ],
@@ -293,5 +294,6 @@ export const architecture: ArchitectureDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
   Visualization: MvcVisualization,
 }

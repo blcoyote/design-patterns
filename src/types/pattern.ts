@@ -102,7 +102,7 @@ export interface ExplorableDefinition {
    */
   python?: string;
   /**
-   * Optional Go example, shown as another tab. Same rules as `csharp`, with
+   * Required Go example, shown as another tab. Same rules as `csharp`, with
    * `// [id]` … `// [/id]` markers. A single `package main` file whose usage
    * lives in `func main()` at the bottom.
    */

@@ -83,7 +83,7 @@ class SubmitButton:
 
     def set_enabled(self, enabled: bool) -> None:
         self.enabled = enabled
-        print(f"submit: enabled = {enabled}")
+        print(f"submit: enabled = {str(enabled).lower()}")
 # [/submit]
 
 

@@ -7,7 +7,7 @@ Every pattern and architecture has:
 
 - an **animated diagram** — press play and watch messages travel between objects (or layers, or services), step by step
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
-- TypeScript, C# and Python examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
+- TypeScript, C#, Python and Go examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
 | Creational                                                      | Structural                                                      | Behavioral                                                                                                                      | Enterprise                                                                                                              |
 | --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -46,7 +46,7 @@ src/
     categories.ts            # category labels + colours
     validate.ts              # validateDiagram (shared) + validatePattern
     <category>/<slug>/index.ts          # one folder per pattern, grouped by category (pure data)
-    <category>/<slug>/example.ts/.cs/.py # code samples, imported with ?raw
+    <category>/<slug>/example.ts/.cs/.py/.go # code samples, imported with ?raw
     <category>/<slug>/Visualization.tsx # optional custom animated scene
     _template/               # copy me to add a pattern (ignored by the registry)
   architectures/
@@ -54,7 +54,7 @@ src/
     paradigms.ts             # paradigm labels + colours (oo / functional / both)
     validate.ts              # validateDiagram (shared) + validateArchitecture
     <paradigm>/<slug>/index.ts          # one folder per architecture, grouped by paradigm (pure data)
-    <paradigm>/<slug>/example.ts/.cs/.py # code samples, same convention as patterns
+    <paradigm>/<slug>/example.ts/.cs/.py/.go # code samples, same convention as patterns
     <paradigm>/<slug>/Visualization.tsx # optional custom animated scene
     _template/               # copy me to add an architecture (ignored by the registry)
   comparisons/
@@ -82,9 +82,10 @@ src/
    - show small `notes` badges under participants,
    - highlight a `code` region.
 4. Put the TypeScript example in `example.ts` (imported with `?raw` as `code`; excluded from `tsc` and lint). Mark regions with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
-5. Optionally add `example.cs` (imported with `?raw` as `csharp`) with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as the TypeScript file — `npm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
-6. Optionally add `example.py` (imported with `?raw` as `python`) with an equivalent Python example, shown as another tab. Use the same region ids, written as Python comments: `# [id]` and `# [/id]`. Usage code goes at the bottom, as in TypeScript, and the file should run as-is with `python3 example.py`.
-7. Run `npm test` — it reports unknown ids, missing code regions and broken `related` links.
+5. Add `example.cs` (imported with `?raw` as `csharp`) with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as the TypeScript file — `npm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
+6. Add `example.py` (imported with `?raw` as `python`) with an equivalent Python example, shown as another tab. Use the same region ids, written as Python comments: `# [id]` and `# [/id]`. Usage code goes at the bottom, as in TypeScript, and the file should run as-is with `python3 example.py`.
+7. Add `example.go` (imported with `?raw` as `go`) with the equivalent Go example, shown as another tab. Use the same region ids, `package main`, and a `func main()` usage block at the bottom. `npm test` requires every pattern to ship this file.
+8. Run `npm test` — it reports unknown ids, missing code regions and broken `related` links.
 
 That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up automatically. No other file needs to change.
 
@@ -104,13 +105,13 @@ A step's packets tell one story, and the viewer has to be able to follow it hop 
 
 ```ts
 packets: [
-  { relation: 'input', label: 'click' },                // 0
-  { relation: 'delegate', label: 'handleClick()', after: 0 },
-  { relation: 'execute', label: 'execute()', after: 1 },
-  { relation: 'notifyList', label: 'update()', after: 2 }, // branch:
-  { relation: 'notifyCount', label: 'update()', after: 2 }, // both start together
-  { relation: 'execute', label: 'ok', reverse: true, after: 2 },
-]
+  { relation: "input", label: "click" }, // 0
+  { relation: "delegate", label: "handleClick()", after: 0 },
+  { relation: "execute", label: "execute()", after: 1 },
+  { relation: "notifyList", label: "update()", after: 2 }, // branch:
+  { relation: "notifyCount", label: "update()", after: 2 }, // both start together
+  { relation: "execute", label: "ok", reverse: true, after: 2 },
+];
 ```
 
 Rules of thumb:
@@ -157,8 +158,8 @@ the dependency one-directional everywhere else and avoids a circular import betw
    exactly like a pattern. Use `participant.patterns` to mark which design-pattern slugs a box is built with.
 3. Fill in `commonlyUsedWith.designPatterns` (with a `why` for each) and `commonlyUsedWith.architectures` (declared
    symmetrically with any sibling architecture you reference).
-4. Write the animated `steps`, and the TypeScript/C#/Python examples in `example.ts`/`.cs`/`.py` exactly as for a pattern —
-   all three are required so the persisted language tab works on every architecture page.
+4. Write the animated `steps`, and the TypeScript/C#/Python/Go examples in `example.ts`/`.cs`/`.py`/`.go` exactly as for a pattern —
+   all four are required so the persisted language tab works on every architecture page.
 5. Run `npm test` — besides the usual diagram/region checks, it also verifies the cross-reference symmetry rule above.
 
 That's it: the sidebar (grouped by paradigm under `/architecture*`), the architecture index and the route

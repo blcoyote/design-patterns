@@ -2,6 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
+import goExample from "./example.go?raw";
 
 export const pattern: PatternDefinition = {
   slug: "template-method",
@@ -20,7 +21,7 @@ export const pattern: PatternDefinition = {
     "A recipe card printed once and shared by every cook: preheat, mix, bake, cool. The steps and their order never change. Each cook can use their own mixing technique or skip the optional glaze, but the structure of the recipe stays exactly as printed.",
   whenToUse: [
     "Several classes implement the same algorithm but differ in only a few steps, and you want that shared structure in one place.",
-    "You want subclasses to customise specific steps while the overall algorithm stays fixed. (Truly forbidding overrides needs language support. C# methods are non-virtual by default and Java has `final`. TypeScript has nothing equivalent, and Python's `@typing.final` is only checked by type checkers, so in those two it is a convention.)",
+    "You want subclasses to customise specific steps while the overall algorithm stays fixed. (Truly forbidding overrides needs language support. C# methods are non-virtual by default and Java has `final`. TypeScript has nothing equivalent, and Python's `@typing.final` is only checked by type checkers, so in those two it is a convention. Go has no method overriding at all: the skeleton calls the varying steps through an interface, so a concrete generator supplies steps but cannot replace generate().)",
     "You want optional extension points (hooks) that most subclasses can safely ignore.",
   ],
   pros: [
@@ -280,4 +281,5 @@ export const pattern: PatternDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
 };

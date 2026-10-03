@@ -43,6 +43,12 @@ class AuthHandler(Handler):
 # [/authHandler]
 
 
+@dataclass
+class RateWindow:
+    window_start: float
+    count: int
+
+
 # [rateLimitHandler]
 class RateLimitHandler(Handler):
     _WINDOW_MS = 60_000
@@ -52,17 +58,17 @@ class RateLimitHandler(Handler):
         super().__init__()
         # Each client gets its own fixed window — one client going over the cap
         # never affects any other client's count.
-        self._windows: dict[str, dict[str, float]] = {}
+        self._windows: dict[str, RateWindow] = {}
 
     # [rateLimit]
     def handle(self, req: HttpRequest) -> HttpResponse:
         now = time.monotonic() * 1000
         window = self._windows.get(req.client_id)
-        if not window or now - window['window_start'] >= self._WINDOW_MS:
-            window = {'window_start': now, 'count': 0}
+        if not window or now - window.window_start >= self._WINDOW_MS:
+            window = RateWindow(window_start=now, count=0)
             self._windows[req.client_id] = window
-        window['count'] += 1
-        if window['count'] > self._LIMIT:
+        window.count += 1
+        if window.count > self._LIMIT:
             return HttpResponse(429, 'Too Many Requests')
         return super().handle(req)
     # [/rateLimit]
@@ -73,7 +79,7 @@ class RateLimitHandler(Handler):
 class ValidationHandler(Handler):
     # [validation]
     def handle(self, req: HttpRequest) -> HttpResponse:
-        if req.body is not None and not isinstance(req.body, dict):
+        if req.body is not None and isinstance(req.body, (str, int, float, bool)):  # a primitive, not an object
             return HttpResponse(422, 'Invalid payload')
         return super().handle(req)  # no body to check, or it already looks fine
     # [/validation]

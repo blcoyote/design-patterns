@@ -71,7 +71,7 @@ export const pattern: PatternDefinition = {
       x: 620,
       y: 110,
       description:
-        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor can read it (a module-private WeakMap in TypeScript, a private nested class in C#, a module-private WeakKeyDictionary in Python), so even HistoryShelf has no way to peek inside.',
+        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor can read it (a module-private WeakMap in TypeScript, a private nested class in C#, a module-private-by-convention WeakKeyDictionary in Python), so HistoryShelf has no accessor to peek through.',
     },
     {
       id: 'history',
@@ -130,7 +130,7 @@ export const pattern: PatternDefinition = {
       to: 'memento',
       type: 'calls',
       label: 'unseal()',
-      description: 'Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, by casting to its private nested ConcreteMemento in C#, or via the module-private WeakKeyDictionary in Python), recovering the content it sealed away earlier.',
+      description: 'Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, by casting to its private nested ConcreteMemento in C#, or via the module-private-by-convention WeakKeyDictionary in Python), recovering the content it sealed away earlier.',
       bend: 24,
       code: 'getState',
     },

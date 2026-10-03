@@ -19,6 +19,9 @@ class SimpleCoffee:
 
 
 # [coffeeDecorator]
+# Abstract in intent (TS/C# mark it `abstract`): it has no abstract methods,
+# so Python won't block CoffeeDecorator(...) — only subclasses are meant to
+# be instantiated.
 class CoffeeDecorator:
     def __init__(self, coffee: Coffee) -> None:
         self._coffee = coffee

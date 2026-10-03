@@ -12,7 +12,7 @@ Console.WriteLine(service.GetReceipt("482"));
 var fakeRepo = new InMemoryOrderRepository();
 fakeRepo.Add(new Order("482", "cst-9", 42));
 var testService = new OrderService(fakeRepo);
-Console.WriteLine(testService.GetReceipt("482")); // reads straight out of the Map, no SQL involved
+Console.WriteLine(testService.GetReceipt("482")); // reads straight out of the Dictionary, no SQL involved
 // [/usage]
 
 // [order]
@@ -67,7 +67,7 @@ class SqlOrderRepository(Database db) : IOrderRepository
             "INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)",
             order.Id,
             order.CustomerId,
-            Math.Round(order.Total * 100));
+            Math.Round(order.Total * 100, MidpointRounding.AwayFromZero));
     }
 
     public void Save(Order order)
@@ -77,7 +77,7 @@ class SqlOrderRepository(Database db) : IOrderRepository
         db.Query(
             "UPDATE orders SET customer_id = ?, total_cents = ? WHERE id = ?",
             order.CustomerId,
-            Math.Round(order.Total * 100),
+            Math.Round(order.Total * 100, MidpointRounding.AwayFromZero),
             order.Id);
     }
 

@@ -47,8 +47,8 @@ class ReportGeneratorBefore:
         if len(result.warnings) > 0:
             # forgot the None check every other call site remembered. A type
             # checker (mypy, pyright) would flag this given the `Logger | None`
-            # annotation, but nothing stops the code from running — it still
-            # crashes at runtime, exactly the clutter Null Object removes.
+            # annotation and force a guard here too — exactly the clutter Null
+            # Object removes — but nothing stops the code from running, so it crashes.
             self._logger.warn(f"report has {len(result.warnings)} warnings")
         # [/forgotten]
 

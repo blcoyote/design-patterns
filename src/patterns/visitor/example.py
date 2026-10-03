@@ -82,15 +82,20 @@ class AreaCalculator:
 
 
 # [jsonExporter]
+def _json_number(n: float) -> str:
+    # JSON.stringify prints 2.0 as 2; Python would print 2.0.
+    return str(int(n)) if float(n).is_integer() else repr(n)
+
+
 class JsonExporter:
     def __init__(self) -> None:
         self._parts: list[str] = []
 
     def visit_circle(self, circle: Circle) -> None:
-        self._parts.append(f'{{"type":"circle","r":{circle.radius}}}')
+        self._parts.append(f'{{"type":"circle","r":{_json_number(circle.radius)}}}')
 
     def visit_rectangle(self, rectangle: Rectangle) -> None:
-        self._parts.append(f'{{"type":"rectangle","w":{rectangle.width},"h":{rectangle.height}}}')
+        self._parts.append(f'{{"type":"rectangle","w":{_json_number(rectangle.width)},"h":{_json_number(rectangle.height)}}}')
 
     def visit_group(self, group: Group) -> None:
         # Every child (leaf or nested group) left exactly one entry behind, so this
@@ -99,8 +104,7 @@ class JsonExporter:
         children, self._parts = self._parts[split:], self._parts[:split]
         self._parts.append(f'{{"type":"group","children":[{",".join(children)}]}}')
 
-    # Named result(), not __json__ — this class has no special serialization hook
-    # to collide with, but the name still makes its purpose explicit.
+    # result() returns the root entry once the whole tree has been visited.
     def result(self) -> str:
         return self._parts[0] if self._parts else "{}"
 # [/jsonExporter]

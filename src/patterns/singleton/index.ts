@@ -49,7 +49,7 @@ export const pattern: PatternDefinition = {
       y: 90,
       width: 180,
       description:
-        'Has a private constructor and a private static field holding the one instance. getInstance() creates it on first call and returns the cached object thereafter.',
+        'Its constructor is off-limits to outside code (private in TS and C#, a runtime guard in Python) and a static field holds the one instance. getInstance() creates it on first call and returns the cached object thereafter.',
     },
     {
       id: 'userService',

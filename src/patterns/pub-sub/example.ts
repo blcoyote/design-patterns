@@ -21,7 +21,9 @@ class EventBus<Events extends Record<string, unknown>> {
 
   publish<K extends keyof Events>(topic: K, payload: Events[K]): void {
     // [dispatch]
-    for (const handler of this.topics.get(topic) ?? []) {
+    // Loop over a snapshot so a handler that subscribes or unsubscribes
+    // mid-publish doesn't affect the round we're already delivering.
+    for (const handler of [...(this.topics.get(topic) ?? [])]) {
       handler(payload)
     }
     // [/dispatch]

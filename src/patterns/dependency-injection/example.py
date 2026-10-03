@@ -89,13 +89,15 @@ class Container:
     def register(self, key: str, deps: list[str], create: Callable[..., object]) -> None:
         self._providers[key] = _Provider(deps, create)
 
-    def resolve(self, key: str) -> T:
+    # cls plays the role of TS's resolve<T>(): it only tells the type checker
+    # what comes back — the registered provider decides what is actually built.
+    def resolve(self, key: str, cls: type[T]) -> T:
         if key not in self._singletons:
             provider = self._providers.get(key)
             if provider is None:
                 raise ValueError("No provider registered for " + key)
             # Build whatever it needs first (recursively), then construct it.
-            args = [self.resolve(dep) for dep in provider.deps]
+            args = [self.resolve(dep, object) for dep in provider.deps]
             self._singletons[key] = provider.create(*args)
         return cast(T, self._singletons[key])
 # [/container]
@@ -116,7 +118,7 @@ container.register("orderController", ["orderService"], lambda service: OrderCon
 # Ask only for the root — the container works out the rest of the graph.
 # Note: OrderController and OrderService never call container.resolve()
 # themselves — if they did, that would be the Service Locator pattern, not DI.
-order_controller: OrderController = container.resolve("orderController")
+order_controller = container.resolve("orderController", OrderController)
 order_controller.handle("A-1001", "ada@example.com")
 # [/usage]
 

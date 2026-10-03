@@ -102,7 +102,7 @@ export const pattern: PatternDefinition = {
       x: 650,
       y: 390,
       width: 220,
-      description: 'Implements the same OrderRepository interface backed by a plain Map instead of a database — used in unit tests so business logic can run with no real storage at all.',
+      description: 'Implements the same OrderRepository interface backed by a plain in-memory map (Map / Dictionary / dict) instead of a database — used in unit tests so business logic can run with no real storage at all.',
     },
   ],
   relations: [
@@ -157,8 +157,8 @@ export const pattern: PatternDefinition = {
       from: 'inMemoryOrderRepository',
       to: 'order',
       type: 'holds',
-      label: 'Map<id, Order>',
-      description: 'The in-memory repository keeps Order instances directly in a Map, so a lookup is just orders.get(id) — no SQL, no mapping step.',
+      label: 'map: id → Order',
+      description: 'The in-memory repository keeps Order instances directly in an in-memory map keyed by id, so a lookup is a single key read — no SQL, no mapping step.',
       code: 'inMemoryOrderRepository',
     },
   ],
@@ -221,7 +221,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Swapped for an in-memory repository in tests',
-      description: 'A unit test constructs the very same OrderService with an InMemoryOrderRepository instead. findById() now reads straight out of a Map — no database, no SQL — and OrderService does not change at all.',
+      description: 'A unit test constructs the very same OrderService with an InMemoryOrderRepository instead. findById() now reads straight out of an in-memory map — no database, no SQL — and OrderService does not change at all.',
       highlight: ['client', 'find', 'inMemoryOrderRepository', 'memImpl', 'memHolds', 'order'],
       packets: [{ relation: 'memHolds', label: 'orders.get(482)' }],
       notes: { inMemoryOrderRepository: 'test double' },

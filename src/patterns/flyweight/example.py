@@ -1,4 +1,5 @@
 import random
+from dataclasses import dataclass
 from typing import Protocol
 
 
@@ -15,17 +16,19 @@ class TreeType(Protocol):
 
 
 # [concreteType]
+# frozen=True: one instance is shared by thousands of trees, so it must be
+# immutable (assigning to a field raises FrozenInstanceError).
+@dataclass(frozen=True, slots=True)
 class ConcreteTreeType:
     # Intrinsic state: shared and identical for every tree of this species.
-    def __init__(self, name: str, color: str, texture: str) -> None:
-        self._name = name
-        self._color = color
-        self._texture = texture
+    name: str
+    color: str
+    texture: str
 
     # [draw]
     def draw(self, canvas: Canvas, x: float, y: float, age: float) -> None:
         # Extrinsic state (x, y, age) arrives as arguments — it is never stored here.
-        canvas.paint_tree(self._color, self._texture, x, y, age)
+        canvas.paint_tree(self.color, self.texture, x, y, age)
     # [/draw]
 # [/concreteType]
 
@@ -53,6 +56,10 @@ class TreeTypeFactory:
 
 # [tree]
 class Tree:
+    # __slots__ drops the per-instance __dict__, so each of the thousands of
+    # trees stays as small as possible.
+    __slots__ = ("_x", "_y", "_age", "_type")
+
     def __init__(
         self,
         # Extrinsic state: unique per tree, stored outside the flyweight.

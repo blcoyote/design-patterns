@@ -1,4 +1,6 @@
-# Module-private key: only get_instance() has it, so only it can construct.
+# Underscore-prefixed sentinel: by convention only get_instance() passes it.
+# This blocks an accidental AppConfig() call, not a deliberate bypass —
+# Python cannot make a constructor truly private.
 _CREATE = object()
 
 

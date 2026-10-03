@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 
@@ -11,6 +12,7 @@ from dataclasses import dataclass
 
 # [iteratorInterface]
 #   class Iterator(Protocol):
+#       def __iter__(self) -> "Iterator": ...  # an iterator is itself iterable: returns self
 #       def __next__(self): ...  # returns the next value, or raises StopIteration
 # [/iteratorInterface]
 
@@ -51,6 +53,9 @@ class PlaylistIterator:
         self._playlist = playlist
         self._cursor = 0
 
+    def __iter__(self) -> "PlaylistIterator":
+        return self
+
     # [next]
     def __next__(self) -> Song:
         if self._cursor >= self._playlist.length:
@@ -87,6 +92,6 @@ class GeneratorPlaylist:
     def __init__(self, songs: list[Song]) -> None:
         self._songs = songs
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Song]:
         for song in self._songs:
             yield song

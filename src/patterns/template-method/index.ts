@@ -19,7 +19,7 @@ export const pattern: PatternDefinition = {
     'A recipe card printed once and reused by every cook: preheat, mix, bake, cool. The steps and their order never change, but each cook can swap in their own mixing technique, or skip the optional glaze step entirely, while the structure of the recipe itself stays exactly as printed.',
   whenToUse: [
     'Several classes implement the same algorithm but differ in only a few steps, and that duplication needs to live in one place.',
-    'You want subclasses to extend specific steps of a behavior while the overall algorithm stays fixed. (Enforcing "un-overridable" needs language support the TypeScript and Python examples lack — Java\'s `final` or C#\'s non-virtual-by-default methods do this; here it\'s only a convention.)',
+    'You want subclasses to extend specific steps of a behavior while the overall algorithm stays fixed. (Enforcing "un-overridable" needs language support the TypeScript and Python examples lack — Java\'s `final` or C#\'s non-virtual-by-default methods do this; Python\'s `@typing.final` is only checked by type checkers, so here it\'s a convention.)',
     'You want optional extension points (hooks) that most subclasses can safely ignore.',
   ],
   pros: [

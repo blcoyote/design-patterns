@@ -263,7 +263,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Add calls its left child first",
       description:
-        "Add's interpret() evaluates `this.left.interpret(context) + this.right.interpret(context)` — JavaScript evaluates the left operand before the right, so Add calls Variable('x') first and waits for its answer before touching Multiply at all.",
+        "Add's interpret() adds its left child's result to its right child's — TypeScript, C# and Python all evaluate the left operand before the right, so Add calls Variable('x') first and waits for its answer before touching Multiply at all.",
       highlight: ['add', 'addLeft', 'variableX'],
       packets: [{ relation: 'addLeft', label: 'interpret(context)' }],
       code: 'add',

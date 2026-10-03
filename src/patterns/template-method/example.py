@@ -9,8 +9,9 @@ class ReportGenerator(ABC):
 
     # [generate]
     # The template method — fixed skeleton. By convention never overridden;
-    # Python has no `final` keyword to enforce that (Java's `final`, or
-    # C#'s methods being non-virtual by default, would).
+    # Python can't enforce that at runtime (`@typing.final` only lets a type
+    # checker flag overrides — Java's `final`, or C#'s methods being
+    # non-virtual by default, enforce it in the compiler).
     def generate(self) -> str:
         rows = self._fetch_data()
         formatted = self._format_data(rows)

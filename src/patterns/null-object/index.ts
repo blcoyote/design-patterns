@@ -165,7 +165,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Before: null means "no logger"',
       description:
-        'A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed Logger | null, so every call site that wants to log now has to remember to guard it.',
+        'A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed as an optional Logger (Logger | null, ILogger?, Logger | None), so every call site that wants to log now has to remember to guard it.',
       highlight: ['client', 'client-create', 'reportGenerator'],
       packets: [{ relation: 'client-create', label: 'new ReportGenerator(null)' }],
       notes: { reportGenerator: 'logger: null' },
@@ -174,7 +174,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Two guarded calls behave',
       description:
-        'generate() checks if (this.logger != null) before its first two log calls. Since logger really is null here, both checks correctly skip the call and the method carries on safely.',
+        'generate() checks that the logger is not null before its first two log calls. Since logger really is null here, both checks correctly skip the call and the method carries on safely.',
       highlight: ['client', 'client-call', 'reportGenerator'],
       packets: [{ relation: 'client-call', label: 'generate()' }],
       notes: { reportGenerator: 'guards: 2 skipped' },
@@ -185,15 +185,15 @@ export const pattern: PatternDefinition = {
       description:
         'When the report has warnings, generate() calls this.logger.warn(...) directly — whoever added that branch forgot the null check every other call site remembered.',
       highlight: ['reportGenerator'],
-      notes: { reportGenerator: 'warnings: 2' },
+      notes: { reportGenerator: 'warnings: 1' },
       code: 'forgotten',
     },
     {
       title: 'It crashes',
       description:
-        "Because logger is null, .warn() throws TypeError: Cannot read properties of null (reading 'warn'). The exception unwinds past generate() and the whole report is lost — for want of one if.",
+        "Because logger is null, the .warn() call throws (TypeError in TS, NullReferenceException in C#, AttributeError in Python). The exception unwinds past generate() and the whole report is lost — for want of one if.",
       highlight: ['client', 'reportGenerator'],
-      notes: { reportGenerator: '💥 TypeError' },
+      notes: { reportGenerator: '💥 crash' },
       code: 'forgotten',
     },
     {

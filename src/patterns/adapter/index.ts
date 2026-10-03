@@ -120,7 +120,7 @@ export const pattern: PatternDefinition = {
   steps: [
     {
       title: 'Adapter wraps the legacy gateway',
-      description: 'A StripeAdapter is constructed around the existing LegacyStripeGateway instance. From here on, the gateway is only reachable through the adapter.',
+      description: 'A StripeAdapter is constructed around the existing LegacyStripeGateway instance. From here on, the client only ever reaches the gateway through the adapter.',
       highlight: ['adapter', 'wraps', 'adaptee'],
       notes: { adapter: 'wraps gateway' },
       code: 'adapter',

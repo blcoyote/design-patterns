@@ -60,7 +60,7 @@ export const pattern: PatternDefinition = {
       x: 340,
       y: 230,
       width: 170,
-      description: 'Wraps every call to RemoteService. Tracks a failure count and a current mode (Closed, Open or Half-Open) and decides, before each call, whether RemoteService gets touched at all. Here the modes are a plain string enum switched on in one class, not separate State objects (see the State pattern) — fine at this size, worth revisiting if the transition logic grows.',
+      description: 'Wraps every call to RemoteService. Tracks a failure count and a current mode (Closed, Open or Half-Open) and decides, before each call, whether RemoteService gets touched at all. Here the modes are a simple enum switched on in one class, not separate State objects (see the State pattern) — fine at this size, worth revisiting if the transition logic grows.',
     },
     {
       id: 'service',

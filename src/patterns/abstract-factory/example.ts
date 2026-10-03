@@ -73,7 +73,9 @@ function renderDialog(factory: UIFactory) {
 }
 // [/client]
 
-declare function getUserTheme(): 'light' | 'dark'
+function getUserTheme(): 'light' | 'dark' {
+  return 'dark' // stand-in for a real preference lookup
+}
 
 const theme: 'light' | 'dark' = getUserTheme()
 const factory: UIFactory = theme === 'dark' ? new DarkFactory() : new LightFactory()

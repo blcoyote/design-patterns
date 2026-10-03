@@ -6,9 +6,10 @@ import weakref
 # true private fields, so a plain attribute would still be readable via
 # memento._content. Instead the content lives in a module-private
 # WeakKeyDictionary (Python's equivalent of a JS WeakMap), keyed by the
-# memento instance. Nothing outside this module can reach that map, so
-# HistoryShelf has no way to read a memento's content even if it wanted
-# to — it only ever shuffles tokens.
+# memento instance. The leading underscore makes it private by convention
+# only — Python can't enforce it — but the content is kept off the token
+# itself, so HistoryShelf has no accessor to read it: it only ever
+# shuffles tokens.
 class EditorMemento:
     pass
 

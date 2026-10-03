@@ -51,7 +51,7 @@ class ObjectPool(Generic[T]):
         self._max_size = max_size
         self._idle: list[T] = []
         self._in_use: set[T] = set()
-        self._waiting: list[asyncio.Future] = []
+        self._waiting: list[asyncio.Future[T]] = []
         self._created = 0
 
     # [acquire]
@@ -63,7 +63,7 @@ class ObjectPool(Generic[T]):
         if self._idle:
             reused = self._idle.pop()
             self._in_use.add(reused)
-            future: asyncio.Future = loop.create_future()
+            future: asyncio.Future[T] = loop.create_future()
             future.set_result(reused)
             return future
         if self._created < self._max_size:
@@ -85,12 +85,16 @@ class ObjectPool(Generic[T]):
             raise RuntimeError("release() called with an item that is not checked out from this pool")
         self._in_use.discard(item)
         item.reset()  # scrub borrower state before anyone else sees this object
-        if self._waiting:
+        while self._waiting:
             next_waiter = self._waiting.pop(0)
+            # Unlike a JS Promise, an asyncio future can be cancelled (e.g. by
+            # asyncio.wait_for timing out) — skip waiters nobody is listening to.
+            if next_waiter.done():
+                continue
             self._in_use.add(item)
             next_waiter.set_result(item)  # hand it straight to the waiting caller — it never goes idle
-        else:
-            self._idle.append(item)
+            return
+        self._idle.append(item)
     # [/release]
 
     @property

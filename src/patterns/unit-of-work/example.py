@@ -107,7 +107,7 @@ class UnitOfWork:
             self._new_objects = []
             self._dirty_objects = []
             self._removed_objects = []
-        except Exception:
+        except BaseException:  # catch everything, like TS catch (err) — re-raised below
             self._db.rollback_transaction()  # none of the writes above take effect
             raise
     # [/commit]

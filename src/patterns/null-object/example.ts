@@ -5,9 +5,12 @@ interface ReportData {
 interface Report {
   warnings: string[]
 }
-declare function buildReport(data: ReportData): Report
-declare const cleanData: ReportData
-declare const dataWithWarnings: ReportData
+function buildReport(data: ReportData): Report {
+  return { warnings: data.rows.length > 2 ? ['low confidence'] : [] }
+}
+
+const cleanData: ReportData = { rows: [1, 2] }
+const dataWithWarnings: ReportData = { rows: [1, 2, 3] }
 
 // ============================================================
 // Before: "no logger" is represented by null.
@@ -48,7 +51,11 @@ class ReportGeneratorBefore {
 new ReportGeneratorBefore(null).generate(cleanData)
 
 // Crashes the moment a report has warnings:
-new ReportGeneratorBefore(null).generate(dataWithWarnings)
+try {
+  new ReportGeneratorBefore(null).generate(dataWithWarnings)
+} catch (err) {
+  console.log(`crashed: ${(err as Error).message}`)
+}
 // TypeError: Cannot read properties of null (reading 'warn')
 // [/before]
 

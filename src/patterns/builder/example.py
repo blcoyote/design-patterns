@@ -84,7 +84,9 @@ class CurlCommandBuilder:
         return self
 
     def set_query(self, key: str, value: str) -> Self:
-        self._query_parts.append(f'{key}={quote(value)}')
+        # safe="!'()*" makes quote() escape exactly what JS encodeURIComponent does.
+        encoded = quote(value, safe="!'()*")
+        self._query_parts.append(f'{key}={encoded}')
         return self
 
     def set_body(self, body: str) -> Self:
@@ -111,7 +113,7 @@ class RequestDirector:
     def post_json(builder: RequestBuilder, payload: object) -> None:
         builder.set_method('POST')
         builder.set_header('Content-Type', 'application/json')
-        builder.set_body(json.dumps(payload))
+        builder.set_body(json.dumps(payload, separators=(',', ':')))  # compact, like JSON.stringify
 # [/director]
 
 

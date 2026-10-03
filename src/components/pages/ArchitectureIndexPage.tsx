@@ -30,7 +30,7 @@ export function ArchitectureIndexPage() {
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-6xl">
           {architectures.length} architectural patterns,{" "}
-          <span className="bg-gradient-to-r from-rose-300 via-indigo-300 to-lime-300 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-rose-300 via-indigo-300 to-lime-300 bg-clip-text text-transparent">
             animated
           </span>
           .

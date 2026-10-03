@@ -36,7 +36,7 @@ export function Section({
   return (
     <Panel className={`p-4 sm:p-6 ${className}`}>
       <PanelHeading>{title}</PanelHeading>
-      <div className="mt-3 leading-relaxed [overflow-wrap:anywhere] text-slate-300">
+      <div className="mt-3 leading-relaxed wrap-anywhere text-slate-300">
         {children}
       </div>
     </Panel>

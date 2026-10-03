@@ -23,7 +23,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-[96rem] items-center gap-2 px-4 sm:gap-3 sm:px-8">
+      <div className="mx-auto flex h-14 max-w-384 items-center gap-2 px-4 sm:gap-3 sm:px-8">
         <button
           type="button"
           onClick={onMenu}

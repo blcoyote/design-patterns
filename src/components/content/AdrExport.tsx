@@ -149,7 +149,7 @@ export function AdrExport({
       </div>
 
       {open && (
-        <pre className="mt-4 max-h-[32rem] overflow-auto rounded-xl bg-[#011627] p-4 text-xs leading-relaxed whitespace-pre-wrap text-slate-300 ring-1 ring-slate-800">
+        <pre className="mt-4 max-h-128 overflow-auto rounded-xl bg-[#011627] p-4 text-xs leading-relaxed whitespace-pre-wrap text-slate-300 ring-1 ring-slate-800">
           {adr}
         </pre>
       )}

@@ -11,7 +11,7 @@ const BAND_HEIGHT = 56
  * connector where the pipeline drops from the top row down to the bottom row. It is
  * nothing but a visual echo of the straight-line flow the relations already encode.
  */
-export function PipesAndFiltersVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function PipesAndFiltersVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       <rect x={40} y={ROW1_Y - BAND_HEIGHT / 2} width={720} height={BAND_HEIGHT} rx={BAND_HEIGHT / 2} fill="#0f172a" opacity={0.5} />
@@ -37,6 +37,7 @@ export function PipesAndFiltersVisualization({ pattern, color, step, stepIndex, 
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { CodeBlock, type CodeSource } from "@/components/content/CodeBlock";
 import { useCodeLanguage, type CodeLanguage } from "@/hooks/useCodeLanguage";
 import { useStepPlayer } from "@/hooks/useStepPlayer";
 import { resolvePattern } from "@/lib/crossRefs";
 import { parseCode, type ParsedCode } from "@/lib/codeRegions";
+import { stepDuration } from "@/lib/packetTiming";
 import type { ExplorableDefinition } from "@/types/pattern";
 import { findSelection } from "@/lib/selection";
 import { DetailPanel } from "./DetailPanel";
@@ -22,7 +23,11 @@ export function PatternExplorer({
   pattern: ExplorableDefinition;
   color: string;
 }) {
-  const player = useStepPlayer(pattern.steps.length);
+  const durationOf = useCallback(
+    (index: number, speed: number) => stepDuration(pattern.steps[index], speed),
+    [pattern.steps],
+  );
+  const player = useStepPlayer(pattern.steps.length, durationOf);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const step = pattern.steps[player.index] ?? null;
   const selection = findSelection(pattern, selectedId);

@@ -33,7 +33,7 @@ function ServiceBox({ x, y, width, height, label, showDb }: { x: number; y: numb
   )
 }
 
-export function MicroservicesVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function MicroservicesVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g>
       <ServiceBox {...ORDERS_BOX} showDb={true} />
@@ -53,6 +53,7 @@ export function MicroservicesVisualization({ pattern, color, step, stepIndex, se
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

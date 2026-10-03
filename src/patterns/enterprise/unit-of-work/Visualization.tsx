@@ -66,7 +66,7 @@ const DATABASE_CAPTION: Record<Phase, string> = {
   rolledback: 'unchanged — rolled back',
 }
 
-export function UnitOfWorkVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function UnitOfWorkVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
 
   // "Try it" replays a full commit cycle on demand. Tagging the attempt with the
@@ -125,6 +125,7 @@ export function UnitOfWorkVisualization({ pattern, color, step, stepIndex, selec
         selectedId={selectedId}
         onSelect={onSelect}
         animationKey={stepIndex}
+        packetSpeed={speed}
         ariaLabel={`${pattern.name} diagram`}
       />
 

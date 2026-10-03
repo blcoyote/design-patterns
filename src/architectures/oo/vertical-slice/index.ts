@@ -323,7 +323,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['validationBehaviour', 'dispatchToHandler', 'placeOrderHandler', 'persist', 'placeOrderStore'],
       packets: [
         { relation: 'dispatchToHandler', label: 'next(request)' },
-        { relation: 'persist', label: 'save(row)' },
+        { relation: 'persist', label: 'save(row)', after: 0 },
       ],
       notes: { placeOrderStore: 'order-7 saved' },
       code: 'placeOrderHandler',
@@ -334,8 +334,8 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'sendQuery', 'mediator', 'queryToLogging', 'loggingBehaviour', 'queryToValidation', 'validationBehaviour'],
       packets: [
         { relation: 'sendQuery', label: 'GetOrder' },
-        { relation: 'queryToLogging', label: 'next(request)' },
-        { relation: 'queryToValidation', label: 'next(request)' },
+        { relation: 'queryToLogging', label: 'next(request)', after: 0 },
+        { relation: 'queryToValidation', label: 'next(request)', after: 1 },
       ],
       notes: { loggingBehaviour: 'LOG: handling GetOrder', validationBehaviour: 'valid' },
       code: 'usage',
@@ -346,7 +346,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['validationBehaviour', 'queryToHandler', 'getOrderHandler', 'read', 'getOrderStore'],
       packets: [
         { relation: 'queryToHandler', label: 'next(request)' },
-        { relation: 'read', label: 'findById(orderId)' },
+        { relation: 'read', label: 'findById(orderId)', after: 0 },
       ],
       notes: { getOrderStore: 'order-7 found' },
       code: 'getOrderHandler',
@@ -358,8 +358,8 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'sendInvalid', 'mediator', 'invalidToLogging', 'loggingBehaviour', 'invalidToValidation', 'validationBehaviour'],
       packets: [
         { relation: 'sendInvalid', label: 'PlaceOrder (totalCents: 0)' },
-        { relation: 'invalidToLogging', label: 'next(request)' },
-        { relation: 'invalidToValidation', label: 'next(request)' },
+        { relation: 'invalidToLogging', label: 'next(request)', after: 0 },
+        { relation: 'invalidToValidation', label: 'next(request)', after: 1 },
       ],
       notes: { loggingBehaviour: 'LOG: handling PlaceOrder (no "handled")', validationBehaviour: 'rejected: positive totalCents required' },
       code: 'usage',

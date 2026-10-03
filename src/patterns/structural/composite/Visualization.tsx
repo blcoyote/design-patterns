@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useMemo } from 'react'
 import { DEFAULT_VIEWBOX } from '@/components/viz/Diagram'
 import { DiagramEdge, EdgeMarkers } from '@/components/viz/DiagramEdge'
-import { Packet } from '@/components/viz/Packet'
+import { PacketLayer } from '@/components/viz/PacketLayer'
 import { onActivate } from '@/lib/a11y'
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from '@/lib/geometry'
 import type { EdgeGeometry } from '@/lib/geometry'
@@ -159,7 +159,7 @@ function TreeNode({ participant: p, color, active, dimmed, selected, note, icon,
   )
 }
 
-export function CompositeVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function CompositeVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
 
   const byId = useMemo(() => new Map(pattern.participants.map((p) => [p.id, p])), [pattern.participants])
@@ -222,12 +222,7 @@ export function CompositeVisualization({ pattern, color, step, stepIndex, select
         />
       ))}
 
-      <g key={`packets-${stepIndex}`}>
-        {packets.map((pk, i) => {
-          const g = geometry[pk.relation]
-          return g ? <Packet key={`${pk.relation}-${i}`} geometry={g} color={color} label={pk.label} reverse={pk.reverse} delay={i * 0.18} /> : null
-        })}
-      </g>
+      <PacketLayer packets={packets} geometry={geometry} color={color} speed={speed} animationKey={stepIndex} />
     </svg>
   )
 }

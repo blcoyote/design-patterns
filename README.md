@@ -71,12 +71,9 @@ src/
 2. Fill in the text fields, the `participants` (boxes) and `relations` (arrows). Coordinates are box centres in an 800 × 460 viewBox.
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
-   - send `packets` along relations (`reverse: true` for return values),
-
-- sequence packets in shared `Diagram` or `PacketLayer` scenes with `after: 0` to wait for the first packet's animation to finish (indices are zero-based and must point to an earlier packet),
-- show small `notes` badges under participants,
-- highlight a `code` region.
-
+   - send `packets` along relations (`reverse: true` for return values), chained with `after` (see [Animating steps](#animating-steps)),
+   - show small `notes` badges under participants,
+   - highlight a `code` region.
 4. Put the TypeScript example in `example.ts` (imported with `?raw` as `code`; excluded from `tsc` and lint). Mark regions with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
 5. Optionally add `example.cs` (imported with `?raw` as `csharp`) with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as the TypeScript file — `npm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
 6. Optionally add `example.py` (imported with `?raw` as `python`) with an equivalent Python example, shown as another tab. Use the same region ids, written as Python comments: `# [id]` and `# [/id]`. Usage code goes at the bottom, as in TypeScript, and the file should run as-is with `python3 example.py`.
@@ -88,7 +85,34 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
 
-For packet animation, pass `packetSpeed={speed}` to `Diagram`, or use `PacketLayer` from `src/components/viz/PacketLayer.tsx` in a custom SVG with `packets`, relation-keyed `geometry` (a Map or record), `color`, `speed` and `animationKey`. Dependencies start on animation completion, not a fixed stagger; sibling packets with the same `after` value run in parallel. Longer chains use shorter journeys to fit the step interval. Under reduced motion, only terminal packets are shown, without animation. Leave `after` unset for independent packets.
+Every scene must animate packets through the shared timing, never its own `delay`s: pass `packetSpeed={speed}` to `<Diagram>`, or, in a fully custom SVG, render `<PacketLayer>` from `src/components/viz/PacketLayer.tsx` with `packets`, relation-keyed `geometry` (a Map or record), `color`, `speed` and `animationKey={stepIndex}`. Then `after`, the speed control and reduced motion all work, and the step player's timing matches what is on screen.
+
+### Animating steps
+
+A step's packets tell one story, and the viewer has to be able to follow it hop by hop. Packets are timed by `src/lib/packetTiming.ts`:
+
+- **Independent packets** (no `after` anywhere in the step) start together with a small stagger and loop. Use this only for a true broadcast — one sender notifying several receivers, e.g. Observer's `notify()` or a pub/sub fan-out.
+- **A chain** uses `after: <index>`: the packet waits until the earlier packet (zero-based index in the same step, always earlier in the array) has finished travelling. Every hop takes the same time (1.4 s at 1×), so a long chain is never squeezed.
+- **Branches**: several packets with the same `after` start together once that packet lands, e.g. a publish followed by a fan-out.
+
+```ts
+packets: [
+  { relation: 'input', label: 'click' },                // 0
+  { relation: 'delegate', label: 'handleClick()', after: 0 },
+  { relation: 'execute', label: 'execute()', after: 1 },
+  { relation: 'notifyList', label: 'update()', after: 2 }, // branch:
+  { relation: 'notifyCount', label: 'update()', after: 2 }, // both start together
+  { relation: 'execute', label: 'ok', reverse: true, after: 2 },
+]
+```
+
+Rules of thumb:
+
+- Order packets the way the code runs them, and chain anything that is caused by an earlier packet: call → return, request → next hop in a pipeline, result bubbling back up. `npm test` rejects a packet that departs from where an earlier packet in the same step arrives unless it has `after`.
+- If the step text says "first … then …", chain those packets even if they share a sender.
+- Don't use `after` for more than one story per step — split a long scenario into several steps instead.
+
+The step player waits for the animation: each step stays on screen for at least 3.2 s, or longer if its packets need it — every packet runs at least once and then settles for 0.8 s before the next step starts (`stepDuration`). Both scale with the speed control. A chained step loops after a short pause; independent packets loop continuously.
 
 ## Architecture
 

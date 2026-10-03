@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import type { EdgeGeometry } from "@/lib/geometry";
-import { packetAnimationDuration } from "@/lib/packetTiming";
+import {
+  PACKET_HOP,
+  PACKET_STAGGER,
+  packetAnimationDuration,
+} from "@/lib/packetTiming";
 import type { Packet as PacketDef } from "@/types/pattern";
 import { Packet } from "./Packet";
 
@@ -30,7 +34,7 @@ function PacketCycle({
   geometry,
   color,
   speed = 1,
-  stagger = 0.18,
+  stagger = PACKET_STAGGER,
   reduceMotion,
 }: PacketLayerProps & { reduceMotion: boolean }) {
   const sequenced = packets.some((packet) => packet.after !== undefined);
@@ -74,8 +78,12 @@ function PacketCycle({
             color={color}
             label={packet.label}
             reverse={packet.reverse}
-            delay={sequenced ? 0 : index * stagger}
-            duration={sequenced ? packetAnimationDuration(packets, speed) : 1.4}
+            delay={sequenced ? 0 : (index * stagger) / speed}
+            duration={
+              sequenced
+                ? packetAnimationDuration(packets, speed)
+                : PACKET_HOP / speed
+            }
             repeat={!sequenced}
             onComplete={
               sequenced

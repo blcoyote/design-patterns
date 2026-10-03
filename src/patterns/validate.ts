@@ -53,6 +53,27 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
         );
       }
     }
+    // A packet that departs from where an earlier one arrives is the next hop of a chain,
+    // so it must wait for it with `after` instead of flying at the same time.
+    const relationById = new Map(p.relations.map((rel) => [rel.id, rel]));
+    const ends = (step.packets ?? []).map((packet) => {
+      const rel = relationById.get(packet.relation);
+      if (!rel) return null;
+      return packet.reverse
+        ? { from: rel.to, to: rel.from }
+        : { from: rel.from, to: rel.to };
+    });
+    ends.forEach((end, packetIndex) => {
+      if (!end || step.packets![packetIndex].after !== undefined) return;
+      const previous = ends.findIndex(
+        (other, otherIndex) =>
+          otherIndex < packetIndex && other?.to === end.from,
+      );
+      if (previous !== -1)
+        errors.push(
+          `step ${i + 1}: packet ${packetIndex} continues packet ${previous}; sequence it with "after"`,
+        );
+    });
     for (const id of Object.keys(step.notes ?? {})) {
       if (!participantIds.has(id))
         errors.push(`step ${i + 1}: unknown note target "${id}"`);

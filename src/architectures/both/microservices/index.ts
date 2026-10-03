@@ -202,7 +202,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['orders', 'toInventoryClient', 'inventoryClient', 'toInventory', 'inventory'],
       packets: [
         { relation: 'toInventoryClient', label: 'getProduct(sku-1)' },
-        { relation: 'toInventory', label: 'findProduct(sku-1)' },
+        { relation: 'toInventory', label: 'findProduct(sku-1)', after: 0 },
       ],
       notes: { inventory: 'calls: 1', inventoryClient: 'cache populated' },
       code: 'inventoryClient',
@@ -222,9 +222,9 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['orders', 'toBreaker', 'paymentsBreaker', 'toPayments', 'payments', 'toBroker', 'broker', 'toShipping', 'shipping'],
       packets: [
         { relation: 'toBreaker', label: 'call(() => charge)' },
-        { relation: 'toPayments', label: 'charge(order-1, 59.97)' },
-        { relation: 'toBroker', label: 'OrderPlaced' },
-        { relation: 'toShipping', label: 'onOrderPlaced(event)' },
+        { relation: 'toPayments', label: 'charge(order-1, 59.97)', after: 0 },
+        { relation: 'toBroker', label: 'OrderPlaced', after: 1 },
+        { relation: 'toShipping', label: 'onOrderPlaced(event)', after: 2 },
       ],
       notes: { orders: 'order-1: PAID', payments: 'calls: 1', shipping: 'received: 1' },
       code: 'orders',
@@ -236,7 +236,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['orders', 'toBreaker', 'paymentsBreaker', 'toPayments', 'payments'],
       packets: [
         { relation: 'toBreaker', label: 'call(() => charge)' },
-        { relation: 'toPayments', label: 'charge(orderId, total) ✗' },
+        { relation: 'toPayments', label: 'charge(orderId, total) ✗', after: 0 },
       ],
       notes: { payments: 'calls: 4', orders: 'order-4: PAYMENT_FAILED', paymentsBreaker: 'CLOSED → OPEN' },
       code: 'breaker',

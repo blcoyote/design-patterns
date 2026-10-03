@@ -10,7 +10,7 @@ const BROKER_BAND = { x: 330, y: 20, width: 220, height: 520 }
  * reads before a single step plays. The band is purely decorative; EventBroker is
  * still a normal participant positioned inside it.
  */
-export function EventDrivenVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function EventDrivenVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       <rect
@@ -66,6 +66,7 @@ export function EventDrivenVisualization({ pattern, color, step, stepIndex, sele
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

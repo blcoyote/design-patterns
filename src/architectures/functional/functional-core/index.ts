@@ -277,7 +277,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'request', 'handler', 'readClock', 'clock'],
       packets: [
         { relation: 'request', label: 'GET /reminders/run' },
-        { relation: 'readClock', label: 'now()' },
+        { relation: 'readClock', label: 'now()', after: 0 },
       ],
       notes: { clock: 'now: plain Date' },
       code: 'shell',

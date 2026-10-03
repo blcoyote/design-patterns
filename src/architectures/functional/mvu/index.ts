@@ -284,7 +284,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'create', 'msg', 'dispatch', 'runtime'],
       packets: [
         { relation: 'create', label: 'new Msg' },
-        { relation: 'dispatch', label: 'dispatch(msg)' },
+        { relation: 'dispatch', label: 'dispatch(msg)', after: 0 },
       ],
       notes: { msg: '{ type: "add", text: "Buy milk" }' },
       code: 'msg',
@@ -314,7 +314,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['runtime', 'runCmd', 'effects', 'loopBack'],
       packets: [
         { relation: 'runCmd', label: 'perform(save id:1)' },
-        { relation: 'loopBack', label: 'dispatch(saved id:1)' },
+        { relation: 'loopBack', label: 'dispatch(saved id:1)', after: 0 },
       ],
       notes: { effects: 'save → dispatch(saved)', history: 'history: 3 models' },
       code: 'runtime',
@@ -326,7 +326,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['runtime', 'render', 'view', 'notify', 'subs'],
       packets: [
         { relation: 'render', label: 'view(model)' },
-        { relation: 'notify', label: 'notify(rendered)' },
+        { relation: 'notify', label: 'notify(rendered)', after: 0 },
       ],
       notes: { subs: '"[ ] Buy milk\\n(saved #1)"' },
       code: 'view',

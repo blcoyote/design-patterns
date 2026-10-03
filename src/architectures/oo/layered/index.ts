@@ -261,8 +261,8 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['save', 'place', 'http'],
       packets: [
         { relation: 'save', label: 'ok', reverse: true },
-        { relation: 'place', label: 'Order', reverse: true },
-        { relation: 'http', label: '201 Created', reverse: true },
+        { relation: 'place', label: 'Order', reverse: true, after: 0 },
+        { relation: 'http', label: '201 Created', reverse: true, after: 1 },
       ],
       notes: { controller: '201 Created' },
       code: 'controller',

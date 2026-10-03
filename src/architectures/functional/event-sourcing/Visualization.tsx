@@ -36,7 +36,7 @@ const PENDING_STEP = 3
 const APPEND_STEP = 4
 const SNAPSHOT_STEP = 7
 
-export function EventSourcingVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function EventSourcingVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
   const idx = Math.min(stepIndex, TAPE_LENGTH_BY_STEP.length - 1)
 
@@ -69,6 +69,7 @@ export function EventSourcingVisualization({ pattern, color, step, stepIndex, se
         notes={step?.notes}
         selectedId={selectedId}
         onSelect={onSelect}
+        packetSpeed={speed}
         animationKey={stepIndex}
         ariaLabel={`${pattern.name} diagram`}
       />

@@ -295,7 +295,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'query', 'queryHandler', 'read', 'readStore'],
       packets: [
         { relation: 'query', label: 'GetOrderSummary(orderId)' },
-        { relation: 'read', label: 'find(orderId) → (none yet)' },
+        { relation: 'read', label: 'find(orderId) → (none yet)', after: 0 },
       ],
       notes: { readStore: 'not yet projected' },
       code: 'eventualConsistency',
@@ -314,7 +314,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'query', 'queryHandler', 'read', 'readStore'],
       packets: [
         { relation: 'query', label: 'GetOrderSummary(orderId)' },
-        { relation: 'read', label: 'find(orderId) → view', reverse: false },
+        { relation: 'read', label: 'find(orderId) → view', reverse: false, after: 0 },
       ],
       notes: { readStore: 'up to date' },
       code: 'eventualConsistency',

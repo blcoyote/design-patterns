@@ -260,7 +260,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['model', 'notifyList', 'notifyCount', 'listView', 'countView'],
       packets: [
         { relation: 'notifyList', label: 'update(model)' },
-        { relation: 'notifyCount', label: 'update(model)' },
+        { relation: 'notifyCount', label: 'update(model)', after: 0 },
       ],
       notes: { model: 'notifying 2 observers' },
       code: 'model',
@@ -279,9 +279,11 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['user', 'input', 'listView', 'delegate', 'controller', 'dispatch', 'command', 'execute', 'model', 'notifyList', 'notifyCount', 'countView'],
       packets: [
         { relation: 'input', label: 'click checkbox #1' },
-        { relation: 'delegate', label: 'handleToggleClick(1)' },
-        { relation: 'dispatch', label: 'new ToggleTodoCommand(1)' },
-        { relation: 'execute', label: 'execute(model)' },
+        { relation: 'delegate', label: 'handleToggleClick(1)', after: 0 },
+        { relation: 'dispatch', label: 'new ToggleTodoCommand(1)', after: 1 },
+        { relation: 'execute', label: 'execute(model)', after: 2 },
+        { relation: 'notifyList', label: 'update(model)', after: 3 },
+        { relation: 'notifyCount', label: 'update(model)', after: 4 },
       ],
       notes: { model: 'todo 1 toggled', listView: '[x] Buy milk', countView: '0 remaining' },
       code: 'usage',

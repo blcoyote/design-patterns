@@ -17,7 +17,7 @@ const BANDS = [
  * plays. Participants in index.ts are positioned to sit inside their band; this
  * underlay just draws the bands behind them.
  */
-export function MvcVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function MvcVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       {BANDS.map((band) => (
@@ -57,6 +57,7 @@ export function MvcVisualization({ pattern, color, step, stepIndex, selectedId, 
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

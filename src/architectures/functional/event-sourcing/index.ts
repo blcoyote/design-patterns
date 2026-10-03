@@ -228,7 +228,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['decide', 'replay', 'fold', 'load', 'store'],
       packets: [
         { relation: 'replay', label: 'replay()' },
-        { relation: 'load', label: 'load(stream)' },
+        { relation: 'load', label: 'load(stream)', after: 0 },
       ],
       notes: { fold: 'balance 0 → 100' },
       code: 'fold',

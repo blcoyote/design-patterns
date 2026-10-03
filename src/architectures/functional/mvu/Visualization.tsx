@@ -39,7 +39,7 @@ function pointAt(t: number) {
   return { x: a.x + (b.x - a.x) * frac, y: a.y + (b.y - a.y) * frac }
 }
 
-export function MvuVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function MvuVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
   const idx = Math.min(stepIndex, MARKER_BY_STEP.length - 1)
   const markerT = MARKER_BY_STEP[idx] / (CYCLE.length - 1)
@@ -92,6 +92,7 @@ export function MvuVisualization({ pattern, color, step, stepIndex, selectedId, 
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       overlay={overlay}

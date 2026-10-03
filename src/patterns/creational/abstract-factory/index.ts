@@ -249,7 +249,7 @@ export const pattern: PatternDefinition = {
       ],
       packets: [
         { relation: "lf-creates-button", label: "new LightButton()" },
-        { relation: "lf-creates-checkbox", label: "new LightCheckbox()" },
+        { relation: "lf-creates-checkbox", label: "new LightCheckbox()", after: 0 },
       ],
       notes: { button: "light variant", checkbox: "light variant" },
       code: "lightFactory",

@@ -45,6 +45,7 @@ Follow these every time. If a task seems to need a different route, stop and ask
 - **Collection semantics:** remove-first vs remove-all, iterating a live list vs a snapshot. Keep them identical across languages.
 - **Comments:** a comment claiming something ("upsert", "never overridden", "cursor: 0") must be literally true in that language. Example: in C#, a method marked `virtual` can be overridden.
 - **Step notes:** values in `notes` (counts, cursors, totals) must be reproducible by running the example.
+- **Animation order:** packets in a step play in the order the code runs. Chain cause → effect with `after` (call → return, hop → next hop); leave packets parallel only for a true broadcast. Custom scenes use `Diagram`'s `packetSpeed={speed}` or `PacketLayer`, never hand-rolled packet delays. See README → "Animating steps".
 
 ### 4. Verify before you call it done
 

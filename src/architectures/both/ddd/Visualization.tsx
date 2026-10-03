@@ -11,7 +11,7 @@ const SHIPPING_BOX = { x: 560, y: 110, width: 320, height: 400 }
  * plays. The ACL participant is positioned to straddle that seam in index.ts; this
  * underlay just draws the regions and seam behind it.
  */
-export function DddVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function DddVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       <rect
@@ -79,6 +79,7 @@ export function DddVisualization({ pattern, color, step, stepIndex, selectedId, 
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

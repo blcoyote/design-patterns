@@ -290,7 +290,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['appService', 'load', 'orderRepo', 'manages', 'order'],
       packets: [
         { relation: 'load', label: 'findById(orderId)' },
-        { relation: 'load', label: 'Order', reverse: true },
+        { relation: 'load', label: 'Order', reverse: true, after: 0 },
       ],
       notes: { orderRepo: 'loading' },
       code: 'orderRepo',
@@ -333,7 +333,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['orderPlaced', 'cross', 'acl', 'translate', 'shipping'],
       packets: [
         { relation: 'cross', label: 'OrderPlaced' },
-        { relation: 'translate', label: 'ShipmentRequested' },
+        { relation: 'translate', label: 'ShipmentRequested', after: 0 },
       ],
       notes: { acl: 'translates', shipping: 'ShipmentRequested received' },
       code: 'acl',

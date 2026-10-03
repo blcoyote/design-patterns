@@ -12,7 +12,7 @@ const LAYER_LINES = [245, 345]
  * The point lands before a single step plays: this architecture cuts by
  * feature (the bands), not by technical layer (the lines).
  */
-export function VerticalSliceVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function VerticalSliceVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       {LAYER_LINES.map((y) => (
@@ -72,6 +72,7 @@ export function VerticalSliceVisualization({ pattern, color, step, stepIndex, se
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

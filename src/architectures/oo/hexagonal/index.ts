@@ -348,8 +348,8 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['reqHttp', 'portToService', 'repoCall'],
       packets: [
         { relation: 'repoCall', label: 'ok', reverse: true },
-        { relation: 'portToService', label: 'Order', reverse: true },
-        { relation: 'reqHttp', label: '201 Created', reverse: true },
+        { relation: 'portToService', label: 'Order', reverse: true, after: 0 },
+        { relation: 'reqHttp', label: '201 Created', reverse: true, after: 1 },
       ],
       notes: { httpController: '201 Created' },
       code: 'controller',
@@ -361,7 +361,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['testHarness', 'reqTest', 'placeOrderPort', 'orderRepoPort', 'memSave', 'inMemoryAdapter'],
       packets: [
         { relation: 'reqTest', label: 'execute(command)' },
-        { relation: 'memSave', label: 'saved.push(order)' },
+        { relation: 'memSave', label: 'saved.push(order)', after: 0 },
       ],
       notes: { inMemoryAdapter: '1 order, 0 infrastructure' },
       code: 'test',

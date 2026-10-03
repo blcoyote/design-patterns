@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { findMarkerErrors, parseCode } from "@/lib/codeRegions";
-import { packetAnimationDuration } from "@/lib/packetTiming";
+import {
+  packetAnimationDuration,
+  packetTimeline,
+  stepDuration,
+} from "@/lib/packetTiming";
 import type { PatternDefinition } from "@/types/pattern";
 import { patterns } from "./registry";
 import { validatePattern } from "./validate";
@@ -169,6 +173,24 @@ describe("packet dependencies", () => {
     );
   });
 
+  it("rejects an unsequenced chain", () => {
+    const invalid = {
+      ...singleton,
+      steps: [
+        {
+          ...singleton.steps[1],
+          packets: [
+            { relation: "user-get" },
+            { relation: "user-get", reverse: true },
+          ],
+        },
+      ],
+    };
+    expect(validatePattern(invalid)).toContain(
+      'step 1: packet 1 continues packet 0; sequence it with "after"',
+    );
+  });
+
   it("rejects a dependency on the packet itself", () => {
     const invalid = {
       ...singleton,
@@ -206,21 +228,37 @@ describe("packet sequence timing", () => {
     ).toBe(1.4);
   });
 
+  const baseStep = { title: "", description: "", highlight: [] };
+  const chain = [
+    { relation: "request" },
+    { relation: "cache", after: 0 },
+    { relation: "database", after: 1 },
+    { relation: "result", after: 2 },
+    { relation: "populate", after: 3 },
+  ];
+
+  it("keeps every hop of a long chain at a readable speed", () => {
+    expect(packetAnimationDuration(chain)).toBe(1.4);
+  });
+
   it.each([0.5, 1, 2])(
-    "fits a long chain within its step at speed %s",
+    "holds a step until its whole chain has run at speed %s",
     (speed) => {
-      const packets = [
-        { relation: "request" },
-        { relation: "cache", after: 0 },
-        { relation: "database", after: 1 },
-        { relation: "result", after: 2 },
-        { relation: "populate", after: 3 },
-      ];
-      expect(
-        packetAnimationDuration(packets, speed) * packets.length,
-      ).toBeCloseTo(2.8 / speed);
+      const duration = stepDuration({ ...baseStep, packets: chain }, speed);
+      expect(duration).toBeGreaterThan(packetTimeline(chain, speed) * 1000);
+      expect(duration).toBeCloseTo((5 * 1400 + 800) / speed);
     },
   );
+
+  it("keeps the base interval for short steps", () => {
+    expect(stepDuration({ ...baseStep, packets: [] }, 2)).toBe(1600);
+    expect(
+      stepDuration({
+        ...baseStep,
+        packets: [{ relation: "a" }, { relation: "b" }],
+      }),
+    ).toBe(3200);
+  });
 });
 
 describe("findMarkerErrors", () => {

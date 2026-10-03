@@ -10,32 +10,32 @@ export const pattern: PatternDefinition = {
   order: 1,
   summary: 'Wrap an incompatible interface so existing client code can use it unchanged.',
   intent:
-    'Convert the interface of a class into another interface clients expect. Adapter lets classes work together that could not otherwise because of incompatible interfaces.',
+    'Wrap an object with an incompatible interface so that existing code can use it as if it matched.',
   problem:
-    'Your checkout code is written against a clean PaymentProcessor interface, but the payment provider you were just handed only exposes a legacy, cents-based API with a completely different method name and shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.',
+    'Your checkout code is written against a clean PaymentProcessor interface. But the payment provider you were handed only offers a legacy, cents-based API with a different method name and a different shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.',
   solution:
-    'Introduce an Adapter that implements the interface your client already expects, and holds an instance of the incompatible class internally. The adapter translates each call — converting arguments, invoking the legacy method, and converting the result back — so neither the client nor the legacy class needs to know about the other. This is the object adapter form, built on composition and holding the adaptee as a field; a class adapter instead inherits from the adaptee, which only works in languages with multiple inheritance and ties the adapter to one concrete adaptee class.',
+    'Write an Adapter that implements the interface your client already expects and holds an instance of the incompatible class (the adaptee) inside it. The adapter translates each call: it converts the arguments, calls the legacy method, and converts the result back. Neither the client nor the legacy class needs to know about the other. This is the object adapter form, built on composition (the adaptee is a field). A class adapter would instead inherit from the adaptee, which only works in languages with multiple inheritance and ties the adapter to one concrete adaptee class.',
   analogy:
-    'A travel power plug adapter does not change what your laptop charger does, and it does not change the wall socket. It just sits between them, translating one physical shape into the other.',
+    'A travel power plug adapter does not change what your laptop charger does, and it does not change the wall socket. It just sits between them and turns one physical shape into the other.',
   whenToUse: [
-    'You want to use an existing class but its interface does not match what the rest of your code expects.',
-    'You are integrating a third-party or legacy library you cannot modify.',
-    'You want to create a reusable class that cooperates with unrelated or unforeseen classes.',
+    'You want to use an existing class, but its interface does not match what the rest of your code expects.',
+    'You are integrating a third-party or legacy library that you cannot modify.',
+    'You want a reusable class that can cooperate with unrelated or unforeseen classes.',
   ],
   pros: [
-    'Lets incompatible interfaces work together without changing either side.',
+    'Incompatible interfaces can work together without changing either side.',
     'Single Responsibility: the translation logic lives in one place.',
-    'Open/Closed: new adapters can be introduced without touching existing client code.',
+    'Open/Closed: you can add new adapters without touching existing client code.',
   ],
   cons: [
-    'Adds an extra layer of indirection and a class to maintain.',
-    'Can hide a poor underlying API rather than fixing the real problem.',
+    'It adds an extra layer of indirection and one more class to maintain.',
+    'It can hide a poor underlying API instead of fixing the real problem.',
   ],
   realWorld: [
-    'Node.js util.promisify()/util.callbackify() adapting between callback-based and Promise-based function signatures',
-    'Node.js Readable.toWeb()/Readable.fromWeb() adapting between Node streams and the Web Streams API',
-    'ORMs adapting different database drivers to one query interface',
-    'Payment SDKs wrapping each provider’s raw HTTP API behind a common interface',
+    'Node.js util.promisify() and util.callbackify(), which adapt between callback-based and Promise-based function signatures',
+    'Node.js Readable.toWeb() and Readable.fromWeb(), which adapt between Node streams and the Web Streams API',
+    'ORMs that adapt different database drivers to one query interface',
+    'Payment SDKs that wrap each provider’s raw HTTP API behind a common interface',
   ],
   related: ['bridge', 'decorator', 'facade', 'proxy'],
   participants: [

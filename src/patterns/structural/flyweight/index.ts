@@ -12,34 +12,33 @@ export const pattern: PatternDefinition = {
   summary:
     "Share common state across many objects to keep large numbers of them cheap.",
   intent:
-    "Use sharing to support large numbers of fine-grained objects efficiently, by factoring out the state they have in common.",
+    'Save memory by sharing the common parts of many similar objects instead of storing a copy in each one.',
   problem:
-    "A map editor needs to render a forest of thousands of trees, or a text editor needs an object per character on the page. If every Tree or every Glyph stores its own copy of the species texture or the font outline, memory use explodes — even though most of that data is identical across every instance and only the position, age or scale truly differs.",
+    "A map editor needs to draw a forest of thousands of trees, or a text editor needs an object for every character on the page. If every Tree or Glyph stores its own copy of the species texture or the font outline, memory use explodes. Most of that data is identical across instances, and only the position, age or scale really differs.",
   solution:
-    "Split each object's state into intrinsic state (shared, context-independent — the texture, the font outline) and extrinsic state (unique per instance — position, age, scale). Move the intrinsic state into a small set of shared Flyweight objects handed out by a factory that caches them by key, and keep only the extrinsic state in the many lightweight context objects. The same flyweight instance is reused by every object that needs that particular combination of shared data.",
+    "Split each object's state into intrinsic state (shared and independent of context, like the texture or font outline) and extrinsic state (unique to each instance, like position, age or scale). Move the intrinsic state into a small set of shared Flyweight objects, handed out by a factory that caches them by key. The many lightweight context objects keep only the extrinsic state. Every object that needs a given combination of shared data reuses the same flyweight instance.",
   analogy:
-    'A print shop keeps one metal stamp per letter and reuses it everywhere that letter appears on the page, instead of casting a brand-new stamp for every single occurrence of "e".',
+    'A print shop keeps one metal stamp per letter and reuses it everywhere that letter appears on the page. It does not cast a brand-new stamp for every single "e".',
   whenToUse: [
-    "An application needs to create a very large number of similar objects that strain memory.",
-    "Most of an object's state can be made extrinsic — passed in rather than stored.",
+    "Your application creates a huge number of similar objects, and they strain memory.",
+    "Most of an object's state can be made extrinsic, meaning it is passed in rather than stored.",
     "Objects can be grouped by a small set of shared, immutable properties.",
-    "Object identity does not matter to callers — they only care that the shared state is correct, not whether two references point at the exact same instance.",
+    "Object identity does not matter to callers. They only care that the shared state is correct, not whether two references point at the same instance.",
   ],
   pros: [
-    "Sharply reduces memory use when many objects share the same underlying data.",
-    "Centralizes intrinsic state, so it is only ever built and validated once per variant.",
-    "Different from an object pool: a pool lends out exclusive, mutable objects that the borrower can change and must return, while flyweights are shared, immutable, and never owned by any one caller.",
+    "It sharply reduces memory use when many objects share the same underlying data.",
+    "Intrinsic state is built and validated only once per variant.",
+    "Not the same as an object pool: a pool lends out exclusive, mutable objects that the borrower can change and must return, while flyweights are shared, immutable, and never owned by any one caller.",
   ],
   cons: [
-    "Adds complexity: state must be split into intrinsic/extrinsic, and extrinsic data threaded through method calls.",
+    "It adds complexity: you must split state into intrinsic and extrinsic, and pass the extrinsic data through method calls.",
     "Recomputing or passing extrinsic state on every call can trade memory for extra CPU work.",
-    "Only pays off once the instance count is large enough to matter — used too early it is just indirection.",
+    "It only pays off once the instance count is large enough to matter. Used too early, it is just indirection.",
   ],
   realWorld: [
-    "Glyph rendering in text editors and browsers — one font-glyph object reused for every occurrence of a character.",
-    "Game engines and map renderers that reuse a handful of mesh/texture objects across thousands of trees, rocks or units.",
-    "String interning — Java string literals and String.intern(), or Python's sys.intern(), share one underlying instance for equal strings.",
-    "Map libraries caching a handful of marker/icon objects reused across thousands of pins.",
+    "Glyph rendering in text editors and browsers, where one font-glyph object is reused for every occurrence of a character",
+    "Game engines and map renderers that reuse a handful of mesh or texture objects across thousands of trees, rocks or units",
+    "String interning: Java string literals and String.intern(), or Python's sys.intern(), share one underlying instance for equal strings",
   ],
   related: ["object-pool", "proxy", "composite", "factory-method"],
 

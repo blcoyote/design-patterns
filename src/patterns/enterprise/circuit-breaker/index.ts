@@ -12,27 +12,27 @@ export const pattern: PatternDefinition = {
   summary:
     "Stop hammering a failing dependency — fail fast until it has had a chance to recover.",
   intent:
-    "Wrap calls to a remote or unreliable dependency so that once it starts failing, further calls fail immediately instead of piling up — then automatically test the water and resume once it recovers.",
+    "Stop calling a failing dependency for a while so errors fail fast, then carefully try again to see if it has recovered.",
   problem:
-    "A downstream service starts timing out. Every caller still dutifully waits out the full timeout before giving up, so threads, connections and queues fill up with requests that are almost certainly doomed. The failure of one dependency cascades into the caller, and then into the caller's callers, until the whole system is slow or down — even the parts that have nothing to do with the original problem.",
+    "A service you depend on starts timing out. Every caller still waits out the full timeout before giving up, so threads, connections and queues fill up with requests that will almost certainly fail. One failing dependency slows its caller, then the caller's callers, until the whole system is slow or down, even the parts that have nothing to do with the original problem.",
   solution:
-    "Put a CircuitBreaker in front of every call to the dependency. While things are healthy it is Closed and simply forwards calls through. Once failures cross a threshold, it trips to Open: every call bounces off the breaker immediately, with no attempt to reach the dependency at all. After a cooldown period it moves to Half-Open and lets exactly one trial call through — success closes the breaker again, failure sends it straight back to Open for another cooldown.",
+    "Put a CircuitBreaker in front of every call to the dependency. While things are healthy it is Closed and simply passes calls through. Once failures reach a threshold, it trips to Open: every call is rejected immediately, and the dependency is not contacted at all. After a cooldown period it moves to Half-Open and lets exactly one trial call through. If that call succeeds, the breaker closes again. If it fails, the breaker goes straight back to Open for another cooldown.",
   analogy:
-    "An electrical circuit breaker in a house. A short circuit could keep drawing current and burn the wiring down, so the breaker trips and cuts the circuit instead. Nobody can use that circuit until someone resets it — which they only do once they believe the short has been fixed.",
+    "Think of the circuit breaker in a house. A short circuit could keep drawing current and burn the wiring, so the breaker trips and cuts the power. A real breaker waits for a person to flip it back once the fault is fixed. The software version resets itself: after a cooldown it lets one trial call through to check whether the problem is gone.",
   whenToUse: [
     "Calls cross a network to a dependency that can become slow or unavailable (another service, a database, a third-party API).",
-    "A failing dependency risks exhausting threads, connections or queues in the caller while everyone waits for it to time out.",
-    "You want the system to detect recovery and resume automatically, without a human flipping a switch.",
+    "A failing dependency could use up threads, connections or queues in the caller while everyone waits for timeouts.",
+    "You want the system to notice recovery and resume on its own, without a human flipping a switch.",
   ],
   pros: [
     "Fails fast once a dependency is known to be unhealthy, instead of making every caller wait out a full timeout.",
-    "Stops a cascading failure in one dependency from exhausting resources in everything upstream of it.",
-    "Recovers on its own: a Half-Open trial call is all it takes to notice the dependency is healthy again.",
+    "Stops one dependency's failure from cascading and exhausting resources in everything upstream of it.",
+    "Recovers by itself: a single Half-Open trial call is enough to notice that the dependency is healthy again.",
   ],
   cons: [
-    "Adds another layer of state (and configuration — threshold, cooldown) that has to be tuned per dependency.",
-    "A too-aggressive threshold can trip on a brief blip; a too-lenient one defeats the point of having a breaker at all.",
-    "Callers need a sensible fallback for the Open state — fail fast still means failing, and something has to handle that.",
+    "Adds another layer of state and settings (threshold, cooldown) that must be tuned for each dependency.",
+    "A threshold that is too low can trip on a brief blip. One that is too high defeats the point of having a breaker.",
+    "Callers need a sensible fallback for the Open state. Failing fast is still failing, and something has to handle it.",
   ],
   realWorld: [
     "Netflix Hystrix — the library that popularized the pattern for service-to-service calls",

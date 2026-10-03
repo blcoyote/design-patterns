@@ -11,30 +11,30 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: "Encapsulate interchangeable algorithms and swap them at runtime.",
   intent:
-    "Define a family of interchangeable algorithms, encapsulate each one, and make them interchangeable behind a common interface so the code that uses them never has to change.",
+    'Put each way of doing a job behind a common interface, so you can swap one for another without changing the code that uses it.',
   problem:
-    'A navigation app needs to compute a route, but "fastest", "shortest" and "scenic" are three genuinely different algorithms. Cramming all three into one method behind a big if/else means every new option edits the same tangled function, and there is no clean way to let a caller choose or change the algorithm at runtime.',
+    'A navigation app has to compute a route, but "fastest", "shortest" and "scenic" are three genuinely different algorithms. If you cram all three into one method behind a big if/else, every new option edits that same tangled function. There is also no clean way to let the caller choose, or change, the algorithm while the app runs.',
   solution:
-    "Extract each algorithm into its own class implementing a shared Strategy interface. The Context (Navigator) holds a reference to the current strategy and delegates to it — it never branches on type, and setStrategy() lets any caller swap the algorithm at any time, even mid-session.",
+    "Move each algorithm into its own class that implements a shared Strategy interface. The Context (here, Navigator) holds a reference to the current strategy and hands the work to it. It never checks which kind of strategy it has. Calling setStrategy() swaps the algorithm at any time, even in the middle of a session.",
   analogy:
-    "Choosing how to get across town: walking, biking, or driving. The destination never changes, but each strategy gets you there differently — and you can change your mind about which one to use right up until you leave.",
+    "Choosing how to get across town: walk, bike or drive. The destination stays the same, but each option gets you there in a different way. You can change your mind about which one to use right up until you leave.",
   whenToUse: [
-    "You have several variants of an algorithm and want to choose between them at runtime.",
-    "A class is bloated with conditional logic that only selects between related behaviors.",
+    "You have several variants of an algorithm and want to pick between them at runtime.",
+    "A class is bloated with conditional logic that only chooses between related behaviors.",
     "You want to add new algorithms without touching the code that uses them (Open/Closed).",
   ],
   pros: [
-    "Swaps algorithms at runtime without changing the context.",
-    "Eliminates large conditional blocks that select between related behaviors.",
+    "You can swap algorithms at runtime without changing the context.",
+    "Large conditional blocks that choose between related behaviors go away.",
     "New strategies can be added without touching existing ones (Open/Closed).",
   ],
   cons: [
-    "Clients must be aware of the different strategies to pick the right one.",
-    "Adds extra classes and indirection for what might be a simple choice.",
-    "Strategies cannot usually share logic unless factored into a common base.",
+    "Clients must know the different strategies to pick the right one.",
+    "It adds extra classes and indirection, which is a lot for a simple choice.",
+    "Strategies usually cannot share logic unless you factor it into a common base.",
   ],
   realWorld: [
-    "Array.prototype.sort(compareFn) — the comparator is a swappable strategy",
+    "Array.prototype.sort(compareFn): the comparator is a swappable strategy",
     "Passport.js authentication strategies (local, OAuth, JWT, …)",
     "Payment processing: choosing between card, wallet, or bank-transfer gateways",
     "Compression libraries that let you pick zip, gzip, or brotli at call time",

@@ -12,27 +12,27 @@ export const pattern: PatternDefinition = {
   summary:
     "Decouple publishers from subscribers behind a broker that routes messages by topic.",
   intent:
-    "Let senders publish messages to named topics without knowing who — if anyone — is listening, and let listeners subscribe to topics without knowing who publishes to them.",
+    "Let publishers send messages to named topics and subscribers listen to them, with a broker in between so neither side knows the other.",
   problem:
-    "CheckoutService needs to trigger a receipt email, an analytics event and an inventory update whenever an order is placed. Calling each of those services directly means CheckoutService has to import all three, know their APIs, and grow a new call every time another part of the system wants to react to an order — and the same tangle repeats for every other kind of event in the app.",
+    "CheckoutService must trigger a receipt email, an analytics event and an inventory update whenever an order is placed. Calling each of those services directly means CheckoutService has to import all three, know their APIs, and add a new call every time another part of the system wants to react to an order. The same tangle repeats for every other kind of event in the app.",
   solution:
-    "Introduce a broker — the EventBus — that sits between everyone. Publishers call publish(topic, payload) on the bus and never call a subscriber directly. Subscribers call subscribe(topic, handler) on the same bus and get back an unsubscribe function. The bus is the only thing either side depends on, and it only ever deals in topic names and payloads, never concrete classes.",
+    "Introduce a broker, here the EventBus, that sits between everyone. Publishers call publish(topic, payload) on the bus and never call a subscriber directly. Subscribers call subscribe(topic, handler) on the same bus and get back an unsubscribe function. The bus is the only thing either side depends on, and it deals only in topic names and payloads, never in concrete classes.",
   analogy:
-    "A radio station: a presenter broadcasts on a frequency without knowing who owns a radio tuned to it, and a listener tunes in without knowing — or caring — which studio is transmitting. Switch the dial (unsubscribe) and the broadcast keeps right on going for everyone else.",
+    "A radio station broadcasts on a frequency without knowing who has a radio tuned to it, and a listener tunes in without knowing or caring which studio is transmitting. If one listener switches the dial (unsubscribes), the broadcast carries on for everyone else.",
   whenToUse: [
     "Many unrelated parts of the system need to react to the same event, and that list keeps growing.",
-    "Publishers and subscribers are built, deployed or owned independently and should not import each other.",
+    "Publishers and subscribers are built, deployed or owned separately and should not import each other.",
     "You want to add or remove a reaction to an event without touching the code that raises it.",
   ],
   pros: [
-    "Publishers and subscribers are decoupled from each other — neither references the other's type — though both are still coupled to the topic/payload contract.",
-    "New subscribers can be added, or removed, without changing a single publisher.",
-    "One topic can fan out to any number of handlers, including zero.",
+    "Publishers and subscribers are decoupled: neither references the other's type. Both are still tied to the topic and payload contract.",
+    "New subscribers can be added or removed without changing a single publisher.",
+    "One topic can fan out to any number of handlers, including none.",
   ],
   cons: [
     'Harder to trace: reading publish("order.placed", …) alone does not tell you what will run.',
-    "Delivery order and timing are implementation-defined, and one slow handler can delay the others unless dispatch is made async.",
-    "A typo in a topic name fails silently — nothing was subscribed, nothing happens, no error.",
+    "Delivery order and timing depend on the implementation, and one slow handler can delay the others unless dispatch is made async.",
+    "A typo in a topic name fails silently: nobody is subscribed, so nothing happens and there is no error.",
   ],
   realWorld: [
     "Apache Kafka and other log-based message brokers",

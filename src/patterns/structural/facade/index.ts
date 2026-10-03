@@ -10,32 +10,32 @@ export const pattern: PatternDefinition = {
   order: 3,
   summary: 'Offer one simple entry point in front of a complicated subsystem.',
   intent:
-    'Provide a unified, higher-level interface to a set of interfaces in a subsystem, making the subsystem easier to use.',
+    "Offer one simple interface in front of a complicated subsystem, so clients don't have to coordinate its many parts.",
   problem:
-    'Watching a movie means turning on the amplifier and setting its volume, powering on the projector and switching it to widescreen, lowering the screen, and starting the DVD player, in the right order. Every call site that wants to watch a movie would need to know all four subsystems intimately and get the sequence right.',
+    'Watching a movie means lowering the screen, powering on the projector and switching it to widescreen, turning on the amplifier and setting its volume, and starting the DVD player, in the right order. Every place that wants to play a movie would need to know all four subsystems well and get the sequence right.',
   solution:
-    'Add a HomeTheaterFacade with one method, watchMovie(), that owns references to all four subsystem objects and calls them in the correct order. Client code now depends on a single simple method instead of four classes and their protocol.',
+    'Add a HomeTheaterFacade with one method, watchMovie(). It holds references to all four subsystem objects and calls them in the correct order. Client code now depends on one simple method instead of four classes and the rules for using them together.',
   analogy:
-    'A restaurant front counter: you order "the lunch special" and the cashier coordinates the grill, the fryer and the drinks station behind the scenes. You never have to talk to the kitchen directly.',
+    'Think of a restaurant front counter. You order "the lunch special" and the cashier coordinates the grill, the fryer and the drinks station behind the scenes. You never have to talk to the kitchen directly.',
   whenToUse: [
     'You want a simple entry point into a complex subsystem with many moving parts.',
-    'You want to decouple client code from subsystem internals so the subsystem can change freely.',
+    'You want client code to stay independent of the subsystem internals, so the subsystem can change freely.',
     'You are layering a system and want a clear API at the boundary of each layer.',
   ],
   pros: [
-    'Shields client code from subsystem complexity and internal changes.',
-    'Promotes loose coupling between clients and the subsystem.',
-    'Does not prevent advanced clients from using subsystem classes directly if they need to.',
+    'Client code is shielded from the subsystem’s complexity and from changes inside it.',
+    'Clients and the subsystem are loosely coupled.',
+    'Advanced clients can still use the subsystem classes directly if they need to.',
   ],
   cons: [
-    'Can become a "god object" coupled to every class in the subsystem.',
-    'Adds a layer that still needs to be kept in sync with the subsystem it wraps.',
+    'The facade can grow into a "god object" coupled to every class in the subsystem.',
+    'It is one more layer that you must keep in sync with the subsystem it wraps.',
   ],
   realWorld: [
-    'jQuery wrapping raw DOM APIs behind a simpler interface',
+    'jQuery, which wraps raw DOM APIs behind a simpler interface',
     'A checkout() service that coordinates inventory, payment and shipping subsystems',
-    'An SDK\'s top-level client class hiding networking, auth and retry logic',
-    'The C standard library (e.g. fopen/fread) facading raw OS syscalls',
+    'An SDK’s top-level client class that hides networking, auth and retry logic',
+    'The C standard library (e.g. fopen/fread), which wraps lower-level OS calls',
   ],
   related: ['adapter', 'mediator', 'repository', 'proxy'],
   participants: [

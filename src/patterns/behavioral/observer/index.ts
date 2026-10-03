@@ -10,27 +10,27 @@ export const pattern: PatternDefinition = {
   order: 1,
   summary: 'Let many objects subscribe to, and react to, changes in another object.',
   intent:
-    'Define a one-to-many dependency so that when one object changes state, all its dependents are notified and updated automatically.',
+    'Let an object announce its changes to any number of subscribers, without knowing who they are.',
   problem:
-    'Several parts of an application need to react when some data changes — a chart, a table and a badge all show the same stock price. Polling wastes work, and hard-wiring the data source to each view couples it to every consumer.',
+    'Several parts of an app need to react when some data changes. For example, a chart, a table and a badge all show the same stock price. Asking the data source over and over ("polling") wastes work. Wiring the data source directly to each view ties it to every one of them, so it has to change whenever a view is added or removed.',
   solution:
-    'The Subject keeps a list of Observers behind a tiny interface (update). Observers subscribe and unsubscribe themselves at runtime. When the Subject changes it loops over the list and calls update on each one — it never needs to know their concrete types.',
+    'The Subject keeps a list of Observers, and every Observer follows one tiny interface with a single update method. Observers subscribe and unsubscribe themselves while the program runs. When the Subject changes, it loops over its list and calls update on each Observer. It never needs to know their concrete types.',
   analogy:
-    'A newsletter: readers subscribe once, and every new issue is delivered to all current subscribers. The publisher does not care who the readers are, and anyone can unsubscribe at any time.',
+    'Think of a newsletter. Readers sign up once, and every new issue goes to everyone currently subscribed. The publisher does not care who the readers are, and any reader can unsubscribe at any time.',
   whenToUse: [
-    'A change in one object requires changing others, and you do not know how many in advance.',
-    'Consumers should be able to subscribe and unsubscribe dynamically.',
-    'You want the source of data to stay decoupled from its presentations.',
+    'A change in one object forces changes in others, and you do not know in advance how many others.',
+    'Listeners should be able to subscribe and unsubscribe while the program runs.',
+    'You want the source of the data kept independent from the ways it is shown or used.',
   ],
   pros: [
-    'Open/Closed: add new observers without touching the subject.',
-    'Loose coupling — the subject only knows the Observer interface.',
-    'Relationships can be established at runtime.',
+    'Open/Closed: you can add new observers without touching the subject.',
+    'Loose coupling: the subject only knows the Observer interface, not the concrete classes.',
+    'Subscriptions can be set up and removed at runtime.',
   ],
   cons: [
-    'Clients shouldn\'t rely on notification order.',
-    'Forgotten subscriptions cause memory leaks (the "lapsed listener" problem).',
-    'Cascading updates can be hard to trace and debug.',
+    'Observers should not rely on the order in which they are notified.',
+    'A subscription nobody removes keeps its observer alive and can leak memory (the "lapsed listener" problem).',
+    'One update can trigger a chain of further updates, which is hard to trace and debug.',
   ],
   realWorld: [
     'DOM events: element.addEventListener("click", handler)',

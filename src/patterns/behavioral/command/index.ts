@@ -11,33 +11,33 @@ export const pattern: PatternDefinition = {
   summary:
     "Turn a request into a standalone object you can queue, log, or undo.",
   intent:
-    "Encapsulate a request as an object, letting you parameterize clients with different requests, queue them, log them, and support undo.",
+    'Wrap a request in an object, so it can be queued, logged, passed around or undone like any other piece of data.',
   problem:
-    "A remote control button needs to turn a light on, but it should not need to know anything about Light directly — the same button widget is reused for lights, fans, and locks. On top of that, pressing the button should be undoable, and every press should be recorded in a history.",
+    "A remote-control button should turn a light on without knowing anything about Light. The same button widget is reused for lights, fans and locks. You also want every press to be undoable and recorded in a history.",
   solution:
-    "Wrap each request in a Command object with execute() and undo() methods. The Invoker (the button) only ever calls execute() on whatever Command it is holding, pushing it onto a history stack; undo() pops the stack and reverses the effect — all without the invoker knowing what the command actually does.",
+    "Wrap each request in a Command object with execute() and undo() methods. The Invoker (the button) only calls execute() on whichever Command it currently holds, and pushes that command onto a history stack. undo() pops the stack and reverses the effect. The invoker never needs to know what the command actually does.",
   analogy:
-    "A restaurant order slip. The waiter (invoker) does not cook — they just hand the slip (command) to the kitchen (receiver). The slip can be queued, handed to any cook, or crossed out and remade, all without the waiter understanding how any dish is prepared.",
+    "Think of a restaurant order slip. The waiter (invoker) doesn't cook. They hand the slip (command) to the kitchen (receiver). The slip can be queued, given to any cook, or crossed out and remade, and the waiter never needs to understand how any dish is prepared.",
   whenToUse: [
-    "You want to parameterize UI elements (buttons, menu items) with an action to perform.",
+    "You want to give UI elements such as buttons and menu items an action to perform, and be able to change that action.",
     "You need undo/redo, queuing, or logging of operations.",
-    "You want to decouple the object that invokes an operation from the object that knows how to perform it.",
+    "You want to separate the object that triggers an operation from the object that knows how to perform it.",
   ],
   pros: [
-    "Decouples the invoker from the receiver — neither needs to know about the other.",
+    "Decouples the invoker from the receiver: neither needs to know about the other.",
     "Commands can be queued, logged, serialized, or combined into macros.",
-    "Undo/redo falls out naturally from storing executed commands.",
+    "Undo/redo comes almost for free once you keep the executed commands.",
   ],
   cons: [
-    "Introduces a class (or object) for every distinct action, which adds boilerplate.",
-    "A command can’t just hard-code the opposite action as its undo() — it must capture whatever state execute() is about to overwrite (e.g. the previous value) so undo() can restore it, which is extra bookkeeping to keep in sync by hand.",
-    "A long-lived history of commands can consume memory if never trimmed.",
+    "Every distinct action needs its own class (or object), which adds boilerplate.",
+    "A command can't just hard-code the opposite action as its undo(). It must remember whatever execute() is about to overwrite (for example the previous value) so undo() can restore it, and that is extra bookkeeping to keep in sync by hand.",
+    "A long-lived history of commands uses more and more memory if you never trim it.",
   ],
   realWorld: [
     "Undo/redo stacks in text editors and design tools",
     "Task queues and job schedulers (each job is a serialized command)",
     "GUI menu items and toolbar buttons bound to an action object",
-    "Redux-style serializable actions are Command-like in shape, but they carry no execute()/undo() — a reducer interprets them, which is what makes time-travel debugging possible",
+    "Redux-style serializable actions are Command-like in shape, but they carry no execute()/undo(). A reducer interprets them instead, which is what makes time-travel debugging possible.",
   ],
   related: [
     "chain-of-responsibility",

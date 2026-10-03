@@ -10,33 +10,33 @@ export const pattern: PatternDefinition = {
   order: 4,
   summary: "Provide a stand-in for another object that controls access to it.",
   intent:
-    "Provide a surrogate or placeholder for another object to control access to it.",
+    'Stand in for another object with the same interface, to control access to it, for example by delaying its creation, checking permissions or caching.',
   problem:
-    "Some objects are expensive to create, live behind a slow network, or need access rules enforced before every call. Creating them eagerly, or trusting every caller to check permissions themselves, wastes resources and scatters the same guard logic across the codebase.",
+    "Some objects are expensive to create, sit behind a slow network, or need access rules checked before every call. If you create them eagerly, or trust every caller to check permissions itself, you waste resources and scatter the same guard logic across the codebase.",
   solution:
-    "Give the proxy the exact same interface as the real object, so callers cannot tell them apart. The proxy forwards calls to the real object, but can delay creating it, cache results, check permissions, or add logging first — all without the caller or the real object knowing. This differs from Decorator, which is always handed an already-existing object to wrap: a proxy instead controls access to and often owns the lifecycle of the one real subject it stands in for.",
+    "Give the proxy the exact same interface as the real object, so callers cannot tell them apart. The proxy forwards calls to the real object, but first it can delay creating it, cache results, check permissions or add logging. Neither the caller nor the real object has to know. This differs from Decorator, which is always handed an existing object to wrap. A proxy controls access to the one real subject it stands in for, and it often owns that subject's lifecycle.",
   analogy:
-    "A credit card is a proxy for the cash in your bank account. The merchant accepts it exactly like cash, but it adds a layer that can check your balance, log the transaction, or decline the charge — without the account itself being touched for every tiny decision.",
+    "A credit card is a proxy for the cash in your bank account. The shop accepts it just like cash, but it adds a layer that can check your balance, log the payment or decline the charge, without your account being touched for every small decision.",
   whenToUse: [
-    "Creating the real object is expensive and it may never actually be needed (virtual proxy / lazy loading).",
+    "Creating the real object is expensive and it may never be needed (virtual proxy, or lazy loading).",
     "Calls go over a network and you want a local stand-in with the same interface (remote proxy).",
-    "You need to add access control, logging, or caching in front of an object without changing it (protection / caching proxy).",
+    "You need access control, logging or caching in front of an object without changing it (protection or caching proxy).",
   ],
   pros: [
-    "Controls access to the real object without the client or the object itself knowing.",
-    "Virtual proxies can defer expensive work until it is actually needed.",
-    "Caching proxies can serve repeated requests without hitting the real object again.",
+    "You control access to the real object without the client or the object itself knowing.",
+    "A virtual proxy can put off expensive work until it is actually needed.",
+    "A caching proxy can answer repeated requests without hitting the real object again.",
   ],
   cons: [
-    "Adds an extra layer of indirection, which can complicate the code.",
+    "It adds a layer of indirection, which can complicate the code.",
     "A caching proxy can return stale data if invalidation is not handled carefully.",
-    "With a virtual proxy, the first call pays the deferred creation cost that every later call avoids.",
+    "With a virtual proxy, the first call pays the delayed creation cost that every later call avoids.",
   ],
   realWorld: [
-    "ES2015 Proxy objects for intercepting property access",
+    "ES2015 Proxy objects, which intercept property access",
     "ORMs that return lazy-loading proxies for related records",
     "CDN edge caches acting as caching proxies in front of an origin server",
-    "gRPC/REST client stubs acting as remote proxies for a networked service",
+    "gRPC and REST client stubs acting as remote proxies for a networked service",
   ],
   related: ["decorator", "adapter", "facade", "flyweight"],
   participants: [

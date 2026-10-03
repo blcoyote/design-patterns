@@ -10,33 +10,29 @@ export const pattern: PatternDefinition = {
   category: 'enterprise',
   order: 3,
   summary: 'Collect every insert, update and delete from a business operation, then commit them as a single transaction — or not at all.',
-  intent:
-    'Track every object created, changed, or deleted during a business transaction, and coordinate writing out all of those changes as a single unit — so either all of them persist, or none do.',
-  problem:
-    'A checkout operation touches half a dozen rows: a new Order is inserted, the Customer\'s loyalty points are updated, a stale Cart is deleted. Saving each of those the instant it changes means a crash halfway through leaves the database in a state no business rule allows — an Order with no matching Cart cleanup, points awarded for a purchase that never actually completed. Nothing holds the whole operation together as one transaction.',
-  solution:
-    'Give each business operation a UnitOfWork. Instead of saving anything the moment it changes, application code just reports what happened — registerNew, registerDirty, registerRemoved — and the UnitOfWork keeps each object in the right pending list. Only when the caller calls commit() does it open a single database transaction, flush every pending insert, update and delete through it, and commit. If any single write fails, the whole transaction rolls back and none of the changes take effect.',
-  analogy:
-    'A restaurant order pad: a server does not walk to the kitchen after jotting down each item — they collect the whole table\'s order first, then send it in as one ticket. If the kitchen cannot make one of the dishes, the whole ticket is handed back rather than half the meal silently never arriving.',
+  intent: 'Track all the changes made during one business operation and write them out together, so either everything is saved or nothing is.',
+  problem: "A checkout touches half a dozen rows: a new Order is inserted, the Customer's loyalty points are updated, and a stale Cart is deleted. If each change is saved the instant it happens, a crash halfway through leaves the database in a state no business rule allows, such as an Order with no matching Cart cleanup, or points awarded for a purchase that never completed. Nothing holds the whole operation together as one transaction.",
+  solution: 'Give each business operation a UnitOfWork. Instead of saving anything the moment it changes, application code just reports what happened (registerNew, registerDirty, registerRemoved), and the UnitOfWork keeps each object in the right pending list. Only when the caller calls commit() does it open a single database transaction, write every pending insert, update and delete through it, and commit. If any write fails, the whole transaction rolls back and none of the changes take effect.',
+  analogy: "A restaurant order pad. A server does not walk to the kitchen after writing down each item. They collect the whole table's order first, then send it in as one ticket. If the kitchen cannot make one of the dishes, the whole ticket is handed back, instead of half the meal silently never arriving.",
   whenToUse: [
-    'A single business operation touches several objects that must be saved together or not at all.',
-    'You want every write from one business operation to succeed or fail together, as a single transaction.',
-    'You need one place to decide the order writes happen in (inserts before updates before deletes, say) independent of when the application code made each change.',
+    'One business operation touches several objects that must be saved together or not at all.',
+    'You want all the writes from one business operation to succeed or fail together, as a single transaction.',
+    'You need one place to decide the order of writes (inserts before updates before deletes, say), regardless of when the application code made each change.',
   ],
   pros: [
-    'Changes commit as one atomic transaction — a partial failure leaves no partial state behind.',
-    'Opens the door to batching: once every change is collected in one place, an ORM can combine them into fewer round trips (this example still issues one statement per entity; batching is a further optimization on top).',
-    'Decouples "what changed", tracked by the UnitOfWork as it happens, from "when it gets written", decided once by commit().',
+    'Changes commit as one atomic transaction, so a partial failure leaves no partial state behind.',
+    'Opens the door to batching: once all changes are collected in one place, an ORM can combine them into fewer round trips. This example still issues one statement per entity; batching would be a further optimization on top.',
+    'Separates "what changed", tracked by the UnitOfWork as it happens, from "when it gets written", decided once by commit().',
   ],
   cons: [
-    'Adds bookkeeping — every mutation has to be registered instead of just saved directly.',
-    'A long-lived Unit of Work can accumulate large pending lists and hold locks or memory longer than it should.',
-    'Easy to forget to register a change, which produces a silent write that never actually happens — real ORMs (EF Core, Hibernate, SQLAlchemy) avoid this by tracking changes automatically instead of relying on manual register calls.',
+    'Adds bookkeeping: every change has to be registered instead of just saved directly.',
+    'A long-lived Unit of Work can build up large pending lists and hold locks or memory longer than it should.',
+    'It is easy to forget to register a change, which means a write silently never happens. Real ORMs (EF Core, Hibernate, SQLAlchemy) avoid this by tracking changes automatically instead of relying on manual register calls.',
   ],
   realWorld: [
-    'Entity Framework Core\'s DbContext — SaveChanges() flushes every tracked Added/Modified/Deleted entity in one transaction.',
-    'Hibernate / NHibernate\'s Session, which batches inserts, updates and deletes and flushes them together.',
-    'SQLAlchemy\'s Session object, which tracks pending objects until session.commit().',
+    "Entity Framework Core's DbContext — SaveChanges() flushes every tracked Added/Modified/Deleted entity in one transaction.",
+    "Hibernate / NHibernate's Session, which batches inserts, updates and deletes and flushes them together.",
+    "SQLAlchemy's Session object, which tracks pending objects until session.commit().",
   ],
   related: ['repository', 'command', 'memento'],
 

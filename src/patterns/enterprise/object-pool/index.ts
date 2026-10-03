@@ -12,28 +12,28 @@ export const pattern: PatternDefinition = {
   summary:
     "Reuse a fixed set of expensive-to-create objects instead of constructing and destroying them for every request.",
   intent:
-    "Manage a set of initialized objects ready to use — a pool — rather than creating and destroying them on demand, handing one out on acquire() and reclaiming it on release().",
+    "Keep a set of expensive-to-create objects ready to use, handing them out and taking them back instead of creating new ones each time.",
   problem:
-    "Some objects are expensive to create — a database connection, a thread, a game bullet with its own physics state — yet an application may need one for only a few milliseconds at a time. Constructing a fresh one for every request, and garbage-collecting it right after, wastes CPU and, for things like sockets or threads, can exhaust the underlying system resource long before the application itself runs out of memory.",
+    "Some objects are expensive to create: a database connection, a thread, a game bullet with its own physics state. Yet the application may need one for only a few milliseconds at a time. Building a fresh one for every request and throwing it away right after wastes CPU. For things like sockets or threads, it can also use up the underlying system resource long before the application runs out of memory.",
   solution:
-    "Keep a bounded collection of pre-built, reusable objects behind acquire()/release() methods. acquire() hands out an idle object if one exists, lazily creates a new one if the pool has not yet reached its max size, or queues the caller if every object is already checked out. release() clears the object's per-borrower state and either returns it to the idle list or hands it straight to the next caller waiting in that queue.",
+    "Keep a limited collection of pre-built, reusable objects behind acquire() and release() methods. acquire() hands out an idle object if there is one. If not, it creates a new one as long as the pool has not reached its maximum size. If every object is already checked out, the caller waits in a queue. release() clears the object's per-borrower state, then either puts it back in the idle list or hands it straight to the next caller in the queue.",
   analogy:
-    "A library with a fixed shelf of three loaner laptops: borrowing one just means walking to the desk, not buying a new laptop. If all three are checked out, the next person waits in line and gets the very next one returned — wiped clean of the previous borrower's files first.",
+    "Picture a library with a fixed shelf of three loaner laptops. Borrowing one just means walking to the desk, not buying a new laptop. If all three are out, the next person waits in line and gets the very next one returned, wiped clean of the previous borrower's files first.",
   whenToUse: [
-    "Creating an instance is measurably expensive — a network/database connection, a thread, a large buffer — compared to reusing one.",
+    "Creating an instance is clearly expensive (a network or database connection, a thread, a large buffer) compared to reusing one.",
     "Many short-lived borrowers need the same kind of object, one at a time, in quick succession.",
-    "The number of instances in play at once should be capped, not left to grow unbounded.",
-    "Each object can be reset to a clean, reusable state after use — nothing from one borrower may leak into the next.",
+    "The number of instances in use at once should be capped, not left to grow without limit.",
+    "Each object can be reset to a clean, reusable state after use, so nothing from one borrower leaks into the next.",
   ],
   pros: [
-    "Avoids the cost of repeated construction/teardown for expensive resources.",
-    "Caps how many instances exist at once, protecting a limited external resource (connections, threads, sockets).",
-    "Smooths out load: a burst of short requests reuses the same handful of objects instead of spawning new ones for each.",
+    "Avoids the cost of building and tearing down expensive resources again and again.",
+    "Caps how many instances exist at once, which protects a limited external resource (connections, threads, sockets).",
+    "Smooths out load: a burst of short requests reuses the same few objects instead of creating new ones each time.",
   ],
   cons: [
-    "An object that is never released leaks a slot forever — pools need timeouts or owner tracking to catch this.",
-    "A reset that misses some piece of state lets it leak between borrowers, causing hard-to-reproduce bugs.",
-    "Adds moving parts — idle lists, in-use tracking, a waiting queue — for a problem plain allocation would solve for free with cheap objects.",
+    "An object that is never released holds its slot forever. Pools need timeouts or owner tracking to catch this.",
+    "A reset that misses some piece of state lets it leak between borrowers, causing bugs that are hard to reproduce.",
+    "Adds moving parts (idle list, in-use tracking, waiting queue) to solve a problem that plain allocation handles for free when objects are cheap.",
   ],
   realWorld: [
     "Database connection pools — HikariCP, node-postgres's Pool, ADO.NET connection pooling.",

@@ -11,32 +11,31 @@ export const pattern: PatternDefinition = {
   summary:
     "Produce families of related objects without specifying their concrete classes.",
   intent:
-    "Provide an interface for creating families of related or dependent objects without specifying their concrete classes.",
+    'Create whole families of matching objects through one interface, without naming their concrete classes.',
   problem:
-    "A UI needs to render buttons and checkboxes that always match the active theme — light or dark. If the code sprinkles `new LightButton()` and `new DarkCheckbox()` across the app, nothing stops a light button from ending up next to a dark checkbox, and adding a third theme means hunting down every one of those call sites.",
+    "Your UI needs buttons and checkboxes that always match the active theme, light or dark. If `new LightButton()` and `new DarkCheckbox()` are scattered across the app, nothing stops a light button from ending up next to a dark checkbox. Adding a third theme means hunting down every one of those call sites.",
   solution:
-    "Define an abstract factory (UIFactory) with one creation method per product — createButton(), createCheckbox() — and a concrete factory per family (LightFactory, DarkFactory). Client code depends only on the abstract factory and the abstract products; swapping LightFactory for DarkFactory swaps every product it creates, and the two always come from the same matching family.",
+    "Define an abstract factory (UIFactory) with one creation method per product: createButton() and createCheckbox(). Then write one concrete factory per family (LightFactory, DarkFactory). Client code only knows the abstract factory and the abstract products (Button, Checkbox). Swap LightFactory for DarkFactory and every product changes at once, and they always come from the same matching family.",
   analogy:
-    'A furniture catalogue sold in matching sets: pick the "Scandinavian" catalogue and every chair, table and lamp you order comes in that style. Pick "Industrial" instead and the whole set changes together — you can never accidentally order a Scandinavian chair with an Industrial lamp.',
+    'Think of a furniture catalogue sold in matching sets. Pick the "Scandinavian" catalogue and every chair, table and lamp you order comes in that style. Pick "Industrial" and the whole set changes together, so you can never end up with a Scandinavian chair next to an Industrial lamp.',
   whenToUse: [
-    "A system needs to work with several families of related products, and products from one family must never be mixed with another.",
-    "You want client code to stay independent of how its objects are created, composed and represented.",
-    "You want to ship a class library of products but reveal only their interfaces, never their concrete implementations.",
+    "Your system works with several families of related products, and products from one family must never be mixed with another.",
+    "You want client code to stay independent of how its objects are created and put together.",
+    "You ship a library of products but want to expose only their interfaces, never the concrete classes behind them.",
   ],
   pros: [
-    "Guarantees that the products you get from one factory are compatible with each other.",
-    "Isolates concrete classes from client code — the client only ever imports interfaces and factories.",
-    "Open/Closed: introduce a whole new product family by adding one new concrete factory, with no changes to client code.",
+    "Products from one factory are guaranteed to fit together.",
+    "Client code never depends on concrete classes. It only uses interfaces and factories.",
+    "Open/Closed: add a whole new product family by adding one new concrete factory, without changing client code.",
   ],
   cons: [
-    "Adding a new kind of product to the family means changing the abstract factory interface and every concrete factory that implements it.",
-    "Can introduce a lot of interfaces and classes for what might otherwise be a simple set of objects.",
+    "Adding a new kind of product (say, a Slider) means changing the abstract factory interface and every concrete factory.",
+    "You get many interfaces and classes, which can be heavy when you only have a few simple objects.",
   ],
   realWorld: [
     "ADO.NET's DbProviderFactory, which creates a matching Connection, Command and Parameter for one database provider",
-    "Cross-platform UI toolkits whose look-and-feel engine (e.g. Java Swing's UIManager) swaps an entire family of native-looking widgets at once",
-    'Database-agnostic ORMs whose "dialect" object creates matching Connection, QueryBuilder and Schema classes for Postgres vs MySQL',
-    "Cloud SDK abstractions that create a matching family of Storage/Queue/Secrets clients per provider (AWS vs GCP vs Azure)",
+    "Cross-platform UI toolkits whose look-and-feel setting (e.g. Java Swing's UIManager) swaps a whole family of widgets at once",
+    "Multi-cloud abstraction layers that hand you a matching set of storage, queue and secrets clients for whichever provider is configured",
   ],
   related: ["factory-method", "builder", "singleton", "bridge", "prototype"],
   participants: [

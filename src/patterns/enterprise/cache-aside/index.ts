@@ -11,35 +11,35 @@ export const pattern: PatternDefinition = {
   summary:
     "The application checks the cache first, loads from the source on a miss, and invalidates on writes.",
   intent:
-    "Let the application code — not the store — manage the cache. On a read, check the cache first. On a miss, load from the slow source of truth and populate the cache. On a write, update the source and invalidate the cache entry, instead of trying to keep it in sync in place.",
+    "Let the application manage its own cache: look there first, fall back to the real data source on a miss, and invalidate the entry when the data changes.",
   problem:
-    "A slow or expensive source — a database under load, a remote service with a rate limit — gets hit on every read, even though most reads ask for the same handful of hot items over and over. Nothing stands between the callers and the source, so load scales with request volume instead of with how often the underlying data actually changes.",
+    "Some data is slow or costly to fetch: a database under heavy load, or a remote service that limits how often you can call it. Yet most reads ask for the same few popular items again and again. If nothing stands between callers and the source, every read hits the source, so its load grows with the number of requests instead of with how often the data actually changes.",
   solution:
-    "Put a Cache in front of the source and route every read through the application: look the key up in the cache; on a hit, return it with the source untouched; on a miss, load from the source, store the result in the cache, and return it. On a write, update the source first, then invalidate — not update — the cached entry, so the next read is a clean miss that reloads the fresh value rather than risking a half-updated cache entry. A caching Proxy achieves something similar but transparently: callers call what looks like the real service, and the proxy decides behind their back whether to hit the cache or the source. Cache-Aside is more work for the caller — it has to know the cache exists — but it keeps the cache policy visible and in the application's own control, rather than hidden behind an interception point. Read-through and write-through are the self-managing alternative: the cache itself knows how to load from (and, for write-through, write to) the source, so callers just talk to the cache. A no-TTL, never-invalidated special case of Cache-Aside is plain in-process memoization: fine as long as the underlying data cannot change for the lifetime of the cached key, which is exactly the trade this site makes in parseCode (see Real-world examples).",
+    "Put a Cache in front of the source and make the application do the lookups itself. On a read, check the cache first. On a hit, return the cached value and leave the source alone. On a miss, load the value from the source, store it in the cache, and return it. On a write, update the source first, then invalidate (remove) the cached entry rather than updating it, so the next read is a clean miss that reloads the fresh value. A caching Proxy does something similar, but invisibly: callers think they are talking to the real service, and the proxy decides behind their backs whether to use the cache or the source. Cache-Aside asks more of the caller, which has to know the cache exists, but it keeps the caching policy visible and under the application's control. Read-through and write-through caches are the self-managing alternative: the cache itself knows how to load from (and, for write-through, write to) the source, so callers only talk to the cache. Plain in-process memoization is a special case of Cache-Aside with no TTL (time-to-live) and no invalidation. It is fine when the underlying data can never change while the key is cached, which is exactly the trade this site makes in parseCode (see Real-world examples).",
   analogy:
-    "Checking your own notes before calling a reference desk. You look at what you wrote down last time; if it is there, you use it and the desk never hears from you. If it is missing, you call the desk, get the answer, and jot it down for next time. Nobody at the desk decides when you take notes — that is entirely up to you.",
+    "Think of checking your own notes before calling a reference desk. You look at what you wrote down last time. If the answer is there, you use it and the desk never hears from you. If it is not, you call the desk, get the answer, and jot it down for next time. Nobody at the desk decides when you take notes; that is entirely up to you.",
   whenToUse: [
-    "Reads vastly outnumber writes, and the same keys are requested repeatedly.",
-    "The source is slow, rate-limited, or expensive to query, and a little staleness is acceptable.",
-    "You want the cache to be optional — the application still works, just slower, if the cache is empty or unavailable.",
-    "You need the cache and the invalidation policy to live in application code that you can read, test and change, rather than inside a transparent interception layer.",
+    "Reads far outnumber writes, and the same keys are requested again and again.",
+    "The source is slow, rate-limited or expensive to query, and a little staleness is acceptable.",
+    "You want the cache to be optional: if it is empty or unavailable, the application still works, just more slowly.",
+    "You want the caching and invalidation rules in application code that you can read, test and change, not hidden inside a transparent interception layer.",
   ],
   pros: [
-    "Only requested keys ever get cached — there is no need to warm or pre-populate anything.",
-    'A cold or failed cache degrades to "every read hits the source," not a hard failure.',
-    "The read/write policy — what to cache, for how long, when to invalidate — is ordinary application code, easy to read and to change.",
+    "Only keys that are actually requested get cached, so there is nothing to warm up or pre-fill.",
+    "A cold or failed cache just means every read goes to the source. It is slower, not broken.",
+    "What to cache, for how long and when to invalidate is ordinary application code, easy to read and change.",
   ],
   cons: [
-    "Every call site that reads through the cache has to know it exists and follow the same check-then-load protocol; a caching Proxy avoids this by making the cache transparent to callers.",
-    "Concurrent readers and writers can race. A reader that misses can load the old value from the source, a writer can then update the source and invalidate, and the reader then caches the old value, which is served until its TTL expires or the next write. A reader that hits between the write and the invalidate only sees the old value briefly.",
-    "TTLs and invalidation are extra configuration to choose and tune — too short defeats the cache, too long serves stale data for longer than intended.",
+    "Every place that reads through the cache has to know it exists and follow the same check-then-load steps. A caching Proxy avoids this by hiding the cache from callers.",
+    "Readers and writers can race. A reader that misses may load the old value from the source. A writer can then update the source and invalidate. The reader then caches the old value, and it stays until its TTL expires or the next write. A reader that hits between a write and its invalidate sees the old value only briefly.",
+    "TTLs and invalidation rules are extra settings to choose and tune. Too short and the cache barely helps; too long and you serve stale data longer than you meant to.",
   ],
   realWorld: [
-    "Redis or Memcached sitting in front of a SQL database, the textbook case the pattern is named for",
+    "Redis or Memcached in front of a SQL database, the classic case the pattern is named for",
     'The "Cache-Aside" entry in Azure\'s cloud design patterns catalogue',
-    "HTTP caching at a CDN edge, with explicit invalidation/purge on origin writes",
+    "HTTP caching at a CDN edge, with explicit invalidation (purge) when the origin changes",
     "React Query and similar client-side data-fetching caches, which check a cache before calling the network and invalidate on mutations",
-    "This site: parseCode in src/lib/codeRegions.ts checks an in-memory Map before re-parsing a source string, and populates it on a miss. It is the in-process memoization variant, not the TTL-bounded version demoed here: entries have no expiry and are never invalidated, which is safe because its input — a pattern's source text — never changes once loaded",
+    "This site: parseCode in src/lib/codeRegions.ts checks an in-memory Map before re-parsing a source string, and fills it on a miss. It is the in-process memoization variant, not the TTL-bounded version demoed here: entries never expire and are never invalidated, which is safe because a pattern's source text never changes once loaded",
   ],
   related: ["proxy", "flyweight", "repository", "circuit-breaker"],
 

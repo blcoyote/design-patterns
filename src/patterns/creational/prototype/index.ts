@@ -11,29 +11,29 @@ export const pattern: PatternDefinition = {
   summary:
     "Copy existing objects to create new ones, instead of building them from scratch.",
   intent:
-    "Specify the kinds of objects to create using a prototypical instance, and create new objects by copying that prototype rather than instantiating a class directly.",
+    'Create new objects by copying an existing one instead of building each from scratch.',
   problem:
-    "Creating a new object sometimes means reproducing an expensive or elaborate setup — a fully configured Circle with a chain of style settings, or a Document with its layout already computed. Re-running that setup through a constructor every time is wasteful, and it forces the caller to know the exact concrete class and every constructor argument, coupling it to a class hierarchy it should not need to care about.",
+    "Sometimes creating an object means repeating an expensive or elaborate setup, like a Circle with a long list of style settings or a Document whose layout is already computed. Running that setup through a constructor every time is wasteful. It also forces the caller to know the exact concrete class and every constructor argument, which ties it to a class hierarchy it should not have to care about.",
   solution:
-    'Give every object a clone() method that knows how to copy itself, including any nested objects it owns. To create a new object, ask an existing instance — a prototype — to clone itself instead of calling `new ConcreteClass(...)`. A small PrototypeRegistry can keep a named set of ready-made prototypes so client code can copy by name, like clone("circle"), without ever importing the Circle class.',
+    'Give every object a clone() method that knows how to copy itself, including any nested objects it owns. To make a new object, ask an existing instance (the prototype) to clone itself instead of calling `new ConcreteClass(...)`. A small PrototypeRegistry can hold a named set of ready-made prototypes. Client code then copies by name, like clone("circle"), without ever importing the Circle class.',
   analogy:
-    "A biological cell is not assembled from a blueprint each time one is needed — an existing cell splits and copies itself, nucleus and all. Asking a cell to divide is faster and safer than building a new one from scratch, and each offspring is independent of its parent afterward.",
+    "A biological cell does not follow a blueprint each time a new one is needed. An existing cell splits and copies itself, nucleus and all. Copying what already exists is faster than building from scratch, and once the copy exists it lives independently of its parent.",
   whenToUse: [
-    "Creating an object is costly or elaborate, and an already-configured instance exists that is close to what you need.",
-    "You want to avoid a factory class hierarchy that parallels the product hierarchy.",
-    "The concrete class of the object being copied should stay hidden from the client, which should depend only on a common clone() operation.",
-    "You need many near-identical objects that differ from each other only by small tweaks made after copying.",
+    "Creating an object is costly or elaborate, and you already have a configured instance that is close to what you need.",
+    "You want to avoid a factory class hierarchy that mirrors the product hierarchy.",
+    "The concrete class being copied should stay hidden from the client, which depends only on a common clone() operation.",
+    "You need many near-identical objects that differ only by small tweaks made after copying.",
   ],
   pros: [
-    "Creates new objects without coupling the client to their concrete classes.",
-    "Avoids repeating expensive or complex initialization — the prototype already did it once.",
-    "New kinds of objects can be introduced at runtime by registering an instance, not by adding a class.",
-    'Produces pre-configured variants of an object (a "preset") simply by cloning and tweaking.',
+    "You create new objects without coupling the client to their concrete classes.",
+    "You skip repeating expensive or complex setup, because the prototype already did it once.",
+    "You can add new kinds of objects at runtime by registering an instance, instead of writing a new class.",
+    'You get ready-made variants (a "preset") by cloning and tweaking.',
   ],
   cons: [
     "Cloning objects with circular references or deeply nested structures can be tricky to get right.",
-    "Deep vs. shallow copy must be decided per class — getting it wrong causes subtle shared-state bugs between the original and its clones.",
-    "Classes that wrap non-cloneable resources, like open sockets or file handles, need special-case handling.",
+    "Each class must decide between a deep and a shallow copy. Getting it wrong causes subtle bugs where the original and its clones share state.",
+    "Classes that wrap resources that cannot be copied, like open sockets or file handles, need special handling.",
   ],
   realWorld: [
     "structuredClone() in JavaScript for deep copies, or `{ ...obj }` / Object.assign() for a shallow copy",

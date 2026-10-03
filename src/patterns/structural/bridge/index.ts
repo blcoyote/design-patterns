@@ -11,32 +11,32 @@ export const pattern: PatternDefinition = {
   summary:
     "Split an abstraction from its implementation so the two can vary independently.",
   intent:
-    "Decouple an abstraction from its implementation so that the two can evolve, and vary, independently of one another.",
+    'Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.',
   problem:
-    "A remote control needs to work with many kinds of devices — TVs, radios, maybe a projector next year — and there are also several kinds of remotes: a basic one and an advanced one with extra buttons. Modeling this with inheritance alone (BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote…) multiplies every new remote type by every new device type: with M remote kinds and N device kinds you need M × N subclasses, so each new device or remote adds a whole row or column of classes.",
+    "A remote control has to work with many kinds of devices (TVs, radios, maybe a projector next year), and there are also several kinds of remotes, such as a basic one and an advanced one with extra buttons. With inheritance alone you would write BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote and so on. With M remote kinds and N device kinds that is M × N subclasses, so every new device or remote adds a whole row or column of classes.",
   solution:
-    "Split the two dimensions into separate hierarchies. RemoteControl (the abstraction) holds a reference to a Device (the implementor interface) instead of extending a concrete device class. New remotes extend RemoteControl; new devices implement Device. Either hierarchy can grow on its own, and any remote can be paired with any device at runtime through the reference that bridges them. Bridge is a structural split of two hierarchies decided up front at design time, which is different from Strategy, where a single class swaps out one interchangeable algorithm.",
+    "Split the two dimensions into separate hierarchies. RemoteControl (the abstraction) holds a reference to a Device (the implementor interface) instead of extending a concrete device class. New remotes extend RemoteControl, and new devices implement Device. Each hierarchy grows on its own, and any remote can be paired with any device at runtime through the reference that bridges them. Bridge is a structural split into two hierarchies, planned up front at design time. That differs from Strategy, where one class swaps a single interchangeable algorithm.",
   analogy:
-    'A universal remote and the appliances it points at. The remote does not care whether it is pointed at a TV or a radio — it just sends "power" and "volume" signals through the same bridge, and the appliance on the other end decides how to act on them.',
+    'Think of a universal remote and the appliances it points at. The remote does not care whether it faces a TV or a radio. It sends "power" and "volume" signals through the same bridge, and the appliance on the other end decides what to do with them.',
   whenToUse: [
-    "You want to avoid a permanent binding between an abstraction and one implementation, so either can be chosen or swapped at runtime.",
-    "Both the abstraction and the implementation should be extensible through subclassing, independently of each other.",
+    "You want to avoid a permanent link between an abstraction and one implementation, so either can be chosen or swapped at runtime.",
+    "Both the abstraction and the implementation should be extensible by subclassing, independently of each other.",
     "A class hierarchy is exploding because it is really modeling two independent dimensions of variation.",
   ],
   pros: [
-    "Abstraction and implementation can be extended independently, without touching each other.",
-    "Swaps the concrete implementation at runtime, even after the abstraction object already exists.",
-    "Avoids a combinatorial explosion of classes for every abstraction × implementation pairing.",
+    "You can extend the abstraction and the implementation independently, without touching each other.",
+    "You can swap the concrete implementation at runtime, even after the abstraction object exists.",
+    "You avoid a combinatorial explosion of classes, one for every abstraction × implementation pairing.",
   ],
   cons: [
-    "Adds indirection and an extra interface that a simpler design might not need.",
-    "Designing the right Device interface upfront takes more care than reaching for inheritance.",
+    "It adds indirection and an extra interface that a simpler design might not need.",
+    "Getting the Device interface right up front takes more care than reaching for inheritance.",
   ],
   realWorld: [
-    "JDBC / ODBC drivers bridging a common database API to many vendor-specific engines",
-    "Cross-platform UI toolkits bridging a Window abstraction to per-OS rendering implementations",
-    "Graphics APIs bridging a Shape abstraction to different rendering backends (raster, vector, GPU)",
-    "Logger front-ends bridging a logging API to swappable backends (console, file, remote service)",
+    "JDBC and ODBC drivers, which put one common database API in front of many vendor-specific engines",
+    "Cross-platform UI toolkits that connect a Window abstraction to per-OS rendering implementations",
+    "Graphics code that connects a Shape abstraction to different rendering backends (raster, vector, GPU)",
+    "Logging front-ends that connect one logging API to swappable backends (console, file, remote service)",
   ],
   related: ["adapter", "abstract-factory", "strategy", "state"],
   participants: [

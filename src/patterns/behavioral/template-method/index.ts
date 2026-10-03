@@ -11,27 +11,27 @@ export const pattern: PatternDefinition = {
   summary:
     "Fix the skeleton of an algorithm in a base class, and let subclasses override individual steps.",
   intent:
-    "Define the skeleton of an algorithm in a base class method, deferring some of its steps to subclasses. Template Method lets subclasses redefine certain steps of an algorithm without changing its overall structure.",
+    'Fix the overall steps of an algorithm in a base class and let subclasses fill in the individual steps.',
   problem:
-    "Two report exporters — CSV and PDF — follow almost the same procedure: fetch the data, format it, then write it out. Without a shared skeleton, every new format copies the same three-step sequence and only tweaks a line or two, so a bug in the ordering, or a forgotten step, has to be fixed in every copy separately.",
+    "Two report exporters, CSV and PDF, follow almost the same procedure: fetch the data, format it, then write it out. Without a shared skeleton, every new format copies the same three steps and tweaks a line or two. A bug in the ordering, or a forgotten step, then has to be fixed in every copy separately.",
   solution:
-    "Pull the invariant steps into one base-class method — generate() — and never let subclasses touch its order. Steps that must vary are declared abstract, forcing every subclass to supply them. Steps that usually do not vary, but occasionally might, are given a default implementation as an overridable hook. Each subclass then only writes the handful of lines that are genuinely different.",
+    "Put the fixed sequence of steps into one base-class method, generate(), which subclasses are not meant to override. Steps that must differ are declared abstract, so every subclass has to supply them. Steps that usually stay the same, but occasionally might not, get a default implementation that subclasses may override (a hook). Each subclass then writes only the few lines that are genuinely different.",
   analogy:
-    "A recipe card printed once and reused by every cook: preheat, mix, bake, cool. The steps and their order never change, but each cook can swap in their own mixing technique, or skip the optional glaze step entirely, while the structure of the recipe itself stays exactly as printed.",
+    "A recipe card printed once and shared by every cook: preheat, mix, bake, cool. The steps and their order never change. Each cook can use their own mixing technique or skip the optional glaze, but the structure of the recipe stays exactly as printed.",
   whenToUse: [
-    "Several classes implement the same algorithm but differ in only a few steps, and that duplication needs to live in one place.",
-    "You want subclasses to extend specific steps of a behavior while the overall algorithm stays fixed. (Enforcing \"un-overridable\" needs language support the TypeScript and Python examples lack — Java's `final` or C#'s non-virtual-by-default methods do this; Python's `@typing.final` is only checked by type checkers, so here it's a convention.)",
+    "Several classes implement the same algorithm but differ in only a few steps, and you want that shared structure in one place.",
+    "You want subclasses to customise specific steps while the overall algorithm stays fixed. (Truly forbidding overrides needs language support. C# methods are non-virtual by default and Java has `final`. TypeScript has nothing equivalent, and Python's `@typing.final` is only checked by type checkers, so in those two it is a convention.)",
     "You want optional extension points (hooks) that most subclasses can safely ignore.",
   ],
   pros: [
-    "Eliminates duplicated algorithm structure — the skeleton lives in exactly one place.",
-    "Hooks give subclasses optional extension points without forcing every one of them to override everything.",
-    "Calling code only ever depends on the base class, so new variants are added by adding a subclass.",
+    "No duplicated algorithm structure: the skeleton lives in exactly one place.",
+    "Hooks give subclasses optional extension points without forcing each one to override everything.",
+    "Calling code only depends on the base class, so a new variant is just a new subclass.",
   ],
   cons: [
-    "Inheritance ties a subclass to the base class for life — unlike Strategy’s composition, the algorithm cannot be swapped on an existing object at runtime.",
-    "Deep or wide class hierarchies make it harder to see at a glance which subclass overrides which step.",
-    "Subclasses can violate the skeleton’s assumptions in ways it never anticipated, which is easy to miss until it breaks.",
+    "Inheritance ties a subclass to its base class for good. Unlike Strategy’s composition, you cannot swap the algorithm on an existing object at runtime.",
+    "With deep or wide class hierarchies it is hard to see at a glance which subclass overrides which step.",
+    "Subclasses can break the skeleton’s assumptions in ways it never anticipated, and that is easy to miss until something fails.",
   ],
   realWorld: [
     "java.util.AbstractList, whose concrete iterator/indexOf methods are built from the abstract get() and size() primitives a subclass supplies",

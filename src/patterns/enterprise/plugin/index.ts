@@ -11,29 +11,29 @@ export const pattern: PatternDefinition = {
   summary:
     "Link implementations in at configuration or start-up time, not compile time, so adding one needs no change to the host.",
   intent:
-    "Link implementations at configuration or start-up time rather than compile time (Fowler, Patterns of Enterprise Application Architecture). The host only ever depends on an interface and a registry; concrete plugins are discovered and registered without the host changing.",
+    "Let a host application pick up new implementations at start-up or configuration time, through a registry, without changing its own code.",
   problem:
-    "A host that calls concrete implementations directly has to be edited, recompiled and redeployed every time a new implementation shows up — a new export format, a new payment provider, a new notification channel. The host and every implementation end up compiled together, so adding one more case means touching code that otherwise has nothing to do with it, and a big if/switch keyed on type grows forever.",
+    "A host program that calls concrete implementations directly has to be edited, recompiled and redeployed every time a new one shows up: a new export format, a new payment provider, a new notification channel. The host and every implementation are compiled together, so adding one more case means touching code that otherwise has nothing to do with it. A big if/switch keyed on type keeps growing.",
   solution:
-    "Define a narrow interface the host depends on, and a registry that looks plugins up by id. A loader reads a manifest — a plain list of plugin ids and the factories that build them — and registers one instance per entry before the host runs. The host only ever calls registry.get(id); it never names a concrete plugin class, so adding one is purely a manifest change.",
+    "Define a narrow interface that the host depends on, plus a registry that looks plugins up by id. A loader reads a manifest, which is a plain list of plugin ids and the factories that build them, and registers one instance per entry before the host runs. The host only ever calls registry.get(id) and never names a concrete plugin class, so adding a plugin is purely a manifest change.",
   analogy:
-    "A power strip: it only knows the shape of a plug, not which appliance is attached. Adding a lamp or a charger never means rewiring the strip — you plug it in, and it works because both sides agreed on the socket shape ahead of time.",
+    "A power strip only knows the shape of a plug, not which appliance is attached. Adding a lamp or a charger never means rewiring the strip. You plug it in and it works, because both sides agreed on the socket shape ahead of time.",
   whenToUse: [
-    "Third parties, or other teams, need to add behavior without touching or recompiling the host.",
+    "Third parties or other teams need to add behavior without touching or recompiling the host.",
     "The set of implementations is open-ended or configured per deployment (which exporters, which payment providers, which checks run).",
-    "You want new capabilities to ship as an added file or package, not an edited one.",
+    "You want new capabilities to arrive as an added file or package, not an edited one.",
     'A growing if/switch over a "type" field is the only thing standing between the host and a new case.',
   ],
   pros: [
-    "New behavior ships by adding a plugin and a manifest entry — the host and registry are never edited.",
+    "New behavior ships by adding a plugin and a manifest entry. The host and registry are never edited.",
     "Keeps the host small: it depends on one interface and one registry, never on concrete implementations.",
     "Plugins can be developed, tested and even distributed independently of the host.",
-    "The manifest is a single, explicit place that lists everything currently wired in.",
+    "The manifest is one explicit place that lists everything currently wired in.",
   ],
   cons: [
-    'Indirection: tracing "what actually runs for id X" means following the manifest and the factory map, not just reading the host.',
-    "An id that is misspelled, or missing from the manifest, only fails at the point something asks the registry for it.",
-    'Real discovery mechanisms (classpath/assembly scanning, bundler globs) can make plugins "just appear", which is convenient but easy to lose track of.',
+    "It adds indirection. To find out what runs for id X, you follow the manifest and the factory map, not just the host.",
+    "An id that is misspelled or missing from the manifest only fails when something asks the registry for it.",
+    'Real discovery mechanisms (classpath or assembly scanning, bundler globs) can make plugins "just appear". That is convenient, but easy to lose track of.',
   ],
   realWorld: [
     "VS Code extensions, discovered and activated from a manifest without the editor knowing about any of them at compile time",

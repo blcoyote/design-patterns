@@ -9,30 +9,26 @@ export const pattern: PatternDefinition = {
   category: 'enterprise',
   order: 2,
   summary: 'Hide persistence behind a collection-like interface so domain code never sees SQL.',
-  intent:
-    'Mediate between the domain/application layer and the data store with an interface that looks like an in-memory collection of objects — findById, findByCustomer, add, save, remove — so the rest of the application can work with domain objects without knowing how, or where, they are actually stored.',
-  problem:
-    'Without a boundary, SQL strings, ORM query builders and connection handling creep into services and controllers, so every piece of code that needs an Order ends up knowing the shape of the orders table. The same query gets copy-pasted in three places, unit tests require a real database just to exercise business logic, and swapping or upgrading the data store means hunting down every call site that touches it.',
-  solution:
-    'Define a Repository interface shaped like a collection of domain objects, and put exactly one concrete class behind it that knows how to talk to the real store — building SQL, executing it, and mapping rows back into fully-formed domain objects. Application code is constructed against the interface only, so a SqlOrderRepository can be swapped for an InMemoryOrderRepository in tests, or for a different store entirely later, without changing a single caller.',
-  analogy:
-    'A library catalogue desk: you ask for "the 2023 edition of this title" and get a book back. You never find out whether it came off the open shelves, a back-room archive, or an inter-library loan — the request looks the same either way, because the desk hides where the books actually live.',
+  intent: 'Give the domain code a collection-like interface for loading and saving objects, so it never deals with the storage details.',
+  problem: 'Without a boundary, SQL strings, ORM query builders and connection handling creep into services and controllers. Every piece of code that needs an Order ends up knowing the shape of the orders table. The same query gets copy-pasted in three places, unit tests need a real database just to exercise business logic, and swapping or upgrading the data store means hunting down every call site that touches it.',
+  solution: 'Define a Repository interface shaped like a collection of domain objects. Put exactly one concrete class behind it that knows how to talk to the real store: it builds the SQL, runs it, and maps rows back into fully formed domain objects. Application code is written against the interface only, so a SqlOrderRepository can be swapped for an InMemoryOrderRepository in tests, or for a different store later, without changing a single caller.',
+  analogy: 'A library catalogue desk. You ask for "the 2023 edition of this title" and get a book back. You never learn whether it came off the open shelves, a back-room archive or an inter-library loan. The request looks the same either way, because the desk hides where the books actually live.',
   whenToUse: [
-    'Domain or application logic is becoming entangled with SQL, ORM query builders, or other storage-specific APIs.',
-    'You want to unit test business logic without spinning up a real database.',
+    'Domain or application logic is getting tangled up with SQL, ORM query builders or other storage-specific APIs.',
+    'You want to unit test business logic without starting a real database.',
     'Several parts of the app need the same queries and you want them defined once instead of copy-pasted.',
     'You expect to change or add a data store later (SQL today, a cache or a different engine tomorrow) without rewriting every caller.',
   ],
   pros: [
-    'Isolates persistence details behind a small, collection-like interface.',
-    'Makes domain and application logic trivially testable with an in-memory fake instead of a real database.',
-    'Centralizes query logic in one place so it is not duplicated across services.',
-    'Swapping data stores means writing a new repository, not rewriting every consumer.',
+    'Hides persistence details behind a small, collection-like interface.',
+    'Makes domain and application logic easy to test with an in-memory fake instead of a real database.',
+    'Keeps query logic in one place so it is not duplicated across services.',
+    'Switching data stores means writing a new repository, not rewriting every consumer.',
   ],
   cons: [
-    'Can become a leaky abstraction once real query needs (filtering, pagination, joins) force the interface to balloon.',
-    'Adds a layer of indirection that simple, single-datastore CRUD apps may never actually need.',
-    'Can hide performance-relevant details — N+1 queries, missing indexes — behind a deceptively simple-looking call.',
+    'Can become a leaky abstraction: once real query needs (filtering, pagination, joins) arrive, the interface tends to balloon.',
+    'Adds a layer of indirection that simple, single-datastore CRUD apps may never need.',
+    'Can hide performance problems such as N+1 queries or missing indexes behind a deceptively simple-looking call.',
   ],
   realWorld: [
     'Spring Data JPA repository interfaces, implemented automatically from method name conventions',

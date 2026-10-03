@@ -18,8 +18,7 @@ remote.UndoLast(); // pops LightOffCommand, calls Undo() -> light turns back on
 // [command]
 interface ICommand
 {
-    void Execute();
-    void Undo();
+    Action Execute();
 }
 // [/command]
 
@@ -45,19 +44,14 @@ class Light
 // [onCommand]
 class LightOnCommand(Light light) : ICommand
 {
-    // What Undo() needs: whether the light was already on before Execute()
-    // ran. Undo can't just assume "the opposite action" is correct.
-    private bool _wasOn;
-
-    public void Execute()
+    public Action Execute()
     {
-        _wasOn = light.On;
+        var wasOn = light.On;
         light.TurnOn();
-    }
-
-    public void Undo()
-    {
-        if (!_wasOn) light.TurnOff();
+        return () =>
+        {
+            if (!wasOn) light.TurnOff();
+        };
     }
 }
 // [/onCommand]
@@ -65,17 +59,14 @@ class LightOnCommand(Light light) : ICommand
 // [offCommand]
 class LightOffCommand(Light light) : ICommand
 {
-    private bool _wasOn;
-
-    public void Execute()
+    public Action Execute()
     {
-        _wasOn = light.On;
+        var wasOn = light.On;
         light.TurnOff();
-    }
-
-    public void Undo()
-    {
-        if (_wasOn) light.TurnOn();
+        return () =>
+        {
+            if (wasOn) light.TurnOn();
+        };
     }
 }
 // [/offCommand]
@@ -84,7 +75,7 @@ class LightOffCommand(Light light) : ICommand
 class RemoteButton
 {
     private ICommand? _current;
-    private readonly List<ICommand> _history = new();
+    private readonly List<Action> _history = new();
 
     // [setCommand]
     public void SetCommand(ICommand command)
@@ -97,8 +88,7 @@ class RemoteButton
     public void Press()
     {
         if (_current is null) return;
-        _current.Execute();
-        _history.Add(_current);
+        _history.Add(_current.Execute());
     }
     // [/execute]
 
@@ -106,9 +96,9 @@ class RemoteButton
     public void UndoLast()
     {
         if (_history.Count == 0) return;
-        var command = _history[^1];
+        var undo = _history[^1];
         _history.RemoveAt(_history.Count - 1);
-        command.Undo();
+        undo();
     }
     // [/undo]
 }

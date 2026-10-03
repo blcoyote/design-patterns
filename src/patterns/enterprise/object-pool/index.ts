@@ -2,6 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
+import goExample from "./example.go?raw";
 import { ObjectPoolVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
@@ -249,7 +250,7 @@ export const pattern: PatternDefinition = {
     {
       title: "A new caller arrives — the pool is exhausted",
       description:
-        "Client B calls acquire(), but all 3 connections are in use and the pool is already at its max size. Instead of creating a fourth, acquire() queues Client B and returns a promise that stays pending.",
+        "Client B calls acquire(), but all 3 connections are in use and the pool is already at its max size. Instead of creating a fourth, acquire() queues Client B and returns a promise that stays pending (a Task in C#, a Future in Python, a channel in Go).",
       highlight: ["clientB", "acquireB", "pool"],
       packets: [{ relation: "acquireB", label: "acquire()" }],
       notes: { pool: "idle:0 inUse:3 waiting:1", clientB: "waiting…" },
@@ -287,6 +288,7 @@ export const pattern: PatternDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
 
   Visualization: ObjectPoolVisualization,
 };

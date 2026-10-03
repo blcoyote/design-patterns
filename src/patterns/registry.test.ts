@@ -109,6 +109,36 @@ describe("pattern registry", () => {
   );
 });
 
+describe("pattern go examples", () => {
+  it("every pattern ships a go example", () => {
+    expect(patterns.every((p) => p.go?.trim())).toBe(true);
+  });
+
+  it.each(patterns.map((p) => [p.slug, p] as const))(
+    "%s go code has no unclosed or stray markers",
+    (_slug, p) => {
+      expect(findMarkerErrors(p.go!)).toEqual([]);
+    },
+  );
+
+  it.each(patterns.map((p) => [p.slug, p] as const))(
+    "%s go is a runnable package main file",
+    (_slug, p) => {
+      expect(p.go).toMatch(/^package main$/m);
+      expect(p.go).toMatch(/^func main\(\) \{$/m);
+    },
+  );
+
+  it.each(patterns.map((p) => [p.slug, p] as const))(
+    "%s go regions match the typescript regions",
+    (_slug, p) => {
+      const tsRegionIds = Object.keys(parseCode(p.code).regions).sort();
+      const goRegionIds = Object.keys(parseCode(p.go!).regions).sort();
+      expect(goRegionIds).toEqual(tsRegionIds);
+    },
+  );
+});
+
 describe("packet dependencies", () => {
   const singleton = patterns.find((pattern) => pattern.slug === "singleton")!;
 

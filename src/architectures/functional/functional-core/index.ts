@@ -2,6 +2,7 @@ import type { ArchitectureDefinition } from '@/types/architecture'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
 import pyExample from './example.py?raw'
+import goExample from './example.go?raw'
 import { FunctionalCoreVisualization } from './Visualization'
 
 export const architecture: ArchitectureDefinition = {
@@ -337,5 +338,6 @@ export const architecture: ArchitectureDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
   Visualization: FunctionalCoreVisualization,
 }

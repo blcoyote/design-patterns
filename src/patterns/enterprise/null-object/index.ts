@@ -2,6 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
+import goExample from "./example.go?raw";
 import { NullObjectVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
@@ -178,7 +179,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Before: null means "no logger"',
       description:
-        "A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed as an optional Logger (Logger | null, ILogger?, Logger | None), so every call site that wants to log now has to remember to guard it.",
+        "A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed as an optional Logger (Logger | null, ILogger?, Logger | None, or a nil Logger interface in Go), so every call site that wants to log now has to remember to guard it.",
       highlight: ["client", "client-create", "reportGenerator"],
       packets: [
         { relation: "client-create", label: "new ReportGenerator(null)" },
@@ -206,7 +207,7 @@ export const pattern: PatternDefinition = {
     {
       title: "It crashes",
       description:
-        "Because logger is null, the .warn() call throws (TypeError in TS, NullReferenceException in C#, AttributeError in Python). The exception unwinds past generate() and the whole report is lost — for want of one if.",
+        "Because logger is null, the .warn() call throws (TypeError in TS, NullReferenceException in C#, AttributeError in Python, a nil-pointer panic in Go). The exception unwinds past generate() and the whole report is lost — for want of one if.",
       highlight: ["client", "reportGenerator"],
       notes: { reportGenerator: "💥 crash" },
       code: "forgotten",
@@ -272,5 +273,6 @@ export const pattern: PatternDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
   Visualization: NullObjectVisualization,
 };

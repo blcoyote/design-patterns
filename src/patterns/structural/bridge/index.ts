@@ -2,6 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
+import goExample from "./example.go?raw";
 
 export const pattern: PatternDefinition = {
   slug: "bridge",
@@ -11,16 +12,16 @@ export const pattern: PatternDefinition = {
   summary:
     "Split an abstraction from its implementation so the two can vary independently.",
   intent:
-    'Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.',
+    "Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.",
   problem:
-    "A remote control has to work with many kinds of devices (TVs, radios, maybe a projector next year), and there are also several kinds of remotes, such as a basic one and an advanced one with extra buttons. With inheritance alone you would write BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote and so on. With M remote kinds and N device kinds that is M × N subclasses, so every new device or remote adds a whole row or column of classes.",
+    "A remote control has to work with many kinds of devices (TVs, radios, maybe a projector next year), and there are also several kinds of remotes, such as a basic one and an advanced one with extra buttons. In class-based languages, modeling both dimensions with inheritance alone would require BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote and so on. With M remote kinds and N device kinds that is M × N combinations; Go avoids the same coupling with interfaces and embedding rather than subclasses.",
   solution:
-    "Split the two dimensions into separate hierarchies. RemoteControl (the abstraction) holds a reference to a Device (the implementor interface) instead of extending a concrete device class. New remotes extend RemoteControl, and new devices implement Device. Each hierarchy grows on its own, and any remote can be paired with any device at runtime through the reference that bridges them. Bridge is a structural split into two hierarchies, planned up front at design time. That differs from Strategy, where one class swaps a single interchangeable algorithm.",
+    "Split the two dimensions into separate abstractions. RemoteControl holds a Device reference instead of depending on a concrete device. Class-based tabs extend RemoteControl for refined remotes, while Go embeds RemoteControl to promote its behavior; devices implement Device in every tab. Either way, each side grows independently and any remote can be paired with any device at runtime through the bridge reference. Bridge is a structural split planned up front at design time. That differs from Strategy, where one class swaps a single interchangeable algorithm.",
   analogy:
     'Think of a universal remote and the appliances it points at. The remote does not care whether it faces a TV or a radio. It sends "power" and "volume" signals through the same bridge, and the appliance on the other end decides what to do with them.',
   whenToUse: [
     "You want to avoid a permanent link between an abstraction and one implementation, so either can be chosen or swapped at runtime.",
-    "Both the abstraction and the implementation should be extensible by subclassing, independently of each other.",
+    "The abstraction and implementation should be extendable independently, through subclassing in class-based languages or composition and embedding in Go.",
     "A class hierarchy is exploding because it is really modeling two independent dimensions of variation.",
   ],
   pros: [
@@ -30,7 +31,7 @@ export const pattern: PatternDefinition = {
   ],
   cons: [
     "It adds indirection and an extra interface that a simpler design might not need.",
-    "Getting the Device interface right up front takes more care than reaching for inheritance.",
+    "Getting the Device interface right up front takes more care than coupling each remote to a concrete device.",
   ],
   realWorld: [
     "JDBC and ODBC drivers, which put one common database API in front of many vendor-specific engines",
@@ -93,7 +94,7 @@ export const pattern: PatternDefinition = {
       y: 320,
       width: 230,
       description:
-        "Extends RemoteControl with an extra operation, mute(), built on the very same Device reference it inherited.",
+        "Adds mute() to the refined abstraction. Class-based tabs inherit the Device reference; Go embeds RemoteControl and promotes its methods.",
     },
     {
       id: "client",
@@ -129,7 +130,7 @@ export const pattern: PatternDefinition = {
       to: "remoteControl",
       type: "implements",
       description:
-        "AdvancedRemoteControl extends RemoteControl, inheriting its device reference and togglePower() for free.",
+        "Class-based tabs extend RemoteControl; Go embeds it. Both reuse the same Device reference and togglePower() behavior.",
       code: "advancedRemote",
     },
     {
@@ -161,7 +162,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "setVolume(0)",
       description:
-        "mute() is new behaviour added by the refined abstraction, but it still goes through the same inherited device reference.",
+        "mute() is new behavior on the refined abstraction, but it still goes through the same Device reference (inherited in class-based tabs, promoted from the embedded value in Go).",
       bend: 25,
       code: "mute",
     },
@@ -216,7 +217,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "togglePower()/mute()",
       description:
-        "The client calls both the inherited togglePower() and the new mute() on the refined abstraction.",
+        "The client calls togglePower() and the new mute() on the refined abstraction; Go promotes togglePower() from its embedded RemoteControl.",
       bend: 20,
       code: "usage",
     },
@@ -294,9 +295,9 @@ export const pattern: PatternDefinition = {
       code: "togglePower",
     },
     {
-      title: "Extend the abstraction side instead",
+      title: "Refine the abstraction side",
       description:
-        "The client now builds an AdvancedRemoteControl — a refined abstraction — around a TV. It inherits everything RemoteControl already does, plus a new mute() operation.",
+        "The client builds an AdvancedRemoteControl around a TV. Class-based tabs inherit RemoteControl behavior; Go embeds RemoteControl and promotes its methods, then adds mute().",
       highlight: [
         "client",
         "client-creates-advanced",
@@ -316,9 +317,9 @@ export const pattern: PatternDefinition = {
       code: "usage",
     },
     {
-      title: "Inherited behaviour still works",
+      title: "Shared behavior still works",
       description:
-        "The client calls togglePower() on the advanced remote. It reuses the base class delegation logic unchanged, through the same inherited device reference.",
+        "The client calls togglePower() on the advanced remote. It reuses RemoteControl's delegation logic through the same Device reference, inherited in class-based tabs and promoted from the embedded value in Go.",
       highlight: [
         "client",
         "client-advanced",
@@ -372,4 +373,5 @@ export const pattern: PatternDefinition = {
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
 };

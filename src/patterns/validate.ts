@@ -4,9 +4,13 @@ import type { ExplorableDefinition, PatternDefinition } from "@/types/pattern";
 /** Returns a list of authoring mistakes in the diagram/steps/code shared by patterns and architectures. */
 export function validateDiagram(p: ExplorableDefinition): string[] {
   const errors: string[] = [];
+  if (!p.csharp?.trim()) errors.push("missing csharp example");
+  if (!p.python?.trim()) errors.push("missing python example");
+  if (!p.go?.trim()) errors.push("missing go example");
   const { regions } = parseCode(p.code);
   const csRegions = p.csharp ? parseCode(p.csharp).regions : null;
   const pyRegions = p.python ? parseCode(p.python).regions : null;
+  const goRegions = p.go ? parseCode(p.go).regions : null;
   const participantIds = new Set(p.participants.map((x) => x.id));
   const relationIds = new Set(p.relations.map((x) => x.id));
   const ids = new Set([...participantIds, ...relationIds]);
@@ -22,6 +26,8 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
       errors.push(`${where}: unknown csharp code region "${region}"`);
     if (pyRegions && !pyRegions[region])
       errors.push(`${where}: unknown python code region "${region}"`);
+    if (goRegions && !goRegions[region])
+      errors.push(`${where}: unknown go code region "${region}"`);
   };
 
   for (const part of p.participants)

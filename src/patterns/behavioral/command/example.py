@@ -1,10 +1,9 @@
-from typing import Protocol
+from typing import Callable, Protocol
 
 
 # [command]
 class Command(Protocol):
-    def execute(self) -> None: ...
-    def undo(self) -> None: ...
+    def execute(self) -> Callable[[], None]: ...
 # [/command]
 
 
@@ -31,17 +30,14 @@ class Light:
 class LightOnCommand:
     def __init__(self, light: Light) -> None:
         self._light = light
-        # What undo() needs: whether the light was already on before execute()
-        # ran. Undo can't just assume "the opposite action" is correct.
-        self._was_on = False
 
-    def execute(self) -> None:
-        self._was_on = self._light.on
+    def execute(self) -> Callable[[], None]:
+        was_on = self._light.on
         self._light.turn_on()
-
-    def undo(self) -> None:
-        if not self._was_on:
-            self._light.turn_off()
+        def undo() -> None:
+            if not was_on:
+                self._light.turn_off()
+        return undo
 # [/onCommand]
 
 
@@ -49,15 +45,14 @@ class LightOnCommand:
 class LightOffCommand:
     def __init__(self, light: Light) -> None:
         self._light = light
-        self._was_on = False
 
-    def execute(self) -> None:
-        self._was_on = self._light.on
+    def execute(self) -> Callable[[], None]:
+        was_on = self._light.on
         self._light.turn_off()
-
-    def undo(self) -> None:
-        if self._was_on:
-            self._light.turn_on()
+        def undo() -> None:
+            if was_on:
+                self._light.turn_on()
+        return undo
 # [/offCommand]
 
 
@@ -65,7 +60,7 @@ class LightOffCommand:
 class RemoteButton:
     def __init__(self) -> None:
         self._current: Command | None = None
-        self._history: list[Command] = []
+        self._history: list[Callable[[], None]] = []
 
     # [setCommand]
     def set_command(self, command: Command) -> None:
@@ -76,16 +71,15 @@ class RemoteButton:
     def press(self) -> None:
         if self._current is None:
             return
-        self._current.execute()
-        self._history.append(self._current)
+        self._history.append(self._current.execute())
     # [/execute]
 
     # [undo]
     def undo_last(self) -> None:
         if not self._history:
             return
-        command = self._history.pop()
-        command.undo()
+        undo = self._history.pop()
+        undo()
     # [/undo]
 # [/remote]
 

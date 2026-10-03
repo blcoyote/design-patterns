@@ -7,7 +7,7 @@ An interactive, animated teaching site for the 23 Gang of Four patterns plus 9 e
 The product is **correct teaching material**. A diagram, a step note or a code comment that disagrees with the code is a bug, just as much as a crash. Every pattern must be:
 
 - **Correct**: the code compiles, runs, and does exactly what its comments, step notes and descriptions claim.
-- **Consistent**: the TypeScript, C# and Python examples tell the same story: same roles, same scenario, same values, same output.
+- **Consistent**: the TypeScript, C#, Python and Go examples tell the same story: same roles, same scenario, same values, same output.
 - **Honest about the pattern**: GoF role names and intent are the textbook ones. Language-specific shortcuts (C# events, Python `blinker`, etc.) are mentioned in a comment, not substituted for the pattern.
 
 ## The paved path
@@ -16,7 +16,7 @@ Follow these every time. If a task seems to need a different route, stop and ask
 
 ### 1. Patterns are data, not code paths
 
-- One folder per pattern: `src/patterns/<category>/<slug>/` with `index.ts` (pure `PatternDefinition` data), `example.ts`, `example.cs`, `example.py`, and optionally `Visualization.tsx`.
+- One folder per pattern: `src/patterns/<category>/<slug>/` with `index.ts` (pure `PatternDefinition` data), `example.ts`, `example.cs`, `example.py`, `example.go`, and optionally `Visualization.tsx`.
 - The registry auto-discovers folders. Never hand-register a pattern, and never special-case a slug in shared components.
 - New patterns start from `src/patterns/_template/` (see README → "Adding a pattern").
 - Shared behaviour goes in `src/components`, `src/hooks` or `src/lib`, never inside a pattern folder.
@@ -24,17 +24,18 @@ Follow these every time. If a task seems to need a different route, stop and ask
 - Comparisons (`src/comparisons/<slug>/`, `ComparisonDefinition`, template in `src/comparisons/_template/`) follow the same data/registry rules, one level deep (no category/paradigm folder). A comparison has no code or diagram of its own — it only references region ids and step indices that already exist on the patterns/architectures it compares, resolved through `crossRefs.ts`'s `resolveSubject` so `comparisons/registry.ts` never imports either registry directly.
 - When this site's own code uses a pattern it teaches, tag the usage with `// @pattern <slug>: <explanation>` directly above the code (see "Used in this site" in the README) instead of listing files anywhere.
 
-### 2. Three languages, one set of regions
+### 2. Four languages, one set of regions
 
-- `example.ts` → `code`, `example.cs` → `csharp`, `example.py` → `python`, all imported with `?raw`.
-- Region markers go on their own lines: `// [id]` … `// [/id]` in TS/C#, `# [id]` … `# [/id]` in Python. Every file must use **exactly the same set of region ids** (`npm test` enforces this).
-- Steps, participants and relations point at region ids. Check that each region wraps the code that the step's text describes, in **all three** files.
+- `example.ts` → `code`, `example.cs` → `csharp`, `example.py` → `python`, `example.go` → `go`, all imported with `?raw`.
+- Region markers go on their own lines: `// [id]` … `// [/id]` in TS/C#/Go, `# [id]` … `# [/id]` in Python. Every file must use **exactly the same set of region ids** (`npm test` enforces this).
+- Steps, participants and relations point at region ids. Check that each region wraps the code that the step's text describes, in **all four** files.
 - Layout conventions:
   - **TS:** usage goes at the bottom.
   - **C#:** usage goes at the top, because top-level statements must come before type declarations.
   - **Python:** imports first, usage at the bottom, `asyncio.run(main())` when TS uses `await`.
-- When you change one example, change the other two in the same task. Never leave the tabs out of step.
-- Description text in `index.ts` must hold for every tab. If it names a mechanism, name all three (e.g. Memento: WeakMap / private nested class / WeakKeyDictionary) or use neutral wording.
+  - **Go:** package declaration first, usage in `func main()` at the bottom.
+- When you change one example, change the other three in the same task. Never leave the tabs out of step.
+- Description text in `index.ts` must hold for every tab. If it names a mechanism, name all four (e.g. Memento: WeakMap / private nested class / WeakKeyDictionary / unexported field) or use neutral wording.
 
 ### 3. Known parity traps (each one has already bitten us)
 
@@ -57,6 +58,7 @@ npm test                     # registry validation, marker/region parity
 npx tsc -b                   # type-check
 npm run lint
 for f in src/patterns/*/*/example.py src/architectures/*/*/example.py; do PYTHONDONTWRITEBYTECODE=1 python3 -W error "$f" >/dev/null || echo "FAIL $f"; done
+for f in src/patterns/*/*/example.go src/architectures/*/*/example.go; do go run "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
 - Compile and run any C# file you touched (e.g. copy it into a scratch `dotnet new console` project as `Program.cs`). Check the output matches the comments.

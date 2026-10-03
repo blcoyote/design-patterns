@@ -6,7 +6,7 @@
  * A comparison has no code or diagram of its own: `code` and `steps` below point at region ids
  * and step indices that already exist on the subjects, so re-read those patterns'/architectures'
  * `index.ts` and `example.*` files before writing any claim here. Every value must be literally
- * true of all three languages.
+ * true of all four languages.
  */
 import type { ComparisonDefinition } from '@/types/comparison'
 

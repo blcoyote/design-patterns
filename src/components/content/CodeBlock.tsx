@@ -25,12 +25,14 @@ const FILE_NAME: Record<CodeLanguage, string> = {
   typescript: "example.ts",
   csharp: "Example.cs",
   python: "example.py",
+  go: "example.go",
 };
 
 const PRISM_LANGUAGE: Record<CodeLanguage, string> = {
   typescript: "tsx",
   csharp: "csharp",
   python: "python",
+  go: "go",
 };
 
 export function CodeBlock({

@@ -3,13 +3,15 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { byParadigm } from '@/architectures/registry'
 import { paradigms } from '@/architectures/paradigms'
 import { UsedBadge } from '@/components/content/UsedInThisSite'
+import { comparisons } from '@/comparisons/registry'
+import { areaOf } from '@/lib/areas'
 import { usedSlugs } from '@/lib/selfUsage'
 import { categories } from '@/patterns/categories'
 import { byCategory } from '@/patterns/registry'
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { pathname } = useLocation()
-  const inArchitectureArea = pathname.startsWith('/architecture')
+  const area = areaOf(pathname)
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
   const used = usedSlugs()
@@ -28,7 +30,13 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
     }))
     .filter((g) => g.architectures.length > 0)
 
-  const empty = inArchitectureArea ? architectureGroups.length === 0 : patternGroups.length === 0
+  const filteredComparisons = comparisons.filter(
+    (c) => !q || c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q),
+  )
+
+  const empty =
+    area === 'architecture' ? architectureGroups.length === 0 : area === 'compare' ? filteredComparisons.length === 0 : patternGroups.length === 0
+  const emptyLabel = area === 'architecture' ? 'architectures' : area === 'compare' ? 'comparisons' : 'patterns'
 
   return (
     <>
@@ -39,19 +47,19 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         }`}
       >
         <label className="relative block">
-          <span className="sr-only">{inArchitectureArea ? 'Search architectures' : 'Search patterns'}</span>
+          <span className="sr-only">Search {emptyLabel}</span>
           <svg viewBox="0 0 24 24" className="absolute top-2.5 left-3 size-4 fill-slate-500" aria-hidden>
             <path d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" />
           </svg>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={inArchitectureArea ? 'Search architectures…' : 'Search patterns…'}
+            placeholder={`Search ${emptyLabel}…`}
             className="w-full rounded-lg bg-slate-900 py-2 pr-3 pl-9 text-sm text-slate-200 ring-1 ring-slate-800 placeholder:text-slate-500 focus:ring-slate-600 focus:outline-none"
           />
         </label>
 
-        {inArchitectureArea ? (
+        {area === 'architecture' && (
           <nav className="mt-6 space-y-6" aria-label="Architectures">
             {architectureGroups.map(({ paradigm, architectures }) => (
               <div key={paradigm}>
@@ -80,7 +88,31 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
               </div>
             ))}
           </nav>
-        ) : (
+        )}
+
+        {area === 'compare' && (
+          <nav className="mt-6" aria-label="Comparisons">
+            <ul className="space-y-0.5">
+              {filteredComparisons.map((c) => (
+                <li key={c.slug}>
+                  <NavLink
+                    to={`/compare/${c.slug}`}
+                    onClick={onClose}
+                    className={({ isActive }) =>
+                      `flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition ${
+                        isActive ? 'bg-slate-800 font-medium text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+                      }`
+                    }
+                  >
+                    {c.title}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+
+        {area === 'patterns' && (
           <nav className="mt-6 space-y-6" aria-label="Patterns">
             {patternGroups.map(({ category, patterns }) => (
               <div key={category}>
@@ -110,16 +142,25 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             ))}
           </nav>
         )}
-        {empty && <p className="mt-6 text-sm text-slate-500">No {inArchitectureArea ? 'architectures' : 'patterns'} match “{query}”.</p>}
 
-        <div className="mt-8 border-t border-slate-800 pt-4">
-          <Link
-            to={inArchitectureArea ? '/' : '/architecture'}
-            onClick={onClose}
-            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
-          >
-            {inArchitectureArea ? '← Design patterns' : 'Zoom out: architecture →'}
-          </Link>
+        {empty && <p className="mt-6 text-sm text-slate-500">No {emptyLabel} match “{query}”.</p>}
+
+        <div className="mt-8 space-y-1 border-t border-slate-800 pt-4">
+          {area !== 'patterns' && (
+            <Link to="/" onClick={onClose} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white">
+              ← Design patterns
+            </Link>
+          )}
+          {area !== 'architecture' && (
+            <Link to="/architecture" onClick={onClose} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white">
+              {area === 'patterns' ? 'Zoom out: architecture →' : 'Architecture →'}
+            </Link>
+          )}
+          {area !== 'compare' && (
+            <Link to="/compare" onClick={onClose} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white">
+              Which should I choose? →
+            </Link>
+          )}
         </div>
       </aside>
     </>

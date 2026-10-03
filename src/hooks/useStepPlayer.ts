@@ -19,17 +19,20 @@ export interface StepPlayer {
 }
 
 /**
- * Drives an auto-advancing, looping step index. Auto-play is off under reduced motion.
+ * Drives an auto-advancing, looping step index. Auto-play is off under reduced motion, and also
+ * off when `initialIndex` is given (a deep link into a specific step), so the linked step stays
+ * on screen instead of immediately advancing.
  * `durationOf(index, speed)` returns how long that step stays on screen in ms, so a step
  * with a long packet chain is not cut short (see `stepDuration` in src/lib/packetTiming.ts).
  */
 export function useStepPlayer(
   count: number,
   durationOf: (index: number, speed: number) => number = (_index, speed) => 3200 / speed,
+  initialIndex?: number,
 ): StepPlayer {
   const reduceMotion = useReducedMotion()
-  const [index, setIndex] = useState(0)
-  const [playing, setPlaying] = useState(!reduceMotion)
+  const [index, setIndex] = useState(initialIndex ?? 0)
+  const [playing, setPlaying] = useState(initialIndex === undefined && !reduceMotion)
   const [speed, setSpeed] = useState(1)
 
   useEffect(() => {

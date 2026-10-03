@@ -4,6 +4,8 @@ import { Header } from '@/components/layout/Header'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { ArchitectureIndexPage } from '@/components/pages/ArchitectureIndexPage'
 import { ArchitecturePage } from '@/components/pages/ArchitecturePage'
+import { ComparisonIndexPage } from '@/components/pages/ComparisonIndexPage'
+import { ComparisonPage } from '@/components/pages/ComparisonPage'
 import { HomePage } from '@/components/pages/HomePage'
 import { NotFound } from '@/components/pages/NotFound'
 import { PatternPage } from '@/components/pages/PatternPage'
@@ -27,6 +29,8 @@ export function App() {
             <Route path="/patterns/:slug" element={<PatternPage />} />
             <Route path="/architecture" element={<ArchitectureIndexPage />} />
             <Route path="/architecture/:slug" element={<ArchitecturePage />} />
+            <Route path="/compare" element={<ComparisonIndexPage />} />
+            <Route path="/compare/:slug" element={<ComparisonPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

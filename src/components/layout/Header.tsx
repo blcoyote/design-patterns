@@ -1,12 +1,19 @@
 import { Link, useLocation } from 'react-router-dom'
 import { architectures } from '@/architectures/registry'
+import { comparisons } from '@/comparisons/registry'
+import { areaOf } from '@/lib/areas'
 import { patterns } from '@/patterns/registry'
+
+const COUNTS = {
+  patterns: { count: patterns.length, unit: 'patterns' },
+  architecture: { count: architectures.length, unit: 'architectures' },
+  compare: { count: comparisons.length, unit: 'comparisons' },
+} as const
 
 export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boolean }) {
   const { pathname } = useLocation()
-  const inArchitectureArea = pathname.startsWith('/architecture')
-  const count = inArchitectureArea ? architectures.length : patterns.length
-  const unit = inArchitectureArea ? 'architectures' : 'patterns'
+  const area = areaOf(pathname)
+  const { count, unit } = COUNTS[area]
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur">
@@ -27,12 +34,16 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
           </span>
         </Link>
         <nav className="flex items-center gap-1 sm:ml-2" aria-label="Areas">
-          <HeaderLink to="/" active={!inArchitectureArea}>
+          <HeaderLink to="/" active={area === 'patterns'}>
             <span className="min-[400px]:hidden">Patterns</span>
             <span className="hidden min-[400px]:inline">Design patterns</span>
           </HeaderLink>
-          <HeaderLink to="/architecture" active={inArchitectureArea}>
+          <HeaderLink to="/architecture" active={area === 'architecture'}>
             Architecture
+          </HeaderLink>
+          <HeaderLink to="/compare" active={area === 'compare'}>
+            <span className="sm:hidden">Compare</span>
+            <span className="hidden sm:inline">Which should I choose?</span>
           </HeaderLink>
         </nav>
         <span className="ml-auto hidden font-mono text-xs text-slate-500 sm:block">

@@ -1,18 +1,22 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { ComparisonTeaser } from '@/components/content/ComparisonTeaser'
 import { CrossReferenceBox } from '@/components/content/CrossReferenceBox'
 import { BulletList, ProsCons, Section } from '@/components/content/Section'
 import { UsedInThisSite } from '@/components/content/UsedInThisSite'
 import { PatternExplorer } from '@/components/viz/PatternExplorer'
 import { paradigms } from '@/architectures/paradigms'
 import { architectureNeighbours, getArchitecture } from '@/architectures/registry'
+import { comparisonsFor } from '@/comparisons/registry'
 import { architecturesUsedBy, designPatternsUsedBy } from '@/lib/crossRefs'
 import { usagesOf } from '@/lib/selfUsage'
+import { parseStepParam } from '@/lib/stepParam'
 import { NotFound } from './NotFound'
 
 /** Mirrors PatternPage, with the paradigm badge/colour instead of category, a cross-reference box
  * linking back to the design patterns this architecture is built from, and a concepts glossary. */
 export function ArchitecturePage() {
   const { slug } = useParams()
+  const [searchParams] = useSearchParams()
   const architecture = getArchitecture(slug)
   if (!architecture) return <NotFound />
 
@@ -21,6 +25,8 @@ export function ArchitecturePage() {
   const designPatterns = designPatternsUsedBy(architecture)
   const siblingArchitectures = architecturesUsedBy(architecture)
   const usages = usagesOf(architecture.slug)
+  const comparisons = comparisonsFor(architecture.slug)
+  const initialStep = parseStepParam(searchParams.get('step'), architecture.steps.length)
 
   return (
     <article className="space-y-8">
@@ -33,13 +39,15 @@ export function ArchitecturePage() {
         <p className="mt-4 text-lg leading-relaxed text-slate-300">{architecture.intent}</p>
       </header>
 
-      <PatternExplorer key={architecture.slug} pattern={architecture} color={meta.color} />
+      <PatternExplorer key={`${architecture.slug}:${initialStep ?? 'auto'}`} pattern={architecture} color={meta.color} initialStep={initialStep} />
 
       <CrossReferenceBox
         title={`Commonly used with ${architecture.name}`}
         designPatterns={designPatterns}
         architectures={siblingArchitectures}
       />
+
+      <ComparisonTeaser comparisons={comparisons} />
 
       <UsedInThisSite usages={usages} />
 

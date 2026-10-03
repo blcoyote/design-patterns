@@ -4,6 +4,8 @@ import { paradigms } from '@/architectures/paradigms'
 import { categories } from '@/patterns/categories'
 import { getPattern, patterns } from '@/patterns/registry'
 import type { ArchitectureDefinition } from '@/types/architecture'
+import type { SubjectRef } from '@/types/comparison'
+import type { ExplorableDefinition } from '@/types/pattern'
 
 /**
  * The only module allowed to import both `patterns/registry` and `architectures/registry`.
@@ -73,4 +75,20 @@ export function resolveArchitecture(slug: string): ResolvedLink | undefined {
  * `PatternPage` should render a `CrossReferenceBox` at all. */
 export function patternsReferencedByArchitectures(): Set<string> {
   return new Set(patterns.map((p) => p.slug).filter((slug) => architecturesUsing(slug).length > 0))
+}
+
+export interface ResolvedSubject extends ResolvedLink {
+  def: ExplorableDefinition
+}
+
+// @pattern facade: resolveSubject hides the pattern-vs-architecture branch behind one call, so
+// `comparisons/registry.ts` and `comparisons/validate.ts` never import either registry directly
+/** Resolves a comparison subject (pattern or architecture) to its definition plus link-ready data. */
+export function resolveSubject(ref: SubjectRef): ResolvedSubject | undefined {
+  if (ref.kind === 'pattern') {
+    const pattern = getPattern(ref.slug)
+    return pattern ? { ...resolvePattern(ref.slug)!, def: pattern } : undefined
+  }
+  const architecture = getArchitecture(ref.slug)
+  return architecture ? { ...resolveArchitecture(ref.slug)!, def: architecture } : undefined
 }

@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { UsedBadge } from '@/components/content/UsedInThisSite'
+import { comparisons } from '@/comparisons/registry'
 import { categories, categoryOrder } from '@/patterns/categories'
 import { patterns } from '@/patterns/registry'
 import { usedSlugs } from '@/lib/selfUsage'
@@ -46,21 +47,41 @@ export function HomePage() {
         <HeroGraphic />
       </section>
 
-      <Link
-        to="/architecture"
-        className="group flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-indigo-500/10 to-lime-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
-      >
-        <div>
-          <p className="text-xs font-mono uppercase tracking-wider text-slate-500">// same explorer, bigger boxes</p>
-          <p className="mt-1 text-lg font-semibold text-white">
-            Zoom out: <span className="text-slate-300">architectural patterns</span>
-          </p>
-          <p className="mt-1 text-sm text-slate-400">
-            Layered, Hexagonal, DDD, CQRS, Microservices, Event-Driven, MVU and more — see which of the patterns above each one is built from.
-          </p>
-        </div>
-        <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">→</span>
-      </Link>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          to="/architecture"
+          className="group flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-indigo-500/10 to-lime-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
+        >
+          <div>
+            <p className="text-xs font-mono uppercase tracking-wider text-slate-500">// same explorer, bigger boxes</p>
+            <p className="mt-1 text-lg font-semibold text-white">
+              Zoom out: <span className="text-slate-300">architectural patterns</span>
+            </p>
+            <p className="mt-1 text-sm text-slate-400">
+              Layered, Hexagonal, DDD, CQRS, Microservices, Event-Driven, MVU and more — see which of the patterns above each one is built from.
+            </p>
+          </div>
+          <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">→</span>
+        </Link>
+
+        {comparisons.length > 0 && (
+          <Link
+            to="/compare"
+            className="group flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-slate-500/10 to-slate-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
+          >
+            <div>
+              <p className="text-xs font-mono uppercase tracking-wider text-slate-500">// look-alikes, told apart</p>
+              <p className="mt-1 text-lg font-semibold text-white">
+                Not sure which? <span className="text-slate-300">Which should I choose?</span>
+              </p>
+              <p className="mt-1 text-sm text-slate-400">
+                Patterns that look nearly identical on a class diagram, compared side by side with a scenario to test yourself against.
+              </p>
+            </div>
+            <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">→</span>
+          </Link>
+        )}
+      </div>
 
       <section id="catalogue" className="scroll-mt-20">
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by category">

@@ -23,7 +23,7 @@ export function UsedInThisSite({ usages }: Props) {
       <ul className="mt-4 space-y-5">
         {usages.map((usage) => (
           <li key={`${usage.file}:${usage.line}`}>
-            <a href={usage.githubUrl} target="_blank" rel="noreferrer" className="font-mono text-sm text-emerald-300 hover:underline">
+            <a href={usage.githubUrl} target="_blank" rel="noreferrer" className="font-mono text-sm break-all text-emerald-300 hover:underline">
               {usage.file}:{usage.line}
             </a>
             <p className="mt-1 text-sm leading-relaxed text-slate-300">{usage.explanation}</p>

@@ -107,7 +107,7 @@ export function HomePage() {
           <p className="mt-3 text-sm text-slate-400">Patterns this site's own code uses on itself — see each page's "Used in this site" box.</p>
         )}
 
-        <motion.ul layout className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <motion.ul layout className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((p, i) => {
             const cat = categories[p.category]
             return (

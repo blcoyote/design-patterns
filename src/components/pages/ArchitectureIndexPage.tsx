@@ -86,7 +86,7 @@ export function ArchitectureIndexPage() {
 
         <motion.ul
           layout
-          className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
         >
           {shown.map((a, i) => {
             const meta = paradigms[a.paradigm];

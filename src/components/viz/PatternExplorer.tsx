@@ -61,24 +61,30 @@ export function PatternExplorer({
   return (
     <section
       aria-label="Interactive visualisation"
-      className="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+      className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
     >
-      <div className="space-y-5 rounded-2xl bg-slate-900/40 p-4 ring-1 ring-slate-800 sm:p-6">
-        <div className="overflow-hidden rounded-xl bg-slate-950 ring-1 ring-slate-800">
-          <Visualization
-            pattern={pattern}
-            color={color}
-            step={step}
-            stepIndex={player.index}
-            speed={player.speed}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
+      <div className="min-w-0 space-y-5 rounded-2xl bg-slate-900/40 p-3 ring-1 ring-slate-800 sm:p-6">
+        {/* diagrams are drawn on an ~800px canvas; below that width they scroll sideways instead of shrinking the text to nothing */}
+        <div className="overflow-x-auto overflow-y-hidden rounded-xl bg-slate-950 ring-1 ring-slate-800">
+          <div className="min-w-[40rem]">
+            <Visualization
+              pattern={pattern}
+              color={color}
+              step={step}
+              stepIndex={player.index}
+              speed={player.speed}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+            />
+          </div>
         </div>
+        <p className="text-center text-xs text-slate-500 md:hidden">
+          Swipe the diagram sideways to see all of it
+        </p>
         <StepPlayer steps={pattern.steps} player={player} color={color} />
       </div>
 
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <DetailPanel
           pattern={pattern}
           selection={selection}

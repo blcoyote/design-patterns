@@ -30,7 +30,7 @@ export const pattern: PatternDefinition = {
   ],
   cons: [
     'Every call site that reads through the cache has to know it exists and follow the same check-then-load protocol; a caching Proxy avoids this by making the cache transparent to callers.',
-    'There is a stale-read window between the write to the source and the invalidate call: a reader between those two steps can still load and cache the old value, and will keep serving it until the entry\'s TTL (or the next write) clears it out.',
+    'Concurrent readers and writers can race. A reader that misses can load the old value from the source, a writer can then update the source and invalidate, and the reader then caches the old value, which is served until its TTL expires or the next write. A reader that hits between the write and the invalidate only sees the old value briefly.',
     'TTLs and invalidation are extra configuration to choose and tune — too short defeats the cache, too long serves stale data for longer than intended.',
   ],
   realWorld: [
@@ -209,7 +209,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Expiry forces one more miss',
-      description: 'The next get() finds the entry\'s expiresAt in the past, drops it, and reports a miss, so ProductService reloads from ProductDatabase one more time. This is also the pattern\'s sharpest edge: between any write and its invalidate() call, a concurrent reader could still slip in and cache the value that is about to become stale — a risk a single-threaded demo cannot show, but a real one under concurrent load.',
+      description: 'The next get() finds the entry\'s expiresAt in the past, drops it, and reports a miss, so ProductService reloads from ProductDatabase one more time. This is also the pattern\'s sharpest edge, which a single-threaded demo cannot show: a reader that misses can load the old value from the source before a write, and cache it after that write\'s invalidate(), so the old value persists until its TTL expires. A reader that hits between the write and the invalidate sees the old value only briefly.',
       highlight: ['client', 'request', 'service', 'cacheOp', 'cache', 'dbOp', 'database'],
       packets: [
         { relation: 'request', label: 'getProduct("p1")' },

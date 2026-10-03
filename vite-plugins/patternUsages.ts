@@ -121,13 +121,24 @@ export function patternUsagesPlugin(root: string = process.cwd()): Plugin {
     configureServer(server) {
       // scanned files aren't imported by any module graph, so they wouldn't otherwise be watched
       for (const absolute of collectFiles(root)) server.watcher.add(absolute)
+
+      // adding or deleting a scanned file changes the catalogue even though no module imports it
+      const refresh = (file: string) => {
+        if (!isScanned(root, file) || !isScannable(file)) return
+        const mod = server.moduleGraph.getModuleById(RESOLVED_ID)
+        if (mod) server.moduleGraph.invalidateModule(mod)
+        server.ws.send({ type: 'full-reload' })
+      }
+      server.watcher.on('add', refresh)
+      server.watcher.on('unlink', refresh)
     },
-    handleHotUpdate({ file, server }) {
+    handleHotUpdate({ file, server, modules }) {
       if (!isScanned(root, file)) return
       const mod = server.moduleGraph.getModuleById(RESOLVED_ID)
       if (!mod) return
       server.moduleGraph.invalidateModule(mod)
-      return [mod]
+      // keep Vite's own update list so the edited component still hot-updates too
+      return [...modules, mod]
     },
   }
 }

@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 // Usage (top-level statements must come before type declarations in a
 // C# file, so this runs first even though it reads last).
 
@@ -66,7 +68,7 @@ class JsonExporter : IExporter
 {
     public string Id => "json";
 
-    public string Export(Doc doc) => $"{{\"title\":\"{doc.Title}\",\"body\":\"{doc.Body}\"}}";
+    public string Export(Doc doc) => JsonSerializer.Serialize(new { title = doc.Title, body = doc.Body });
 }
 
 // [manifest]

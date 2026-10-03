@@ -69,6 +69,9 @@ export const architecture: ArchitectureDefinition = {
       { slug: 'ddd', why: "The command side's aggregate is exactly the DDD aggregate — it owns the invariants — while the query side bypasses the domain model entirely for read-optimized views." },
       { slug: 'event-sourcing', why: 'Event Sourcing is the natural write-side partner: the events already written to the store are exactly what a projector folds into the read model.' },
       { slug: 'functional-core', why: 'Turning a write-model change into a read-model view is a pure function of data in, data out, making the projector a natural functional core wrapped by an imperative shell that does the actual I/O.' },
+      { slug: 'vertical-slice', why: 'Vertical Slice organizes the same command/query split by feature — PlaceOrder and GetOrder are independent slices — rather than splitting the whole system into one write model and one read model.' },
+      { slug: 'microservices', why: 'A service with its own read model, kept up to date from other services\' published events instead of querying them synchronously, is CQRS applied at the service boundary rather than inside one process.' },
+      { slug: 'event-driven', why: 'A CQRS projector is just another consumer on an event-driven broker: it subscribes to the events the write side publishes and folds them into its own read model.' },
     ],
   },
 

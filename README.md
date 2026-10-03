@@ -1,7 +1,7 @@
 # design-patterns
 
-An interactive, animated guide to all 23 Gang of Four design patterns plus 7 common enterprise patterns, and a second
-area covering 6 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+An interactive, animated guide to all 23 Gang of Four design patterns plus 9 common enterprise patterns, and a second
+area covering 12 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern and architecture has:
 
@@ -9,12 +9,12 @@ Every pattern and architecture has:
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
 - TypeScript, C# and Python examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
-| Creational | Structural | Behavioral | Enterprise |
-| --- | --- | --- | --- |
-| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool |
+| Creational                                                      | Structural                                                      | Behavioral                                                                                                                      | Enterprise                                                                                                              |
+| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool, Plugin, Cache-Aside |
 
-Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, Domain-Driven Design, CQRS, Event Sourcing and
-Functional Core / Imperative Shell — see [Architecture](#architecture) below.
+Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, MVC, Vertical Slice, Domain-Driven Design, CQRS,
+Microservices, Event-Driven, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.
 
 ## Getting started
 
@@ -72,9 +72,11 @@ src/
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
    - send `packets` along relations (`reverse: true` for return values),
-   - sequence packets in shared `Diagram` or `PacketLayer` scenes with `after: 0` to wait for the first packet's animation to finish (indices are zero-based and must point to an earlier packet),
-   - show small `notes` badges under participants,
-   - highlight a `code` region.
+
+- sequence packets in shared `Diagram` or `PacketLayer` scenes with `after: 0` to wait for the first packet's animation to finish (indices are zero-based and must point to an earlier packet),
+- show small `notes` badges under participants,
+- highlight a `code` region.
+
 4. Put the TypeScript example in `example.ts` (imported with `?raw` as `code`; excluded from `tsc` and lint). Mark regions with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
 5. Optionally add `example.cs` (imported with `?raw` as `csharp`) with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as the TypeScript file — `npm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
 6. Optionally add `example.py` (imported with `?raw` as `python`) with an equivalent Python example, shown as another tab. Use the same region ids, written as Python comments: `# [id]` and `# [/id]`. Usage code goes at the bottom, as in TypeScript, and the file should run as-is with `python3 example.py`.
@@ -90,16 +92,16 @@ For packet animation, pass `packetSpeed={speed}` to `Diagram`, or use `PacketLay
 
 ## Architecture
 
-A second area, **Architecture** (`/architecture`), explains *architectural* patterns — whole-system shapes like Layered or
+A second area, **Architecture** (`/architecture`), explains _architectural_ patterns — whole-system shapes like Layered or
 CQRS — the same way the patterns above explain class-level ones: an animated, clickable diagram, a step player, linked
 TypeScript/C#/Python code, and the usual problem/solution/pros/cons sections, plus a glossary of key concepts and (for a
 few) named variants.
 
-The six planned architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
+The twelve architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
 
-| Object-oriented | Functional | OO + Functional |
-| --- | --- | --- |
-| Layered (N-tier), Hexagonal (Ports & Adapters), Domain-Driven Design | Event Sourcing, Functional Core / Imperative Shell | CQRS |
+| Object-oriented                                                                       | Functional                                                                                                  | OO + Functional                                         |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture) | Domain-Driven Design, CQRS, Microservices, Event-Driven |
 
 ### Cross-reference model
 
@@ -107,10 +109,10 @@ Architectures and design patterns link to each other through a **"Commonly used 
 
 - **Architecture → design pattern** is declared by the architecture, in `commonlyUsedWith.designPatterns`, each with a
   `why` sentence. Every slug used in a `participant.patterns` array must also appear here (checked by `validateArchitecture`).
-- **Design pattern → architecture** is never declared — it is *derived*: `lib/crossRefs.ts` scans every architecture's
+- **Design pattern → architecture** is never declared — it is _derived_: `lib/crossRefs.ts` scans every architecture's
   `commonlyUsedWith.designPatterns` for a given pattern slug and reuses that `why` text. This is why `patterns/registry.ts`
   never has to import anything from `architectures/`.
-- **Architecture ↔ architecture** links must be declared on *both* sides, each with its own `why` — `architectures/registry.test.ts`
+- **Architecture ↔ architecture** links must be declared on _both_ sides, each with its own `why` — `architectures/registry.test.ts`
   has a symmetry test that fails the build if `A` lists `B` but `B` doesn't list `A` back.
 
 `src/lib/crossRefs.ts` is the only module that imports both `patterns/registry` and `architectures/registry`; this keeps

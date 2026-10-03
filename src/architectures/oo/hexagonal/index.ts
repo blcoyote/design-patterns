@@ -99,6 +99,7 @@ export const architecture: ArchitectureDefinition = {
       { slug: 'ddd', why: 'The hexagon is usually where a DDD bounded context lives — aggregates and domain services sit in the core, repositories are driven ports, and the ACL is itself a pair of adapters.' },
       { slug: 'functional-core', why: 'Both push effects to the edges; Hexagonal does it with interfaces and classes, Functional Core / Imperative Shell does it with plain functions and a thin shell that performs the I/O.' },
       { slug: 'cqrs', why: 'The driving side splits cleanly along CQRS lines: a PlaceOrderUseCase port for commands and a separate query port for reads, each with its own adapters.' },
+      { slug: 'microservices', why: 'Each microservice is internally a hexagon of its own — its core stays framework-free, while HTTP controllers and repository adapters are what expose it to, and connect it from, other services.' },
     ],
   },
 

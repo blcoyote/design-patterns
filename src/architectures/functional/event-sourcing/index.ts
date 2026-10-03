@@ -66,6 +66,8 @@ export const architecture: ArchitectureDefinition = {
       { slug: 'ddd', why: 'A DDD aggregate\'s history is a natural event stream: the domain events it already raises to express what happened are exactly what Event Sourcing appends and replays.' },
       { slug: 'cqrs', why: 'The event store is the write side\'s single source of truth; CQRS read-side projections are just subscribers to the same stream Event Sourcing already produces.' },
       { slug: 'functional-core', why: 'decide and evolve are already pure, effect-free functions over plain data — the shell\'s entire job is loading events in and appending events out around that pure core.' },
+      { slug: 'event-driven', why: 'Integration events published on a broker (OrderPlaced, StockReserved) are transient messages consumed and forgotten; Event Sourcing\'s events are the permanent source of truth state is rebuilt from — easy to confuse, genuinely different jobs.' },
+      { slug: 'mvu', why: 'An MVU runtime keeps every Model it has produced as a history list — the same idea as an event log, except each entry is already the folded state rather than the event that produced it, so time-travel is a lookup instead of a replay.' },
     ],
   },
 

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { paradigmOrder, paradigms } from "@/architectures/paradigms";
 import { architectures } from "@/architectures/registry";
 import { UsedBadge } from "@/components/content/UsedInThisSite";
+import { Seo } from "@/components/content/Seo";
 import { usedSlugs } from "@/lib/selfUsage";
 import type { Paradigm } from "@/types/architecture";
 
@@ -18,6 +19,10 @@ export function ArchitectureIndexPage() {
 
   return (
     <div className="space-y-12">
+      <Seo
+        title="Architectural Patterns"
+        description="Explore architectural patterns such as Layered, Hexagonal, DDD, CQRS, and Event Sourcing through animated diagrams and their underlying design patterns."
+      />
       <section className="max-w-3xl">
         <p className="font-mono text-sm text-slate-500">
           // zoom out from objects to systems

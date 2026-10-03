@@ -3,10 +3,11 @@ import { categoryOrder } from './categories'
 import { validatePattern } from './validate'
 
 /**
- * Every folder in src/patterns with an index.ts exporting `pattern` is picked up
- * automatically. Folders starting with "_" (like _template) are ignored.
+ * Every folder in src/patterns/<category>/<slug> with an index.ts exporting `pattern` is
+ * picked up automatically. The template at src/patterns/_template is naturally excluded
+ * since it isn't nested one level deeper, but it's also excluded explicitly for clarity.
  */
-const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./*/index.ts', '!./_*/index.ts'], {
+const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./*/*/index.ts', '!./_*/**'], {
   eager: true,
 })
 

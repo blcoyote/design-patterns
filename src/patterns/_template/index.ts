@@ -1,5 +1,5 @@
 /**
- * TEMPLATE — copy this folder to `src/patterns/<your-slug>/` and fill it in.
+ * TEMPLATE — copy this folder to `src/patterns/<category>/<your-slug>/` and fill it in.
  * Folders starting with "_" are ignored by the registry, so this file never shows up on the site.
  * See README.md → "Adding a pattern" for details.
  */
@@ -11,7 +11,7 @@ import pyExample from './example.py?raw' // optional: delete along with `python`
 export const pattern: PatternDefinition = {
   slug: 'my-pattern', // must match the folder name; used in the URL (#/patterns/my-pattern)
   name: 'My Pattern',
-  category: 'behavioral', // 'creational' | 'structural' | 'behavioral' | 'architectural'
+  category: 'behavioral', // 'creational' | 'structural' | 'behavioral' | 'enterprise'
   order: 99, // position within the category
   summary: 'One line shown on cards and in search.',
   intent: 'The GoF-style intent statement.',

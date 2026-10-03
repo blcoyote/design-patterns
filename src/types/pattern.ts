@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-export type Category = 'creational' | 'structural' | 'behavioral' | 'architectural'
+export type Category = 'creational' | 'structural' | 'behavioral' | 'enterprise'
 
 export type ParticipantKind = 'class' | 'interface' | 'abstract' | 'client' | 'object'
 
@@ -21,6 +21,8 @@ export interface Participant {
    * Defaults to the participant id if a region with that name exists.
    */
   code?: string
+  /** Slugs of design patterns this box is built with, e.g. `['repository']`. Shown as "Built with" chips. */
+  patterns?: string[]
 }
 
 export type RelationType = 'calls' | 'creates' | 'implements' | 'wraps' | 'notifies' | 'holds'
@@ -59,32 +61,10 @@ export interface Step {
   code?: string
 }
 
-export interface VisualizationProps {
-  pattern: PatternDefinition
-  step: Step | null
-  stepIndex: number
-  selectedId: string | null
-  onSelect: (id: string | null) => void
-}
-
-export interface PatternDefinition {
+/** Everything the interactive explorer (`PatternExplorer`) needs to animate and render a diagram. */
+export interface ExplorableDefinition {
   slug: string
   name: string
-  category: Category
-  /** Sort order within its category. */
-  order: number
-  /** One line for cards and the sidebar. */
-  summary: string
-  intent: string
-  problem: string
-  solution: string
-  analogy: string
-  whenToUse: string[]
-  pros: string[]
-  cons: string[]
-  realWorld: string[]
-  /** Slugs of related patterns. */
-  related: string[]
   participants: Participant[]
   relations: Relation[]
   steps: Step[]
@@ -108,4 +88,32 @@ export interface PatternDefinition {
   viewBox?: string
   /** Optional custom scene replacing the generic diagram. */
   Visualization?: ComponentType<VisualizationProps>
+}
+
+export interface VisualizationProps {
+  pattern: ExplorableDefinition
+  /** Accent colour (category or paradigm), passed down by PatternExplorer. */
+  color: string
+  step: Step | null
+  stepIndex: number
+  selectedId: string | null
+  onSelect: (id: string | null) => void
+}
+
+export interface PatternDefinition extends ExplorableDefinition {
+  category: Category
+  /** Sort order within its category. */
+  order: number
+  /** One line for cards and the sidebar. */
+  summary: string
+  intent: string
+  problem: string
+  solution: string
+  analogy: string
+  whenToUse: string[]
+  pros: string[]
+  cons: string[]
+  realWorld: string[]
+  /** Slugs of related patterns. */
+  related: string[]
 }

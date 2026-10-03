@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
+import { Link } from 'react-router-dom'
 import type { Selection } from '@/lib/selection'
-import type { PatternDefinition, Relation } from '@/types/pattern'
+import type { ExplorableDefinition, Relation } from '@/types/pattern'
 
 const RELATION_NAMES: Record<Relation['type'], string> = {
   calls: 'Calls',
@@ -11,14 +12,19 @@ const RELATION_NAMES: Record<Relation['type'], string> = {
   holds: 'Holds a reference to',
 }
 
+/** Resolves a design-pattern slug to a "Built with" chip. Kept as a prop so the patterns
+ * registry never has to import architecture code (see `lib/crossRefs`). */
+export type ResolvePattern = (slug: string) => { name: string; href: string; color: string } | undefined
+
 interface Props {
-  pattern: PatternDefinition
+  pattern: ExplorableDefinition
   selection: Selection | null
   color: string
   onSelect: (id: string | null) => void
+  resolvePattern?: ResolvePattern
 }
 
-export function DetailPanel({ pattern, selection, color, onSelect }: Props) {
+export function DetailPanel({ pattern, selection, color, onSelect, resolvePattern }: Props) {
   const name = (id: string) => pattern.participants.find((p) => p.id === id)?.label ?? id
   const connections =
     selection?.kind === 'participant'
@@ -101,6 +107,28 @@ export function DetailPanel({ pattern, selection, color, onSelect }: Props) {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {selection.kind === 'participant' && selection.item.patterns && selection.item.patterns.length > 0 && resolvePattern && (
+              <div className="mt-4">
+                <p className="text-xs font-mono uppercase tracking-wider text-slate-500">Built with</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selection.item.patterns.map((slug) => {
+                    const resolved = resolvePattern(slug)
+                    if (!resolved) return null
+                    return (
+                      <Link
+                        key={slug}
+                        to={resolved.href}
+                        className="rounded-full px-3 py-1 text-xs font-medium transition hover:bg-slate-800"
+                        style={{ color: resolved.color, boxShadow: `inset 0 0 0 1px ${resolved.color}55` }}
+                      >
+                        {resolved.name}
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
             )}
           </motion.div>

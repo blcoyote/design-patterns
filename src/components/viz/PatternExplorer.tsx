@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { CodeBlock, type CodeSource } from '@/components/content/CodeBlock'
 import { useCodeLanguage, type CodeLanguage } from '@/hooks/useCodeLanguage'
 import { useStepPlayer } from '@/hooks/useStepPlayer'
+import { resolvePattern } from '@/lib/crossRefs'
 import { parseCode, type ParsedCode } from '@/lib/codeRegions'
-import { categories } from '@/patterns/categories'
-import type { PatternDefinition } from '@/types/pattern'
+import type { ExplorableDefinition } from '@/types/pattern'
 import { findSelection } from '@/lib/selection'
 import { DetailPanel } from './DetailPanel'
 import { GenericVisualization } from './GenericVisualization'
@@ -12,10 +12,10 @@ import { StepPlayer } from './StepPlayer'
 
 /**
  * Interactive area: animated visualisation, step player, detail panel and linked code.
- * Render with `key={pattern.slug}` so state resets between patterns.
+ * Shared by design-pattern and architecture pages — `color` is the category or paradigm
+ * accent colour. Render with `key={pattern.slug}` so state resets between patterns.
  */
-export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
-  const color = categories[pattern.category].color
+export function PatternExplorer({ pattern, color }: { pattern: ExplorableDefinition; color: string }) {
   const player = useStepPlayer(pattern.steps.length)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const step = pattern.steps[player.index] ?? null
@@ -55,6 +55,7 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
         <div className="overflow-hidden rounded-xl bg-slate-950 ring-1 ring-slate-800">
           <Visualization
             pattern={pattern}
+            color={color}
             step={step}
             stepIndex={player.index}
             selectedId={selectedId}
@@ -65,7 +66,7 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
       </div>
 
       <div className="space-y-4">
-        <DetailPanel pattern={pattern} selection={selection} color={color} onSelect={setSelectedId} />
+        <DetailPanel pattern={pattern} selection={selection} color={color} onSelect={setSelectedId} resolvePattern={resolvePattern} />
         <CodeBlock sources={sources} active={activeLang} onActiveChange={setPreferredLang} color={color} />
       </div>
     </section>

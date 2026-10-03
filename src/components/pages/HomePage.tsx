@@ -40,6 +40,22 @@ export function HomePage() {
         <HeroGraphic />
       </section>
 
+      <Link
+        to="/architecture"
+        className="group flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-indigo-500/10 to-lime-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
+      >
+        <div>
+          <p className="text-xs font-mono uppercase tracking-wider text-slate-500">// same explorer, bigger boxes</p>
+          <p className="mt-1 text-lg font-semibold text-white">
+            Zoom out: <span className="text-slate-300">architectural patterns</span>
+          </p>
+          <p className="mt-1 text-sm text-slate-400">
+            Layered, Hexagonal, DDD, CQRS, Event Sourcing and Functional Core — see which of the patterns above each one is built from.
+          </p>
+        </div>
+        <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">→</span>
+      </Link>
+
       <section id="catalogue" className="scroll-mt-20">
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by category">
           <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>

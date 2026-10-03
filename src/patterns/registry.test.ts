@@ -1,13 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import { findMarkerErrors, parseCode } from '@/lib/codeRegions'
+import type { PatternDefinition } from '@/types/pattern'
 import { patterns } from './registry'
 import { validatePattern } from './validate'
 
 const slugs = patterns.map((p) => p.slug)
 
+const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./*/*/index.ts', '!./_*/**'], {
+  eager: true,
+})
+
 describe('pattern registry', () => {
   it('has unique slugs', () => {
     expect(new Set(slugs).size).toBe(slugs.length)
+  })
+
+  it('every pattern lives at ./<category>/<slug>/index.ts', () => {
+    for (const [path, mod] of Object.entries(modules)) {
+      const { pattern } = mod
+      expect(path).toBe(`./${pattern.category}/${pattern.slug}/index.ts`)
+    }
   })
 
   it('every slug matches its folder-friendly format', () => {

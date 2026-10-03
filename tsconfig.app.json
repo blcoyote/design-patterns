@@ -24,5 +24,10 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/patterns/*/example.ts"]
+  "exclude": [
+    "src/patterns/_template/example.ts",
+    "src/patterns/*/*/example.ts",
+    "src/architectures/_template/example.ts",
+    "src/architectures/*/*/example.ts"
+  ]
 }

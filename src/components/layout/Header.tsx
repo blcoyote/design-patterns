@@ -1,7 +1,13 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { architectures } from '@/architectures/registry'
 import { patterns } from '@/patterns/registry'
 
 export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boolean }) {
+  const { pathname } = useLocation()
+  const inArchitectureArea = pathname.startsWith('/architecture')
+  const count = inArchitectureArea ? architectures.length : patterns.length
+  const unit = inArchitectureArea ? 'architectures' : 'patterns'
+
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-[96rem] items-center gap-3 px-4 sm:px-8">
@@ -16,13 +22,37 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
         </button>
         <Link to="/" className="flex items-center gap-2.5 font-semibold text-white">
           <Logo />
-          <span>
+          <span className="hidden sm:inline">
             Design Patterns <span className="font-normal text-slate-400">· interactive</span>
           </span>
         </Link>
-        <span className="ml-auto hidden font-mono text-xs text-slate-500 sm:block">{patterns.length} patterns</span>
+        <nav className="ml-2 flex items-center gap-1" aria-label="Areas">
+          <HeaderLink to="/" active={!inArchitectureArea}>
+            Design patterns
+          </HeaderLink>
+          <HeaderLink to="/architecture" active={inArchitectureArea}>
+            Architecture
+          </HeaderLink>
+        </nav>
+        <span className="ml-auto hidden font-mono text-xs text-slate-500 sm:block">
+          {count} {unit}
+        </span>
       </div>
     </header>
+  )
+}
+
+function HeaderLink({ to, active, children }: { to: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <Link
+      to={to}
+      aria-current={active ? 'page' : undefined}
+      className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+        active ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
+      }`}
+    >
+      {children}
+    </Link>
   )
 }
 

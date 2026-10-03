@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Header } from '@/components/layout/Header'
 import { Sidebar } from '@/components/layout/Sidebar'
+import { ArchitectureIndexPage } from '@/components/pages/ArchitectureIndexPage'
+import { ArchitecturePage } from '@/components/pages/ArchitecturePage'
 import { HomePage } from '@/components/pages/HomePage'
 import { NotFound } from '@/components/pages/NotFound'
 import { PatternPage } from '@/components/pages/PatternPage'
@@ -23,6 +25,8 @@ export function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/patterns/:slug" element={<PatternPage />} />
+            <Route path="/architecture" element={<ArchitectureIndexPage />} />
+            <Route path="/architecture/:slug" element={<ArchitecturePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

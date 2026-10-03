@@ -39,36 +39,26 @@ class SqlOrderRepository implements OrderRepository {
   // [/findById]
 
   findByCustomer(customerId: string): Order[] {
-    const rows = this.db.query("SELECT * FROM orders WHERE customer_id = ?", [
-      customerId,
-    ]);
+    const rows = this.db.query("SELECT * FROM orders WHERE customer_id = ?", [customerId]);
     return rows.map((row) => this.mapRow(row));
   }
 
   add(order: Order): void {
-    this.db.query(
-      "INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)",
-      [
-        order.id,
-        order.customerId,
-        Math.sign(order.total * 100) *
-          Math.floor(Math.abs(order.total * 100) + 0.5),
-      ],
-    );
+    this.db.query("INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)", [
+      order.id,
+      order.customerId,
+      Math.sign(order.total * 100) * Math.floor(Math.abs(order.total * 100) + 0.5),
+    ]);
   }
 
   save(order: Order): void {
     // An update path for an Order already added — see the Unit of Work pattern
     // for batching several such changes into a single transaction.
-    this.db.query(
-      "UPDATE orders SET customer_id = ?, total_cents = ? WHERE id = ?",
-      [
-        order.customerId,
-        Math.sign(order.total * 100) *
-          Math.floor(Math.abs(order.total * 100) + 0.5),
-        order.id,
-      ],
-    );
+    this.db.query("UPDATE orders SET customer_id = ?, total_cents = ? WHERE id = ?", [
+      order.customerId,
+      Math.sign(order.total * 100) * Math.floor(Math.abs(order.total * 100) + 0.5),
+      order.id,
+    ]);
   }
 
   remove(id: string): void {
@@ -96,9 +86,7 @@ class InMemoryOrderRepository implements OrderRepository {
   }
 
   findByCustomer(customerId: string): Order[] {
-    return [...this.orders.values()].filter(
-      (order) => order.customerId === customerId,
-    );
+    return [...this.orders.values()].filter((order) => order.customerId === customerId);
   }
 
   add(order: Order): void {
@@ -121,9 +109,7 @@ class OrderService {
 
   getReceipt(orderId: string): string {
     const order = this.repo.findById(orderId);
-    return order
-      ? `Order ${order.id}: $${order.total.toFixed(2)}`
-      : "not found";
+    return order ? `Order ${order.id}: $${order.total.toFixed(2)}` : "not found";
   }
 }
 // [/client]

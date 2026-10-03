@@ -11,20 +11,20 @@
 // [/iteratorInterface]
 
 interface Song {
-  title: string
+  title: string;
 }
 
 // [playlist]
 class Playlist implements Iterable<Song> {
-  private readonly songs: Song[]
+  private readonly songs: Song[];
 
   constructor(songs: Song[]) {
-    this.songs = songs
+    this.songs = songs;
   }
 
   // [getIterator]
   [Symbol.iterator](): Iterator<Song> {
-    return new PlaylistIterator(this)
+    return new PlaylistIterator(this);
   }
   // [/getIterator]
 
@@ -34,11 +34,11 @@ class Playlist implements Iterable<Song> {
   // A collection with no traversal needs could keep the array fully
   // private and hide it behind a closure instead.
   at(index: number): Song | undefined {
-    return this.songs[index]
+    return this.songs[index];
   }
 
   get length(): number {
-    return this.songs.length
+    return this.songs.length;
   }
   // [/holds]
 }
@@ -46,37 +46,42 @@ class Playlist implements Iterable<Song> {
 
 // [playlistIterator]
 class PlaylistIterator implements Iterator<Song> {
-  private cursor = 0
+  private cursor = 0;
 
   constructor(private readonly playlist: Playlist) {}
 
   // [next]
   next(): IteratorResult<Song> {
     if (this.cursor >= this.playlist.length) {
-      return { done: true, value: undefined }
+      return { done: true, value: undefined };
     }
-    const song = this.playlist.at(this.cursor)!
-    this.cursor++
-    return { done: false, value: song }
+    const song = this.playlist.at(this.cursor)!;
+    this.cursor++;
+    return { done: false, value: song };
   }
   // [/next]
 }
 // [/playlistIterator]
 
 // [usage]
-const playlist = new Playlist([{ title: 'Intro' }, { title: 'Verse' }, { title: 'Chorus' }, { title: 'Outro' }])
+const playlist = new Playlist([
+  { title: "Intro" },
+  { title: "Verse" },
+  { title: "Chorus" },
+  { title: "Outro" },
+]);
 
 // for...of calls [Symbol.iterator]() once, then next() until done is true.
 for (const song of playlist) {
-  console.log(song.title) // "Intro", "Verse", "Chorus", "Outro"
+  console.log(song.title); // "Intro", "Verse", "Chorus", "Outro"
 }
 
 // What the loop above does under the hood:
-const it = playlist[Symbol.iterator]()
-let result = it.next()
+const it = playlist[Symbol.iterator]();
+let result = it.next();
 while (!result.done) {
-  console.log(result.value.title)
-  result = it.next()
+  console.log(result.value.title);
+  result = it.next();
 }
 // [/usage]
 
@@ -88,7 +93,7 @@ class GeneratorPlaylist implements Iterable<Song> {
 
   *[Symbol.iterator](): Iterator<Song> {
     for (const song of this.songs) {
-      yield song
+      yield song;
     }
   }
 }

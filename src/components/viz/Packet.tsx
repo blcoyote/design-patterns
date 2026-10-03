@@ -62,10 +62,7 @@ export function Packet({
       ? pointOnQuad(geometry.start, geometry.control, geometry.end, 0.5)
       : points[points.length - 1];
     return (
-      <g
-        transform={`translate(${position.x} ${position.y})`}
-        pointerEvents="none"
-      >
+      <g transform={`translate(${position.x} ${position.y})`} pointerEvents="none">
         {body}
       </g>
     );

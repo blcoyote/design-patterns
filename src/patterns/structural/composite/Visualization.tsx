@@ -1,12 +1,12 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useMemo } from 'react'
-import { DEFAULT_VIEWBOX } from '@/components/viz/Diagram'
-import { DiagramEdge, EdgeMarkers } from '@/components/viz/DiagramEdge'
-import { PacketLayer } from '@/components/viz/PacketLayer'
-import { onActivate } from '@/lib/a11y'
-import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from '@/lib/geometry'
-import type { EdgeGeometry } from '@/lib/geometry'
-import type { Participant, VisualizationProps } from '@/types/pattern'
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useMemo } from "react";
+import { DEFAULT_VIEWBOX } from "@/components/viz/Diagram";
+import { DiagramEdge, EdgeMarkers } from "@/components/viz/DiagramEdge";
+import { PacketLayer } from "@/components/viz/PacketLayer";
+import { onActivate } from "@/lib/a11y";
+import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
+import type { EdgeGeometry } from "@/lib/geometry";
+import type { Participant, VisualizationProps } from "@/types/pattern";
 
 /**
  * Composite drawn as a literal tree: root/ branches into docs/ and readme.md,
@@ -27,19 +27,19 @@ const DEPTH: Record<string, number> = {
   readme: 1,
   photo: 2,
   logo: 2,
-}
+};
 
 /** Folder vs. file glyph per participant id (interface/client get neither). */
-const ICON: Record<string, 'folder' | 'file' | undefined> = {
-  root: 'folder',
-  docs: 'folder',
-  readme: 'file',
-  photo: 'file',
-  logo: 'file',
-}
+const ICON: Record<string, "folder" | "file" | undefined> = {
+  root: "folder",
+  docs: "folder",
+  readme: "file",
+  photo: "file",
+  logo: "file",
+};
 
 function FolderGlyph({ color }: { color: string }) {
-  return <path d="M -10 -6 L -2 -6 L 1 -2 L 10 -2 L 10 7 L -10 7 Z" fill={color} opacity={0.9} />
+  return <path d="M -10 -6 L -2 -6 L 1 -2 L 10 -2 L 10 7 L -10 7 Z" fill={color} opacity={0.9} />;
 }
 
 function FileGlyph({ color }: { color: string }) {
@@ -48,29 +48,41 @@ function FileGlyph({ color }: { color: string }) {
       <path d="M -6 -8 L 2 -8 L 8 -2 L 8 8 L -6 8 Z" fill="none" stroke={color} strokeWidth={1.5} />
       <path d="M 2 -8 L 2 -2 L 8 -2" fill="none" stroke={color} strokeWidth={1.5} />
     </>
-  )
+  );
 }
 
 interface TreeNodeProps {
-  participant: Participant
-  color: string
-  active: boolean
-  dimmed: boolean
-  selected: boolean
-  note?: string
-  icon?: 'folder' | 'file'
-  delay: number
-  reduceMotion: boolean
-  onSelect: (id: string) => void
+  participant: Participant;
+  color: string;
+  active: boolean;
+  dimmed: boolean;
+  selected: boolean;
+  note?: string;
+  icon?: "folder" | "file";
+  delay: number;
+  reduceMotion: boolean;
+  onSelect: (id: string) => void;
 }
 
 /** One clickable node in the tree: a UML-ish box with an optional folder/file glyph. */
-function TreeNode({ participant: p, color, active, dimmed, selected, note, icon, delay, reduceMotion, onSelect }: TreeNodeProps) {
-  const w = p.width ?? NODE_WIDTH
-  const h = NODE_HEIGHT
-  const stereotype = p.kind === 'interface' ? '«interface»' : p.kind === 'client' ? '«client»' : undefined
-  const isAbstract = p.kind === 'interface'
-  const select = () => onSelect(p.id)
+function TreeNode({
+  participant: p,
+  color,
+  active,
+  dimmed,
+  selected,
+  note,
+  icon,
+  delay,
+  reduceMotion,
+  onSelect,
+}: TreeNodeProps) {
+  const w = p.width ?? NODE_WIDTH;
+  const h = NODE_HEIGHT;
+  const stereotype =
+    p.kind === "interface" ? "«interface»" : p.kind === "client" ? "«client»" : undefined;
+  const isAbstract = p.kind === "interface";
+  const select = () => onSelect(p.id);
 
   return (
     <motion.g
@@ -80,13 +92,15 @@ function TreeNode({ participant: p, color, active, dimmed, selected, note, icon,
       aria-pressed={selected}
       className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-white"
       onClick={(e) => {
-        e.stopPropagation()
-        select()
+        e.stopPropagation();
+        select();
       }}
       onKeyDown={onActivate(select)}
       initial={reduceMotion ? false : { opacity: 0, scale: 0.5, x: p.x, y: p.y }}
       animate={{ opacity: dimmed ? 0.35 : 1, scale: 1, x: p.x, y: p.y }}
-      transition={reduceMotion ? { duration: 0.3 } : { type: 'spring', stiffness: 260, damping: 22, delay }}
+      transition={
+        reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 260, damping: 22, delay }
+      }
       whileHover={{ scale: 1.04 }}
     >
       {active && (
@@ -100,8 +114,12 @@ function TreeNode({ participant: p, color, active, dimmed, selected, note, icon,
           stroke={color}
           strokeWidth={2}
           initial={false}
-          animate={reduceMotion ? { opacity: 0.7 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.05, 1] }}
-          transition={reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          animate={
+            reduceMotion ? { opacity: 0.7 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.05, 1] }
+          }
+          transition={
+            reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+          }
           filter="url(#glow)"
         />
       )}
@@ -112,30 +130,42 @@ function TreeNode({ participant: p, color, active, dimmed, selected, note, icon,
         width={w}
         height={h}
         rx={12}
-        fill={active ? `${color}22` : '#0f172a'}
-        stroke={selected ? '#ffffff' : active ? color : '#334155'}
+        fill={active ? `${color}22` : "#0f172a"}
+        stroke={selected ? "#ffffff" : active ? color : "#334155"}
         strokeWidth={selected ? 2.5 : 1.5}
-        strokeDasharray={isAbstract ? '6 4' : undefined}
+        strokeDasharray={isAbstract ? "6 4" : undefined}
       />
       {icon && (
         <g transform={`translate(${-w / 2 + 22} ${h / 2 - 18})`}>
-          {icon === 'folder' ? <FolderGlyph color={active || selected ? color : '#64748b'} /> : <FileGlyph color={active || selected ? color : '#64748b'} />}
+          {icon === "folder" ? (
+            <FolderGlyph color={active || selected ? color : "#64748b"} />
+          ) : (
+            <FileGlyph color={active || selected ? color : "#64748b"} />
+          )}
         </g>
       )}
       {stereotype && (
-        <text y={-h / 2 + 15} textAnchor="middle" className="fill-slate-400 text-[10px] font-mono select-none">
+        <text
+          y={-h / 2 + 15}
+          textAnchor="middle"
+          className="fill-slate-400 text-[10px] font-mono select-none"
+        >
           {stereotype}
         </text>
       )}
       <text
         y={stereotype ? 6 : -2}
         textAnchor="middle"
-        className={`text-[13px] font-semibold select-none ${isAbstract ? 'italic' : ''}`}
-        fill={active || selected ? '#f8fafc' : '#e2e8f0'}
+        className={`text-[13px] font-semibold select-none ${isAbstract ? "italic" : ""}`}
+        fill={active || selected ? "#f8fafc" : "#e2e8f0"}
       >
         {p.label}
       </text>
-      <text y={stereotype ? 22 : 16} textAnchor="middle" className="fill-slate-400 text-[10px] select-none">
+      <text
+        y={stereotype ? 22 : 16}
+        textAnchor="middle"
+        className="fill-slate-400 text-[10px] select-none"
+      >
         {p.role}
       </text>
 
@@ -146,45 +176,67 @@ function TreeNode({ participant: p, color, active, dimmed, selected, note, icon,
             initial={{ opacity: 0, y: h / 2 + 8, scale: 0.6 }}
             animate={{ opacity: 1, y: h / 2 + 18, scale: 1 }}
             exit={{ opacity: 0, scale: 0.6 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
           >
-            <rect x={-(note.length * 3.6 + 12)} y={-10} width={note.length * 7.2 + 24} height={20} rx={10} fill={color} />
-            <text y={4} textAnchor="middle" className="fill-slate-950 text-[11px] font-semibold font-mono select-none">
+            <rect
+              x={-(note.length * 3.6 + 12)}
+              y={-10}
+              width={note.length * 7.2 + 24}
+              height={20}
+              rx={10}
+              fill={color}
+            />
+            <text
+              y={4}
+              textAnchor="middle"
+              className="fill-slate-950 text-[11px] font-semibold font-mono select-none"
+            >
               {note}
             </text>
           </motion.g>
         )}
       </AnimatePresence>
     </motion.g>
-  )
+  );
 }
 
-export function CompositeVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
-  const reduceMotion = !!useReducedMotion()
+export function CompositeVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
+  const reduceMotion = !!useReducedMotion();
 
-  const byId = useMemo(() => new Map(pattern.participants.map((p) => [p.id, p])), [pattern.participants])
+  const byId = useMemo(
+    () => new Map(pattern.participants.map((p) => [p.id, p])),
+    [pattern.participants],
+  );
 
   const geometry = useMemo(() => {
-    const g: Record<string, EdgeGeometry> = {}
+    const g: Record<string, EdgeGeometry> = {};
     for (const r of pattern.relations) {
-      const a = byId.get(r.from)
-      const b = byId.get(r.to)
-      if (a && b) g[r.id] = edgeBetween(boxOf(a), boxOf(b), r.bend)
+      const a = byId.get(r.from);
+      const b = byId.get(r.to);
+      if (a && b) g[r.id] = edgeBetween(boxOf(a), boxOf(b), r.bend);
     }
-    return g
-  }, [pattern.relations, byId])
+    return g;
+  }, [pattern.relations, byId]);
 
-  const highlight = step?.highlight ?? []
-  const active = new Set(highlight)
-  const dimming = active.size > 0
-  const notes = step?.notes ?? {}
-  const packets = step?.packets ?? []
+  const highlight = step?.highlight ?? [];
+  const active = new Set(highlight);
+  const dimming = active.size > 0;
+  const notes = step?.notes ?? {};
+  const packets = step?.packets ?? [];
 
   const stateFor = (id: string) => ({
     active: active.has(id),
     dimmed: dimming && !active.has(id) && selectedId !== id,
     selected: selectedId === id,
-  })
+  });
 
   return (
     <svg
@@ -203,9 +255,18 @@ export function CompositeVisualization({ pattern, color, step, stepIndex, select
       <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />
 
       {pattern.relations.map((r) => {
-        const g = geometry[r.id]
-        if (!g) return null
-        return <DiagramEdge key={r.id} relation={r} geometry={g} color={color} {...stateFor(r.id)} onSelect={onSelect} />
+        const g = geometry[r.id];
+        if (!g) return null;
+        return (
+          <DiagramEdge
+            key={r.id}
+            relation={r}
+            geometry={g}
+            color={color}
+            {...stateFor(r.id)}
+            onSelect={onSelect}
+          />
+        );
       })}
 
       {pattern.participants.map((p) => (
@@ -222,7 +283,13 @@ export function CompositeVisualization({ pattern, color, step, stepIndex, select
         />
       ))}
 
-      <PacketLayer packets={packets} geometry={geometry} color={color} speed={speed} animationKey={stepIndex} />
+      <PacketLayer
+        packets={packets}
+        geometry={geometry}
+        color={color}
+        speed={speed}
+        animationKey={stepIndex}
+      />
     </svg>
-  )
+  );
 }

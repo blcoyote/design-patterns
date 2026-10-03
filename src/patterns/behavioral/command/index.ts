@@ -9,10 +9,9 @@ export const pattern: PatternDefinition = {
   name: "Command",
   category: "behavioral",
   order: 3,
-  summary:
-    "Turn a request into a standalone object you can queue, log, or undo.",
+  summary: "Turn a request into a standalone object you can queue, log, or undo.",
   intent:
-    'Wrap a request in an object, so it can be queued, logged, passed around or undone like any other piece of data.',
+    "Wrap a request in an object, so it can be queued, logged, passed around or undone like any other piece of data.",
   problem:
     "A remote-control button should turn a light on without knowing anything about Light. The same button widget is reused for lights, fans and locks. You also want every press to be undoable and recorded in a history.",
   solution:
@@ -40,13 +39,7 @@ export const pattern: PatternDefinition = {
     "GUI menu items and toolbar buttons bound to an action object",
     "Redux-style serializable actions are Command-like in shape, but they carry no execute()/undo(). A reducer interprets them instead, which is what makes time-travel debugging possible.",
   ],
-  related: [
-    "chain-of-responsibility",
-    "memento",
-    "unit-of-work",
-    "observer",
-    "strategy",
-  ],
+  related: ["chain-of-responsibility", "memento", "unit-of-work", "observer", "strategy"],
   participants: [
     {
       id: "command",
@@ -144,8 +137,7 @@ export const pattern: PatternDefinition = {
       to: "onCommand",
       type: "creates",
       label: "new LightOnCommand(light)",
-      description:
-        "The client creates a LightOnCommand bound to a specific Light instance.",
+      description: "The client creates a LightOnCommand bound to a specific Light instance.",
       code: "createCommands",
     },
     {
@@ -154,8 +146,7 @@ export const pattern: PatternDefinition = {
       to: "offCommand",
       type: "creates",
       label: "new LightOffCommand(light)",
-      description:
-        "The client creates a LightOffCommand bound to the same Light instance.",
+      description: "The client creates a LightOffCommand bound to the same Light instance.",
       bend: -20,
       code: "createCommands",
     },
@@ -175,8 +166,7 @@ export const pattern: PatternDefinition = {
       to: "onCommand",
       type: "calls",
       label: "execute()",
-      description:
-        "Pressing the button calls execute() on whichever command is currently loaded.",
+      description: "Pressing the button calls execute() on whichever command is currently loaded.",
       code: "execute",
     },
     {
@@ -185,8 +175,7 @@ export const pattern: PatternDefinition = {
       to: "offCommand",
       type: "calls",
       label: "execute()",
-      description:
-        "Pressing the button calls execute() on whichever command is currently loaded.",
+      description: "Pressing the button calls execute() on whichever command is currently loaded.",
       code: "execute",
     },
     {

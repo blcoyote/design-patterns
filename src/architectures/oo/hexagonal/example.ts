@@ -1,18 +1,18 @@
 interface LineItem {
-  sku: string
-  price: number
+  sku: string;
+  price: number;
 }
 
 interface PlaceOrderCommand {
-  customerId: string
-  items: LineItem[]
+  customerId: string;
+  items: LineItem[];
 }
 
 // [port]
 // Driving port: the only way into the core. Adapters depend on this
 // interface; the core never depends on them.
 interface PlaceOrderUseCase {
-  execute(command: PlaceOrderCommand): Order
+  execute(command: PlaceOrderCommand): Order;
 }
 // [/port]
 
@@ -20,17 +20,17 @@ interface PlaceOrderUseCase {
 // Domain entity, part of the core. It knows nothing about HTTP, SQL or any
 // adapter — only its own rules.
 class Order {
-  readonly lines: LineItem[] = []
+  readonly lines: LineItem[] = [];
 
   constructor(public readonly customerId: string) {}
 
   addLine(item: LineItem): void {
-    if (item.price <= 0) throw new Error('line item must have a positive price')
-    this.lines.push(item)
+    if (item.price <= 0) throw new Error("line item must have a positive price");
+    this.lines.push(item);
   }
 
   get total(): number {
-    return this.lines.reduce((sum, line) => sum + line.price, 0)
+    return this.lines.reduce((sum, line) => sum + line.price, 0);
   }
 }
 // [/order]
@@ -39,7 +39,7 @@ class Order {
 // Driven port: the core declares the capability it needs, in its own
 // vocabulary. It has no idea Postgres or an in-memory map will answer it.
 interface OrderRepository {
-  save(order: Order): void
+  save(order: Order): void;
 }
 // [/repoPort]
 
@@ -50,10 +50,10 @@ class PlaceOrderService implements PlaceOrderUseCase {
   constructor(private readonly orders: OrderRepository) {}
 
   execute(command: PlaceOrderCommand): Order {
-    const order = new Order(command.customerId)
-    for (const item of command.items) order.addLine(item)
-    this.orders.save(order)
-    return order
+    const order = new Order(command.customerId);
+    for (const item of command.items) order.addLine(item);
+    this.orders.save(order);
+    return order;
   }
 }
 // [/service]
@@ -63,7 +63,9 @@ class PlaceOrderService implements PlaceOrderUseCase {
 // just another OrderRepository as far as the core is concerned.
 class PostgresOrderRepository implements OrderRepository {
   save(order: Order): void {
-    databaseQuery(`INSERT INTO orders (customer_id, total) VALUES ('${order.customerId}', ${order.total})`)
+    databaseQuery(
+      `INSERT INTO orders (customer_id, total) VALUES ('${order.customerId}', ${order.total})`,
+    );
   }
 }
 // [/postgres]
@@ -72,10 +74,10 @@ class PostgresOrderRepository implements OrderRepository {
 // Driven adapter #2: an in-memory stand-in used by tests. Same port, zero
 // infrastructure, and the core cannot tell the difference.
 class InMemoryOrderRepository implements OrderRepository {
-  readonly saved: Order[] = []
+  readonly saved: Order[] = [];
 
   save(order: Order): void {
-    this.saved.push(order)
+    this.saved.push(order);
   }
 }
 
@@ -97,40 +99,43 @@ class NullOrderRepository implements OrderRepository {
 class HttpOrderController {
   constructor(private readonly useCase: PlaceOrderUseCase) {}
 
-  handlePost(body: { customerId: string; items: LineItem[] }): { status: number; customerId: string } {
-    const order = this.useCase.execute(body)
-    return { status: 201, customerId: order.customerId }
+  handlePost(body: { customerId: string; items: LineItem[] }): {
+    status: number;
+    customerId: string;
+  } {
+    const order = this.useCase.execute(body);
+    return { status: 201, customerId: order.customerId };
   }
 }
 // [/controller]
 
 function databaseQuery(sql: string): void {
-  console.log('SQL:', sql)
+  console.log("SQL:", sql);
 }
 
 // Usage: production wiring plugs the real database adapter into the core.
-const controller = new HttpOrderController(new PlaceOrderService(new PostgresOrderRepository()))
+const controller = new HttpOrderController(new PlaceOrderService(new PostgresOrderRepository()));
 controller.handlePost({
-  customerId: 'cust-42',
+  customerId: "cust-42",
   items: [
-    { sku: 'WIDGET', price: 19.99 },
-    { sku: 'GADGET', price: 29.99 },
+    { sku: "WIDGET", price: 19.99 },
+    { sku: "GADGET", price: 29.99 },
   ],
-})
+});
 
 // [test]
 // Test harness: the SAME PlaceOrderService, the SAME PlaceOrderUseCase port —
 // only the driven adapter changes. The core is never touched, recompiled or
 // mocked; it just receives a different implementation of OrderRepository.
 function testPlaceOrderWritesToRepository(): void {
-  const repo = new InMemoryOrderRepository()
-  const useCase: PlaceOrderUseCase = new PlaceOrderService(repo)
+  const repo = new InMemoryOrderRepository();
+  const useCase: PlaceOrderUseCase = new PlaceOrderService(repo);
 
-  useCase.execute({ customerId: 'cust-1', items: [{ sku: 'WIDGET', price: 9.99 }] })
+  useCase.execute({ customerId: "cust-1", items: [{ sku: "WIDGET", price: 9.99 }] });
 
-  if (repo.saved.length !== 1) throw new Error('expected exactly one saved order')
-  console.log('test passed: order persisted through the in-memory adapter')
+  if (repo.saved.length !== 1) throw new Error("expected exactly one saved order");
+  console.log("test passed: order persisted through the in-memory adapter");
 }
 
-testPlaceOrderWritesToRepository()
+testPlaceOrderWritesToRepository();
 // [/test]

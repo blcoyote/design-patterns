@@ -32,27 +32,20 @@ function replaceMeta(html, attribute, key, content) {
 }
 
 try {
-  const { SITE_NAME, seoSharePages } = await server.ssrLoadModule(
-    "/src/lib/seoPages.ts",
-  );
+  const { SITE_NAME, seoSharePages } = await server.ssrLoadModule("/src/lib/seoPages.ts");
   const template = await readFile(resolve(distDirectory, "index.html"), "utf8");
 
   for (const page of seoSharePages) {
     const pageTitle = `${page.title} | ${SITE_NAME}`;
     const description = page.description.replace(/\s+/g, " ").trim();
     const excerpt =
-      description.length > 160
-        ? `${description.slice(0, 157).trimEnd()}...`
-        : description;
-    const outputFile = resolve(
-      distDirectory,
-      "share",
-      page.sharePath.replace(/^\/share\//, ""),
+      description.length > 160 ? `${description.slice(0, 157).trimEnd()}...` : description;
+    const outputFile = resolve(distDirectory, "share", page.sharePath.replace(/^\/share\//, ""));
+    const assetPrefix = `${relative(dirname(outputFile), distDirectory).split(sep).join("/")}/`;
+    let html = template.replace(
+      /<title>[^<]*<\/title>/,
+      `<title>${escapeAttribute(pageTitle)}</title>`,
     );
-    const assetPrefix = `${relative(dirname(outputFile), distDirectory)
-      .split(sep)
-      .join("/")}/`;
-    let html = template.replace(/<title>[^<]*<\/title>/, `<title>${escapeAttribute(pageTitle)}</title>`);
 
     html = replaceMeta(html, "name", "description", excerpt);
     html = replaceMeta(html, "property", "og:title", pageTitle);

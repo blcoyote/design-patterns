@@ -72,12 +72,8 @@ export function FlyweightVisualization({
   const instanceCount = NARRATIVE_COUNTS[idx];
 
   const withoutFlyweight = instanceCount * (INTRINSIC_BYTES + EXTRINSIC_BYTES);
-  const withFlyweight =
-    typeCount * INTRINSIC_BYTES + instanceCount * EXTRINSIC_BYTES;
-  const savedPct =
-    instanceCount > 0
-      ? Math.round((1 - withFlyweight / withoutFlyweight) * 100)
-      : 0;
+  const withFlyweight = typeCount * INTRINSIC_BYTES + instanceCount * EXTRINSIC_BYTES;
+  const savedPct = instanceCount > 0 ? Math.round((1 - withFlyweight / withoutFlyweight) * 100) : 0;
 
   const highlight = step?.highlight ?? [];
   const treeActive = highlight.some((id) =>
@@ -138,11 +134,7 @@ export function FlyweightVisualization({
             stroke={treeActive || selectedId === "tree" ? color : "transparent"}
             strokeWidth={2}
           />
-          <text
-            x={12}
-            y={18}
-            className="fill-slate-500 text-[10px] font-mono select-none"
-          >
+          <text x={12} y={18} className="fill-slate-500 text-[10px] font-mono select-none">
             forest render
           </text>
           <AnimatePresence>
@@ -159,11 +151,7 @@ export function FlyweightVisualization({
                   fillOpacity={0.85}
                   stroke={fill}
                   strokeWidth={1}
-                  initial={
-                    reduceMotion
-                      ? { opacity: 0.85, scale: 1 }
-                      : { opacity: 0, scale: 0.2 }
-                  }
+                  initial={reduceMotion ? { opacity: 0.85, scale: 1 } : { opacity: 0, scale: 0.2 }}
                   animate={{ opacity: 0.85, scale: 1 }}
                   transition={
                     reduceMotion
@@ -235,11 +223,7 @@ export function FlyweightVisualization({
                   onSelect("concreteType");
                 }}
                 className="flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[11px] text-slate-300 outline-none hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-white"
-                style={
-                  typeActive
-                    ? { boxShadow: `inset 0 0 0 1px ${color}` }
-                    : undefined
-                }
+                style={typeActive ? { boxShadow: `inset 0 0 0 1px ${color}` } : undefined}
               >
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full"

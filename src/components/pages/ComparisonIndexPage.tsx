@@ -10,17 +10,14 @@ export function ComparisonIndexPage() {
     <div className="space-y-12">
       <Seo page={comparisonIndexSeoPage} />
       <section className="max-w-3xl">
-        <p className="font-mono text-sm text-slate-500">
-          // look-alikes, told apart
-        </p>
+        <p className="font-mono text-sm text-slate-500">// look-alikes, told apart</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-6xl">
           Which should I choose?
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-slate-300">
-          Some patterns look almost identical on a class diagram but solve
-          different problems. Each comparison walks through one concrete
-          problem, lays the options side by side, and ends with a scenario you
-          can test yourself against.
+          Some patterns look almost identical on a class diagram but solve different problems. Each
+          comparison walks through one concrete problem, lays the options side by side, and ends
+          with a scenario you can test yourself against.
         </p>
       </section>
 

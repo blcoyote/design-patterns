@@ -6,6 +6,6 @@ class Service {
 
 // [usage]
 // [client]
-new Service().run()
+new Service().run();
 // [/client]
 // [/usage]

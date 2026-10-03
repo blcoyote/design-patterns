@@ -1,8 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import type {
-  KeyboardEvent as ReactKeyboardEvent,
-  MouseEvent as ReactMouseEvent,
-} from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import type { VisualizationProps } from "@/types/pattern";
@@ -31,15 +28,7 @@ function cellX(index: number) {
 /** Number of songs already consumed (cursor position) at a given step. */
 const CURSOR_BY_STEP = [0, 1, 2, 3, 4, 4, 4];
 /** The value handed to the client at this step, if any. */
-const YIELD_BY_STEP: Array<string | null> = [
-  null,
-  "Intro",
-  "Verse",
-  "Chorus",
-  "Outro",
-  null,
-  null,
-];
+const YIELD_BY_STEP: Array<string | null> = [null, "Intro", "Verse", "Chorus", "Outro", null, null];
 const DONE_BY_STEP = [false, false, false, false, false, true, true];
 
 export function IteratorVisualization({
@@ -107,11 +96,7 @@ export function IteratorVisualization({
                 fill={isCurrent ? `${color}22` : "#0f172a"}
                 initial={false}
                 animate={{
-                  stroke: isCurrent
-                    ? color
-                    : isConsumed
-                      ? "#334155"
-                      : "#475569",
+                  stroke: isCurrent ? color : isConsumed ? "#334155" : "#475569",
                   opacity: isConsumed ? 0.5 : 1,
                 }}
                 strokeWidth={isCurrent ? 2.5 : 1.5}
@@ -175,11 +160,7 @@ export function IteratorVisualization({
         {yieldedValue && (
           <motion.g
             key={`${stepIndex}-${yieldedValue}`}
-            initial={
-              reduceMotion
-                ? { opacity: 0 }
-                : { opacity: 0, x: cursorX, y: STRIP_Y + 30 }
-            }
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: cursorX, y: STRIP_Y + 30 }}
             animate={{
               opacity: [0, 1, 1, 0],
               x: [cursorX, cursorX, clientX, clientX],

@@ -1,18 +1,18 @@
 // [routeStrategy]
 interface RouteStrategy {
-  calculate(from: string, to: string): Route
+  calculate(from: string, to: string): Route;
 }
 // [/routeStrategy]
 
 interface Route {
-  minutes: number
-  summary: string
+  minutes: number;
+  summary: string;
 }
 
 // [fastest]
 class FastestRoute implements RouteStrategy {
   calculate(from: string, to: string): Route {
-    return { minutes: 12, summary: `highway from ${from} to ${to}` }
+    return { minutes: 12, summary: `highway from ${from} to ${to}` };
   }
 }
 // [/fastest]
@@ -20,7 +20,7 @@ class FastestRoute implements RouteStrategy {
 // [shortest]
 class ShortestRoute implements RouteStrategy {
   calculate(from: string, to: string): Route {
-    return { minutes: 18, summary: `direct path from ${from} to ${to}` }
+    return { minutes: 18, summary: `direct path from ${from} to ${to}` };
   }
 }
 // [/shortest]
@@ -28,7 +28,7 @@ class ShortestRoute implements RouteStrategy {
 // [scenic]
 class ScenicRoute implements RouteStrategy {
   calculate(from: string, to: string): Route {
-    return { minutes: 35, summary: `coastal road from ${from} to ${to}` }
+    return { minutes: 35, summary: `coastal road from ${from} to ${to}` };
   }
 }
 // [/scenic]
@@ -41,24 +41,24 @@ class Navigator {
 
   // [setStrategy]
   setStrategy(strategy: RouteStrategy) {
-    this.strategy = strategy
+    this.strategy = strategy;
   }
   // [/setStrategy]
 
   // [route]
   route(from: string, to: string): Route {
-    return this.strategy.calculate(from, to)
+    return this.strategy.calculate(from, to);
   }
   // [/route]
 }
 // [/navigator]
 
 // Usage
-const nav = new Navigator(new FastestRoute())
-nav.route('Home', 'Office') // { minutes: 12, ... }
+const nav = new Navigator(new FastestRoute());
+nav.route("Home", "Office"); // { minutes: 12, ... }
 
-nav.setStrategy(new ScenicRoute())
-nav.route('Home', 'Office') // { minutes: 35, ... } — same call, different algorithm
+nav.setStrategy(new ScenicRoute());
+nav.route("Home", "Office"); // { minutes: 35, ... } — same call, different algorithm
 
-nav.setStrategy(new ShortestRoute())
-nav.route('Home', 'Office') // { minutes: 18, ... }
+nav.setStrategy(new ShortestRoute());
+nav.route("Home", "Office"); // { minutes: 18, ... }

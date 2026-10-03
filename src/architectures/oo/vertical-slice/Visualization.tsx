@@ -1,9 +1,9 @@
-import { Diagram } from '@/components/viz/Diagram'
-import type { VisualizationProps } from '@/types/pattern'
+import { Diagram } from "@/components/viz/Diagram";
+import type { VisualizationProps } from "@/types/pattern";
 
-const PLACE_ORDER_BAND = { x: 60, y: 230, width: 280, height: 230 }
-const GET_ORDER_BAND = { x: 460, y: 230, width: 280, height: 230 }
-const LAYER_LINES = [245, 345]
+const PLACE_ORDER_BAND = { x: 60, y: 230, width: 280, height: 230 };
+const GET_ORDER_BAND = { x: 460, y: 230, width: 280, height: 230 };
+const LAYER_LINES = [245, 345];
 
 /**
  * Vertical Slice keeps the plain, data-driven diagram but adds two vertical
@@ -12,11 +12,28 @@ const LAYER_LINES = [245, 345]
  * The point lands before a single step plays: this architecture cuts by
  * feature (the bands), not by technical layer (the lines).
  */
-export function VerticalSliceVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
+export function VerticalSliceVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       {LAYER_LINES.map((y) => (
-        <line key={y} x1={0} y1={y} x2={800} y2={y} stroke="#1e293b" strokeWidth={1} strokeDasharray="4 8" />
+        <line
+          key={y}
+          x1={0}
+          y1={y}
+          x2={800}
+          y2={y}
+          stroke="#1e293b"
+          strokeWidth={1}
+          strokeDasharray="4 8"
+        />
       ))}
 
       <rect
@@ -59,7 +76,7 @@ export function VerticalSliceVisualization({ pattern, color, step, stepIndex, se
         GetOrder slice
       </text>
     </g>
-  )
+  );
 
   return (
     <Diagram
@@ -77,5 +94,5 @@ export function VerticalSliceVisualization({ pattern, color, step, stepIndex, se
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

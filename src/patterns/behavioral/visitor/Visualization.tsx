@@ -4,19 +4,8 @@ import { DEFAULT_VIEWBOX } from "@/components/viz/Diagram";
 import { DiagramEdge, EdgeMarkers } from "@/components/viz/DiagramEdge";
 import { PacketLayer } from "@/components/viz/PacketLayer";
 import { onActivate } from "@/lib/a11y";
-import {
-  boxOf,
-  edgeBetween,
-  NODE_HEIGHT,
-  NODE_WIDTH,
-  type EdgeGeometry,
-} from "@/lib/geometry";
-import type {
-  Packet as PacketDef,
-  Participant,
-  Step,
-  VisualizationProps,
-} from "@/types/pattern";
+import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH, type EdgeGeometry } from "@/lib/geometry";
+import type { Packet as PacketDef, Participant, Step, VisualizationProps } from "@/types/pattern";
 
 /**
  * Visitor is drawn as the Shape/ShapeVisitor diagram, but every element gets a
@@ -89,16 +78,7 @@ function CircleGlyph({ color }: { color: string }) {
 
 function RectGlyph({ color }: { color: string }) {
   return (
-    <rect
-      x={-9}
-      y={-6}
-      width={18}
-      height={12}
-      rx={2}
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-    />
+    <rect x={-9} y={-6} width={18} height={12} rx={2} fill="none" stroke={color} strokeWidth={2} />
   );
 }
 
@@ -124,13 +104,7 @@ function GroupGlyph({ color }: { color: string }) {
 
 function SigmaGlyph({ color }: { color: string }) {
   return (
-    <text
-      y={5}
-      textAnchor="middle"
-      fontSize={16}
-      fontWeight="bold"
-      fill={color}
-    >
+    <text y={5} textAnchor="middle" fontSize={16} fontWeight="bold" fill={color}>
       Σ
     </text>
   );
@@ -216,14 +190,10 @@ function ShapeNode({
           strokeWidth={2}
           initial={false}
           animate={
-            reduceMotion
-              ? { opacity: 0.7 }
-              : { opacity: [0.7, 0, 0.7], scale: [1, 1.05, 1] }
+            reduceMotion ? { opacity: 0.7 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.05, 1] }
           }
           transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+            reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
           }
           filter="url(#glow)"
         />
@@ -273,16 +243,10 @@ function ShapeNode({
       {note && (
         <motion.g
           key={note}
-          initial={
-            reduceMotion
-              ? { opacity: 0 }
-              : { opacity: 0, y: h / 2 + 8, scale: 0.6 }
-          }
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: h / 2 + 8, scale: 0.6 }}
           animate={{ opacity: 1, y: h / 2 + 18, scale: 1 }}
           transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { type: "spring", stiffness: 400, damping: 22 }
+            reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 22 }
           }
         >
           <rect
@@ -344,9 +308,7 @@ export function VisitorVisualization({
   }, [pattern.relations, byId]);
 
   const effectiveStep: Step | SyntheticStep | null = liveOverride ?? step;
-  const animationKey = liveOverride
-    ? `override-${activeVisitor}-${replayToken}`
-    : stepIndex;
+  const animationKey = liveOverride ? `override-${activeVisitor}-${replayToken}` : stepIndex;
 
   const highlight = effectiveStep?.highlight ?? [];
   const active = new Set(highlight);
@@ -375,11 +337,7 @@ export function VisitorVisualization({
   const concreteNode = byId.get(CONCRETE_VISITOR[activeVisitor]);
   const connector =
     visitorNode && concreteNode
-      ? edgeBetween(
-          boxOf(visitorNode),
-          boxOf(concreteNode),
-          VISITOR_BEND[activeVisitor],
-        )
+      ? edgeBetween(boxOf(visitorNode), boxOf(concreteNode), VISITOR_BEND[activeVisitor])
       : null;
   const springTransition = reduceMotion
     ? { duration: 0 }
@@ -396,22 +354,11 @@ export function VisitorVisualization({
       >
         <defs>
           <EdgeMarkers color={color} />
-          <pattern
-            id="grid"
-            width="20"
-            height="20"
-            patternUnits="userSpaceOnUse"
-          >
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
             <circle cx="1" cy="1" r="1" fill="#1e293b" />
           </pattern>
         </defs>
-        <rect
-          x="-1000"
-          y="-1000"
-          width="3000"
-          height="3000"
-          fill="url(#grid)"
-        />
+        <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />
 
         {pattern.relations.map((r) => {
           const g = geometry[r.id];
@@ -491,9 +438,7 @@ export function VisitorVisualization({
               ? "text-slate-950 ring-transparent"
               : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
           }`}
-          style={
-            activeVisitor === "area" ? { backgroundColor: color } : undefined
-          }
+          style={activeVisitor === "area" ? { backgroundColor: color } : undefined}
         >
           Run AreaCalculator
         </button>
@@ -509,9 +454,7 @@ export function VisitorVisualization({
               ? "text-slate-950 ring-transparent"
               : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
           }`}
-          style={
-            activeVisitor === "json" ? { backgroundColor: color } : undefined
-          }
+          style={activeVisitor === "json" ? { backgroundColor: color } : undefined}
         >
           Run JsonExporter
         </button>
@@ -536,8 +479,7 @@ export function VisitorVisualization({
         <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg bg-slate-900/60 p-2 font-mono text-xs text-slate-300">
           {log.length === 0 ? (
             <div className="text-slate-600">
-              Run a visitor above to see the same Circle + Rectangle produce a
-              different result.
+              Run a visitor above to see the same Circle + Rectangle produce a different result.
             </div>
           ) : (
             log.map((entry, i) => (

@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Chain of Responsibility",
   category: "behavioral",
   order: 7,
-  summary:
-    "Pass a request along a chain of handlers until one of them deals with it.",
+  summary: "Pass a request along a chain of handlers until one of them deals with it.",
   intent:
     "Pass a request along a line of handlers until one of them deals with it, so the sender doesn't need to know who will.",
   problem:
@@ -71,8 +70,8 @@ export const pattern: PatternDefinition = {
       label: "AuthHandler",
       role: "Concrete Handler",
       kind: "class",
-      x: 115,
-      y: 280,
+      x: 145,
+      y: 220,
       description:
         "Checks the Authorization token. A missing or expired token is rejected on the spot; a valid one is forwarded to the next handler untouched.",
     },
@@ -81,8 +80,8 @@ export const pattern: PatternDefinition = {
       label: "RateLimitHandler",
       role: "Concrete Handler",
       kind: "class",
-      x: 300,
-      y: 280,
+      x: 645,
+      y: 220,
       width: 180,
       description:
         "Tracks each client's own fixed one-minute window and request count. Over the cap within that window, it rejects with 429; otherwise it forwards the request unchanged — one client's traffic never affects another's.",
@@ -92,8 +91,8 @@ export const pattern: PatternDefinition = {
       label: "ValidationHandler",
       role: "Concrete Handler",
       kind: "class",
-      x: 500,
-      y: 280,
+      x: 645,
+      y: 385,
       width: 180,
       description:
         "Checks that the request body, if present, is a non-null object rather than a primitive — a stand-in for full shape validation. A malformed payload is rejected; a well-formed one is forwarded.",
@@ -103,8 +102,8 @@ export const pattern: PatternDefinition = {
       label: "Controller",
       role: "Concrete Handler (terminal)",
       kind: "class",
-      x: 685,
-      y: 280,
+      x: 145,
+      y: 385,
       description:
         "The last link in the chain. It never forwards further — it executes the actual business logic and returns the real response.",
     },
@@ -177,8 +176,7 @@ export const pattern: PatternDefinition = {
       from: "validationHandler",
       to: "controller",
       type: "holds",
-      description:
-        "ValidationHandler forwards to the final handler once the payload checks out.",
+      description: "ValidationHandler forwards to the final handler once the payload checks out.",
       code: "validation",
     },
   ],
@@ -258,9 +256,7 @@ export const pattern: PatternDefinition = {
       description:
         "A second request carries an expired token. AuthHandler rejects it immediately and returns 401 straight to the client — RateLimitHandler, ValidationHandler and Controller never even see it.",
       highlight: ["entry", "authHandler"],
-      packets: [
-        { relation: "entry", label: "401 Unauthorized", reverse: true },
-      ],
+      packets: [{ relation: "entry", label: "401 Unauthorized", reverse: true }],
       notes: { authHandler: "token expired ✗" },
       code: "auth",
     },

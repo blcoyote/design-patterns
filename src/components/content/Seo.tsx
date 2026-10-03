@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import { SITE_NAME, type SharePage } from "@/lib/seoPages";
 
 function setMeta(attribute: "name" | "property", key: string, content: string) {
-  let element = document.head.querySelector<HTMLMetaElement>(
-    `meta[${attribute}="${key}"]`,
-  );
+  let element = document.head.querySelector<HTMLMetaElement>(`meta[${attribute}="${key}"]`);
   if (!element) {
     element = document.createElement("meta");
     element.setAttribute(attribute, key);
@@ -13,11 +11,7 @@ function setMeta(attribute: "name" | "property", key: string, content: string) {
   element.content = content;
 }
 
-export function Seo({
-  page,
-}: {
-  page: Pick<SharePage, "title" | "description" | "sharePath">;
-}) {
+export function Seo({ page }: { page: Pick<SharePage, "title" | "description" | "sharePath"> }) {
   useEffect(() => {
     const pageTitle = `${page.title} | ${SITE_NAME}`;
     const pageDescription = page.description.replace(/\s+/g, " ").trim();
@@ -52,9 +46,7 @@ export function Seo({
     setMeta("name", "twitter:title", pageTitle);
     setMeta("name", "twitter:description", excerpt);
 
-    let canonical = document.head.querySelector<HTMLLinkElement>(
-      'link[rel="canonical"]',
-    );
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) {
       canonical = document.createElement("link");
       canonical.rel = "canonical";

@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import type { ComparisonDefinition } from '@/types/comparison'
+import { Link } from "react-router-dom";
+import type { ComparisonDefinition } from "@/types/comparison";
 
 /**
  * "Often confused with…" box on a pattern/architecture page, built from `comparisonsFor(slug)`.
@@ -7,7 +7,7 @@ import type { ComparisonDefinition } from '@/types/comparison'
  * has to declare which comparisons mention it.
  */
 export function ComparisonTeaser({ comparisons }: { comparisons: ComparisonDefinition[] }) {
-  if (comparisons.length === 0) return null
+  if (comparisons.length === 0) return null;
 
   return (
     <section className="rounded-2xl bg-slate-900/60 p-6 ring-1 ring-inset ring-amber-500/20">
@@ -31,5 +31,5 @@ export function ComparisonTeaser({ comparisons }: { comparisons: ComparisonDefin
         ))}
       </ul>
     </section>
-  )
+  );
 }

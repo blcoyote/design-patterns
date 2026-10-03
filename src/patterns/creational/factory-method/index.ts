@@ -46,8 +46,7 @@ export const pattern: PatternDefinition = {
       kind: "interface",
       x: 620,
       y: 90,
-      description:
-        "Declares deliver(), the operation every concrete vehicle must implement.",
+      description: "Declares deliver(), the operation every concrete vehicle must implement.",
     },
     {
       id: "truck",

@@ -1,8 +1,8 @@
-import { Diagram } from '@/components/viz/Diagram'
-import type { VisualizationProps } from '@/types/pattern'
+import { Diagram } from "@/components/viz/Diagram";
+import type { VisualizationProps } from "@/types/pattern";
 
-const ORDERING_BOX = { x: 40, y: 110, width: 490, height: 400 }
-const SHIPPING_BOX = { x: 560, y: 110, width: 320, height: 400 }
+const ORDERING_BOX = { x: 40, y: 110, width: 490, height: 400 };
+const SHIPPING_BOX = { x: 560, y: 110, width: 320, height: 400 };
 
 /**
  * DDD swaps the generic diagram's plain background for two dashed bounded-context
@@ -11,7 +11,15 @@ const SHIPPING_BOX = { x: 560, y: 110, width: 320, height: 400 }
  * plays. The ACL participant is positioned to straddle that seam in index.ts; this
  * underlay just draws the regions and seam behind it.
  */
-export function DddVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
+export function DddVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       <rect
@@ -66,7 +74,7 @@ export function DddVisualization({ pattern, color, step, stepIndex, selectedId, 
         strokeDasharray="2 6"
       />
     </g>
-  )
+  );
 
   return (
     <Diagram
@@ -84,5 +92,5 @@ export function DddVisualization({ pattern, color, step, stepIndex, selectedId, 
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

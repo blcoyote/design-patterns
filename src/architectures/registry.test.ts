@@ -25,9 +25,7 @@ describe("architecture registry", () => {
     expect(Object.keys(modules).length).toBe(architectures.length);
     for (const [path, mod] of Object.entries(modules)) {
       const { architecture } = mod;
-      expect(path).toBe(
-        `./${architecture.paradigm}/${architecture.slug}/index.ts`,
-      );
+      expect(path).toBe(`./${architecture.paradigm}/${architecture.slug}/index.ts`);
     }
   });
 
@@ -68,11 +66,7 @@ describe("architecture registry", () => {
     "%s csharp has no JavaScript template strings",
     (_slug, a) => {
       // backticks outside comments are invalid C#; they usually mean a TS line was copied over unconverted
-      expect(
-        a
-          .csharp!.split("\n")
-          .filter((line) => line.split("//")[0].includes("`")),
-      ).toEqual([]);
+      expect(a.csharp!.split("\n").filter((line) => line.split("//")[0].includes("`"))).toEqual([]);
     },
   );
 
@@ -97,9 +91,7 @@ describe("architecture registry", () => {
     "%s python uses # markers, not //",
     (_slug, a) => {
       // a `// [id]` line in Python is a syntax error; it usually means a marker was copied over unconverted
-      expect(
-        a.python!.split("\n").filter((line) => /^\s*\/\/ \[/.test(line)),
-      ).toEqual([]);
+      expect(a.python!.split("\n").filter((line) => /^\s*\/\/ \[/.test(line))).toEqual([]);
     },
   );
 
@@ -145,13 +137,8 @@ describe("architecture registry", () => {
     for (const a of architectures) {
       for (const ref of a.commonlyUsedWith.architectures) {
         const other = bySlug.get(ref.slug);
-        expect(
-          other,
-          `"${ref.slug}" referenced by "${a.slug}" does not exist`,
-        ).toBeDefined();
-        const backRef = other?.commonlyUsedWith.architectures.find(
-          (r) => r.slug === a.slug,
-        );
+        expect(other, `"${ref.slug}" referenced by "${a.slug}" does not exist`).toBeDefined();
+        const backRef = other?.commonlyUsedWith.architectures.find((r) => r.slug === a.slug);
         expect(
           backRef,
           `"${other?.slug}" must list "${a.slug}" back in commonlyUsedWith.architectures`,

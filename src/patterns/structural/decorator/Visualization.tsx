@@ -7,11 +7,7 @@ import { onActivate } from "@/lib/a11y";
 import { PacketLayer } from "@/components/viz/PacketLayer";
 import { boxExit, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
 import type { Box, EdgeGeometry, Point } from "@/lib/geometry";
-import type {
-  Participant,
-  Relation,
-  VisualizationProps,
-} from "@/types/pattern";
+import type { Participant, Relation, VisualizationProps } from "@/types/pattern";
 
 /**
  * The decorator stack drawn as literal, concentric rounded rectangles:
@@ -87,21 +83,9 @@ function buildGeometry(relations: Relation[]): Record<string, EdgeGeometry> {
     call: straightLink(boxExit(clientBox, callEntry), callEntry),
     wrapsMilk: straightLink(sugarTop, milkTop, 48),
     wrapsCoffee: straightLink(milkTop, coreTop, 48),
-    sugarExtends: edgeBetween(
-      sugarBox,
-      coffeeDecoratorBox,
-      bendOf("sugarExtends"),
-    ),
-    milkExtends: edgeBetween(
-      milkBox,
-      coffeeDecoratorBox,
-      bendOf("milkExtends"),
-    ),
-    decoratorImpl: edgeBetween(
-      coffeeDecoratorBox,
-      coffeeBox,
-      bendOf("decoratorImpl"),
-    ),
+    sugarExtends: edgeBetween(sugarBox, coffeeDecoratorBox, bendOf("sugarExtends")),
+    milkExtends: edgeBetween(milkBox, coffeeDecoratorBox, bendOf("milkExtends")),
+    decoratorImpl: edgeBetween(coffeeDecoratorBox, coffeeBox, bendOf("decoratorImpl")),
     simpleImpl: edgeBetween(coreBox, coffeeBox, bendOf("simpleImpl")),
     wrappee: edgeBetween(coffeeDecoratorBox, coffeeBox, bendOf("wrappee")),
   };
@@ -158,14 +142,10 @@ function Layer({
         select();
       }}
       onKeyDown={onActivate(select)}
-      initial={
-        reduceMotion ? false : { opacity: 0, scale: 0.7, x: box.x, y: box.y }
-      }
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.7, x: box.x, y: box.y }}
       animate={{ opacity: dimmed ? 0.35 : 1, scale: 1, x: box.x, y: box.y }}
       transition={
-        reduceMotion
-          ? { duration: 0.3 }
-          : { type: "spring", stiffness: 260, damping: 22, delay }
+        reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 260, damping: 22, delay }
       }
     >
       {active && (
@@ -180,14 +160,10 @@ function Layer({
           strokeWidth={2}
           initial={false}
           animate={
-            reduceMotion
-              ? { opacity: 0.7 }
-              : { opacity: [0.7, 0, 0.7], scale: [1, 1.02, 1] }
+            reduceMotion ? { opacity: 0.7 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.02, 1] }
           }
           transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+            reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
           }
           filter="url(#glow)"
         />
@@ -211,11 +187,7 @@ function Layer({
       >
         {p.label}
       </text>
-      <text
-        y={-h / 2 + 38}
-        textAnchor="middle"
-        className="fill-slate-400 text-[11px] select-none"
-      >
+      <text y={-h / 2 + 38} textAnchor="middle" className="fill-slate-400 text-[11px] select-none">
         {p.role}
       </text>
       {note && (
@@ -251,10 +223,7 @@ export function DecoratorVisualization({
   onSelect,
 }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion();
-  const geometry = useMemo(
-    () => buildGeometry(pattern.relations),
-    [pattern.relations],
-  );
+  const geometry = useMemo(() => buildGeometry(pattern.relations), [pattern.relations]);
   const byId = useMemo(
     () => new Map(pattern.participants.map((p) => [p.id, p])),
     [pattern.participants],
@@ -277,14 +246,7 @@ export function DecoratorVisualization({
   const milkDecorator = byId.get("milkDecorator");
   const sugarDecorator = byId.get("sugarDecorator");
 
-  if (
-    !client ||
-    !coffee ||
-    !coffeeDecorator ||
-    !simpleCoffee ||
-    !milkDecorator ||
-    !sugarDecorator
-  )
+  if (!client || !coffee || !coffeeDecorator || !simpleCoffee || !milkDecorator || !sugarDecorator)
     return null;
 
   // Painted outer-to-inner (sugar at the back, core on top) so the nesting reads correctly;

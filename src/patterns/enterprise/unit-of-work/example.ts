@@ -1,35 +1,35 @@
 interface Entity {
-  id: string
+  id: string;
 }
 
 interface Database {
-  beginTransaction(): void
-  insert(entity: Entity): void
-  update(entity: Entity): void
-  delete(entity: Entity): void
-  commitTransaction(): void
-  rollbackTransaction(): void
+  beginTransaction(): void;
+  insert(entity: Entity): void;
+  update(entity: Entity): void;
+  delete(entity: Entity): void;
+  commitTransaction(): void;
+  rollbackTransaction(): void;
 }
 
 // [database]
 class SqlDatabase implements Database {
   beginTransaction() {
-    console.log('BEGIN')
+    console.log("BEGIN");
   }
   insert(entity: Entity) {
-    console.log(`INSERT ${entity.id}`)
+    console.log(`INSERT ${entity.id}`);
   }
   update(entity: Entity) {
-    console.log(`UPDATE ${entity.id}`)
+    console.log(`UPDATE ${entity.id}`);
   }
   delete(entity: Entity) {
-    console.log(`DELETE ${entity.id}`)
+    console.log(`DELETE ${entity.id}`);
   }
   commitTransaction() {
-    console.log('COMMIT')
+    console.log("COMMIT");
   }
   rollbackTransaction() {
-    console.log('ROLLBACK')
+    console.log("ROLLBACK");
   }
 }
 // [/database]
@@ -37,13 +37,13 @@ class SqlDatabase implements Database {
 // [unitOfWork]
 class UnitOfWork {
   // [pendingNew]
-  private newObjects: Entity[] = []
+  private newObjects: Entity[] = [];
   // [/pendingNew]
   // [pendingDirty]
-  private dirtyObjects: Entity[] = []
+  private dirtyObjects: Entity[] = [];
   // [/pendingDirty]
   // [pendingRemoved]
-  private removedObjects: Entity[] = []
+  private removedObjects: Entity[] = [];
   // [/pendingRemoved]
 
   constructor(private db: Database) {}
@@ -57,7 +57,7 @@ class UnitOfWork {
   // [registerNew]
   registerNew(entity: Entity) {
     // Guards against double-registering the same still-unsaved entity as new.
-    if (!this.newObjects.includes(entity)) this.newObjects.push(entity)
+    if (!this.newObjects.includes(entity)) this.newObjects.push(entity);
   }
   // [/registerNew]
 
@@ -65,41 +65,41 @@ class UnitOfWork {
   registerDirty(entity: Entity) {
     // Skips entities already queued as new (nothing to UPDATE yet) or already
     // marked dirty (no point queuing the same UPDATE twice).
-    const alreadyTracked = this.newObjects.includes(entity) || this.dirtyObjects.includes(entity)
-    if (!alreadyTracked) this.dirtyObjects.push(entity)
+    const alreadyTracked = this.newObjects.includes(entity) || this.dirtyObjects.includes(entity);
+    if (!alreadyTracked) this.dirtyObjects.push(entity);
   }
   // [/registerDirty]
 
   // [registerRemoved]
   registerRemoved(entity: Entity) {
-    const wasNew = this.newObjects.includes(entity)
+    const wasNew = this.newObjects.includes(entity);
     // Whatever it was before, there is nothing left to insert or update.
-    this.newObjects = this.newObjects.filter((e) => e !== entity)
-    this.dirtyObjects = this.dirtyObjects.filter((e) => e !== entity)
+    this.newObjects = this.newObjects.filter((e) => e !== entity);
+    this.dirtyObjects = this.dirtyObjects.filter((e) => e !== entity);
     // A row that was never inserted has nothing to delete.
-    if (!wasNew && !this.removedObjects.includes(entity)) this.removedObjects.push(entity)
+    if (!wasNew && !this.removedObjects.includes(entity)) this.removedObjects.push(entity);
   }
   // [/registerRemoved]
   // [/register]
 
   // [commit]
   commit() {
-    this.db.beginTransaction()
+    this.db.beginTransaction();
     try {
       // One statement per entity, in order: this example trades round trips
       // for simplicity. The atomicity guarantee comes from the single
       // transaction wrapping all of them, not from how many statements it took
       // to get there — a real ORM can batch these into fewer round trips.
-      for (const entity of this.newObjects) this.db.insert(entity)
-      for (const entity of this.dirtyObjects) this.db.update(entity)
-      for (const entity of this.removedObjects) this.db.delete(entity)
-      this.db.commitTransaction()
-      this.newObjects = []
-      this.dirtyObjects = []
-      this.removedObjects = []
+      for (const entity of this.newObjects) this.db.insert(entity);
+      for (const entity of this.dirtyObjects) this.db.update(entity);
+      for (const entity of this.removedObjects) this.db.delete(entity);
+      this.db.commitTransaction();
+      this.newObjects = [];
+      this.dirtyObjects = [];
+      this.removedObjects = [];
     } catch (err) {
-      this.db.rollbackTransaction() // none of the writes above take effect
-      throw err
+      this.db.rollbackTransaction(); // none of the writes above take effect
+      throw err;
     }
   }
   // [/commit]
@@ -107,19 +107,19 @@ class UnitOfWork {
 // [/unitOfWork]
 
 // [client]
-const db = new SqlDatabase()
-const uow = new UnitOfWork(db)
+const db = new SqlDatabase();
+const uow = new UnitOfWork(db);
 
-const order = { id: 'order-104' }
-const customer = { id: 'customer-58' }
-const cart = { id: 'cart-9' }
+const order = { id: "order-104" };
+const customer = { id: "customer-58" };
+const cart = { id: "cart-9" };
 
-uow.registerNew(order)
-uow.registerDirty(customer)
-uow.registerRemoved(cart)
-uow.registerDirty(customer) // already tracked — ignored
+uow.registerNew(order);
+uow.registerDirty(customer);
+uow.registerRemoved(cart);
+uow.registerDirty(customer); // already tracked — ignored
 
-uow.commit()
+uow.commit();
 // BEGIN
 // INSERT order-104
 // UPDATE customer-58

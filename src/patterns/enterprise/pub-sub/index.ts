@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Pub/Sub (Event Bus)",
   category: "enterprise",
   order: 4,
-  summary:
-    "Decouple publishers from subscribers behind a broker that routes messages by topic.",
+  summary: "Decouple publishers from subscribers behind a broker that routes messages by topic.",
   intent:
     "Let publishers send messages to named topics and subscribers listen to them, with a broker in between so neither side knows the other.",
   problem:

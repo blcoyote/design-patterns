@@ -1,17 +1,8 @@
 import type { ComponentType } from "react";
 
-export type Category =
-  | "creational"
-  | "structural"
-  | "behavioral"
-  | "enterprise";
+export type Category = "creational" | "structural" | "behavioral" | "enterprise";
 
-export type ParticipantKind =
-  | "class"
-  | "interface"
-  | "abstract"
-  | "client"
-  | "object";
+export type ParticipantKind = "class" | "interface" | "abstract" | "client" | "object";
 
 /** A box in the diagram: a class, interface, client or runtime object. */
 export interface Participant {
@@ -34,13 +25,7 @@ export interface Participant {
   patterns?: string[];
 }
 
-export type RelationType =
-  | "calls"
-  | "creates"
-  | "implements"
-  | "wraps"
-  | "notifies"
-  | "holds";
+export type RelationType = "calls" | "creates" | "implements" | "wraps" | "notifies" | "holds";
 
 /** An arrow between two participants. */
 export interface Relation {

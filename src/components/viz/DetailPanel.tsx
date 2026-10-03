@@ -27,20 +27,11 @@ interface Props {
   resolvePattern?: ResolvePattern;
 }
 
-export function DetailPanel({
-  pattern,
-  selection,
-  color,
-  onSelect,
-  resolvePattern,
-}: Props) {
-  const name = (id: string) =>
-    pattern.participants.find((p) => p.id === id)?.label ?? id;
+export function DetailPanel({ pattern, selection, color, onSelect, resolvePattern }: Props) {
+  const name = (id: string) => pattern.participants.find((p) => p.id === id)?.label ?? id;
   const connections =
     selection?.kind === "participant"
-      ? pattern.relations.filter(
-          (r) => r.from === selection.item.id || r.to === selection.item.id,
-        )
+      ? pattern.relations.filter((r) => r.from === selection.item.id || r.to === selection.item.id)
       : [];
 
   return (
@@ -53,14 +44,10 @@ export function DetailPanel({
           exit={{ opacity: 0 }}
           className="text-slate-400"
         >
-          <p className="text-xs font-mono uppercase tracking-wider text-slate-500">
-            Explore
-          </p>
+          <p className="text-xs font-mono uppercase tracking-wider text-slate-500">Explore</p>
           <p className="mt-2">
-            <span className="font-semibold text-slate-200">
-              Click any box or arrow
-            </span>{" "}
-            in the diagram to see what it does and where it lives in the code.
+            <span className="font-semibold text-slate-200">Click any box or arrow</span> in the
+            diagram to see what it does and where it lives in the code.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {pattern.participants.map((p) => (
@@ -85,10 +72,7 @@ export function DetailPanel({
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p
-                className="text-xs font-mono uppercase tracking-wider"
-                style={{ color }}
-              >
+              <p className="text-xs font-mono uppercase tracking-wider" style={{ color }}>
                 {selection.kind === "participant"
                   ? selection.item.role
                   : `${RELATION_NAMES[selection.item.type]} · relationship`}
@@ -98,8 +82,7 @@ export function DetailPanel({
                   selection.item.label
                 ) : (
                   <>
-                    {name(selection.item.from)}{" "}
-                    <span className="text-slate-500">→</span>{" "}
+                    {name(selection.item.from)} <span className="text-slate-500">→</span>{" "}
                     {name(selection.item.to)}
                   </>
                 )}
@@ -116,9 +99,7 @@ export function DetailPanel({
               </svg>
             </button>
           </div>
-          <p className="mt-3 leading-relaxed text-slate-300">
-            {selection.item.description}
-          </p>
+          <p className="mt-3 leading-relaxed text-slate-300">{selection.item.description}</p>
 
           {connections.length > 0 && (
             <div className="mt-4">
@@ -133,14 +114,9 @@ export function DetailPanel({
                       onClick={() => onSelect(r.id)}
                       className="text-left text-sm text-slate-300 hover:text-white"
                     >
-                      <span className="font-mono text-slate-500">{r.type}</span>{" "}
-                      {name(r.from)} → {name(r.to)}
-                      {r.label && (
-                        <span className="font-mono text-slate-500">
-                          {" "}
-                          · {r.label}
-                        </span>
-                      )}
+                      <span className="font-mono text-slate-500">{r.type}</span> {name(r.from)} →{" "}
+                      {name(r.to)}
+                      {r.label && <span className="font-mono text-slate-500"> · {r.label}</span>}
                     </button>
                   </li>
                 ))}

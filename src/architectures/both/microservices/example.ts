@@ -1,47 +1,47 @@
 interface OrderLine {
-  sku: string
-  quantity: number
+  sku: string;
+  quantity: number;
 }
 
 interface PlaceOrderCommand {
-  orderId: string
-  lines: OrderLine[]
+  orderId: string;
+  lines: OrderLine[];
 }
 
 /** Orders' own model of a product -- only what Orders needs, in Orders' own vocabulary. */
 interface Product {
-  sku: string
-  name: string
-  price: number
+  sku: string;
+  name: string;
+  price: number;
 }
 
 interface OrderPlacedEvent {
-  orderId: string
-  lines: OrderLine[]
-  total: number
+  orderId: string;
+  lines: OrderLine[];
+  total: number;
 }
 
 // [inventory]
 /** Inventory's own wire shape. Orders never sees this directly -- only through the client below. */
 interface ProductDto {
-  sku: string
-  displayName: string
-  unitPriceCents: number
+  sku: string;
+  displayName: string;
+  unitPriceCents: number;
 }
 
 /** The Inventory microservice: its own process, its own private store. */
 class InventoryService {
-  calls = 0
+  calls = 0;
   private readonly products = new Map<string, ProductDto>([
-    ['sku-1', { sku: 'sku-1', displayName: 'Widget', unitPriceCents: 1999 }],
-    ['sku-2', { sku: 'sku-2', displayName: 'Gadget', unitPriceCents: 2999 }],
-  ])
+    ["sku-1", { sku: "sku-1", displayName: "Widget", unitPriceCents: 1999 }],
+    ["sku-2", { sku: "sku-2", displayName: "Gadget", unitPriceCents: 2999 }],
+  ]);
 
   findProduct(sku: string): ProductDto {
-    this.calls++
-    const dto = this.products.get(sku)
-    if (!dto) throw new Error(`product ${sku} not found`)
-    return dto
+    this.calls++;
+    const dto = this.products.get(sku);
+    if (!dto) throw new Error(`product ${sku} not found`);
+    return dto;
   }
 }
 // [/inventory]
@@ -54,24 +54,28 @@ class InventoryService {
  * into Orders' own Product model (Adapter) so Inventory's wire shape never leaks in.
  */
 class InventoryServiceClient {
-  private readonly cache = new Map<string, Product>()
+  private readonly cache = new Map<string, Product>();
 
   constructor(private readonly inventory: InventoryService) {}
 
   getProduct(sku: string): Product {
-    const cached = this.cache.get(sku)
-    if (cached) return cached // cache hit -- Inventory is never called
+    const cached = this.cache.get(sku);
+    if (cached) return cached; // cache hit -- Inventory is never called
 
-    const dto = this.inventory.findProduct(sku) // cache miss -- load from the service
-    const product: Product = { sku: dto.sku, name: dto.displayName, price: dto.unitPriceCents / 100 }
-    this.cache.set(sku, product) // populate the cache for next time
-    return product
+    const dto = this.inventory.findProduct(sku); // cache miss -- load from the service
+    const product: Product = {
+      sku: dto.sku,
+      name: dto.displayName,
+      price: dto.unitPriceCents / 100,
+    };
+    this.cache.set(sku, product); // populate the cache for next time
+    return product;
   }
 }
 // [/inventoryClient]
 
 // [breaker]
-type BreakerState = 'CLOSED' | 'OPEN'
+type BreakerState = "CLOSED" | "OPEN";
 
 /**
  * A deliberately minimal circuit breaker: no timers, no clock -- just a failure counter.
@@ -79,28 +83,28 @@ type BreakerState = 'CLOSED' | 'OPEN'
  * every further call immediately without ever invoking `fn` again.
  */
 class CircuitBreaker {
-  private state: BreakerState = 'CLOSED'
-  private failureCount = 0
+  private state: BreakerState = "CLOSED";
+  private failureCount = 0;
 
   constructor(private readonly failureThreshold: number) {}
 
   call<T>(fn: () => T): T {
-    if (this.state === 'OPEN') {
-      throw new Error('circuit open -- failing fast') // fn() never runs
+    if (this.state === "OPEN") {
+      throw new Error("circuit open -- failing fast"); // fn() never runs
     }
     try {
-      const result = fn()
-      this.failureCount = 0
-      return result
+      const result = fn();
+      this.failureCount = 0;
+      return result;
     } catch (err) {
-      this.failureCount++
-      if (this.failureCount >= this.failureThreshold) this.state = 'OPEN'
-      throw err
+      this.failureCount++;
+      if (this.failureCount >= this.failureThreshold) this.state = "OPEN";
+      throw err;
     }
   }
 
   get isOpen(): boolean {
-    return this.state === 'OPEN'
+    return this.state === "OPEN";
   }
 }
 // [/breaker]
@@ -108,35 +112,35 @@ class CircuitBreaker {
 // [payments]
 /** The Payments microservice: its own process, its own private store. */
 class PaymentsService {
-  calls = 0
-  private down = false
+  calls = 0;
+  private down = false;
 
   /** Flips the processor's health. Deterministic: only ever changed by an explicit call, never a timer. */
   setDown(down: boolean): void {
-    this.down = down
+    this.down = down;
   }
 
   charge(orderId: string, amount: number): string {
-    this.calls++
-    if (this.down) throw new Error(`payment processor unavailable for order ${orderId}`)
-    return `receipt-${orderId}-${amount}`
+    this.calls++;
+    if (this.down) throw new Error(`payment processor unavailable for order ${orderId}`);
+    return `receipt-${orderId}-${amount}`;
   }
 }
 // [/payments]
 
 // [broker]
-type OrderPlacedHandler = (event: OrderPlacedEvent) => void
+type OrderPlacedHandler = (event: OrderPlacedEvent) => void;
 
 /** A simple in-process broker: publishers and subscribers only ever know this interface (Pub/Sub). */
 class MessageBroker {
-  private readonly subscribers: OrderPlacedHandler[] = []
+  private readonly subscribers: OrderPlacedHandler[] = [];
 
   subscribe(handler: OrderPlacedHandler): void {
-    this.subscribers.push(handler)
+    this.subscribers.push(handler);
   }
 
   publish(event: OrderPlacedEvent): void {
-    for (const handler of this.subscribers) handler(event)
+    for (const handler of this.subscribers) handler(event);
   }
 }
 // [/broker]
@@ -144,34 +148,34 @@ class MessageBroker {
 // [shipping]
 /** The Shipping microservice. It only ever learns about an order by subscribing to the broker. */
 class ShippingService {
-  readonly received: OrderPlacedEvent[] = []
+  readonly received: OrderPlacedEvent[] = [];
 
   onOrderPlaced(event: OrderPlacedEvent): void {
-    this.received.push(event)
+    this.received.push(event);
   }
 }
 // [/shipping]
 
-type OrderStatus = 'PAID' | 'PAYMENT_FAILED'
+type OrderStatus = "PAID" | "PAYMENT_FAILED";
 
 interface OrderRecord {
-  orderId: string
-  total: number
-  status: OrderStatus
+  orderId: string;
+  total: number;
+  status: OrderStatus;
 }
 
 interface PlaceOrderResult {
-  orderId: string
-  total: number
-  status: OrderStatus
+  orderId: string;
+  total: number;
+  status: OrderStatus;
   /** Empty string when the order was paid. */
-  reason: string
+  reason: string;
 }
 
 // [orders]
 /** The Orders microservice: its own process, with its own private store of the orders it has recorded. */
 class OrderService {
-  private readonly orders = new Map<string, OrderRecord>()
+  private readonly orders = new Map<string, OrderRecord>();
 
   constructor(
     private readonly inventoryClient: InventoryServiceClient,
@@ -181,33 +185,34 @@ class OrderService {
   ) {}
 
   placeOrder(command: PlaceOrderCommand): PlaceOrderResult {
-    let total = 0
+    let total = 0;
     for (const line of command.lines) {
-      const product = this.inventoryClient.getProduct(line.sku)
-      total += product.price * line.quantity
+      const product = this.inventoryClient.getProduct(line.sku);
+      total += product.price * line.quantity;
     }
 
-    let status: OrderStatus
-    let reason = ''
+    let status: OrderStatus;
+    let reason = "";
     try {
-      this.paymentsBreaker.call(() => this.payments.charge(command.orderId, total))
-      status = 'PAID'
+      this.paymentsBreaker.call(() => this.payments.charge(command.orderId, total));
+      status = "PAID";
     } catch (err) {
-      status = 'PAYMENT_FAILED'
-      reason = (err as Error).message
+      status = "PAYMENT_FAILED";
+      reason = (err as Error).message;
     }
 
     // Orders records every order it handled in its own private store, paid or not.
-    this.orders.set(command.orderId, { orderId: command.orderId, total, status })
+    this.orders.set(command.orderId, { orderId: command.orderId, total, status });
 
     // Only a paid order is announced -- a failed one never reaches Shipping.
-    if (status === 'PAID') this.broker.publish({ orderId: command.orderId, lines: command.lines, total })
+    if (status === "PAID")
+      this.broker.publish({ orderId: command.orderId, lines: command.lines, total });
 
-    return { orderId: command.orderId, total, status, reason }
+    return { orderId: command.orderId, total, status, reason };
   }
 
   get recordedOrders(): OrderRecord[] {
-    return [...this.orders.values()]
+    return [...this.orders.values()];
   }
 }
 // [/orders]
@@ -215,53 +220,61 @@ class OrderService {
 // [gateway]
 /** The API Gateway: the one entry point clients see, hiding three separate services behind it (Facade). */
 class ApiGateway {
-  private nextOrderId = 1 // counter-based ids, never timestamps
+  private nextOrderId = 1; // counter-based ids, never timestamps
 
   constructor(private readonly orders: OrderService) {}
 
   placeOrder(lines: OrderLine[]): PlaceOrderResult {
-    const orderId = `order-${this.nextOrderId++}`
-    return this.orders.placeOrder({ orderId, lines })
+    const orderId = `order-${this.nextOrderId++}`;
+    return this.orders.placeOrder({ orderId, lines });
   }
 }
 // [/gateway]
 
 // [usage]
-const inventory = new InventoryService()
-const inventoryClient = new InventoryServiceClient(inventory)
-const payments = new PaymentsService()
-const paymentsBreaker = new CircuitBreaker(/* failureThreshold */ 3)
-const broker = new MessageBroker()
-const shipping = new ShippingService()
-broker.subscribe((event) => shipping.onOrderPlaced(event))
-const orders = new OrderService(inventoryClient, paymentsBreaker, payments, broker)
-const gateway = new ApiGateway(orders)
+const inventory = new InventoryService();
+const inventoryClient = new InventoryServiceClient(inventory);
+const payments = new PaymentsService();
+const paymentsBreaker = new CircuitBreaker(/* failureThreshold */ 3);
+const broker = new MessageBroker();
+const shipping = new ShippingService();
+broker.subscribe((event) => shipping.onOrderPlaced(event));
+const orders = new OrderService(inventoryClient, paymentsBreaker, payments, broker);
+const gateway = new ApiGateway(orders);
 
 function report(order: PlaceOrderResult): void {
-  console.log(`${order.orderId}: total=$${order.total.toFixed(2)} status=${order.status} reason="${order.reason}"`)
+  console.log(
+    `${order.orderId}: total=$${order.total.toFixed(2)} status=${order.status} reason="${order.reason}"`,
+  );
 }
 
 // Order 1: two lines, same sku -- the second lookup is a cache hit. Payments is healthy, so it is paid.
-report(gateway.placeOrder([
-  { sku: 'sku-1', quantity: 1 },
-  { sku: 'sku-1', quantity: 2 },
-]))
+report(
+  gateway.placeOrder([
+    { sku: "sku-1", quantity: 1 },
+    { sku: "sku-1", quantity: 2 },
+  ]),
+);
 
 // The payment processor goes down -- deterministic, flipped explicitly, not by a timer.
-payments.setDown(true)
+payments.setDown(true);
 
 // Orders 2, 3 and 4: the processor is down for all three, so the breaker counts three
 // failures in a row and trips open on the third one.
-report(gateway.placeOrder([{ sku: 'sku-2', quantity: 1 }]))
-report(gateway.placeOrder([{ sku: 'sku-2', quantity: 1 }]))
-report(gateway.placeOrder([{ sku: 'sku-1', quantity: 1 }]))
-console.log(`PaymentsService calls so far: ${payments.calls}, breaker=${paymentsBreaker.isOpen ? 'OPEN' : 'CLOSED'}`)
+report(gateway.placeOrder([{ sku: "sku-2", quantity: 1 }]));
+report(gateway.placeOrder([{ sku: "sku-2", quantity: 1 }]));
+report(gateway.placeOrder([{ sku: "sku-1", quantity: 1 }]));
+console.log(
+  `PaymentsService calls so far: ${payments.calls}, breaker=${paymentsBreaker.isOpen ? "OPEN" : "CLOSED"}`,
+);
 
 // Order 5: the breaker is now open -- it fails fast, PaymentsService.charge is never called.
-report(gateway.placeOrder([{ sku: 'sku-2', quantity: 1 }]))
-console.log(`PaymentsService calls after breaker opened: ${payments.calls}`)
+report(gateway.placeOrder([{ sku: "sku-2", quantity: 1 }]));
+console.log(`PaymentsService calls after breaker opened: ${payments.calls}`);
 
-console.log(`InventoryService product lookups: ${inventory.calls}`)
-console.log(`OrderService recorded ${orders.recordedOrders.length} orders, ${orders.recordedOrders.filter((o) => o.status === 'PAID').length} paid`)
-console.log(`ShippingService received ${shipping.received.length} OrderPlaced events`)
+console.log(`InventoryService product lookups: ${inventory.calls}`);
+console.log(
+  `OrderService recorded ${orders.recordedOrders.length} orders, ${orders.recordedOrders.filter((o) => o.status === "PAID").length} paid`,
+);
+console.log(`ShippingService received ${shipping.received.length} OrderPlaced events`);
 // [/usage]

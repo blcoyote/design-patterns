@@ -2,7 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
-import goExample from './example.go?raw'
+import goExample from "./example.go?raw";
 import { BuilderVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
@@ -13,11 +13,11 @@ export const pattern: PatternDefinition = {
   summary:
     "Construct complex objects step by step, so the same construction process can yield different representations.",
   intent:
-    'Build a complex object step by step, so the same process can produce different results and the constructor stays readable.',
+    "Build a complex object step by step, so the same process can produce different results and the constructor stays readable.",
   problem:
     'An HTTP request can have a method, headers, query params, a body, a timeout, retries and more. One constructor with a dozen optional parameters is hard to read, and most combinations are never used together. This is the "telescoping constructor" nobody wants to call. Sometimes you also need the same recipe to produce more than one kind of output, for example a real request object and the equivalent curl command for debugging.',
   solution:
-    'A Builder interface declares the construction steps, one per optional piece. Each ConcreteBuilder implements those steps for its own product: one assembles a real object, another renders a string. A Director holds reusable recipes (e.g. "a JSON POST") and runs any builder it is handed through the same fixed steps, without knowing which product comes out. The client picks a concrete builder, optionally hands it to the director, and collects the finished product with getResult(). The popular "fluent builder" you see in most codebases (Joshua Bloch\'s version) is a simplified variant: one concrete builder, no Builder interface and no Director. That is fine when you only ever need one kind of output.',
+    'A Builder interface defines the steps for creating a product. Each concrete builder follows those steps to make a different result, such as an HTTP request or a curl command. A Director can store a recipe, like "a JSON POST", and run the same steps with any builder. The client chooses the builder and collects the result with getResult(). The common fluent builder is a simpler version with one builder and no Director, which works when you only need one kind of output.',
   analogy:
     'A recipe card (the Director) lists the same steps, "knead, top, bake", no matter which kitchen follows it. Hand it to a pizzeria (one builder) and you get a pizza. Hand the exact same card to a meal-kit packer (another builder) and you get a boxed kit. Same process, different finished product.',
   whenToUse: [

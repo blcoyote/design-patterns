@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: "Encapsulate interchangeable algorithms and swap them at runtime.",
   intent:
-    'Put each way of doing a job behind a common interface, so you can swap one for another without changing the code that uses it.',
+    "Put each way of doing a job behind a common interface, so you can swap one for another without changing the code that uses it.",
   problem:
     'A navigation app has to compute a route, but "fastest", "shortest" and "scenic" are three genuinely different algorithms. If you cram all three into one method behind a big if/else, every new option edits that same tangled function. There is also no clean way to let the caller choose, or change, the algorithm while the app runs.',
   solution:
@@ -98,8 +98,7 @@ export const pattern: PatternDefinition = {
       kind: "class",
       x: 660,
       y: 350,
-      description:
-        "Optimizes for a pleasant drive, favoring coastal and scenic roads over speed.",
+      description: "Optimizes for a pleasant drive, favoring coastal and scenic roads over speed.",
     },
   ],
   relations: [
@@ -151,8 +150,7 @@ export const pattern: PatternDefinition = {
       to: "fastest",
       type: "calls",
       label: "calculate()",
-      description:
-        "When FastestRoute is the active strategy, route() delegates to it.",
+      description: "When FastestRoute is the active strategy, route() delegates to it.",
       code: "route",
     },
     {
@@ -161,8 +159,7 @@ export const pattern: PatternDefinition = {
       to: "shortest",
       type: "calls",
       label: "calculate()",
-      description:
-        "When ShortestRoute is the active strategy, route() delegates to it.",
+      description: "When ShortestRoute is the active strategy, route() delegates to it.",
       code: "route",
     },
     {
@@ -171,8 +168,7 @@ export const pattern: PatternDefinition = {
       to: "scenic",
       type: "calls",
       label: "calculate()",
-      description:
-        "When ScenicRoute is the active strategy, route() delegates to it.",
+      description: "When ScenicRoute is the active strategy, route() delegates to it.",
       code: "route",
     },
   ],

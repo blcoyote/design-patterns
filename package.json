@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/generate-share-pages.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "oxlint",
     "preview": "vite preview",
+    "prepare": "husky",
     "test": "vitest run"
   },
   "dependencies": {
@@ -24,10 +27,16 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "oxlint": "^1.86.0",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.3.2",
     "vitest": "^5.0.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,html,md,yml,yaml}": "prettier --write"
   }
 }

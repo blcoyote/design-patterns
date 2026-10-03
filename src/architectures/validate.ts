@@ -10,15 +10,11 @@ function checkRefs(
   const errors: string[] = [];
   const seen = new Set<string>();
   for (const ref of refs) {
-    if (seen.has(ref.slug))
-      errors.push(`${where}: duplicate slug "${ref.slug}"`);
+    if (seen.has(ref.slug)) errors.push(`${where}: duplicate slug "${ref.slug}"`);
     seen.add(ref.slug);
-    if (!ref.why.trim())
-      errors.push(`${where}: "${ref.slug}" is missing a "why"`);
-    if (!validSlugs.includes(ref.slug))
-      errors.push(`${where}: unknown slug "${ref.slug}"`);
-    if (selfSlug && ref.slug === selfSlug)
-      errors.push(`${where}: "${ref.slug}" references itself`);
+    if (!ref.why.trim()) errors.push(`${where}: "${ref.slug}" is missing a "why"`);
+    if (!validSlugs.includes(ref.slug)) errors.push(`${where}: unknown slug "${ref.slug}"`);
+    if (selfSlug && ref.slug === selfSlug) errors.push(`${where}: "${ref.slug}" references itself`);
   }
   return errors;
 }
@@ -32,11 +28,7 @@ export function validateArchitecture(
   const errors = validateDiagram(a);
 
   errors.push(
-    ...checkRefs(
-      "commonlyUsedWith.designPatterns",
-      a.commonlyUsedWith.designPatterns,
-      designSlugs,
-    ),
+    ...checkRefs("commonlyUsedWith.designPatterns", a.commonlyUsedWith.designPatterns, designSlugs),
   );
   errors.push(
     ...checkRefs(
@@ -47,15 +39,11 @@ export function validateArchitecture(
     ),
   );
 
-  const declaredDesignPatterns = new Set(
-    a.commonlyUsedWith.designPatterns.map((r) => r.slug),
-  );
+  const declaredDesignPatterns = new Set(a.commonlyUsedWith.designPatterns.map((r) => r.slug));
   for (const participant of a.participants) {
     for (const slug of participant.patterns ?? []) {
       if (designSlugs.length && !designSlugs.includes(slug)) {
-        errors.push(
-          `participant ${participant.id}: unknown design pattern "${slug}"`,
-        );
+        errors.push(`participant ${participant.id}: unknown design pattern "${slug}"`);
       }
       if (!declaredDesignPatterns.has(slug)) {
         errors.push(

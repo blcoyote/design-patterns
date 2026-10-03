@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
   problem:
     "Some data is slow or costly to fetch: a database under heavy load, or a remote service that limits how often you can call it. Yet most reads ask for the same few popular items again and again. If nothing stands between callers and the source, every read hits the source, so its load grows with the number of requests instead of with how often the data actually changes.",
   solution:
-    "Put a Cache in front of the source and make the application do the lookups itself. On a read, check the cache first. On a hit, return the cached value and leave the source alone. On a miss, load the value from the source, store it in the cache, and return it. On a write, update the source first, then invalidate (remove) the cached entry rather than updating it, so the next read is a clean miss that reloads the fresh value. A caching Proxy does something similar, but invisibly: callers think they are talking to the real service, and the proxy decides behind their backs whether to use the cache or the source. Cache-Aside asks more of the caller, which has to know the cache exists, but it keeps the caching policy visible and under the application's control. Read-through and write-through caches are the self-managing alternative: the cache itself knows how to load from (and, for write-through, write to) the source, so callers only talk to the cache. Plain in-process memoization is a special case of Cache-Aside with no TTL (time-to-live) and no invalidation. It is fine when the underlying data can never change while the key is cached, which is exactly the trade this site makes in parseCode (see Real-world examples).",
+    "With Cache-Aside, the application checks the cache before the data source. On a hit, it returns the cached value. On a miss, it loads the value from the source, stores it in the cache, and returns it. When data changes, the application updates the source and removes the cached value, so the next read reloads it. Unlike a caching Proxy, Cache-Aside makes callers handle the cache explicitly. A read-through cache loads from the source itself; a write-through cache also sends updates to the source. Plain in-process memoization is a Cache-Aside variant with no expiry time (TTL) or invalidation. It is safe only when the underlying data cannot change while cached, as with this site's parseCode function (see Real-world examples).",
   analogy:
     "Think of checking your own notes before calling a reference desk. You look at what you wrote down last time. If the answer is there, you use it and the desk never hears from you. If it is not, you call the desk, get the answer, and jot it down for next time. Nobody at the desk decides when you take notes; that is entirely up to you.",
   whenToUse: [
@@ -32,7 +32,7 @@ export const pattern: PatternDefinition = {
   ],
   cons: [
     "Every place that reads through the cache has to know it exists and follow the same check-then-load steps. A caching Proxy avoids this by hiding the cache from callers.",
-    "Readers and writers can race. A reader that misses may load the old value from the source. A writer can then update the source and invalidate. The reader then caches the old value, and it stays until its TTL expires or the next write. A reader that hits between a write and its invalidate sees the old value only briefly.",
+    "Readers and writers can race. A reader may miss and load the old value just before a writer updates the source and invalidates the cache. If the reader then stores its old result, that stale value remains until the TTL expires or another write invalidates it. A read between a write and its invalidation may also briefly return old data.",
     "TTLs and invalidation rules are extra settings to choose and tune. Too short and the cache barely helps; too long and you serve stale data longer than you meant to.",
   ],
   realWorld: [
@@ -163,15 +163,7 @@ export const pattern: PatternDefinition = {
       title: "First read misses the cache",
       description:
         "The client asks ProductService for product p1. The cache has nothing stored yet, so it is a miss: ProductService falls through to ProductDatabase, loads the product, and populates the cache before returning it.",
-      highlight: [
-        "client",
-        "request",
-        "service",
-        "cacheOp",
-        "cache",
-        "dbOp",
-        "database",
-      ],
+      highlight: ["client", "request", "service", "cacheOp", "cache", "dbOp", "database"],
       packets: [
         { relation: "request", label: 'getProduct("p1")' },
         { relation: "cacheOp", label: 'get("p1") → miss', after: 0 },
@@ -199,15 +191,7 @@ export const pattern: PatternDefinition = {
       title: "A write invalidates the entry",
       description:
         "The client asks ProductService to change p1's price. ProductService writes straight to ProductDatabase, then invalidates — rather than updates — the cache entry, so the database stays the single source of truth.",
-      highlight: [
-        "client",
-        "request",
-        "service",
-        "dbOp",
-        "database",
-        "cacheOp",
-        "cache",
-      ],
+      highlight: ["client", "request", "service", "dbOp", "database", "cacheOp", "cache"],
       packets: [
         { relation: "request", label: 'updateProduct("p1", 14.99)' },
         { relation: "dbOp", label: 'update("p1", 14.99)', after: 0 },
@@ -220,15 +204,7 @@ export const pattern: PatternDefinition = {
       title: "The next read is a clean miss",
       description:
         "invalidate() removed the stale entry, so the following read finds nothing cached. ProductService reloads the updated price from ProductDatabase and caches it again.",
-      highlight: [
-        "client",
-        "request",
-        "service",
-        "cacheOp",
-        "cache",
-        "dbOp",
-        "database",
-      ],
+      highlight: ["client", "request", "service", "cacheOp", "cache", "dbOp", "database"],
       packets: [
         { relation: "request", label: 'getProduct("p1")' },
         { relation: "cacheOp", label: 'get("p1") → miss', after: 0 },
@@ -252,15 +228,7 @@ export const pattern: PatternDefinition = {
       title: "Expiry forces one more miss",
       description:
         "The next get() finds the entry's expiresAt in the past, drops it, and reports a miss, so ProductService reloads from ProductDatabase one more time. This is also the pattern's sharpest edge, which a single-threaded demo cannot show: a reader that misses can load the old value from the source before a write, and cache it after that write's invalidate(), so the old value persists until its TTL expires. A reader that hits between the write and the invalidate sees the old value only briefly.",
-      highlight: [
-        "client",
-        "request",
-        "service",
-        "cacheOp",
-        "cache",
-        "dbOp",
-        "database",
-      ],
+      highlight: ["client", "request", "service", "cacheOp", "cache", "dbOp", "database"],
       packets: [
         { relation: "request", label: 'getProduct("p1")' },
         { relation: "cacheOp", label: 'get("p1") → expired', after: 0 },

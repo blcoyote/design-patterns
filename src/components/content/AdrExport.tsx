@@ -25,9 +25,7 @@ export function AdrExport({
   /** A subject slug to preselect, typically the scenario quiz's pick when it names a subject. */
   preselected?: string;
 }) {
-  const [chosen, setChosen] = useState(
-    preselected ?? subjects[0]?.slug ?? NO_PATTERN,
-  );
+  const [chosen, setChosen] = useState(preselected ?? subjects[0]?.slug ?? NO_PATTERN);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -69,20 +67,15 @@ export function AdrExport({
     <Panel className="p-6">
       <PanelHeading>Export as an ADR</PanelHeading>
       <p className="mt-3 leading-relaxed text-slate-300">
-        Turn this comparison into an architecture decision record (MADR format,
-        with YAML frontmatter) for your own project's{" "}
-        <code className="text-slate-400">docs/decisions/</code>.
+        Turn this comparison into an architecture decision record (MADR format, with YAML
+        frontmatter) for your own project's <code className="text-slate-400">docs/decisions/</code>.
       </p>
 
       <fieldset className="mt-4">
         <legend className="text-xs font-medium tracking-wider text-slate-500 uppercase">
           Chosen option
         </legend>
-        <div
-          className="mt-2 flex flex-wrap gap-2"
-          role="radiogroup"
-          aria-label="Chosen option"
-        >
+        <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Chosen option">
           {subjects.map((s) => (
             <label
               key={s.slug}

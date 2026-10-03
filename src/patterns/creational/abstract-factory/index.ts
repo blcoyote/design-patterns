@@ -2,17 +2,16 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
-import goExample from './example.go?raw'
+import goExample from "./example.go?raw";
 
 export const pattern: PatternDefinition = {
   slug: "abstract-factory",
   name: "Abstract Factory",
   category: "creational",
   order: 4,
-  summary:
-    "Produce families of related objects without specifying their concrete classes.",
+  summary: "Produce families of related objects without specifying their concrete classes.",
   intent:
-    'Create whole families of matching objects through one interface, without naming their concrete classes.',
+    "Create whole families of matching objects through one interface, without naming their concrete classes.",
   problem:
     "Your UI needs buttons and checkboxes that always match the active theme, light or dark. If `new LightButton()` and `new DarkCheckbox()` are scattered across the app, nothing stops a light button from ending up next to a dark checkbox. Adding a third theme means hunting down every one of those call sites.",
   solution:
@@ -55,7 +54,7 @@ export const pattern: PatternDefinition = {
       label: "LightFactory",
       role: "Concrete Factory",
       kind: "class",
-      x: 160,
+      x: 120,
       y: 200,
       description:
         "Implements UIFactory for the light theme: every product it creates is the light-themed variant.",
@@ -65,7 +64,7 @@ export const pattern: PatternDefinition = {
       label: "DarkFactory",
       role: "Concrete Factory",
       kind: "class",
-      x: 640,
+      x: 680,
       y: 200,
       description:
         "Implements UIFactory for the dark theme: every product it creates is the dark-themed variant.",
@@ -75,8 +74,8 @@ export const pattern: PatternDefinition = {
       label: "Button",
       role: "Abstract Product A",
       kind: "interface",
-      x: 160,
-      y: 330,
+      x: 400,
+      y: 200,
       description:
         "The abstract product every button variant must implement. Client code only ever calls render() through this interface.",
     },
@@ -85,8 +84,8 @@ export const pattern: PatternDefinition = {
       label: "Checkbox",
       role: "Abstract Product B",
       kind: "interface",
-      x: 640,
-      y: 330,
+      x: 400,
+      y: 350,
       description:
         "The abstract product every checkbox variant must implement, kept separate from Button so each creation method can vary independently.",
     },
@@ -95,8 +94,8 @@ export const pattern: PatternDefinition = {
       label: "Application",
       role: "Client",
       kind: "client",
-      x: 400,
-      y: 410,
+      x: 660,
+      y: 70,
       description:
         "Holds a single UIFactory reference — never a concrete LightFactory or DarkFactory — and builds its whole UI through createButton()/createCheckbox().",
     },
@@ -159,6 +158,7 @@ export const pattern: PatternDefinition = {
       from: "client",
       to: "uiFactory",
       type: "calls",
+      bend: 30,
       label: "createButton() / createCheckbox()",
       description:
         "The client calls createButton()/createCheckbox() on whichever UIFactory it was handed — never on a concrete factory class.",
@@ -170,13 +170,7 @@ export const pattern: PatternDefinition = {
       title: "One interface, two families",
       description:
         "UIFactory declares createButton() and createCheckbox(). LightFactory and DarkFactory each implement it, promising a matching Button and Checkbox for their own theme.",
-      highlight: [
-        "uiFactory",
-        "lightFactory",
-        "darkFactory",
-        "lf-impl",
-        "df-impl",
-      ],
+      highlight: ["uiFactory", "lightFactory", "darkFactory", "lf-impl", "df-impl"],
       code: "uiFactory",
     },
     {
@@ -191,13 +185,7 @@ export const pattern: PatternDefinition = {
       title: "Factory builds the button",
       description:
         "The client calls createButton() on its factory reference. Because that reference is really a DarkFactory, it gets back a DarkButton — without ever writing `new DarkButton()` itself.",
-      highlight: [
-        "client",
-        "client-calls",
-        "darkFactory",
-        "df-creates-button",
-        "button",
-      ],
+      highlight: ["client", "client-calls", "darkFactory", "df-creates-button", "button"],
       packets: [
         { relation: "client-calls", label: "createButton()" },
         { relation: "df-creates-button", label: "new DarkButton()", after: 0 },
@@ -209,13 +197,7 @@ export const pattern: PatternDefinition = {
       title: "Factory builds the checkbox",
       description:
         "The same call pattern produces the other half of the family: createCheckbox() resolves to DarkFactory's override and returns a DarkCheckbox, so the two widgets automatically match.",
-      highlight: [
-        "client",
-        "client-calls",
-        "darkFactory",
-        "df-creates-checkbox",
-        "checkbox",
-      ],
+      highlight: ["client", "client-calls", "darkFactory", "df-creates-checkbox", "checkbox"],
       packets: [
         { relation: "client-calls", label: "createCheckbox()" },
         {

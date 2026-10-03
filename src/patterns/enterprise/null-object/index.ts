@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Null Object",
   category: "enterprise",
   order: 6,
-  summary:
-    "Replace null checks with a do-nothing object that implements the same interface.",
+  summary: "Replace null checks with a do-nothing object that implements the same interface.",
   intent:
     "Use a harmless do-nothing object in place of null, so callers never have to check for a missing collaborator.",
   problem:
@@ -124,8 +123,7 @@ export const pattern: PatternDefinition = {
       from: "consoleLogger",
       to: "logger",
       type: "implements",
-      description:
-        "ConsoleLogger implements Logger and actually writes to the console.",
+      description: "ConsoleLogger implements Logger and actually writes to the console.",
       bend: 25,
       code: "consoleLogger",
     },
@@ -181,9 +179,7 @@ export const pattern: PatternDefinition = {
       description:
         "A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed as an optional Logger (Logger | null, ILogger?, Logger | None, or a nil Logger interface in Go), so every call site that wants to log now has to remember to guard it.",
       highlight: ["client", "client-create", "reportGenerator"],
-      packets: [
-        { relation: "client-create", label: "new ReportGenerator(null)" },
-      ],
+      packets: [{ relation: "client-create", label: "new ReportGenerator(null)" }],
       notes: { reportGenerator: "logger: null" },
       code: "before",
     },
@@ -232,13 +228,7 @@ export const pattern: PatternDefinition = {
       title: "generate() needs no guards at all",
       description:
         "Every call — info(), info(), warn() — is made unconditionally. When the logger is a NullLogger, each call quietly does nothing; the method never has to ask whether logging is wanted.",
-      highlight: [
-        "client",
-        "client-call",
-        "reportGenerator",
-        "call-null",
-        "nullLogger",
-      ],
+      highlight: ["client", "client-call", "reportGenerator", "call-null", "nullLogger"],
       packets: [
         { relation: "client-call", label: "generate()" },
         { relation: "call-null", label: "logger.warn()", after: 0 },

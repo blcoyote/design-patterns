@@ -35,19 +35,11 @@ const SCRIPT: StepScript[] = [
     queue: [],
   }, // 0: empty pool
   {
-    slots: [
-      { state: "busy", owner: "A" },
-      { state: "empty" },
-      { state: "empty" },
-    ],
+    slots: [{ state: "busy", owner: "A" }, { state: "empty" }, { state: "empty" }],
     queue: [],
   }, // 1: lazy create
   {
-    slots: [
-      { state: "busy", owner: "A" },
-      { state: "empty" },
-      { state: "empty" },
-    ],
+    slots: [{ state: "busy", owner: "A" }, { state: "empty" }, { state: "empty" }],
     queue: [],
   }, // 2: wraps resource
   {
@@ -105,11 +97,7 @@ function statsOf(slots: SlotScript[], queue: string[]) {
 }
 
 type ActionKind =
-  | "acquire-direct"
-  | "acquire-create"
-  | "acquire-queued"
-  | "release-idle"
-  | "release-handoff";
+  "acquire-direct" | "acquire-create" | "acquire-queued" | "release-idle" | "release-handoff";
 
 function syntheticStep(
   action: ActionKind,
@@ -304,8 +292,7 @@ export function ObjectPoolVisualization({
                 }}
                 className="flex h-20 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-xs font-mono outline-none focus-visible:ring-2 focus-visible:ring-white"
                 style={{
-                  background:
-                    slot.state === "busy" ? `${color}22` : "rgba(15,23,42,0.4)",
+                  background: slot.state === "busy" ? `${color}22` : "rgba(15,23,42,0.4)",
                   boxShadow:
                     slot.state === "busy"
                       ? `inset 0 0 0 2px ${color}`
@@ -319,15 +306,9 @@ export function ObjectPoolVisualization({
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={`${slot.state}-${slot.owner ?? ""}`}
-                    initial={
-                      reduceMotion
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0, scale: 0.5 }
-                    }
+                    initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={
-                      reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.5 }
-                    }
+                    exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
                     transition={
                       reduceMotion
                         ? { duration: 0 }
@@ -336,11 +317,7 @@ export function ObjectPoolVisualization({
                     className="text-base font-bold"
                     style={{ color: slot.state === "busy" ? color : "#64748b" }}
                   >
-                    {slot.state === "busy"
-                      ? slot.owner
-                      : slot.state === "idle"
-                        ? "idle"
-                        : "—"}
+                    {slot.state === "busy" ? slot.owner : slot.state === "idle" ? "idle" : "—"}
                   </motion.span>
                 </AnimatePresence>
               </button>
@@ -352,16 +329,12 @@ export function ObjectPoolVisualization({
               waiting
             </span>
             <div className="flex min-h-7 flex-1 flex-wrap items-center gap-1.5 rounded bg-slate-900/60 px-2 py-1">
-              {queue.length === 0 && (
-                <span className="text-xs text-slate-600">— none —</span>
-              )}
+              {queue.length === 0 && <span className="text-xs text-slate-600">— none —</span>}
               <AnimatePresence>
                 {queue.map((owner, i) => (
                   <motion.span
                     key={`${owner}-${i}`}
-                    initial={
-                      reduceMotion ? { opacity: 1 } : { opacity: 0, x: -8 }
-                    }
+                    initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 8 }}
                     className="rounded-full px-2 py-0.5 text-xs font-mono font-bold text-slate-950"
@@ -385,20 +358,14 @@ export function ObjectPoolVisualization({
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
-              Idle
-            </span>
-            <span className="font-mono text-sm font-bold text-slate-200">
-              {stats.idle}
-            </span>
+            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">Idle</span>
+            <span className="font-mono text-sm font-bold text-slate-200">{stats.idle}</span>
           </div>
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
               Waiting
             </span>
-            <span className="font-mono text-sm font-bold text-slate-200">
-              {stats.waiting}
-            </span>
+            <span className="font-mono text-sm font-bold text-slate-200">{stats.waiting}</span>
           </div>
           <div className="mt-1 flex items-center gap-2 border-t border-slate-800 pt-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-slate-600">

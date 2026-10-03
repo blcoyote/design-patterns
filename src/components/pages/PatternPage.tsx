@@ -27,16 +27,11 @@ export function PatternPage() {
 
   const cat = categories[pattern.category];
   const { prev, next } = neighbours(pattern.slug);
-  const related = pattern.related
-    .map(getPattern)
-    .filter((p) => p !== undefined);
+  const related = pattern.related.map(getPattern).filter((p) => p !== undefined);
   const usedByArchitectures = architecturesUsing(pattern.slug);
   const usages = usagesOf(pattern.slug);
   const comparisons = comparisonsFor(pattern.slug);
-  const initialStep = parseStepParam(
-    searchParams.get("step"),
-    pattern.steps.length,
-  );
+  const initialStep = parseStepParam(searchParams.get("step"), pattern.steps.length);
 
   return (
     <article className="space-y-8">

@@ -24,9 +24,7 @@ export function ExplorableHeader({
         <span className={`size-1.5 rounded-full ${dotClass}`} />
         {label} {kind}
       </span>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
-        {name}
-      </h1>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">{name}</h1>
       <p className="mt-4 text-lg leading-relaxed text-slate-300">{intent}</p>
     </header>
   );

@@ -15,10 +15,7 @@ type TopicId = "order.placed" | "user.signedUp";
 const TOPICS: TopicId[] = ["order.placed", "user.signedUp"];
 
 /** Which participant publishes each topic, and the relation that carries the call. */
-const TOPIC_PUBLISHER: Record<
-  TopicId,
-  { participant: string; relation: string }
-> = {
+const TOPIC_PUBLISHER: Record<TopicId, { participant: string; relation: string }> = {
   "order.placed": {
     participant: "checkoutService",
     relation: "checkout-publish",
@@ -64,8 +61,7 @@ function scenarioStep(topic: TopicId, inventoryUnsubscribed: boolean): Step {
   const subscriberIds = Object.keys(SUBSCRIPTIONS);
   const reached = subscriberIds.filter(
     (id) =>
-      SUBSCRIPTIONS[id].includes(topic) &&
-      !(id === "inventoryService" && inventoryUnsubscribed),
+      SUBSCRIPTIONS[id].includes(topic) && !(id === "inventoryService" && inventoryUnsubscribed),
   );
 
   const highlight = [
@@ -122,21 +118,13 @@ export function PubSubVisualization({
     topic: TopicId;
   } | null>(null);
   const [replayToken, setReplayToken] = useState(0);
-  const override =
-    pickedOverride?.forStep === stepIndex ? pickedOverride.topic : null;
+  const override = pickedOverride?.forStep === stepIndex ? pickedOverride.topic : null;
 
-  const unsubscribeIndex = pattern.steps.findIndex(
-    (s) => s.title === UNSUBSCRIBE_STEP_TITLE,
-  );
-  const inventoryUnsubscribed =
-    unsubscribeIndex !== -1 && stepIndex >= unsubscribeIndex;
-  const effectiveStep = override
-    ? scenarioStep(override, inventoryUnsubscribed)
-    : step;
+  const unsubscribeIndex = pattern.steps.findIndex((s) => s.title === UNSUBSCRIBE_STEP_TITLE);
+  const inventoryUnsubscribed = unsubscribeIndex !== -1 && stepIndex >= unsubscribeIndex;
+  const effectiveStep = override ? scenarioStep(override, inventoryUnsubscribed) : step;
   const activeTopic = override ?? topicFromStep(step);
-  const animationKey = override
-    ? `override-${override}-${replayToken}`
-    : stepIndex;
+  const animationKey = override ? `override-${override}-${replayToken}` : stepIndex;
 
   const laneColor = useMemo<Record<TopicId, string>>(
     () => ({ "order.placed": color, "user.signedUp": "#818cf8" }),
@@ -217,9 +205,7 @@ export function PubSubVisualization({
                   ? "text-slate-950 ring-transparent"
                   : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
               }`}
-              style={
-                isActive ? { backgroundColor: laneColor[topic] } : undefined
-              }
+              style={isActive ? { backgroundColor: laneColor[topic] } : undefined}
             >
               Publish {topic}
             </button>

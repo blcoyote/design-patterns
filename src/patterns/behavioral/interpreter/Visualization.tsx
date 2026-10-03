@@ -6,12 +6,7 @@ import { PacketLayer } from "@/components/viz/PacketLayer";
 import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
 import type { EdgeGeometry } from "@/lib/geometry";
-import type {
-  Packet,
-  Participant,
-  Step,
-  VisualizationProps,
-} from "@/types/pattern";
+import type { Packet, Participant, Step, VisualizationProps } from "@/types/pattern";
 
 /**
  * Interpreter drawn as a literal AST: Add at the root, branching into a
@@ -115,14 +110,10 @@ function ExprNode({
         select();
       }}
       onKeyDown={onActivate(select)}
-      initial={
-        reduceMotion ? false : { opacity: 0, scale: 0.6, x: p.x, y: p.y }
-      }
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.6, x: p.x, y: p.y }}
       animate={{ opacity: dimmed ? 0.35 : 1, scale: 1, x: p.x, y: p.y }}
       transition={
-        reduceMotion
-          ? { duration: 0.3 }
-          : { type: "spring", stiffness: 260, damping: 22 }
+        reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 260, damping: 22 }
       }
       whileHover={{ scale: 1.04 }}
     >
@@ -138,14 +129,10 @@ function ExprNode({
           strokeWidth={2}
           initial={false}
           animate={
-            reduceMotion
-              ? { opacity: 0.7 }
-              : { opacity: [0.7, 0, 0.7], scale: [1, 1.05, 1] }
+            reduceMotion ? { opacity: 0.7 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.05, 1] }
           }
           transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
+            reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
           }
           filter="url(#glow)"
         />
@@ -260,9 +247,7 @@ export function InterpreterVisualization({
   }, [pattern.relations, byId]);
 
   const liveOverride = override?.forStep === stepIndex ? override : null;
-  const effectiveStep: Step | SyntheticStep | null = liveOverride
-    ? evaluate(liveOverride.x)
-    : step;
+  const effectiveStep: Step | SyntheticStep | null = liveOverride ? evaluate(liveOverride.x) : step;
   const animationKey = liveOverride ? `try-${liveOverride.x}` : stepIndex;
 
   const highlight = effectiveStep?.highlight ?? [];
@@ -293,22 +278,11 @@ export function InterpreterVisualization({
       >
         <defs>
           <EdgeMarkers color={color} />
-          <pattern
-            id="grid"
-            width="20"
-            height="20"
-            patternUnits="userSpaceOnUse"
-          >
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
             <circle cx="1" cy="1" r="1" fill="#1e293b" />
           </pattern>
         </defs>
-        <rect
-          x="-1000"
-          y="-1000"
-          width="3000"
-          height="3000"
-          fill="url(#grid)"
-        />
+        <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />
 
         {pattern.relations.map((r) => {
           const g = geometry[r.id];
@@ -361,11 +335,7 @@ export function InterpreterVisualization({
               tryValue(x);
             }}
             className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-100 ring-1 ring-slate-700 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-white"
-            style={
-              liveOverride?.x === x
-                ? { boxShadow: `inset 0 0 0 1px ${color}55` }
-                : undefined
-            }
+            style={liveOverride?.x === x ? { boxShadow: `inset 0 0 0 1px ${color}55` } : undefined}
           >
             {x}
           </button>

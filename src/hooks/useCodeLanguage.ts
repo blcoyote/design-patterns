@@ -1,63 +1,63 @@
-import { useSyncExternalStore } from 'react'
+import { useSyncExternalStore } from "react";
 
-export type CodeLanguage = 'typescript' | 'csharp' | 'python' | 'go'
+export type CodeLanguage = "typescript" | "csharp" | "python" | "go";
 
-const LANGUAGES: readonly CodeLanguage[] = ['typescript', 'csharp', 'python', 'go']
+const LANGUAGES: readonly CodeLanguage[] = ["typescript", "csharp", "python", "go"];
 
-const STORAGE_KEY = 'dp:code-lang'
+const STORAGE_KEY = "dp:code-lang";
 
 function readStored(): CodeLanguage {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return LANGUAGES.find((lang) => lang === stored) ?? 'typescript'
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return LANGUAGES.find((lang) => lang === stored) ?? "typescript";
   } catch {
-    return 'typescript'
+    return "typescript";
   }
 }
 
-let cached = readStored()
-const listeners = new Set<() => void>()
+let cached = readStored();
+const listeners = new Set<() => void>();
 
 // @pattern observer: every CodeBlock subscribes to the shared language preference, so picking C# once switches all of them
 function emit() {
-  for (const listener of listeners) listener()
+  for (const listener of listeners) listener();
 }
 
 function subscribe(listener: () => void) {
   // storage events fired while nothing was subscribed were missed — resync on (re)subscribe
-  cached = readStored()
-  listeners.add(listener)
+  cached = readStored();
+  listeners.add(listener);
   const onStorage = (e: StorageEvent) => {
     if (e.key === STORAGE_KEY || e.key === null) {
-      cached = readStored()
-      listener()
+      cached = readStored();
+      listener();
     }
-  }
+  };
   // @pattern pub-sub: the browser's storage event carries a language change to other tabs, and the tabs don't know about each other
-  window.addEventListener('storage', onStorage)
+  window.addEventListener("storage", onStorage);
   return () => {
-    listeners.delete(listener)
-    window.removeEventListener('storage', onStorage)
-  }
+    listeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
+  };
 }
 
 function getSnapshot() {
-  return cached
+  return cached;
 }
 
 function getServerSnapshot(): CodeLanguage {
-  return 'typescript'
+  return "typescript";
 }
 
 function setPreferredCodeLanguage(lang: CodeLanguage) {
-  if (cached === lang) return
-  cached = lang
+  if (cached === lang) return;
+  cached = lang;
   try {
-    localStorage.setItem(STORAGE_KEY, lang)
+    localStorage.setItem(STORAGE_KEY, lang);
   } catch {
     // storage unavailable (private mode, etc.) — keep the in-memory value only
   }
-  emit()
+  emit();
 }
 
 /**
@@ -71,6 +71,6 @@ function setPreferredCodeLanguage(lang: CodeLanguage) {
  * fallback.
  */
 export function useCodeLanguage(): [CodeLanguage, (lang: CodeLanguage) => void] {
-  const lang = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
-  return [lang, setPreferredCodeLanguage]
+  const lang = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return [lang, setPreferredCodeLanguage];
 }

@@ -43,12 +43,7 @@ export const pattern: PatternDefinition = {
     "Eclipse OSGi bundles, discovered and wired together at start-up",
     'This site: src/patterns/registry.ts and src/architectures/registry.ts auto-discover every pattern and architecture folder with import.meta.glob — CLAUDE.md says "Never hand-register a pattern".',
   ],
-  related: [
-    "strategy",
-    "abstract-factory",
-    "factory-method",
-    "dependency-injection",
-  ],
+  related: ["strategy", "abstract-factory", "factory-method", "dependency-injection"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [
@@ -115,8 +110,7 @@ export const pattern: PatternDefinition = {
       x: 650,
       y: 390,
       width: 180,
-      description:
-        'Renders a document as Markdown. Registered under the id "markdown".',
+      description: 'Renders a document as Markdown. Registered under the id "markdown".',
     },
     {
       id: "htmlExporter",
@@ -126,8 +120,7 @@ export const pattern: PatternDefinition = {
       x: 230,
       y: 390,
       width: 180,
-      description:
-        'Renders a document as HTML. Registered under the id "html".',
+      description: 'Renders a document as HTML. Registered under the id "html".',
     },
   ],
   relations: [
@@ -251,14 +244,7 @@ export const pattern: PatternDefinition = {
       title: "The registry returns the plugin, and the host calls export()",
       description:
         "The registry hands back the HtmlExporter instance, typed as Exporter. The host calls export(doc) on it without knowing which concrete class it got.",
-      highlight: [
-        "pluginRegistry",
-        "host",
-        "hostGet",
-        "hostExport",
-        "exporter",
-        "htmlExporter",
-      ],
+      highlight: ["pluginRegistry", "host", "hostGet", "hostExport", "exporter", "htmlExporter"],
       packets: [
         { relation: "hostGet", label: "HtmlExporter", reverse: true },
         { relation: "hostExport", label: "export(doc)", after: 0 },
@@ -280,8 +266,7 @@ export const pattern: PatternDefinition = {
         'Asking the registry for "pdf" — a plugin that was never registered — throws an error that names the id and lists every id that actually is registered, so the mistake is obvious immediately.',
       highlight: ["host", "pluginRegistry", "hostGet"],
       notes: {
-        pluginRegistry:
-          'no plugin registered for "pdf" (registered: markdown, html, json)',
+        pluginRegistry: 'no plugin registered for "pdf" (registered: markdown, html, json)',
       },
       code: "usage",
     },

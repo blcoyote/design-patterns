@@ -1,15 +1,15 @@
-import { Diagram } from '@/components/viz/Diagram'
-import type { VisualizationProps } from '@/types/pattern'
+import { Diagram } from "@/components/viz/Diagram";
+import type { VisualizationProps } from "@/types/pattern";
 
-const CONTROLLER_BAND = { x: 20, y: 100, width: 220, height: 350 }
-const MODEL_BAND = { x: 290, y: 100, width: 220, height: 350 }
-const VIEW_BAND = { x: 560, y: 20, width: 220, height: 430 }
+const CONTROLLER_BAND = { x: 20, y: 100, width: 220, height: 350 };
+const MODEL_BAND = { x: 290, y: 100, width: 220, height: 350 };
+const VIEW_BAND = { x: 560, y: 20, width: 220, height: 430 };
 
 const BANDS = [
-  { ...CONTROLLER_BAND, label: 'Controller' },
-  { ...MODEL_BAND, label: 'Model' },
-  { ...VIEW_BAND, label: 'View' },
-]
+  { ...CONTROLLER_BAND, label: "Controller" },
+  { ...MODEL_BAND, label: "Model" },
+  { ...VIEW_BAND, label: "View" },
+];
 
 /**
  * MVC swaps the generic diagram's plain background for three labelled bands —
@@ -17,7 +17,15 @@ const BANDS = [
  * plays. Participants in index.ts are positioned to sit inside their band; this
  * underlay just draws the bands behind them.
  */
-export function MvcVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
+export function MvcVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       {BANDS.map((band) => (
@@ -44,7 +52,7 @@ export function MvcVisualization({ pattern, color, step, stepIndex, selectedId, 
         </g>
       ))}
     </g>
-  )
+  );
 
   return (
     <Diagram
@@ -62,5 +70,5 @@ export function MvcVisualization({ pattern, color, step, stepIndex, selectedId, 
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

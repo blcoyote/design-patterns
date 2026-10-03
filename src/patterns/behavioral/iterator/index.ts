@@ -17,7 +17,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A Playlist might be backed by an array today and by a linked list, or a lazily fetched page of results, tomorrow. If every caller loops over playlist.songs[i] directly, that internal detail leaks into every call site. The moment the storage changes, all of those loops break.",
   solution:
-    "Give the collection one method that returns an Iterator: a small object whose job is to hand out the next value and say when there are none left. In TypeScript, next() returns a result with a done flag. In C#, MoveNext() returns false. In Python, __next__() raises StopIteration. In Go, Next() returns the value plus an ok flag. Callers step through with next() (or let a for...of / foreach / for ... in loop do it for them) without ever knowing whether the elements live in an array, a tree, or are generated on demand.",
+    "Give the collection a method that returns an Iterator. The iterator keeps its place and gives the caller one item at a time, then signals when there are no items left. Callers can use the same idea whether the collection stores items in an array or tree, or fetches them on demand. Each language signals the end differently: TypeScript returns a `done` flag, C# uses MoveNext(), Python raises StopIteration, and Go returns an `ok` flag from Next().",
   analogy:
     'Think of a museum audio guide. You press "next" and it describes the next exhibit, in order, one at a time. You never need the floor plan or the storage room. The guide keeps track of your position and gives a clear "that was the last one" cue when the tour ends.',
   whenToUse: [
@@ -165,14 +165,8 @@ export const pattern: PatternDefinition = {
     {
       title: "Client requests an iterator",
       description:
-        "The client asks Playlist for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / iter(playlist) / playlist.GetIterator()). TS, C#, and Python loops request it through their language protocols; Go requests it explicitly. Playlist creates a brand-new PlaylistIterator and hands it back, and the client never touches the song array directly.",
-      highlight: [
-        "client",
-        "clientGetIterator",
-        "playlist",
-        "creates",
-        "playlistIterator",
-      ],
+        "Playlist returns a new PlaylistIterator. TypeScript, C#, and Python loops request iterators automatically; Go code asks for one explicitly. The client never reads the song array directly.",
+      highlight: ["client", "clientGetIterator", "playlist", "creates", "playlistIterator"],
       packets: [
         { relation: "clientGetIterator", label: "[Symbol.iterator]()" },
         {

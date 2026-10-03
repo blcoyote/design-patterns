@@ -67,7 +67,7 @@ class PriceChart : IObserver
 {
     public void Update(decimal price)
     {
-        Console.WriteLine($"chart: plot {price}");
+        Console.WriteLine(FormattableString.Invariant($"chart: plot {price}"));
     }
 }
 // [/chart]

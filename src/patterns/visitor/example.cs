@@ -1,3 +1,5 @@
+using System.Globalization;
+
 // A real C# app might reach for pattern-matching switch expressions over
 // element types instead of classic double dispatch, but we keep the
 // explicit Visitor structure here for clarity.
@@ -13,7 +15,7 @@ group.Add(rectangle);
 // Usage: swap the operation without changing Circle, Rectangle or Group.
 var areaCalculator = new AreaCalculator();
 group.Accept(areaCalculator);
-Console.WriteLine(areaCalculator.Total); // ≈ 40.27
+Console.WriteLine(areaCalculator.Total.ToString(CultureInfo.InvariantCulture)); // ≈ 40.27
 
 var exporter = new JsonExporter();
 group.Accept(exporter);

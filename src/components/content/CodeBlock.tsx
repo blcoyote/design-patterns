@@ -76,7 +76,7 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
     <div className={`relative overflow-hidden rounded-xl bg-[#011627] ring-1 ring-slate-800 ${className}`}>
       <div className="flex items-center justify-between gap-2 border-b border-slate-800 px-3 py-2 text-xs text-slate-400 sm:px-4">
         {sources.length > 1 ? (
-          <div role="tablist" aria-label="Code language" className="flex min-w-0 gap-2 sm:gap-3" onKeyDown={onTabKeyDown}>
+          <div role="tablist" aria-label="Code language" className="flex min-w-0 gap-2 overflow-x-auto sm:gap-3" onKeyDown={onTabKeyDown}>
             {sources.map((s) => {
               const selected = s.lang === current.lang
               return (
@@ -92,7 +92,7 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
                   aria-controls={panelId}
                   tabIndex={selected ? 0 : -1}
                   onClick={() => onActiveChange(s.lang)}
-                  className="rounded px-1 pb-1 font-mono transition-colors"
+                  className="shrink-0 rounded px-1 pb-1 font-mono transition-colors"
                   style={{
                     color: selected ? color : undefined,
                     boxShadow: selected ? `inset 0 -2px 0 0 ${color}` : undefined,

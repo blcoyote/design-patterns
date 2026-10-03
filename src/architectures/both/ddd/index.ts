@@ -73,6 +73,9 @@ export const architecture: ArchitectureDefinition = {
       { slug: 'hexagonal', why: 'Wrapping a bounded context in its own hexagon, with the aggregate and application service as the core and the repository as a driven adapter, is the standard way a context protects its inside from infrastructure.' },
       { slug: 'cqrs', why: 'The aggregate guarding its invariants is naturally the write side; a bounded context often grows a separate, denormalized read side once queries and commands pull the model in different directions.' },
       { slug: 'event-sourcing', why: 'Instead of storing only an aggregate\'s current fields, Event Sourcing persists every domain event it ever raised — including OrderPlaced — and rebuilds the aggregate by replaying them.' },
+      { slug: 'vertical-slice', why: 'A slice can host its own narrow DDD aggregate for a feature with real invariants, or skip the domain model entirely for a simple CRUD-shaped slice like GetOrder.' },
+      { slug: 'microservices', why: 'Microservices is the usual deployment answer to a bounded context: Ordering and Shipping here are exactly the kind of contexts that would each become their own service, each keeping its own database.' },
+      { slug: 'event-driven', why: 'A bounded context\'s domain events become integration events the moment they cross its boundary onto a broker, for other bounded contexts to subscribe to independently.' },
     ],
   },
 
@@ -287,7 +290,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['appService', 'load', 'orderRepo', 'manages', 'order'],
       packets: [
         { relation: 'load', label: 'findById(orderId)' },
-        { relation: 'load', label: 'Order', reverse: true },
+        { relation: 'load', label: 'Order', reverse: true, after: 0 },
       ],
       notes: { orderRepo: 'loading' },
       code: 'orderRepo',
@@ -330,7 +333,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['orderPlaced', 'cross', 'acl', 'translate', 'shipping'],
       packets: [
         { relation: 'cross', label: 'OrderPlaced' },
-        { relation: 'translate', label: 'ShipmentRequested' },
+        { relation: 'translate', label: 'ShipmentRequested', after: 0 },
       ],
       notes: { acl: 'translates', shipping: 'ShipmentRequested received' },
       code: 'acl',

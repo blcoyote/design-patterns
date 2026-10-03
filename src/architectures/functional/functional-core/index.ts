@@ -109,6 +109,14 @@ export const architecture: ArchitectureDefinition = {
         slug: 'event-sourcing',
         why: '`decide(command, state) => events` and `evolve(state, event) => state` are already a pure core; the append-only event store and its projections are the imperative shell built around them.',
       },
+      {
+        slug: 'mvu',
+        why: 'MVU is Functional Core, Imperative Shell applied to a whole application loop: update and view are the pure core, and the runtime that dispatches messages, performs commands and notifies subscribers is the imperative shell around them.',
+      },
+      {
+        slug: 'pipes-and-filters',
+        why: 'A pipes-and-filters pipeline is a functional core taken to its logical extreme: every stage (parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines) is a pure function with no I/O, and the only impure code is the final loop that drives the pipeline and prints its output — the imperative shell.',
+      },
     ],
   },
 
@@ -269,7 +277,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['client', 'request', 'handler', 'readClock', 'clock'],
       packets: [
         { relation: 'request', label: 'GET /reminders/run' },
-        { relation: 'readClock', label: 'now()' },
+        { relation: 'readClock', label: 'now()', after: 0 },
       ],
       notes: { clock: 'now: plain Date' },
       code: 'shell',

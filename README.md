@@ -1,7 +1,7 @@
 # design-patterns
 
-An interactive, animated guide to all 23 Gang of Four design patterns plus 7 common enterprise patterns, and a second
-area covering 6 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+An interactive, animated guide to all 23 Gang of Four design patterns plus 9 common enterprise patterns, and a second
+area covering 12 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern and architecture has:
 
@@ -9,12 +9,12 @@ Every pattern and architecture has:
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
 - TypeScript, C# and Python examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
-| Creational | Structural | Behavioral | Enterprise |
-| --- | --- | --- | --- |
-| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool |
+| Creational                                                      | Structural                                                      | Behavioral                                                                                                                      | Enterprise                                                                                                              |
+| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool, Plugin, Cache-Aside |
 
-Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, Domain-Driven Design, CQRS, Event Sourcing and
-Functional Core / Imperative Shell — see [Architecture](#architecture) below.
+Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, MVC, Vertical Slice, Domain-Driven Design, CQRS,
+Microservices, Event-Driven, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.
 
 ## Getting started
 
@@ -71,7 +71,7 @@ src/
 2. Fill in the text fields, the `participants` (boxes) and `relations` (arrows). Coordinates are box centres in an 800 × 460 viewBox.
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
-   - send `packets` along relations (`reverse: true` for return values),
+   - send `packets` along relations (`reverse: true` for return values), chained with `after` (see [Animating steps](#animating-steps)),
    - show small `notes` badges under participants,
    - highlight a `code` region.
 4. Put the TypeScript example in `example.ts` (imported with `?raw` as `code`; excluded from `tsc` and lint). Mark regions with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
@@ -83,20 +83,49 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 ### Custom visualisations
 
-The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+
+Every scene must animate packets through the shared timing, never its own `delay`s: pass `packetSpeed={speed}` to `<Diagram>`, or, in a fully custom SVG, render `<PacketLayer>` from `src/components/viz/PacketLayer.tsx` with `packets`, relation-keyed `geometry` (a Map or record), `color`, `speed` and `animationKey={stepIndex}`. Then `after`, the speed control and reduced motion all work, and the step player's timing matches what is on screen.
+
+### Animating steps
+
+A step's packets tell one story, and the viewer has to be able to follow it hop by hop. Packets are timed by `src/lib/packetTiming.ts`:
+
+- **Independent packets** (no `after` anywhere in the step) start together with a small stagger and loop. Use this only for a true broadcast — one sender notifying several receivers, e.g. Observer's `notify()` or a pub/sub fan-out.
+- **A chain** uses `after: <index>`: the packet waits until the earlier packet (zero-based index in the same step, always earlier in the array) has finished travelling. Every hop takes the same time (1.4 s at 1×), so a long chain is never squeezed.
+- **Branches**: several packets with the same `after` start together once that packet lands, e.g. a publish followed by a fan-out.
+
+```ts
+packets: [
+  { relation: 'input', label: 'click' },                // 0
+  { relation: 'delegate', label: 'handleClick()', after: 0 },
+  { relation: 'execute', label: 'execute()', after: 1 },
+  { relation: 'notifyList', label: 'update()', after: 2 }, // branch:
+  { relation: 'notifyCount', label: 'update()', after: 2 }, // both start together
+  { relation: 'execute', label: 'ok', reverse: true, after: 2 },
+]
+```
+
+Rules of thumb:
+
+- Order packets the way the code runs them, and chain anything that is caused by an earlier packet: call → return, request → next hop in a pipeline, result bubbling back up. `npm test` rejects a packet that departs from where an earlier packet in the same step arrives unless it has `after`.
+- If the step text says "first … then …", chain those packets even if they share a sender.
+- Don't use `after` for more than one story per step — split a long scenario into several steps instead.
+
+The step player waits for the animation: each step stays on screen for at least 3.2 s, or longer if its packets need it — every packet runs at least once and then settles for 0.8 s before the next step starts (`stepDuration`). Both scale with the speed control. A chained step loops after a short pause; independent packets loop continuously.
 
 ## Architecture
 
-A second area, **Architecture** (`/architecture`), explains *architectural* patterns — whole-system shapes like Layered or
+A second area, **Architecture** (`/architecture`), explains _architectural_ patterns — whole-system shapes like Layered or
 CQRS — the same way the patterns above explain class-level ones: an animated, clickable diagram, a step player, linked
 TypeScript/C#/Python code, and the usual problem/solution/pros/cons sections, plus a glossary of key concepts and (for a
 few) named variants.
 
-The six planned architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
+The twelve architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
 
-| Object-oriented | Functional | OO + Functional |
-| --- | --- | --- |
-| Layered (N-tier), Hexagonal (Ports & Adapters), Domain-Driven Design | Event Sourcing, Functional Core / Imperative Shell | CQRS |
+| Object-oriented                                                                       | Functional                                                                                                  | OO + Functional                                         |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture) | Domain-Driven Design, CQRS, Microservices, Event-Driven |
 
 ### Cross-reference model
 
@@ -104,10 +133,10 @@ Architectures and design patterns link to each other through a **"Commonly used 
 
 - **Architecture → design pattern** is declared by the architecture, in `commonlyUsedWith.designPatterns`, each with a
   `why` sentence. Every slug used in a `participant.patterns` array must also appear here (checked by `validateArchitecture`).
-- **Design pattern → architecture** is never declared — it is *derived*: `lib/crossRefs.ts` scans every architecture's
+- **Design pattern → architecture** is never declared — it is _derived_: `lib/crossRefs.ts` scans every architecture's
   `commonlyUsedWith.designPatterns` for a given pattern slug and reuses that `why` text. This is why `patterns/registry.ts`
   never has to import anything from `architectures/`.
-- **Architecture ↔ architecture** links must be declared on *both* sides, each with its own `why` — `architectures/registry.test.ts`
+- **Architecture ↔ architecture** links must be declared on _both_ sides, each with its own `why` — `architectures/registry.test.ts`
   has a symmetry test that fails the build if `A` lists `B` but `B` doesn't list `A` back.
 
 `src/lib/crossRefs.ts` is the only module that imports both `patterns/registry` and `architectures/registry`; this keeps

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-An interactive, animated teaching site for the 23 Gang of Four patterns plus 7 enterprise patterns, and a separate Architecture area with 6 architectural patterns (DDD, Hexagonal, CQRS, …) cross-linked to them (React 19 + TypeScript + Tailwind v4, Vite, hash routing, static deploy to GitHub Pages).
+An interactive, animated teaching site for the 23 Gang of Four patterns plus 9 enterprise patterns, and a separate Architecture area with 12 architectural patterns (DDD, Hexagonal, CQRS, …) cross-linked to them (React 19 + TypeScript + Tailwind v4, Vite, hash routing, static deploy to GitHub Pages).
 
 The product is **correct teaching material**. A diagram, a step note or a code comment that disagrees with the code is a bug, just as much as a crash. Every pattern must be:
 
@@ -45,6 +45,7 @@ Follow these every time. If a task seems to need a different route, stop and ask
 - **Collection semantics:** remove-first vs remove-all, iterating a live list vs a snapshot. Keep them identical across languages.
 - **Comments:** a comment claiming something ("upsert", "never overridden", "cursor: 0") must be literally true in that language. Example: in C#, a method marked `virtual` can be overridden.
 - **Step notes:** values in `notes` (counts, cursors, totals) must be reproducible by running the example.
+- **Animation order:** packets in a step play in the order the code runs. Chain cause → effect with `after` (call → return, hop → next hop); leave packets parallel only for a true broadcast. Custom scenes use `Diagram`'s `packetSpeed={speed}` or `PacketLayer`, never hand-rolled packet delays. See README → "Animating steps".
 
 ### 4. Verify before you call it done
 
@@ -60,6 +61,7 @@ for f in src/patterns/*/*/example.py src/architectures/*/*/example.py; do PYTHON
 - Compile and run any C# file you touched (e.g. copy it into a scratch `dotnet new console` project as `Program.cs`). Check the output matches the comments.
 - For TS examples you touched, type-check the file on its own (`npx tsc --ignoreConfig --strict --noEmit --moduleDetection force --target es2022 --module esnext --lib es2022,dom <file>`), since `example.ts` files are excluded from the app tsconfig.
 - For UI changes, check in the browser preview: the `dev-alt` config in `.claude/launch.json` runs on port 5180. Click through the steps and tabs.
+- Shut down every dev server you started (`preview_stop`) as soon as you're done with it, so a stale server doesn't hold the port for the next session or agent.
 
 ### 5. Working style
 

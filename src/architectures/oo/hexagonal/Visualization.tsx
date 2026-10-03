@@ -47,7 +47,7 @@ function syntheticStep(id: AdapterId): Step {
   }
 }
 
-export function HexagonalVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function HexagonalVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
   // Tag the override with the step it was picked on, so it derives back to "no
   // override" as soon as the step player moves on — no effect/sync needed.
@@ -126,6 +126,7 @@ export function HexagonalVisualization({ pattern, color, step, stepIndex, select
         notes={effectiveStep?.notes}
         selectedId={selectedId}
         onSelect={onSelect}
+        packetSpeed={speed}
         animationKey={animationKey}
         underlay={underlay}
         overlay={overlay}

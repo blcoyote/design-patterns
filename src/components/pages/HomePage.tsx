@@ -56,7 +56,7 @@ export function HomePage() {
             Zoom out: <span className="text-slate-300">architectural patterns</span>
           </p>
           <p className="mt-1 text-sm text-slate-400">
-            Layered, Hexagonal, DDD, CQRS, Event Sourcing and Functional Core — see which of the patterns above each one is built from.
+            Layered, Hexagonal, DDD, CQRS, Microservices, Event-Driven, MVU and more — see which of the patterns above each one is built from.
           </p>
         </div>
         <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">→</span>

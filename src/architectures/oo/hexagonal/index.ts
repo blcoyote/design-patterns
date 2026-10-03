@@ -99,6 +99,7 @@ export const architecture: ArchitectureDefinition = {
       { slug: 'ddd', why: 'The hexagon is usually where a DDD bounded context lives — aggregates and domain services sit in the core, repositories are driven ports, and the ACL is itself a pair of adapters.' },
       { slug: 'functional-core', why: 'Both push effects to the edges; Hexagonal does it with interfaces and classes, Functional Core / Imperative Shell does it with plain functions and a thin shell that performs the I/O.' },
       { slug: 'cqrs', why: 'The driving side splits cleanly along CQRS lines: a PlaceOrderUseCase port for commands and a separate query port for reads, each with its own adapters.' },
+      { slug: 'microservices', why: 'Each microservice is internally a hexagon of its own — its core stays framework-free, while HTTP controllers and repository adapters are what expose it to, and connect it from, other services.' },
     ],
   },
 
@@ -347,8 +348,8 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['reqHttp', 'portToService', 'repoCall'],
       packets: [
         { relation: 'repoCall', label: 'ok', reverse: true },
-        { relation: 'portToService', label: 'Order', reverse: true },
-        { relation: 'reqHttp', label: '201 Created', reverse: true },
+        { relation: 'portToService', label: 'Order', reverse: true, after: 0 },
+        { relation: 'reqHttp', label: '201 Created', reverse: true, after: 1 },
       ],
       notes: { httpController: '201 Created' },
       code: 'controller',
@@ -360,7 +361,7 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['testHarness', 'reqTest', 'placeOrderPort', 'orderRepoPort', 'memSave', 'inMemoryAdapter'],
       packets: [
         { relation: 'reqTest', label: 'execute(command)' },
-        { relation: 'memSave', label: 'saved.push(order)' },
+        { relation: 'memSave', label: 'saved.push(order)', after: 0 },
       ],
       notes: { inMemoryAdapter: '1 order, 0 infrastructure' },
       code: 'test',

@@ -1,224 +1,260 @@
-import type { PatternDefinition } from '@/types/pattern'
-import tsExample from './example.ts?raw'
-import csExample from './example.cs?raw'
-import pyExample from './example.py?raw'
-import { IteratorVisualization } from './Visualization'
+import type { PatternDefinition } from "@/types/pattern";
+import tsExample from "./example.ts?raw";
+import csExample from "./example.cs?raw";
+import pyExample from "./example.py?raw";
+import { IteratorVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
-  slug: 'iterator',
-  name: 'Iterator',
-  category: 'behavioral',
+  slug: "iterator",
+  name: "Iterator",
+  category: "behavioral",
   order: 4,
-  summary: 'Step through a collection one element at a time through a uniform next() interface, without exposing how it is stored.',
-  intent: 'Provide a way to access the elements of a collection sequentially without exposing its underlying representation.',
+  summary:
+    "Step through a collection one element at a time through a uniform next() interface, without exposing how it is stored.",
+  intent:
+    "Provide a way to access the elements of a collection sequentially without exposing its underlying representation.",
   problem:
-    'A Playlist might be backed by an array today and a linked list — or a lazily-fetched page of results — tomorrow. If every caller loops over playlist.songs[i] directly, that internal detail leaks into every call site, and the moment the backing storage changes, all of them break.',
+    "A Playlist might be backed by an array today and a linked list — or a lazily-fetched page of results — tomorrow. If every caller loops over playlist.songs[i] directly, that internal detail leaks into every call site, and the moment the backing storage changes, all of them break.",
   solution:
-    'Give the collection a single method that returns an Iterator — a small object with one job, next(), which returns the next value and signals when there are none left (a done flag in TS, MoveNext() returning false in C#, StopIteration in Python). Callers step through with next() (or let a for...of / foreach / for...in loop do it for them) without ever knowing whether the elements live in an array, a tree, or are generated on demand.',
+    "Give the collection a single method that returns an Iterator — a small object with one job, next(), which returns the next value and signals when there are none left (a done flag in TS, MoveNext() returning false in C#, StopIteration in Python). Callers step through with next() (or let a for...of / foreach / for...in loop do it for them) without ever knowing whether the elements live in an array, a tree, or are generated on demand.",
   analogy:
     'A museum audio guide: you press "next" and it describes whatever exhibit comes next, in order, one at a time. You never need the museum\'s floor plan or storage room — the guide tracks your position for you, and gives a clear "that was the last one" cue when the tour ends.',
   whenToUse: [
-    'You need to traverse a collection without exposing its internal representation (array, linked list, tree, …).',
-    'You want a uniform way to step through different kinds of collections using the same client code.',
-    'You need several independent traversals over the same collection happening at once.',
+    "You need to traverse a collection without exposing its internal representation (array, linked list, tree, …).",
+    "You want a uniform way to step through different kinds of collections using the same client code.",
+    "You need several independent traversals over the same collection happening at once.",
   ],
   pros: [
-    'Decouples traversal logic from the collection, which stays free to change its internal structure.',
-    'Supports multiple simultaneous iterators over the same collection, each with its own cursor.',
-    'Gives every collection a uniform traversal interface, so client code — for...of, spread, destructuring — works the same everywhere.',
+    "Decouples traversal logic from the collection, which stays free to change its internal structure.",
+    "Supports multiple simultaneous iterators over the same collection, each with its own cursor.",
+    "Gives every collection a uniform traversal interface, so client code — for...of, spread, destructuring — works the same everywhere.",
   ],
   cons: [
-    'Overkill for a simple array you would just loop over directly.',
-    'An extra object per traversal adds a little indirection and allocation overhead.',
-    'Modifying the underlying collection while an iterator is live can produce inconsistent or skipped results.',
+    "Overkill for a simple array you would just loop over directly.",
+    "An extra object per traversal adds a little indirection and allocation overhead.",
+    "Modifying the underlying collection while an iterator is live can produce inconsistent or skipped results.",
   ],
   realWorld: [
-    'Arrays, Strings, Maps and Sets all implement the iteration protocol, which is why for...of and spread (...) work on them.',
-    'Generator functions (function*) implement Iterator<T> automatically — yield replaces hand-written next() bookkeeping.',
+    "Arrays, Strings, Maps and Sets all implement the iteration protocol, which is why for...of and spread (...) work on them.",
+    "Generator functions (function*) implement Iterator<T> automatically — yield replaces hand-written next() bookkeeping.",
     "Java's Iterable/Iterator, C#'s IEnumerable/IEnumerator, Python's __iter__/__next__",
-    'Database cursors and paginated API clients that fetch results lazily behind a uniform next() call',
+    "Database cursors and paginated API clients that fetch results lazily behind a uniform next() call",
   ],
-  related: ['composite', 'factory-method', 'template-method'],
+  related: ["composite", "factory-method", "template-method"],
 
   participants: [
     {
-      id: 'client',
-      label: 'Client',
-      role: 'Client',
-      kind: 'client',
+      id: "client",
+      label: "Client",
+      role: "Client",
+      kind: "client",
       x: 110,
       y: 250,
-      description: 'Drives the traversal with a for...of loop (or by calling next() directly), without knowing whether Playlist stores songs in an array, a tree, or streams them lazily.',
-      code: 'usage',
+      description:
+        "Drives the traversal with a for...of loop (or by calling next() directly), without knowing whether Playlist stores songs in an array, a tree, or streams them lazily.",
+      code: "usage",
     },
     {
-      id: 'iterable',
-      label: 'Iterable<Song>',
-      role: 'Aggregate interface',
-      kind: 'interface',
+      id: "iterable",
+      label: "Iterable<Song>",
+      role: "Aggregate interface",
+      kind: "interface",
       x: 320,
       y: 70,
       width: 160,
-      description: 'Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python. Any class implementing it works with the language\'s built-in loop.',
+      description:
+        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python. Any class implementing it works with the language's built-in loop.",
     },
     {
-      id: 'playlist',
-      label: 'Playlist',
-      role: 'Concrete Aggregate',
-      kind: 'class',
+      id: "playlist",
+      label: "Playlist",
+      role: "Concrete Aggregate",
+      kind: "class",
       x: 320,
       y: 250,
       width: 160,
-      description: 'Stores the actual songs in a private array and implements the iterable method by handing back a brand-new PlaylistIterator positioned at the start.',
+      description:
+        "Stores the actual songs in a private array and implements the iterable method by handing back a brand-new PlaylistIterator positioned at the start.",
     },
     {
-      id: 'iteratorInterface',
-      label: 'Iterator<Song>',
-      role: 'Iterator interface',
-      kind: 'interface',
+      id: "iteratorInterface",
+      label: "Iterator<Song>",
+      role: "Iterator interface",
+      kind: "interface",
       x: 620,
       y: 70,
       width: 160,
-      description: 'Declares next(), which returns the next value or signals the end — { value, done } in TS, MoveNext()/Current in C#, __next__() raising StopIteration in Python. Client code only ever talks to objects through this interface, never to a concrete iterator class.',
+      description:
+        "Declares next(), which returns the next value or signals the end — { value, done } in TS, MoveNext()/Current in C#, __next__() raising StopIteration in Python. Client code only ever talks to objects through this interface, never to a concrete iterator class.",
     },
     {
-      id: 'playlistIterator',
-      label: 'PlaylistIterator',
-      role: 'Concrete Iterator',
-      kind: 'class',
+      id: "playlistIterator",
+      label: "PlaylistIterator",
+      role: "Concrete Iterator",
+      kind: "class",
       x: 620,
       y: 250,
       width: 170,
-      description: 'Holds a reference to the Playlist plus a private cursor. Each next() call reads the song at the cursor, advances it, and reports done once the cursor passes the last song.',
+      description:
+        "Holds a reference to the Playlist plus a private cursor. Each next() call reads the song at the cursor, advances it, and reports done once the cursor passes the last song.",
     },
   ],
 
   relations: [
     {
-      id: 'implIterable',
-      from: 'playlist',
-      to: 'iterable',
-      type: 'implements',
-      description: 'Playlist implements Iterable<Song>, so anything that accepts an Iterable — including a for...of loop — accepts a Playlist.',
+      id: "implIterable",
+      from: "playlist",
+      to: "iterable",
+      type: "implements",
+      description:
+        "Playlist implements Iterable<Song>, so anything that accepts an Iterable — including a for...of loop — accepts a Playlist.",
     },
     {
-      id: 'implIterator',
-      from: 'playlistIterator',
-      to: 'iteratorInterface',
-      type: 'implements',
-      description: 'PlaylistIterator implements Iterator<Song>, so client code can call next() on it without knowing its concrete type.',
+      id: "implIterator",
+      from: "playlistIterator",
+      to: "iteratorInterface",
+      type: "implements",
+      description:
+        "PlaylistIterator implements Iterator<Song>, so client code can call next() on it without knowing its concrete type.",
     },
     {
-      id: 'creates',
-      from: 'playlist',
-      to: 'playlistIterator',
-      type: 'creates',
-      label: '[Symbol.iterator]()',
-      description: 'Each call to the iterable method creates a brand-new PlaylistIterator with its own cursor, so two simultaneous loops over the same playlist never interfere with each other.',
-      code: 'getIterator',
+      id: "creates",
+      from: "playlist",
+      to: "playlistIterator",
+      type: "creates",
+      label: "[Symbol.iterator]()",
+      description:
+        "Each call to the iterable method creates a brand-new PlaylistIterator with its own cursor, so two simultaneous loops over the same playlist never interfere with each other.",
+      code: "getIterator",
     },
     {
-      id: 'holds',
-      from: 'playlistIterator',
-      to: 'playlist',
-      type: 'holds',
-      label: 'songs, cursor',
-      description: 'The iterator holds a reference back to the Playlist so it can read songs by index — the playlist itself never tracks position.',
-      code: 'holds',
+      id: "holds",
+      from: "playlistIterator",
+      to: "playlist",
+      type: "holds",
+      label: "songs, cursor",
+      description:
+        "The iterator holds a reference back to the Playlist so it can read songs by index — the playlist itself never tracks position.",
+      code: "holds",
     },
     {
-      id: 'clientGetIterator',
-      from: 'client',
-      to: 'playlist',
-      type: 'calls',
-      label: '[Symbol.iterator]()',
-      description: 'A for...of loop starts by asking the playlist for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / iter(playlist)).',
-      code: 'getIterator',
+      id: "clientGetIterator",
+      from: "client",
+      to: "playlist",
+      type: "calls",
+      label: "[Symbol.iterator]()",
+      description:
+        "A for...of loop starts by asking the playlist for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / iter(playlist)).",
+      code: "getIterator",
     },
     {
-      id: 'clientNext',
-      from: 'client',
-      to: 'playlistIterator',
-      type: 'calls',
-      label: 'next()',
-      description: 'The loop repeatedly calls next() on the iterator until it reports that it is done.',
-      code: 'next',
+      id: "clientNext",
+      from: "client",
+      to: "playlistIterator",
+      type: "calls",
+      label: "next()",
+      description:
+        "The loop repeatedly calls next() on the iterator until it reports that it is done.",
+      code: "next",
       bend: 30,
     },
   ],
 
   steps: [
     {
-      title: 'Client starts a for...of loop',
-      description: 'A for...of loop over playlist implicitly asks it for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / __iter__()). Playlist creates a brand-new PlaylistIterator and hands it back — the loop never touches the song array directly.',
-      highlight: ['client', 'clientGetIterator', 'playlist', 'creates', 'playlistIterator'],
-      packets: [
-        { relation: 'clientGetIterator', label: '[Symbol.iterator]()' },
-        { relation: 'clientGetIterator', label: 'iterator', reverse: true },
+      title: "Client starts a for...of loop",
+      description:
+        "A for...of loop over playlist implicitly asks it for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / __iter__()). Playlist creates a brand-new PlaylistIterator and hands it back — the loop never touches the song array directly.",
+      highlight: [
+        "client",
+        "clientGetIterator",
+        "playlist",
+        "creates",
+        "playlistIterator",
       ],
-      notes: { playlist: '4 songs', playlistIterator: 'cursor: 0' },
-      code: 'getIterator',
+      packets: [
+        { relation: "clientGetIterator", label: "[Symbol.iterator]()" },
+        {
+          relation: "clientGetIterator",
+          label: "iterator",
+          reverse: true,
+          after: 0,
+        },
+      ],
+      notes: { playlist: "4 songs", playlistIterator: "cursor: 0" },
+      code: "getIterator",
     },
     {
       title: 'First next() yields "Intro"',
-      description: 'The loop calls next() on the iterator. It reads the song at the current cursor position, advances the cursor, and returns "Intro".',
-      highlight: ['client', 'clientNext', 'playlistIterator', 'holds'],
+      description:
+        'The loop calls next() on the iterator. It reads the song at the current cursor position, advances the cursor, and returns "Intro".',
+      highlight: ["client", "clientNext", "playlistIterator", "holds"],
       packets: [
-        { relation: 'clientNext', label: 'next()' },
-        { relation: 'clientNext', label: '"Intro"', reverse: true },
+        { relation: "clientNext", label: "next()" },
+        { relation: "clientNext", label: '"Intro"', reverse: true, after: 0 },
       ],
-      notes: { playlistIterator: 'cursor: 0 → 1' },
-      code: 'next',
+      notes: { playlistIterator: "cursor: 0 → 1" },
+      code: "next",
     },
     {
       title: 'Second next() yields "Verse"',
-      description: 'The client never changes how it asks — it calls next() again. The iterator moves its cursor forward and returns the next song.',
-      highlight: ['client', 'clientNext', 'playlistIterator', 'holds'],
+      description:
+        "The client never changes how it asks — it calls next() again. The iterator moves its cursor forward and returns the next song.",
+      highlight: ["client", "clientNext", "playlistIterator", "holds"],
       packets: [
-        { relation: 'clientNext', label: 'next()' },
-        { relation: 'clientNext', label: '"Verse"', reverse: true },
+        { relation: "clientNext", label: "next()" },
+        { relation: "clientNext", label: '"Verse"', reverse: true, after: 0 },
       ],
-      notes: { playlistIterator: 'cursor: 1 → 2' },
-      code: 'next',
+      notes: { playlistIterator: "cursor: 1 → 2" },
+      code: "next",
     },
     {
       title: 'Third next() yields "Chorus"',
-      description: 'Same call, same shape of answer. The iterator is the only thing that knows where it is in the traversal.',
-      highlight: ['client', 'clientNext', 'playlistIterator', 'holds'],
+      description:
+        "Same call, same shape of answer. The iterator is the only thing that knows where it is in the traversal.",
+      highlight: ["client", "clientNext", "playlistIterator", "holds"],
       packets: [
-        { relation: 'clientNext', label: 'next()' },
-        { relation: 'clientNext', label: '"Chorus"', reverse: true },
+        { relation: "clientNext", label: "next()" },
+        { relation: "clientNext", label: '"Chorus"', reverse: true, after: 0 },
       ],
-      notes: { playlistIterator: 'cursor: 2 → 3' },
-      code: 'next',
+      notes: { playlistIterator: "cursor: 2 → 3" },
+      code: "next",
     },
     {
       title: 'Fourth next() yields "Outro"',
-      description: 'The cursor reaches the last song. next() still returns a song here — the iterator only reports the end once it is asked for an element past it.',
-      highlight: ['client', 'clientNext', 'playlistIterator', 'holds'],
+      description:
+        "The cursor reaches the last song. next() still returns a song here — the iterator only reports the end once it is asked for an element past it.",
+      highlight: ["client", "clientNext", "playlistIterator", "holds"],
       packets: [
-        { relation: 'clientNext', label: 'next()' },
-        { relation: 'clientNext', label: '"Outro"', reverse: true },
+        { relation: "clientNext", label: "next()" },
+        { relation: "clientNext", label: '"Outro"', reverse: true, after: 0 },
       ],
-      notes: { playlistIterator: 'cursor: 3 → 4' },
-      code: 'next',
+      notes: { playlistIterator: "cursor: 3 → 4" },
+      code: "next",
     },
     {
-      title: 'next() reports done',
-      description: 'The cursor has now passed the last song. next() signals the end instead of wrapping back around: TS returns { value: undefined, done: true }, C# MoveNext() returns false, and Python __next__() raises StopIteration — the protocol\'s agreed end signal, which the loop catches for you.',
-      highlight: ['client', 'clientNext', 'playlistIterator'],
+      title: "next() reports done",
+      description:
+        "The cursor has now passed the last song. next() signals the end instead of wrapping back around: TS returns { value: undefined, done: true }, C# MoveNext() returns false, and Python __next__() raises StopIteration — the protocol's agreed end signal, which the loop catches for you.",
+      highlight: ["client", "clientNext", "playlistIterator"],
       packets: [
-        { relation: 'clientNext', label: 'next()' },
-        { relation: 'clientNext', label: 'done: true', reverse: true },
+        { relation: "clientNext", label: "next()" },
+        {
+          relation: "clientNext",
+          label: "done: true",
+          reverse: true,
+          after: 0,
+        },
       ],
-      notes: { playlistIterator: 'done' },
-      code: 'next',
+      notes: { playlistIterator: "done" },
+      code: "next",
     },
     {
-      title: 'The loop exits cleanly',
-      description: 'The loop checks for the end signal after every call and stops automatically. The client never had to know how many songs were in the playlist, or manage a cursor itself.',
-      highlight: ['client', 'playlist', 'playlistIterator'],
-      code: 'usage',
+      title: "The loop exits cleanly",
+      description:
+        "The loop checks for the end signal after every call and stops automatically. The client never had to know how many songs were in the playlist, or manage a cursor itself.",
+      highlight: ["client", "playlist", "playlistIterator"],
+      code: "usage",
     },
   ],
 
@@ -227,4 +263,4 @@ export const pattern: PatternDefinition = {
   python: pyExample,
 
   Visualization: IteratorVisualization,
-}
+};

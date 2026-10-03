@@ -76,7 +76,7 @@ const MANUAL_RELATIONS: Relation[] = [
   },
 ]
 
-export function DependencyInjectionVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function DependencyInjectionVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
 
   // Each override is tagged with the step it was picked on, so both derive back
@@ -202,6 +202,7 @@ export function DependencyInjectionVisualization({ pattern, color, step, stepInd
         selectedId={selectedId}
         onSelect={onSelect}
         animationKey={animationKey}
+        packetSpeed={speed}
         overlay={overlay}
         ariaLabel={`${pattern.name} diagram`}
       />

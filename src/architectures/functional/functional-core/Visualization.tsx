@@ -14,7 +14,7 @@ const SHELL_RADIUS = 200
  * draws the test harness calling straight into the core, cutting across the ring
  * entirely — the payoff of keeping the core free of side effects.
  */
-export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion()
 
   // Only pulse on the step that is specifically "about" the core deciding — not the
@@ -71,6 +71,7 @@ export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, s
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       overlay={overlay}

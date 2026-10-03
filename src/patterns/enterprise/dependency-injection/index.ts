@@ -264,7 +264,7 @@ export const pattern: PatternDefinition = {
       highlight: ['create-repo', 'repo-holds-config', 'repo-implements', 'sqlOrderRepository', 'orderRepository'],
       packets: [
         { relation: 'create-repo', label: 'new SqlOrderRepository()' },
-        { relation: 'repo-holds-config', label: 'config', reverse: true },
+        { relation: 'repo-holds-config', label: 'config', reverse: true, after: 0 },
       ],
       notes: { config: 'built ✓', sqlOrderRepository: 'built ✓' },
       code: 'sqlOrderRepository',
@@ -284,8 +284,8 @@ export const pattern: PatternDefinition = {
       highlight: ['create-service', 'service-holds-repo', 'service-holds-email', 'orderService'],
       packets: [
         { relation: 'create-service', label: 'new OrderService()' },
-        { relation: 'service-holds-repo', label: 'repository', reverse: true },
-        { relation: 'service-holds-email', label: 'emailSender', reverse: true },
+        { relation: 'service-holds-repo', label: 'repository', reverse: true, after: 0 },
+        { relation: 'service-holds-email', label: 'emailSender', reverse: true, after: 0 },
       ],
       notes: { sqlOrderRepository: 'built ✓', smtpEmailSender: 'built ✓', orderService: 'built ✓' },
       code: 'orderService',
@@ -296,7 +296,7 @@ export const pattern: PatternDefinition = {
       highlight: ['create-controller', 'controller-holds-service', 'orderController'],
       packets: [
         { relation: 'create-controller', label: 'new OrderController()' },
-        { relation: 'controller-holds-service', label: 'service', reverse: true },
+        { relation: 'controller-holds-service', label: 'service', reverse: true, after: 0 },
       ],
       notes: { orderService: 'built ✓', orderController: 'built ✓' },
       code: 'orderController',

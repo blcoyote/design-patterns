@@ -1,8 +1,11 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
-import { Diagram } from '@/components/viz/Diagram'
-import { onActivate } from '@/lib/a11y'
-import type { VisualizationProps } from '@/types/pattern'
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+} from "react";
+import { Diagram } from "@/components/viz/Diagram";
+import { onActivate } from "@/lib/a11y";
+import type { VisualizationProps } from "@/types/pattern";
 
 /**
  * Iterator keeps the class diagram (Iterable/Iterator interfaces, Playlist,
@@ -12,48 +15,71 @@ import type { VisualizationProps } from '@/types/pattern'
  * once the cursor runs past the last cell.
  */
 
-const SONGS = ['Intro', 'Verse', 'Chorus', 'Outro']
+const SONGS = ["Intro", "Verse", "Chorus", "Outro"];
 
-const CELL_W = 92
-const CELL_H = 56
-const CELL_GAP = 14
-const STRIP_Y = 390
-const STRIP_START_X = 270
-const DONE_X = STRIP_START_X + SONGS.length * (CELL_W + CELL_GAP) + 30
+const CELL_W = 92;
+const CELL_H = 56;
+const CELL_GAP = 14;
+const STRIP_Y = 390;
+const STRIP_START_X = 270;
+const DONE_X = STRIP_START_X + SONGS.length * (CELL_W + CELL_GAP) + 30;
 
 function cellX(index: number) {
-  return STRIP_START_X + index * (CELL_W + CELL_GAP) + CELL_W / 2
+  return STRIP_START_X + index * (CELL_W + CELL_GAP) + CELL_W / 2;
 }
 
 /** Number of songs already consumed (cursor position) at a given step. */
-const CURSOR_BY_STEP = [0, 1, 2, 3, 4, 4, 4]
+const CURSOR_BY_STEP = [0, 1, 2, 3, 4, 4, 4];
 /** The value handed to the client at this step, if any. */
-const YIELD_BY_STEP: Array<string | null> = [null, 'Intro', 'Verse', 'Chorus', 'Outro', null, null]
-const DONE_BY_STEP = [false, false, false, false, false, true, true]
+const YIELD_BY_STEP: Array<string | null> = [
+  null,
+  "Intro",
+  "Verse",
+  "Chorus",
+  "Outro",
+  null,
+  null,
+];
+const DONE_BY_STEP = [false, false, false, false, false, true, true];
 
-export function IteratorVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
-  const reduceMotion = !!useReducedMotion()
-  const byId = new Map(pattern.participants.map((p) => [p.id, p]))
-  const client = byId.get('client')
+export function IteratorVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
+  const reduceMotion = !!useReducedMotion();
+  const byId = new Map(pattern.participants.map((p) => [p.id, p]));
+  const client = byId.get("client");
 
-  const clamped = Math.min(stepIndex, CURSOR_BY_STEP.length - 1)
-  const consumed = CURSOR_BY_STEP[clamped]
-  const yieldedValue = YIELD_BY_STEP[clamped]
-  const done = DONE_BY_STEP[clamped]
-  const cursorX = consumed < SONGS.length ? cellX(consumed) : DONE_X
-  const clientX = client ? client.x : 110
-  const clientY = client ? client.y : 250
+  const clamped = Math.min(stepIndex, CURSOR_BY_STEP.length - 1);
+  const consumed = CURSOR_BY_STEP[clamped];
+  const yieldedValue = YIELD_BY_STEP[clamped];
+  const done = DONE_BY_STEP[clamped];
+  const cursorX = consumed < SONGS.length ? cellX(consumed) : DONE_X;
+  const clientX = client ? client.x : 110;
+  const clientY = client ? client.y : 250;
 
-  const springTransition = reduceMotion ? { duration: 0 } : { type: 'spring' as const, stiffness: 260, damping: 24 }
+  const springTransition = reduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 260, damping: 24 };
 
   const select = (id: string) => (e: ReactMouseEvent | ReactKeyboardEvent) => {
-    e.stopPropagation()
-    onSelect(id)
-  }
+    e.stopPropagation();
+    onSelect(id);
+  };
 
   const overlay = (
     <g>
-      <text x={STRIP_START_X - 10} y={STRIP_Y - CELL_H / 2 - 22} textAnchor="start" className="fill-slate-500 text-[10px] font-mono uppercase tracking-wider select-none">
+      <text
+        x={STRIP_START_X - 10}
+        y={STRIP_Y - CELL_H / 2 - 22}
+        textAnchor="start"
+        className="fill-slate-500 text-[10px] font-mono uppercase tracking-wider select-none"
+      >
         playlist.songs
       </text>
 
@@ -62,14 +88,14 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
         role="button"
         tabIndex={0}
         aria-label="Playlist songs"
-        aria-pressed={selectedId === 'playlist'}
+        aria-pressed={selectedId === "playlist"}
         className="cursor-pointer outline-none"
-        onClick={select('playlist')}
-        onKeyDown={onActivate(() => onSelect('playlist'))}
+        onClick={select("playlist")}
+        onKeyDown={onActivate(() => onSelect("playlist"))}
       >
         {SONGS.map((song, i) => {
-          const isConsumed = i < consumed
-          const isCurrent = i === consumed && !done
+          const isConsumed = i < consumed;
+          const isCurrent = i === consumed && !done;
           return (
             <g key={song} transform={`translate(${cellX(i)} ${STRIP_Y})`}>
               <motion.rect
@@ -78,22 +104,34 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
                 width={CELL_W}
                 height={CELL_H}
                 rx={10}
-                fill={isCurrent ? `${color}22` : '#0f172a'}
+                fill={isCurrent ? `${color}22` : "#0f172a"}
                 initial={false}
                 animate={{
-                  stroke: isCurrent ? color : isConsumed ? '#334155' : '#475569',
+                  stroke: isCurrent
+                    ? color
+                    : isConsumed
+                      ? "#334155"
+                      : "#475569",
                   opacity: isConsumed ? 0.5 : 1,
                 }}
                 strokeWidth={isCurrent ? 2.5 : 1.5}
               />
-              <text y={-6} textAnchor="middle" className="fill-slate-100 text-[11px] font-semibold select-none">
+              <text
+                y={-6}
+                textAnchor="middle"
+                className="fill-slate-100 text-[11px] font-semibold select-none"
+              >
                 {song}
               </text>
-              <text y={12} textAnchor="middle" className="fill-slate-500 text-[9px] font-mono select-none">
+              <text
+                y={12}
+                textAnchor="middle"
+                className="fill-slate-500 text-[9px] font-mono select-none"
+              >
                 [{i}]
               </text>
             </g>
-          )
+          );
         })}
 
         {/* "Done" slot, past the last cell. */}
@@ -107,9 +145,16 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
             fill="none"
             strokeDasharray="4 4"
             initial={false}
-            animate={{ stroke: done ? color : '#334155', opacity: done ? 1 : 0.6 }}
+            animate={{
+              stroke: done ? color : "#334155",
+              opacity: done ? 1 : 0.6,
+            }}
           />
-          <text y={4} textAnchor="middle" className="fill-slate-400 text-[9px] font-mono select-none">
+          <text
+            y={4}
+            textAnchor="middle"
+            className="fill-slate-400 text-[9px] font-mono select-none"
+          >
             done
           </text>
         </g>
@@ -130,14 +175,34 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
         {yieldedValue && (
           <motion.g
             key={`${stepIndex}-${yieldedValue}`}
-            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: cursorX, y: STRIP_Y + 30 }}
-            animate={{ opacity: [0, 1, 1, 0], x: [cursorX, cursorX, clientX, clientX], y: [STRIP_Y + 30, STRIP_Y + 30, clientY + 50, clientY + 50] }}
+            initial={
+              reduceMotion
+                ? { opacity: 0 }
+                : { opacity: 0, x: cursorX, y: STRIP_Y + 30 }
+            }
+            animate={{
+              opacity: [0, 1, 1, 0],
+              x: [cursorX, cursorX, clientX, clientX],
+              y: [STRIP_Y + 30, STRIP_Y + 30, clientY + 50, clientY + 50],
+            }}
             exit={{ opacity: 0 }}
-            transition={reduceMotion ? { duration: 0.4 } : { duration: 1.4, times: [0, 0.15, 0.75, 1], ease: 'easeInOut' }}
+            transition={
+              reduceMotion
+                ? { duration: 0.4 }
+                : {
+                    duration: 1.4,
+                    times: [0, 0.15, 0.75, 1],
+                    ease: "easeInOut",
+                  }
+            }
             pointerEvents="none"
           >
             <rect x={-38} y={-13} width={76} height={26} rx={13} fill={color} />
-            <text y={4} textAnchor="middle" className="fill-slate-950 text-[11px] font-bold font-mono select-none">
+            <text
+              y={4}
+              textAnchor="middle"
+              className="fill-slate-950 text-[11px] font-bold font-mono select-none"
+            >
               "{yieldedValue}"
             </text>
           </motion.g>
@@ -153,18 +218,32 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
             initial={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            transition={{ type: "spring", stiffness: 320, damping: 22 }}
             pointerEvents="none"
           >
-            <rect x={-46} y={-13} width={92} height={26} rx={13} fill="none" stroke={color} strokeWidth={1.5} />
-            <text y={4} textAnchor="middle" className="text-[11px] font-bold font-mono select-none" fill={color}>
+            <rect
+              x={-46}
+              y={-13}
+              width={92}
+              height={26}
+              rx={13}
+              fill="none"
+              stroke={color}
+              strokeWidth={1.5}
+            />
+            <text
+              y={4}
+              textAnchor="middle"
+              className="text-[11px] font-bold font-mono select-none"
+              fill={color}
+            >
               done: true
             </text>
           </motion.g>
         )}
       </AnimatePresence>
     </g>
-  )
+  );
 
   return (
     <Diagram
@@ -174,6 +253,7 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
       viewBox={pattern.viewBox}
       highlight={step?.highlight}
       packets={step?.packets}
+      packetSpeed={speed}
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
@@ -181,5 +261,5 @@ export function IteratorVisualization({ pattern, color, step, stepIndex, selecte
       overlay={overlay}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

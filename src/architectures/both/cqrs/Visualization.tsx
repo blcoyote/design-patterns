@@ -10,7 +10,7 @@ const READ_HEIGHT = 230
  * canvas into a write side (top) and a read side (bottom), so the fact that commands
  * and queries travel through entirely separate models and stores reads at a glance.
  */
-export function CqrsVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function CqrsVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       <rect x={0} y={0} width={800} height={WRITE_HEIGHT} fill="#0f172a" opacity={0.5} />
@@ -36,6 +36,7 @@ export function CqrsVisualization({ pattern, color, step, stepIndex, selectedId,
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

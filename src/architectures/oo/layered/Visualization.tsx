@@ -16,7 +16,7 @@ const INFRA_HEIGHT = 80
  * one per layer, plus an unshaded strip for the external database below the stack — so the
  * "each layer only talks to the one below it" shape reads at a glance.
  */
-export function LayeredVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function LayeredVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       {LAYERS.map((layer, i) => (
@@ -48,6 +48,7 @@ export function LayeredVisualization({ pattern, color, step, stepIndex, selected
       notes={step?.notes}
       selectedId={selectedId}
       onSelect={onSelect}
+      packetSpeed={speed}
       animationKey={stepIndex}
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}

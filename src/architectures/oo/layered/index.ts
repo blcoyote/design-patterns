@@ -72,6 +72,14 @@ export const architecture: ArchitectureDefinition = {
         slug: 'cqrs',
         why: 'When reads and writes start pulling the same service layer in opposite directions, CQRS splits the stack into a command path and a lean query path that can skip the domain layer.',
       },
+      {
+        slug: 'mvc',
+        why: 'MVC is usually how a layered app organizes its presentation layer internally: a Controller like OrderController routes a request into the layer below it, with one or more Views rendering whatever comes back.',
+      },
+      {
+        slug: 'vertical-slice',
+        why: 'Vertical Slice is the feature-cut alternative to Layered: instead of a shared OrderController → OrderService → OrderRepository stack, each feature (PlaceOrder, GetOrder) owns its own handler and data access end to end.',
+      },
     ],
   },
 
@@ -253,8 +261,8 @@ export const architecture: ArchitectureDefinition = {
       highlight: ['save', 'place', 'http'],
       packets: [
         { relation: 'save', label: 'ok', reverse: true },
-        { relation: 'place', label: 'Order', reverse: true },
-        { relation: 'http', label: '201 Created', reverse: true },
+        { relation: 'place', label: 'Order', reverse: true, after: 0 },
+        { relation: 'http', label: '201 Created', reverse: true, after: 1 },
       ],
       notes: { controller: '201 Created' },
       code: 'controller',

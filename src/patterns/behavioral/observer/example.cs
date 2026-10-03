@@ -15,7 +15,7 @@ ticker.Unsubscribe(alert);
 ticker.SetPrice(99m); // only chart + log
 
 // [observer]
-interface IObserver
+interface IPriceObserver
 {
     void Update(decimal price);
 }
@@ -24,18 +24,18 @@ interface IObserver
 // [subject]
 class StockTicker
 {
-    private readonly List<IObserver> _observers = new();
+    private readonly List<IPriceObserver> _observers = new();
     private decimal _price;
 
     // [subscribe]
-    public void Subscribe(IObserver observer)
+    public void Subscribe(IPriceObserver observer)
     {
         _observers.Add(observer);
     }
     // [/subscribe]
 
     // [unsubscribe]
-    public void Unsubscribe(IObserver observer)
+    public void Unsubscribe(IPriceObserver observer)
     {
         _observers.RemoveAll(o => o == observer);
     }
@@ -63,7 +63,7 @@ class StockTicker
 
 // [concrete]
 // [chart]
-class PriceChart : IObserver
+class PriceChart : IPriceObserver
 {
     public void Update(decimal price)
     {
@@ -73,7 +73,7 @@ class PriceChart : IObserver
 // [/chart]
 
 // [alert]
-class PriceAlert(decimal limit) : IObserver
+class PriceAlert(decimal limit) : IPriceObserver
 {
     public void Update(decimal price)
     {
@@ -83,7 +83,7 @@ class PriceAlert(decimal limit) : IObserver
 // [/alert]
 
 // [logger]
-class AuditLog : IObserver
+class AuditLog : IPriceObserver
 {
     public List<decimal> Entries { get; } = new();
 

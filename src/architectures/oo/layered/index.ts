@@ -13,11 +13,11 @@ export const architecture: ArchitectureDefinition = {
   summary:
     "Stack the app into presentation, application, domain and data-access layers that only talk downward.",
   intent:
-    "Organize a system into horizontal layers — presentation, application, domain, data access — where each layer depends only on the layer directly beneath it, so a change to how data is stored never has to ripple up into how requests are handled.",
+    "Organize a system into horizontal layers — presentation, application, domain, data access — where a layer may call only layers below it, never above, so a change to how data is stored never has to ripple up into how requests are handled.",
   problem:
     "Without an agreed layering, a web handler ends up calling the database directly, business rules get duplicated between the controller and a service class, and nobody can say with confidence where a given piece of logic is supposed to live. Every change risks touching everything, because there is no rule about what is allowed to call what.",
   solution:
-    "Draw a strict stack — Presentation → Application → Domain → Data access — and enforce a single rule: a layer may only call the layer immediately below it, never sideways and never skipping ahead. A request flows down the stack, gets handled, and the result flows back up through the same layers. Swapping the database, adding caching, or reworking the UI only ever touches one layer at a time.",
+    "Draw a stack — Presentation → Application → Domain → Data access — and enforce a single rule: a layer may call only layers below it, never above. This is relaxed layering: the application layer uses both the domain and data access, and data access maps rows to and from domain objects. A strict variant allows calls only to the layer directly beneath. A request flows down the stack, gets handled, and the result flows back up. Swapping the database, adding caching, or reworking the UI only ever touches one layer at a time.",
   analogy:
     "A company's reporting chain: a customer talks to the front desk, the front desk escalates to a case manager, the case manager consults a specialist, and the specialist pulls a file from records. The customer never phones records directly — every request goes down one level at a time, and the answer travels back the same way.",
   whenToUse: [
@@ -28,20 +28,20 @@ export const architecture: ArchitectureDefinition = {
   ],
   pros: [
     "Easy to learn, explain and onboard new developers into — almost every backend developer has seen this shape before.",
-    'A clear rule ("only call the layer below you") makes code review straightforward: a violation is easy to spot.',
+    'A clear rule ("only call layers below you, never above") makes code review straightforward: a violation is easy to spot.',
     "Each layer can be tested in isolation by substituting the layer below it with a fake or an in-memory implementation.",
     "Works well for straightforward, data-centric applications without forcing unnecessary ceremony.",
   ],
   cons: [
-    "Nothing in a plain class stops a developer from skipping layers under deadline pressure — the rule is a convention, not a compiler error.",
-    'A "fat domain layer" problem can creep in the other direction: an anemic domain layer that is just data, with all real logic piling up in the application layer.',
+    "Nothing in a plain class stops a developer from calling upward, or from going around the data-access layer, under deadline pressure — the rule is a convention, not a compiler error.",
+    'An anemic domain layer can creep in: Order becomes plain data and the real rules pile up in the application layer (a "fat service layer").',
     "Strict layering can mean a trivial change (adding one field) still has to touch four layers top to bottom.",
-    "Compared to Hexagonal or DDD, it gives weaker isolation for the domain: the domain layer typically still depends on data-access types, not the other way around.",
+    "Compared to Hexagonal, it gives weaker isolation for the domain: unless the team adds a repository interface (as this example does), nothing in the style itself stops the domain from depending on data-access types.",
   ],
   realWorld: [
     'The classic ASP.NET / Spring "Controller → Service → Repository → Database" stack',
     "Rails' implicit MVC-plus-service-objects layering in larger apps",
-    "Most generated CRUD scaffolding (Django, Laravel, NestJS) defaults to this shape out of the box",
+    "NestJS's `nest g resource` scaffolding, which generates a controller → service → entity stack out of the box",
     'Traditional enterprise "3-tier" (web tier / app tier / DB tier) deployment diagrams',
   ],
   concepts: [
@@ -68,7 +68,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Layering violation",
       description:
-        "A call that skips a layer (e.g. a controller querying the database directly). The classic failure mode of this architecture — see the final step.",
+        "A call that breaks the layering — an upward call, or code going around the layer that owns a job (e.g. a controller writing SQL and querying the database itself instead of going through data access). The classic failure mode of this architecture — see the final step.",
     },
     {
       term: "N-tier",
@@ -93,7 +93,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "dependency-injection",
-        why: "Each layer is constructed against the interface of the layer below it, wired together by a container at startup instead of hardcoded references.",
+        why: "Each layer receives what it uses below it through its constructor (OrderService gets an OrderRepository interface), wired together at startup instead of hardcoded references.",
       },
       {
         slug: "proxy",
@@ -254,7 +254,7 @@ export const architecture: ArchitectureDefinition = {
       type: "calls",
       label: "✗ SELECT * FROM orders",
       description:
-        "The classic failure mode: a controller reaching straight past Application and Domain into Data access. Nothing in a plain class stops this — only discipline and review do.",
+        "The classic failure mode: a controller going around the data-access layer and writing SQL against the database itself. Nothing in a plain class stops this — only discipline and review do.",
       bend: 260,
       code: "violation",
     },
@@ -265,7 +265,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "A stack of layers, each depending on the one below",
       description:
-        "Presentation, Application, Domain and Data access are stacked top to bottom. The rule is simple: a layer may call the layer directly beneath it, and nothing else — never sideways, never skipping ahead.",
+        "Presentation, Application, Domain and Data access are stacked top to bottom. The rule is simple: a layer may call only layers below it, never above. This example uses relaxed layering — OrderService calls both Order and OrderRepository — rather than the strict variant, where each layer may call only the one directly beneath it.",
       highlight: ["client", "controller", "service", "order", "repository", "database"],
     },
     {
@@ -327,7 +327,7 @@ export const architecture: ArchitectureDefinition = {
       code: "controller",
     },
     {
-      title: "Anti-pattern: skipping layers",
+      title: "Anti-pattern: going around the data-access layer",
       description:
         'A "quick" debug endpoint has the controller query the database directly. It now knows SQL, can no longer be tested without a real database, and nothing below it can change without risking breaking the controller too — the exact coupling layering exists to prevent.',
       highlight: ["controller", "violation", "database"],

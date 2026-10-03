@@ -67,7 +67,7 @@ func (g *ReportGeneratorBefore) Generate(data ReportData) Report {
 func crashes(data ReportData) {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("crashed: nil logger call")
+			fmt.Println("crashed: no logger") // runtime error: invalid memory address or nil pointer dereference
 		}
 	}()
 	(&ReportGeneratorBefore{logger: nil}).Generate(data)
@@ -80,7 +80,6 @@ func init() {
 
 	// Crashes the moment a report has warnings:
 	crashes(dataWithWarnings)
-	// crashed: nil logger call
 }
 
 // [/before]

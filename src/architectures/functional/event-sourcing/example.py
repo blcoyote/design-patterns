@@ -160,10 +160,16 @@ store.subscribe(projection.handle)
 STREAM_ID = "account-42"
 
 
+# [handle]
+# The command handler is the imperative shell around the pure core: load the stream,
+# fold it, decide, then append at the version that was loaded. If another writer
+# appended in between, the store sees a different length and rejects the append.
 def handle(command: Command) -> None:
-    state = fold(store.load(STREAM_ID))
+    history = store.load(STREAM_ID)
+    state = fold(history)
     events = decide(command, state)
-    store.append(STREAM_ID, len(store.load(STREAM_ID)), events)
+    store.append(STREAM_ID, len(history), events)
+# [/handle]
 
 
 handle(OpenAccount("Ada"))

@@ -184,7 +184,7 @@ func main() {
 	// concrete type to call GetResult.)
 	search := NewHttpRequestBuilder("/api/items").SetQuery("q", "pizza").(*HttpRequestBuilder).GetResult()
 
-	// The Python example prints nothing; these only keep Go's unused-variable check happy.
+	// Like the other tabs, this prints nothing; these only keep Go's unused-variable check happy.
 	_, _, _ = request, command, search
 }
 

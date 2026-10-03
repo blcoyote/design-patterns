@@ -21,7 +21,7 @@ export const comparison: ComparisonDefinition = {
   problem:
     "An order system needs to answer two questions: what is the order’s current state, and what happened to it over time? Screens need a fast view of orders; support and compliance may need a full history.",
   constraints: [
-    "Does the write side need a separate, denormalised shape for reads, or would the same model answer both jobs fine?",
+    "Do reads need a separate, denormalised shape, or would the write model answer both jobs fine?",
     'Is a full audit trail — not just the current state, but every past change — a hard requirement, or does only "what is true now" matter?',
     "Can the system tolerate reads being milliseconds (or more) behind the latest write, or must every read see the write that just happened?",
     "Is the domain naturally about things happening over time (orders, withdrawals) or about things that just exist and get overwritten (a profile field)?",
@@ -54,7 +54,7 @@ export const comparison: ComparisonDefinition = {
     {
       label: "Consistency between what was written and what gets read back",
       values: {
-        cqrs: 'Explicitly eventual: a query right after dispatch can return "(none yet)" until Projector.catchUp() drains its queue into the ReadStore.',
+        cqrs: 'Eventual in this example (and whenever the read store is updated asynchronously): a query right after dispatch can return "(none yet)" until Projector.catchUp() drains its queue into the ReadStore. A shared store or a synchronous projection would read its own writes.',
         "event-sourcing":
           "Folding the log directly (fold(store.load(streamId))) is as fresh as the last append — eventual consistency only shows up if you add a separate projection like WithdrawalCountProjection on top.",
       },

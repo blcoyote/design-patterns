@@ -11,12 +11,8 @@ var curlBuilder = new CurlCommandBuilder("/api/items");
 RequestDirector.PostJson(curlBuilder, new { name = "Margherita" });
 string command = curlBuilder.GetResult();
 
-Console.WriteLine($"{request.Method} {request.Url}");
-Console.WriteLine(command);
-
 // Skipping the director: chain a concrete builder directly for a one-off request.
 var search = new HttpRequestBuilder("/api/items").SetQuery("q", "pizza").GetResult();
-Console.WriteLine($"{search.Method} {search.Url}?q={search.Query["q"]}");
 // [/usage]
 
 // [product]
@@ -135,7 +131,7 @@ class CurlCommandBuilder(string url) : IRequestBuilder
         var query = _queryParts.Count > 0 ? $"?{string.Join("&", _queryParts)}" : "";
         var parts = new List<string> { $"curl -X {_method}" };
         parts.AddRange(_headerFlags);
-        if (_body != null) parts.Add($"-d '{_body}'");
+        if (!string.IsNullOrEmpty(_body)) parts.Add($"-d '{_body}'");
         parts.Add($"'{url}{query}'");
         return string.Join(" ", parts);
     }

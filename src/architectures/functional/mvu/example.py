@@ -114,7 +114,8 @@ class Runtime:
     def dispatch(self, msg: Msg) -> None:
         next_model, cmds = update(self.model, msg)
         # A dispatch after time-travel discards any history past the current
-        # cursor, the same way Redux DevTools / Elm's debugger fork a new timeline.
+        # cursor - an undo-stack policy chosen for this demo (Redux DevTools keeps
+        # the later actions).
         self._history = self._history[: self._cursor + 1] + [next_model]
         self._cursor = len(self._history) - 1
         self._notify()

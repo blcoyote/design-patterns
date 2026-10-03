@@ -32,6 +32,14 @@ const CUSTOMER: Card = { id: "customer-58", label: "Customer #58", kind: "dirty"
 const CART: Card = { id: "cart-9", label: "Cart #9", kind: "removed" };
 const ALL_CARDS = [ORDER, CUSTOMER, CART];
 
+// The failing commit in the last step belongs to a different operation, so it
+// uses different entities than the ones step 7 already committed.
+const FAILED_CARDS: Card[] = [
+  { id: "order-105", label: "Order #105", kind: "new" },
+  { id: "customer-61", label: "Customer #61", kind: "dirty" },
+  { id: "cart-12", label: "Cart #12", kind: "removed" },
+];
+
 interface Scene {
   cards: Card[];
   phase: Phase;
@@ -47,7 +55,7 @@ const STEP_SCENES: Scene[] = [
   { cards: ALL_CARDS, phase: "begin" },
   { cards: ALL_CARDS, phase: "flushing" },
   { cards: [], phase: "committed" },
-  { cards: ALL_CARDS, phase: "rolledback", failed: true },
+  { cards: FAILED_CARDS, phase: "rolledback", failed: true },
 ];
 
 const PHASE_CAPTION: Record<Phase, string> = {

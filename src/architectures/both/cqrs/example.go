@@ -28,8 +28,12 @@ type Order struct {
 	Status     string
 }
 
-func NewOrder(id, customerID string, totalCents int) *Order {
-	return &Order{ID: id, CustomerID: customerID, TotalCents: totalCents, Status: "placed"}
+func NewOrder(id, customerID string, totalCents int) (*Order, error) {
+	// Invariant: the write model refuses a command that would create an invalid order.
+	if totalCents <= 0 {
+		return nil, fmt.Errorf("order %s: total must be positive, got %d cents", id, totalCents)
+	}
+	return &Order{ID: id, CustomerID: customerID, TotalCents: totalCents, Status: "placed"}, nil
 }
 
 // [/aggregate]
@@ -56,23 +60,23 @@ func (s *SqlWriteStore) Save(order *Order) {
 
 // [dispatcher]
 type CommandDispatcher struct {
-	handlers map[string]func(Command)
+	handlers map[string]func(Command) error
 }
 
 func NewCommandDispatcher() *CommandDispatcher {
-	return &CommandDispatcher{handlers: map[string]func(Command){}}
+	return &CommandDispatcher{handlers: map[string]func(Command) error{}}
 }
 
-func (d *CommandDispatcher) Register(commandType string, handler func(Command)) {
+func (d *CommandDispatcher) Register(commandType string, handler func(Command) error) {
 	d.handlers[commandType] = handler
 }
 
-func (d *CommandDispatcher) Dispatch(command Command) {
+func (d *CommandDispatcher) Dispatch(command Command) error {
 	handler, ok := d.handlers[command.Type()]
 	if !ok {
-		panic(fmt.Sprintf("no handler registered for %s", command.Type()))
+		return fmt.Errorf("no handler registered for %s", command.Type())
 	}
-	handler(command)
+	return handler(command)
 }
 
 // [/dispatcher]
@@ -87,14 +91,18 @@ func NewPlaceOrderHandler(writeStore WriteStore, projector *Projector) *PlaceOrd
 	return &PlaceOrderHandler{writeStore: writeStore, projector: projector}
 }
 
-func (h *PlaceOrderHandler) Handle(command PlaceOrderCommand) {
-	order := NewOrder(command.OrderID, command.CustomerID, command.TotalCents)
+func (h *PlaceOrderHandler) Handle(command PlaceOrderCommand) error {
+	order, err := NewOrder(command.OrderID, command.CustomerID, command.TotalCents)
+	if err != nil {
+		return err
+	}
 	h.writeStore.Save(order)
 	// In a real system the projector would pick this up off a queue, a CDC
 	// stream or a cron job — asynchronously, on its own schedule. Here that
 	// queue is modeled explicitly: enqueuing is instant, but nothing is
 	// projected into the read store until something calls projector.CatchUp().
 	h.projector.Enqueue(order)
+	return nil
 }
 
 // [/commandHandler]
@@ -200,9 +208,13 @@ func main() {
 	getOrderSummary := NewGetOrderSummaryHandler(readStore)
 
 	dispatcher := NewCommandDispatcher()
-	dispatcher.Register("PlaceOrder", func(command Command) { placeOrderHandler.Handle(command.(PlaceOrderCommand)) })
+	dispatcher.Register("PlaceOrder", func(command Command) error {
+		return placeOrderHandler.Handle(command.(PlaceOrderCommand))
+	})
 
-	dispatcher.Dispatch(PlaceOrderCommand{OrderID: "order-9", CustomerID: "cust-42", TotalCents: 4998})
+	if err := dispatcher.Dispatch(PlaceOrderCommand{OrderID: "order-9", CustomerID: "cust-42", TotalCents: 4998}); err != nil {
+		panic(err)
+	}
 
 	// [eventualConsistency]
 	// Querying immediately after the command returns misses the projection: the

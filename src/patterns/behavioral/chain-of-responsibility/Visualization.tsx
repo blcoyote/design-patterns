@@ -31,6 +31,14 @@ const STOPS_AT: Record<ScenarioId, string> = {
   badPayload: "validationHandler",
 };
 
+/** Display name of that participant, for the scenario description. */
+const STOPS_AT_LABEL: Record<ScenarioId, string> = {
+  valid: "Controller",
+  badAuth: "AuthHandler",
+  rateLimited: "RateLimitHandler",
+  badPayload: "ValidationHandler",
+};
+
 const STATUS: Record<ScenarioId, { code: number; text: string; ok: boolean }> = {
   valid: { code: 200, text: "OK", ok: true },
   badAuth: { code: 401, text: "Unauthorized", ok: false },
@@ -45,7 +53,7 @@ function scenarioStep(id: ScenarioId): Step {
   const status = STATUS[id];
   const base = {
     title: `Try: ${LABELS[id]}`,
-    description: `The request travels the chain until it reaches ${STOPS_AT[id]}, which ${status.ok ? "handles it" : "rejects it"}.`,
+    description: `The request travels the chain until it reaches ${STOPS_AT_LABEL[id]}, which ${status.ok ? "handles it" : "rejects it"}.`,
   };
 
   switch (id) {

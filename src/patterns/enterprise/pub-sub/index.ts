@@ -32,11 +32,11 @@ export const pattern: PatternDefinition = {
   cons: [
     'Harder to trace: reading publish("order.placed", …) alone does not tell you what will run.',
     "Delivery order and timing depend on the implementation, and one slow handler can delay the others unless the broker isolates handlers, for example by running them concurrently or through queues.",
-    "A typo in a topic name fails silently: nobody is subscribed, so nothing happens and there is no error.",
+    "A typo in a topic name fails silently when topics are plain strings: nobody is subscribed, so nothing happens and there is no error. (The TypeScript tab's typed EventMap turns such a typo into a compile error.)",
   ],
   realWorld: [
     "Apache Kafka and other log-based message brokers",
-    "RabbitMQ and other AMQP topic exchanges",
+    "RabbitMQ and other AMQP brokers (topic and fanout exchanges)",
     "Redis Pub/Sub (PUBLISH / SUBSCRIBE)",
     "Google Cloud Pub/Sub and AWS SNS",
     "In-browser event buses built on EventTarget/CustomEvent, or Node.js EventEmitter used as a shared bus",
@@ -76,7 +76,7 @@ export const pattern: PatternDefinition = {
       y: 235,
       width: 170,
       description:
-        "The only thing publishers and subscribers both depend on. Keeps a set of handlers per topic and is responsible for subscribe, unsubscribe and fan-out — nothing more.",
+        "The only thing publishers and subscribers both depend on. Keeps a list of handlers per topic, in subscription order, and is responsible for subscribe, unsubscribe and fan-out — nothing more.",
     },
     {
       id: "emailService",
@@ -226,7 +226,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Services subscribe to their topics",
       description:
-        "EmailService, AnalyticsService and InventoryService each call bus.subscribe(topic, handler) on startup. The bus just adds the handler to a set for that topic name — it has no idea which classes these are.",
+        "EmailService, AnalyticsService and InventoryService each call bus.subscribe(topic, handler) on startup. The bus just appends the handler to that topic's list — it has no idea which classes these are.",
       highlight: [
         "eventBus",
         "email-sub",
@@ -312,7 +312,7 @@ export const pattern: PatternDefinition = {
     {
       title: "InventoryService unsubscribes",
       description:
-        'InventoryService calls the unsubscribe function it got back from subscribe(), removing its handler from the "order.placed" set. The bus and every publisher are completely unaffected — neither ever held a reference to InventoryService directly.',
+        'InventoryService calls the unsubscribe function it got back from subscribe(), removing its handler from the "order.placed" list. The bus and every publisher are completely unaffected — neither ever held a reference to InventoryService directly.',
       highlight: ["inventory-sub", "inventoryService", "eventBus"],
       notes: {
         inventoryService: "unsubscribed",

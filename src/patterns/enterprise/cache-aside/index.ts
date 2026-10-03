@@ -36,10 +36,8 @@ export const pattern: PatternDefinition = {
     "TTLs and invalidation rules are extra settings to choose and tune. Too short and the cache barely helps; too long and you serve stale data longer than you meant to.",
   ],
   realWorld: [
-    "Redis or Memcached in front of a SQL database, the classic case the pattern is named for",
-    'The "Cache-Aside" entry in Azure\'s cloud design patterns catalogue',
-    "Application code that wraps a Redis or Memcached lookup around a database query and deletes the key when the row changes",
-    "React Query and similar client-side data-fetching caches, which check a cache before calling the network and invalidate on mutations",
+    "Redis or Memcached in front of a SQL database: application code wraps the cache lookup around the database query and deletes the key when the row changes. This is the classic deployment, and the one Azure's cloud design patterns catalogue describes under Cache-Aside",
+    "React Query and similar client-side data-fetching libraries are a close cousin: on a miss the library calls your fetcher itself (closer to read-through), but invalidating after a mutation is application-driven, as in Cache-Aside",
     "This site: parseCode in src/lib/codeRegions.ts checks an in-memory Map before re-parsing a source string, and fills it on a miss. It is the in-process memoization variant, not the TTL-bounded version demoed here: entries never expire and are never invalidated, which is safe because a pattern's source text never changes once loaded",
   ],
   related: ["proxy", "flyweight", "repository", "circuit-breaker"],

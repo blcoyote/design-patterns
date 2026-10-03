@@ -154,7 +154,8 @@ func (p *OrdersProducer) PlaceOrder(item string, quantity int) int {
 	return orderID
 }
 
-// Redeliver simulates an at-least-once broker redelivering a message it already delivered once.
+// Redeliver simulates a duplicate delivery, as an at-least-once broker redelivery or a
+// producer retry after a lost ack would cause, by publishing the same event again.
 func (p *OrdersProducer) Redeliver(orderID int, item string, quantity int) {
 	event := OrderPlaced{orderID, item, quantity}
 	p.broker.Publish("OrderPlaced", event)

@@ -128,7 +128,11 @@ export function SingletonVisualization({
                   textAnchor="middle"
                   className="fill-slate-300 text-[11px] font-mono select-none"
                 >
-                  {language === "go" ? "AppConfig{}" : "new AppConfig()"}
+                  {language === "go"
+                    ? "AppConfig{}"
+                    : language === "python"
+                      ? "AppConfig()"
+                      : "new AppConfig()"}
                 </text>
                 {language === "go" ? (
                   <text

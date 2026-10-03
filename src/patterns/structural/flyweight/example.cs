@@ -1,15 +1,19 @@
 // [usage]
 var forest = new Forest();
+forest.Plant(120, 40, 3, "Oak", "#2f6b3a", "rough-bark.png"); // cache miss: builds the Oak type
+forest.Plant(340, 95, 7, "Oak", "#2f6b3a", "rough-bark.png"); // cache hit: same Oak instance
+forest.Plant(560, 70, 5, "Pine", "#1f4d2e", "needle-bark.png"); // cache miss: builds the Pine type
 var random = new Random();
-for (var i = 0; i < 5_000; i++)
+for (var i = 0; i < 4_998; i++)
 {
     forest.Plant(random.NextDouble() * 1000, random.NextDouble() * 1000, random.NextDouble() * 50, "Oak", "#2f6b3a", "rough-bark.png");
 }
-for (var i = 0; i < 5_000; i++)
+for (var i = 0; i < 4_999; i++)
 {
     forest.Plant(random.NextDouble() * 1000, random.NextDouble() * 1000, random.NextDouble() * 50, "Pine", "#1f4d2e", "needle-bark.png");
 }
-// 10,000 Tree objects on the heap, backed by just two shared ConcreteTreeType instances
+// 10,000 Tree objects on the heap (5,000 per species), backed by just two shared ConcreteTreeType instances
+Console.WriteLine($"{forest.TreeCount} trees, {forest.TypeCount} tree types"); // 10000 trees, 2 tree types
 // [/usage]
 
 // [canvas]
@@ -121,5 +125,8 @@ class Forest
         foreach (var tree in _trees) tree.Render(canvas);
     }
     // [/render]
+
+    public int TreeCount => _trees.Count;
+    public int TypeCount => _factory.PoolSize;
 }
 // [/forest]

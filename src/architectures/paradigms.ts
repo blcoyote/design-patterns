@@ -25,7 +25,8 @@ export const paradigms: Record<Paradigm, ParadigmMeta> = {
   functional: {
     id: "functional",
     label: "Functional",
-    description: "Architectures built from pure functions, immutable data and explicit effects.",
+    description:
+      "Architectures most naturally expressed (and presented here) with pure functions, immutable data and explicit effects.",
     color: "#a3e635",
     badge: "bg-lime-400/10 text-lime-300 ring-lime-400/30",
     dot: "bg-lime-400",

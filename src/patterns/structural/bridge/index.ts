@@ -13,7 +13,7 @@ export const pattern: PatternDefinition = {
   intent:
     "Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.",
   problem:
-    "Imagine supporting several kinds of remotes and several kinds of devices. With inheritance alone, you would need a class for every pair: BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, and so on. With M remote types and N device types, that can mean M × N classes. Go avoids the same coupling with interfaces and embedding instead of subclasses.",
+    "Imagine supporting several kinds of remotes and several kinds of devices. With inheritance alone, you would need a class for every pair: BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, and so on. With M remote types and N device types, that can mean M × N classes. Go has the same problem, just with one struct per pairing instead of one subclass; the fix below uses an interface field and embedding.",
   solution:
     "Give the remote and the device separate interfaces. RemoteControl holds a Device, so it can work with any device that implements that interface. Add new remote types and devices independently, then pair them at runtime. TypeScript, C#, and Python use subclasses for specialized remotes; Go embeds RemoteControl instead. This split is planned up front. Strategy has a similar shape, but swaps one algorithm rather than separating two kinds of variation.",
   analogy:

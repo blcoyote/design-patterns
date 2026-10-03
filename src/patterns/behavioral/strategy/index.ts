@@ -38,7 +38,7 @@ export const pattern: PatternDefinition = {
     "Array.prototype.sort(compareFn): the comparator is a swappable strategy",
     "Passport.js authentication strategies (local, OAuth, JWT, …)",
     "Payment processing: choosing between card, wallet, or bank-transfer gateways",
-    "Compression libraries that let you pick zip, gzip, or brotli at call time",
+    "Compression libraries that let you pick deflate, gzip, or brotli at call time",
   ],
   related: ["state", "template-method", "command", "null-object", "bridge"],
   participants: [
@@ -50,7 +50,7 @@ export const pattern: PatternDefinition = {
       x: 400,
       y: 60,
       description:
-        "Declares calculate(from, to). Every concrete strategy implements it the same way; the navigator depends only on this.",
+        "Declares calculate(from, to). Every concrete strategy implements this same signature in its own way; the navigator depends only on this.",
     },
     {
       id: "client",

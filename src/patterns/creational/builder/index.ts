@@ -13,9 +13,9 @@ export const pattern: PatternDefinition = {
   summary:
     "Construct complex objects step by step, so the same construction process can yield different representations.",
   intent:
-    "Build a complex object step by step, so the same process can produce different results and the constructor stays readable.",
+    "Separate how a complex object is built from what it is built into, so the same step-by-step process can produce different representations.",
   problem:
-    'An HTTP request can have a method, headers, query params, a body, a timeout, retries and more. One constructor with a dozen optional parameters is hard to read, and most combinations are never used together. This is the "telescoping constructor" nobody wants to call. Sometimes you also need the same recipe to produce more than one kind of output, for example a real request object and the equivalent curl command for debugging.',
+    'An HTTP request can have a method, headers, query params, a body, a timeout, retries and more. One constructor with a dozen optional parameters is hard to read, and most combinations are never used together. The usual workaround, a "telescoping" chain of overloaded constructors that each add one more parameter, is no better. Sometimes you also need the same recipe to produce more than one kind of output, for example a real request object and the equivalent curl command for debugging.',
   solution:
     'A Builder interface defines the steps for creating a product. Each concrete builder follows those steps to make a different result, such as an HTTP request or a curl command. A Director can store a recipe, like "a JSON POST", and run the same steps with any builder. The client chooses the builder and collects the result with getResult(). The common fluent builder is a simpler version with one builder and no Director, which works when you only need one kind of output.',
   analogy:

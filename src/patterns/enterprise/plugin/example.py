@@ -47,20 +47,11 @@ class JsonExporter:
 
 
 # [manifest]
-# A plain list of plugin ids and the factory module each one maps to. In a
-# real build, this list itself would usually come from scanning a folder —
-# see the comment on `factories` below — but the manifest *shape* is the
-# same either way: plugin id -> the name of the thing that constructs it.
-@dataclass
-class ManifestEntry:
-    id: str
-    module: str
-
-
-manifest: list[ManifestEntry] = [
-    ManifestEntry('markdown', 'markdown-exporter'),
-    ManifestEntry('html', 'html-exporter'),
-]
+# A plain list of the plugin modules to load. In a real build, this list
+# itself would usually come from scanning a folder — see the comment on
+# `factories` below — but the idea is the same either way: the manifest names
+# *what* to load, and each plugin reports its own id once it is constructed.
+manifest: list[str] = ['markdown-exporter', 'html-exporter']
 # [/manifest]
 
 
@@ -85,7 +76,7 @@ class PluginRegistry:
 
 # [pluginLoader]
 # Real discovery mechanisms differ per platform — Vite's `import.meta.glob`
-# (this site uses exactly that, see the registry below), .NET assembly
+# (this site uses exactly that in src/patterns/registry.ts), .NET assembly
 # scanning or MEF, Python's `importlib.metadata` entry points. All of them
 # boil down to the same two steps this loader performs explicitly: read a
 # manifest, then look each entry up in a map of known factories.
@@ -98,9 +89,13 @@ factories: dict[str, Callable[[], Exporter]] = {
 
 class PluginLoader:
     @staticmethod
-    def load(registry: PluginRegistry, entries: list[ManifestEntry]) -> None:
-        for entry in entries:
-            registry.register(factories[entry.module]())
+    def load(registry: PluginRegistry, module_names: list[str]) -> None:
+        for module_name in module_names:
+            factory = factories.get(module_name)
+            if factory is None:
+                raise RuntimeError(f'no factory for plugin module "{module_name}"')
+            # Registered under the id the plugin itself reports.
+            registry.register(factory())
 # [/pluginLoader]
 
 
@@ -126,7 +121,7 @@ print(f'registered: {", ".join(registry.registered_ids())}')
 print(host.export('html', doc))
 
 # A new plugin is added to the manifest — Host and PluginRegistry are untouched.
-extended_manifest = [*manifest, ManifestEntry('json', 'json-exporter')]
+extended_manifest = [*manifest, 'json-exporter']
 registry2 = PluginRegistry()
 PluginLoader.load(registry2, extended_manifest)
 host2 = Host(registry2)

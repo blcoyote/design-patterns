@@ -11,7 +11,7 @@ export const pattern: PatternDefinition = {
   order: 1,
   summary: "Wrap an incompatible interface so existing client code can use it unchanged.",
   intent:
-    "Wrap an object with an incompatible interface so that existing code can use it as if it matched.",
+    "Convert the interface of an existing class into the interface clients expect, so classes with incompatible interfaces can work together.",
   problem:
     "Your checkout code is written against a clean PaymentProcessor interface. But the payment provider you were handed only offers a legacy, cents-based API with a different method name and a different shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.",
   solution:

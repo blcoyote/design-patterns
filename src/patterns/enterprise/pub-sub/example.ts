@@ -6,16 +6,28 @@ type EventMap = {
 type Handler<T> = (payload: T) => void;
 type Unsubscribe = () => void;
 
+// One entry per subscribe() call, identified by object reference.
+interface Subscription {
+  handler: Handler<any>;
+}
+
 // [eventBus]
 class EventBus<Events extends Record<string, unknown>> {
-  private topics = new Map<keyof Events, Set<Handler<any>>>();
+  // A list of subscriptions per topic, kept in subscription order.
+  private topics = new Map<keyof Events, Subscription[]>();
 
   // [subscribe]
   subscribe<K extends keyof Events>(topic: K, handler: Handler<Events[K]>): Unsubscribe {
-    const handlers = this.topics.get(topic) ?? new Set();
-    handlers.add(handler);
-    this.topics.set(topic, handlers);
-    return () => handlers.delete(handler);
+    // Each call gets its own subscription, so subscribing the same handler
+    // twice delivers twice, and each unsubscribe removes only its own entry.
+    const subscription: Subscription = { handler };
+    const subscriptions = this.topics.get(topic) ?? [];
+    subscriptions.push(subscription);
+    this.topics.set(topic, subscriptions);
+    return () => {
+      const index = subscriptions.indexOf(subscription);
+      if (index !== -1) subscriptions.splice(index, 1);
+    };
   }
   // [/subscribe]
 
@@ -23,7 +35,7 @@ class EventBus<Events extends Record<string, unknown>> {
     // [dispatch]
     // Loop over a snapshot so a handler that subscribes or unsubscribes
     // mid-publish doesn't affect the round we're already delivering.
-    for (const handler of [...(this.topics.get(topic) ?? [])]) {
+    for (const { handler } of [...(this.topics.get(topic) ?? [])]) {
       handler(payload);
     }
     // [/dispatch]
@@ -77,11 +89,15 @@ class EmailService {
 // [analyticsService]
 class AnalyticsService {
   constructor(bus: EventBus<EventMap>) {
-    bus.subscribe("order.placed", (e) => this.track("order.placed", e));
-    bus.subscribe("user.signedUp", (e) => this.track("user.signedUp", e));
+    bus.subscribe("order.placed", (e) =>
+      this.track("order.placed", `orderId=${e.orderId} total=${e.total}`),
+    );
+    bus.subscribe("user.signedUp", (e) =>
+      this.track("user.signedUp", `userId=${e.userId} email=${e.email}`),
+    );
   }
-  private track(topic: string, payload: unknown) {
-    console.log("analytics:", topic, payload);
+  private track(topic: string, details: string) {
+    console.log(`analytics: ${topic} ${details}`);
   }
 }
 // [/analyticsService]

@@ -51,7 +51,7 @@ export const pattern: PatternDefinition = {
       y: 90,
       width: 180,
       description:
-        "A static field holds the shared instance. TypeScript and C# make construction private, Python uses a runtime guard, and Go provides an unexported constructor by convention (same-package code can still use an AppConfig literal). getInstance() creates the instance on first call and returns it thereafter.",
+        "A static field (a package-level variable in Go) holds the shared instance. TypeScript and C# make construction private, Python uses a runtime guard, and Go provides an unexported constructor by convention (same-package code can still use an AppConfig literal). getInstance() creates the instance on first call and returns it thereafter.",
     },
     {
       id: "userService",
@@ -101,7 +101,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Restrict construction where possible",
       description:
-        "TypeScript and C# reject direct construction through private constructors, and Python's runtime guard rejects AppConfig(). Go has no private constructor: newAppConfig() is the intended path, but code in package main can still construct AppConfig{} directly.",
+        "TypeScript (at compile time only) and C# reject direct construction through private constructors, and Python's runtime guard rejects AppConfig(). Go has no private constructor: newAppConfig() is the intended path, but code in package main can still construct AppConfig{} directly.",
       highlight: ["config"],
       notes: { config: "instance: null" },
       code: "class",
@@ -109,7 +109,7 @@ export const pattern: PatternDefinition = {
     {
       title: "First request creates it",
       description:
-        "UserService calls AppConfig.getInstance(). The static field is still null, so getInstance() constructs the one instance and stores it.",
+        "UserService calls AppConfig.getInstance(). The instance is not set yet (in Go, sync.Once has not run), so getInstance() constructs the one instance and stores it.",
       highlight: ["userService", "user-get"],
       packets: [
         { relation: "user-get", label: "getInstance()" },
@@ -121,7 +121,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Second request reuses it",
       description:
-        "PaymentService calls getInstance() too. This time the field is already set, so the existing object is returned — no new construction.",
+        "PaymentService calls getInstance() too. This time the instance is already set (in Go, sync.Once skips its function), so the existing object is returned — no new construction.",
       highlight: ["paymentService", "payment-get"],
       packets: [
         { relation: "payment-get", label: "getInstance()" },

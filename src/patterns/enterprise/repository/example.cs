@@ -35,7 +35,9 @@ class Database
 {
     public List<Dictionary<string, object>> Query(string sql, params object[] parameters)
     {
-        Console.WriteLine($"SQL: {sql} [{string.Join(", ", parameters)}]");
+        // Print params the way the other languages do: strings quoted with '.
+        var shown = parameters.Select(p => p is string str ? $"'{str}'" : Convert.ToString(p, CultureInfo.InvariantCulture));
+        Console.WriteLine($"SQL: {sql} [{string.Join(", ", shown)}]");
         return new List<Dictionary<string, object>>
         {
             new() { ["id"] = "482", ["customer_id"] = "cst-9", ["total_cents"] = 4200 },

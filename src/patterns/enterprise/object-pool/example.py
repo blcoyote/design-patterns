@@ -85,16 +85,15 @@ class ObjectPool(Generic[T]):
             raise RuntimeError("release() called with an item that is not checked out from this pool")
         self._in_use.discard(item)
         item.reset()  # scrub borrower state before anyone else sees this object
-        while self._waiting:
+        # Not handled in this example: a waiter that gave up (timed out or was
+        # abandoned). A production pool must skip such waiters instead of handing
+        # them the freed item.
+        if self._waiting:
             next_waiter = self._waiting.pop(0)
-            # Unlike a JS Promise, an asyncio future can be cancelled (e.g. by
-            # asyncio.wait_for timing out) — skip waiters nobody is listening to.
-            if next_waiter.done():
-                continue
             self._in_use.add(item)
             next_waiter.set_result(item)  # hand it straight to the waiting caller — it never goes idle
-            return
-        self._idle.append(item)
+        else:
+            self._idle.append(item)
     # [/release]
 
     @property

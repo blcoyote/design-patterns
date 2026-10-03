@@ -16,9 +16,9 @@ export const pattern: PatternDefinition = {
   problem:
     "A map editor needs to draw a forest of thousands of trees, or a text editor needs an object for every character on the page. If every Tree or Glyph stores its own copy of the species texture or the font outline, memory use explodes. Most of that data is identical across instances, and only the position, age or scale really differs.",
   solution:
-    "Split each object's state into intrinsic state (shared and independent of context, like the texture or font outline) and extrinsic state (unique to each instance, like position, age or scale). Move the intrinsic state into a small set of shared Flyweight objects, handed out by a factory that caches them by key. The many lightweight context objects keep only the extrinsic state. Every object that needs a given combination of shared data reuses the same flyweight instance.",
+    "Split each object's state into intrinsic state (shared and independent of context, like the texture or font outline) and extrinsic state (unique to each instance, like position, age or scale). Move the intrinsic state into a small set of shared Flyweight objects, handed out by a factory that caches them by key. The many lightweight context objects keep only the extrinsic state. Every object that needs a given combination of shared data reuses the same flyweight instance. This is not an object pool: a pool lends out exclusive, mutable objects that the borrower can change and must return, while flyweights are shared, immutable, and never owned by any one caller.",
   analogy:
-    'A print shop keeps one metal stamp per letter and reuses it everywhere that letter appears on the page. It does not cast a brand-new stamp for every single "e".',
+    'A font file stores the outline of the letter "e" once. Every "e" on screen is that same outline drawn at a different position and size.',
   whenToUse: [
     "Your application creates a huge number of similar objects, and they strain memory.",
     "Most of an object's state can be made extrinsic, meaning it is passed in rather than stored.",
@@ -28,7 +28,6 @@ export const pattern: PatternDefinition = {
   pros: [
     "It sharply reduces memory use when many objects share the same underlying data.",
     "Intrinsic state is built and validated only once per variant.",
-    "Not the same as an object pool: a pool lends out exclusive, mutable objects that the borrower can change and must return, while flyweights are shared, immutable, and never owned by any one caller.",
   ],
   cons: [
     "It adds complexity: you must split state into intrinsic and extrinsic, and pass the extrinsic data through method calls.",
@@ -40,7 +39,7 @@ export const pattern: PatternDefinition = {
     "Game engines and map renderers that reuse a handful of mesh or texture objects across thousands of trees, rocks or units",
     "String interning: Java string literals and String.intern(), or Python's sys.intern(), share one underlying instance for equal strings",
   ],
-  related: ["object-pool", "proxy", "composite", "factory-method"],
+  related: ["object-pool", "proxy", "composite", "state", "strategy"],
 
   participants: [
     {
@@ -56,7 +55,7 @@ export const pattern: PatternDefinition = {
     {
       id: "tree",
       label: "Tree",
-      role: "Context (unshared)",
+      role: "Context (holds extrinsic state)",
       kind: "class",
       x: 370,
       y: 350,
@@ -227,7 +226,7 @@ export const pattern: PatternDefinition = {
     {
       title: "A second Oak — no new object",
       description:
-        'Another Oak is planted elsewhere in the forest. The factory looks up the same "Oak:#2f6b3a:rough-bark.png" key again, finds OakType already cached, and returns that exact same instance.',
+        'Another Oak is planted at (340, 95). The factory looks up the same "Oak:#2f6b3a:rough-bark.png" key again, finds OakType already cached, and returns that exact same instance.',
       highlight: ["request-type", "plant-tree"],
       packets: [
         {
@@ -247,7 +246,7 @@ export const pattern: PatternDefinition = {
     {
       title: "A new species: Pine",
       description:
-        'The key "Pine:#1f4d2e:needle-bark.png" has not been requested before, so this lookup misses the cache too. The factory builds a second ConcreteTreeType and adds it to the pool.',
+        'The third tree is a Pine. Its key "Pine:#1f4d2e:needle-bark.png" has not been requested before, so this lookup misses the cache too. The factory builds a second ConcreteTreeType and adds it to the pool.',
       highlight: ["request-type", "factory-create"],
       notes: { factory: "pool: 2 types" },
       code: "getTreeType",
@@ -255,15 +254,15 @@ export const pattern: PatternDefinition = {
     {
       title: "Scaling to thousands of trees",
       description:
-        "Forest keeps planting — thousands of Oaks and Pines, each a cheap Tree holding just x, y and age. Every one of them points at one of the same two cached TreeType objects.",
+        'Forest keeps planting until it holds 10,000 trees — 5,000 Oaks and 5,000 Pines, each a cheap Tree holding just x, y and age. Every one of them points at one of the same two cached TreeType objects; the example prints "10000 trees, 2 tree types".',
       highlight: ["plant-tree", "tree-holds"],
-      notes: { factory: "pool: 2 types", tree: "instances: 5,000+" },
+      notes: { factory: "pool: 2 types", tree: "instances: 10,000" },
       code: "plant",
     },
     {
       title: "Rendering, and the memory saved",
       description:
-        "To draw a frame, each Tree.render() calls draw() on its shared TreeType with its own (x, y, age); the flyweight paints using its intrinsic color and texture. Two shared objects now back thousands of trees.",
+        "When a frame is drawn, Forest.render() asks each Tree to render(), and the Tree calls draw() on its shared TreeType with its own (x, y, age); the flyweight paints using its intrinsic color and texture. The example defines this path but stops before drawing anything — the point is that two shared objects back 10,000 trees.",
       highlight: ["tree-draw", "type-paint"],
       packets: [
         { relation: "tree-draw", label: "draw(canvas,x,y,age)" },
@@ -271,7 +270,7 @@ export const pattern: PatternDefinition = {
       ],
       notes: {
         factory: "pool: 2 types",
-        concreteType: "shared by 5,000+ trees",
+        concreteType: "each shared by 5,000 trees",
       },
       code: "treeDraw",
     },

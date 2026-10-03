@@ -99,14 +99,26 @@ class Forest:
         for tree in self._trees:
             tree.render(canvas)
     # [/render]
+
+    @property
+    def tree_count(self) -> int:
+        return len(self._trees)
+
+    @property
+    def type_count(self) -> int:
+        return self._factory.pool_size
 # [/forest]
 
 
 # [usage]
 forest = Forest()
-for _ in range(5_000):
+forest.plant(120, 40, 3, "Oak", "#2f6b3a", "rough-bark.png")  # cache miss: builds the Oak type
+forest.plant(340, 95, 7, "Oak", "#2f6b3a", "rough-bark.png")  # cache hit: same Oak instance
+forest.plant(560, 70, 5, "Pine", "#1f4d2e", "needle-bark.png")  # cache miss: builds the Pine type
+for _ in range(4_998):
     forest.plant(random.random() * 1000, random.random() * 1000, random.random() * 50, "Oak", "#2f6b3a", "rough-bark.png")
-for _ in range(5_000):
+for _ in range(4_999):
     forest.plant(random.random() * 1000, random.random() * 1000, random.random() * 50, "Pine", "#1f4d2e", "needle-bark.png")
-# 10,000 Tree objects in memory, backed by just two shared ConcreteTreeType instances
+# 10,000 Tree objects in memory (5,000 per species), backed by just two shared ConcreteTreeType instances
+print(f"{forest.tree_count} trees, {forest.type_count} tree types")  # 10000 trees, 2 tree types
 # [/usage]

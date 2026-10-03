@@ -39,10 +39,10 @@ export const architecture: ArchitectureDefinition = {
     "Time-travel and history only cover what the Model captures — effects that already fired for real (an email that was sent) can't be undone by stepping the Model backward.",
   ],
   realWorld: [
-    "Elm bakes this architecture into the language itself: Model, Msg, update and view are not a convention, they are what an Elm program is",
-    "Redux and React's useReducer are this pattern under different names: a pure reducer, dispatched actions, and a render step subscribed to the store",
-    "Redux DevTools' time-travel slider is exactly the history-of-Models idea, generalized into a debugging tool",
-    "The Elm Architecture has been ported deliberately into other ecosystems: Elmish (F#), Fabulous and .NET MAUI MVU, and The Composable Architecture (TCA) for SwiftUI",
+    "In Elm this architecture is the standard shape of every interactive program: `Browser.element` takes `init`, `update`, `view` and `subscriptions`, and the Elm guide describes the pattern as having emerged naturally from early Elm code",
+    "Redux (explicitly inspired by Elm) and React's useReducer use the same reducer loop: a pure reducer and dispatched actions. Unlike update, a reducer returns no Cmds; effects live outside it, in middleware or useEffect",
+    "Redux DevTools' time-travel slider builds on the same idea: it records every dispatched action and caches each computed state, so jumping back is a lookup",
+    "The Elm Architecture has been ported deliberately into other ecosystems: Elmish (F#/Fable), Fabulous (F# for .NET MAUI and Avalonia), and The Composable Architecture (TCA) for SwiftUI",
   ],
   concepts: [
     {
@@ -81,9 +81,9 @@ export const architecture: ArchitectureDefinition = {
         "Because every Model is immutable, the runtime can keep every one it has ever produced in a list and jump back to any of them without recomputing anything — a snapshot lookup, not a replay of messages.",
     },
     {
-      term: "Subscription",
+      term: "Subscriber (render listener)",
       description:
-        "A listener registered with the runtime that is notified with the freshly rendered output after every dispatch — the piece that actually puts it on screen.",
+        "A listener registered with this example's runtime that is notified with the freshly rendered output after every dispatch — the piece that actually puts it on screen. Not to be confused with Elm's `Sub` / `subscriptions`, which turn outside events (timers, sockets, keyboard) into Msgs fed into update.",
     },
   ],
 
@@ -94,9 +94,9 @@ export const architecture: ArchitectureDefinition = {
         "JavaScript's take on the same loop: a pure reducer `(state, action) => state` in place of update, dispatched actions in place of Msg, middleware in place of the Cmd runtime.",
     },
     {
-      name: "Elmish / Fabulous / .NET MAUI MVU",
+      name: "Elmish / Fabulous",
       description:
-        "Direct ports of the Elm Architecture into F# and .NET: the same Model/Msg/update/view shape, with Cmd<Msg> values for effects, applied to desktop and mobile UI instead of the browser.",
+        "Direct ports of the Elm Architecture into F#: the same Model/Msg/update/view shape, with Cmd<Msg> values for effects. Elmish targets the browser via Fable; Fabulous applies it to desktop and mobile UI (.NET MAUI, Avalonia).",
     },
     {
       name: "SwiftUI — The Composable Architecture (TCA)",
@@ -106,7 +106,7 @@ export const architecture: ArchitectureDefinition = {
     {
       name: "Flux",
       description:
-        "Facebook's earlier architecture that MVU and Redux are often compared to: unidirectional data flow through a dispatcher and stores, though without insisting the store-update step be a single pure function.",
+        "Facebook's architecture that Redux evolved from: unidirectional data flow through a dispatcher and stores, though without insisting the store-update step be a single pure function.",
     },
   ],
 

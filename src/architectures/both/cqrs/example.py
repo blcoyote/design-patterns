@@ -15,6 +15,9 @@ class PlaceOrderCommand:
 # [aggregate]
 class Order:
     def __init__(self, order_id: str, customer_id: str, total_cents: int) -> None:
+        # Invariant: the write model refuses a command that would create an invalid order.
+        if total_cents <= 0:
+            raise ValueError(f"order {order_id}: total must be positive, got {total_cents} cents")
         self.id = order_id
         self.customer_id = customer_id
         self.total_cents = total_cents

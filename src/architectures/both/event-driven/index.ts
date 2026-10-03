@@ -30,7 +30,7 @@ export const architecture: ArchitectureDefinition = {
     "Producers and consumers are decoupled from each other — neither references the other's type, only the broker and a topic/event contract.",
     "New consumers can be added, and old ones removed, without changing a single producer.",
     "One event can fan out to any number of consumers, including zero, and consumers can react at their own pace.",
-    "Choreography has no single orchestrator to become a bottleneck or a single point of failure for the whole flow.",
+    "Choreography has no single orchestrator to become a bottleneck or a single point of failure for the whole flow (the broker itself is still shared infrastructure that must be made highly available).",
   ],
   cons: [
     'Harder to trace end-to-end: reading publish("OrderPlaced", …) alone does not tell you everything that will eventually happen because of it.',
@@ -78,7 +78,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Orchestration",
       description:
-        "A single process manager (a saga) explicitly calls each step in order and tracks where the overall flow is — the opposite end of the spectrum from choreography.",
+        "A central orchestrator (often called a process manager, or an orchestration-based saga) explicitly calls each step in order and tracks where the overall flow is — the opposite end of the spectrum from choreography. A saga can be coordinated either way.",
     },
     {
       term: "Delivery guarantee",
@@ -90,12 +90,12 @@ export const architecture: ArchitectureDefinition = {
     {
       name: "Choreography vs. orchestration",
       description:
-        "Choreography (shown here): every consumer reacts independently and may itself publish further events, with no central coordinator. Orchestration: a process manager or saga explicitly drives each step and knows the whole flow.",
+        "Choreography (shown here): every consumer reacts independently and may itself publish further events, with no central coordinator. Orchestration: a central orchestrator (a process manager, or an orchestration-based saga) explicitly drives each step and knows the whole flow.",
     },
     {
       name: "Event notification vs. event-carried state transfer",
       description:
-        "An event notification (shown here) carries just enough to identify what happened — orderId, item, quantity — and expects an interested consumer to ask for more if it needs it. Event-carried state transfer instead embeds a full copy of the changed data in the event itself, so consumers never need to call back.",
+        "An event notification (closest to what is shown here) carries just enough to identify what happened — here orderId, item, quantity — and expects an interested consumer to ask for more if it needs it (no consumer in this scenario does). Event-carried state transfer instead embeds a full copy of the changed data in the event itself, so consumers never need to call back.",
     },
     {
       name: "Broker topology vs. mediator topology",
@@ -393,9 +393,9 @@ export const architecture: ArchitectureDefinition = {
       code: "broker",
     },
     {
-      title: "Inventory publishes StockReserved on its own",
+      title: "Inventory published StockReserved on its own",
       description:
-        "Inside its handler, InventoryConsumer calls broker.publish('StockReserved', …) itself. This is choreography: nothing told Inventory to do this except its own reaction to OrderPlaced.",
+        "This already happened during the drain above: inside its handler, right after reserving stock and before Analytics ran, InventoryConsumer called broker.publish('StockReserved', …) itself. This is choreography: nothing told Inventory to do this except its own reaction to OrderPlaced.",
       highlight: ["inventory", "publish-stock", "broker"],
       packets: [{ relation: "publish-stock", label: "StockReserved(1, WIDGET)" }],
       notes: { broker: "queue: 1 (StockReserved)" },
@@ -412,7 +412,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "At-least-once redelivery: only Inventory notices",
       description:
-        "The same OrderPlaced for order 1 is redelivered, simulating an at-least-once broker. Email and Analytics have no deduplication, so they react again; Inventory's dedupe() pipeline recognizes order 1 and drops it before the real handler ever runs.",
+        "The same OrderPlaced for order 1 is published again, simulating the duplicate an at-least-once broker redelivery or a producer retry would cause. Email and Analytics have no deduplication, so they react again; Inventory's dedupe() pipeline recognizes order 1 and drops it before the real handler ever runs.",
       highlight: [
         "broker",
         "notify-email",
@@ -437,7 +437,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "A new consumer joins — the producer never changes",
       description:
-        "LoyaltyConsumer subscribes to OrderPlaced after the fact. OrdersProducer, EventBroker and every other consumer are untouched. The next order it publishes reaches all four consumers, including the one that did not exist a moment ago.",
+        "LoyaltyConsumer subscribes to OrderPlaced after the fact. OrdersProducer, EventBroker and every other consumer are untouched. The next order OrdersProducer publishes reaches all four consumers, including the one that did not exist a moment ago.",
       highlight: [
         "loyalty",
         "sub-loyalty",

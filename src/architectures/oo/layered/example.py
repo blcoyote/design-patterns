@@ -62,7 +62,7 @@ class OrderController:
         return 201, order.customer_id
 
     # [violation]
-    # Anti-pattern: reaching straight past Application and Domain into Data access.
+    # Anti-pattern: going around the data-access layer and writing SQL here.
     # Nothing in a plain class stops this — only discipline and code review do.
     def handle_debug_lookup(self, order_id: str) -> list[object]:
         return database_query(f"SELECT * FROM orders WHERE id = '{order_id}'")
@@ -79,5 +79,5 @@ def database_query(sql: str) -> list[object]:
 controller = OrderController(OrderService(SqlOrderRepository()))
 controller.handle_place_order("cust-42", [LineItem("WIDGET", 19.99), LineItem("GADGET", 29.99)])
 
-# Anti-pattern in action: the controller reaches past three layers directly into the database.
+# Anti-pattern in action: the controller bypasses the data-access layer and queries the database itself.
 controller.handle_debug_lookup("42")

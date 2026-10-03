@@ -5,7 +5,7 @@ from typing import Any, Callable
 @dataclass(frozen=True)
 class OrderPlaced:
     order_id: str
-    total: float
+    total: int
 
 
 @dataclass(frozen=True)
@@ -17,23 +17,40 @@ class UserSignedUp:
 Unsubscribe = Callable[[], None]
 
 
+# One entry per subscribe() call. A plain class (not a dataclass), so equality
+# is identity and list.remove() finds exactly this subscription.
+class Subscription:
+    def __init__(self, handler: Callable[[Any], None]) -> None:
+        self.handler = handler
+
+
 # [eventBus]
 class EventBus:
     def __init__(self) -> None:
-        # dict keys preserve insertion order and dedupe, standing in for JS's Set here.
-        self._topics: dict[str, dict[Callable[[Any], None], None]] = {}
+        # A list of subscriptions per topic, kept in subscription order.
+        self._topics: dict[str, list[Subscription]] = {}
 
     # [subscribe]
     def subscribe(self, topic: str, handler: Callable[[Any], None]) -> Unsubscribe:
-        handlers = self._topics.setdefault(topic, {})
-        handlers[handler] = None
-        return lambda: handlers.pop(handler, None)
+        # Each call gets its own subscription, so subscribing the same handler
+        # twice delivers twice, and each unsubscribe removes only its own entry.
+        subscription = Subscription(handler)
+        subscriptions = self._topics.setdefault(topic, [])
+        subscriptions.append(subscription)
+
+        def unsubscribe() -> None:
+            if subscription in subscriptions:
+                subscriptions.remove(subscription)
+
+        return unsubscribe
     # [/subscribe]
 
     def publish(self, topic: str, payload: Any) -> None:
         # [dispatch]
-        for handler in list(self._topics.get(topic, {})):
-            handler(payload)
+        # Loop over a snapshot so a handler that subscribes or unsubscribes
+        # mid-publish doesn't affect the round we're already delivering.
+        for subscription in list(self._topics.get(topic, [])):
+            subscription.handler(payload)
         # [/dispatch]
 
 
@@ -46,7 +63,7 @@ class CheckoutService:
     def __init__(self, bus: EventBus) -> None:
         self._bus = bus
 
-    def place_order(self, order_id: str, total: float) -> None:
+    def place_order(self, order_id: str, total: int) -> None:
         # ...charge the card, persist the order...
         # [checkoutPublish]
         self._bus.publish("order.placed", OrderPlaced(order_id, total))
@@ -84,11 +101,11 @@ class EmailService:
 # [analyticsService]
 class AnalyticsService:
     def __init__(self, bus: EventBus) -> None:
-        bus.subscribe("order.placed", lambda e: self._track("order.placed", e))
-        bus.subscribe("user.signedUp", lambda e: self._track("user.signedUp", e))
+        bus.subscribe("order.placed", lambda e: self._track("order.placed", f"orderId={e.order_id} total={e.total}"))
+        bus.subscribe("user.signedUp", lambda e: self._track("user.signedUp", f"userId={e.user_id} email={e.email}"))
 
-    def _track(self, topic: str, payload: object) -> None:
-        print(f"analytics: {topic} {payload}")
+    def _track(self, topic: str, details: str) -> None:
+        print(f"analytics: {topic} {details}")
 # [/analyticsService]
 
 

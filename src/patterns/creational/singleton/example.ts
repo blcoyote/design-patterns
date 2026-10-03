@@ -60,11 +60,11 @@ class PaymentService {
 const users = new UserService();
 const payments = new PaymentService();
 
-users.apiUrl(); // "https://api.example.com"
-payments.apiUrl(); // the exact same value, from the exact same object
+console.log(users.apiUrl()); // "https://api.example.com"
+console.log(payments.apiUrl()); // the exact same value, from the exact same object
 
 payments.updateApiUrl("https://updated.example.com");
-users.apiUrl(); // "https://updated.example.com" — set via PaymentService, seen through UserService
+console.log(users.apiUrl()); // "https://updated.example.com" — set via PaymentService, seen through UserService
 
 // new AppConfig() // compile error: constructor is private
 // [/usage]

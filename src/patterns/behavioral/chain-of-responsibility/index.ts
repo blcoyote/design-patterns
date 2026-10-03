@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
   problem:
     "An API request has to pass several unrelated checks before the real code answers it: is the caller logged in, are they sending too many requests, is the payload valid? If you put all of that in one big handleRequest() method, every new check means editing the same tangled function. The caller also can't reorder the checks, skip one, or reuse a single check somewhere else.",
   solution:
-    "Turn each check into its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either deals with the request itself (for example by rejecting it) or, if it has nothing to say, passes it on by calling next.handle(request). The caller only talks to the first handler. It doesn't need to know how many links there are or in what order. This middleware-style example is the pipeline/filter variant: several links may run, and each one decides whether to reject the request or pass it on. The classic GoF form instead stops at exactly one handler that fully handles the request. Class-based tabs share forwarding through an abstract Handler base; Go uses a Handler interface and embeds BaseHandler for that behavior. Either way, this differs from Decorator in intent: a decorator always runs and always forwards, to add behavior around the call, while a chain link may stop the request outright.",
+    "Turn each check into its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either deals with the request itself (for example by rejecting it) or, if it has nothing to say, passes it on by calling next.handle(request). The caller only talks to the first handler. It doesn't need to know how many links there are or in what order. This middleware-style example is the pipeline/filter variant: several links may run, and each one decides whether to reject the request or pass it on. The classic GoF form instead stops at the first handler that handles the request (or lets it fall off the end of the chain unhandled). Class-based tabs share forwarding through an abstract Handler base; Go uses a Handler interface and embeds BaseHandler for that behavior. Either way, this differs from Decorator in intent: a decorator always runs and always forwards, to add behavior around the call, while a chain link may stop the request outright.",
   analogy:
     "Think of a support call that keeps getting escalated. The first-line agent handles what they can and passes the rest to the next tier, and then the next, until someone with the right authority deals with it. If everyone has had a turn and nobody can help, the request is finally turned away.",
   whenToUse: [
@@ -231,7 +231,7 @@ export const pattern: PatternDefinition = {
       description:
         "A GET request carries no body to validate, so ValidationHandler has nothing to reject and forwards it to the last link.",
       highlight: ["validationHandler"],
-      notes: { validationHandler: "schema ok ✓" },
+      notes: { validationHandler: "no body ✓" },
       code: "validation",
     },
     {

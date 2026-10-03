@@ -20,6 +20,7 @@ class AppConfig:
     # [getInstance]
     @classmethod
     def get_instance(cls) -> "AppConfig":
+        # Not thread-safe: two threads can both see None and create two instances (see the cons).
         if cls._instance is None:
             cls._instance = cls(_CREATE)
         return cls._instance
@@ -61,11 +62,11 @@ class PaymentService:
 users = UserService()
 payments = PaymentService()
 
-users.api_url()  # "https://api.example.com"
-payments.api_url()  # the exact same value, from the exact same object
+print(users.api_url())  # "https://api.example.com"
+print(payments.api_url())  # the exact same value, from the exact same object
 
 payments.update_api_url("https://updated.example.com")
-users.api_url()  # "https://updated.example.com" — set via PaymentService, seen through UserService
+print(users.api_url())  # "https://updated.example.com" — set via PaymentService, seen through UserService
 
 # AppConfig()  # raises RuntimeError: use get_instance() instead
 # [/usage]

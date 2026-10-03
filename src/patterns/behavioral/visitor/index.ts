@@ -23,7 +23,7 @@ export const pattern: PatternDefinition = {
   whenToUse: [
     "An object structure contains many different classes, and you need several distinct operations across all of them.",
     "The classes in the structure rarely change, but you expect to add new operations often.",
-    "An operation would otherwise be scattered across every element class, repeating the traversal code each time.",
+    "Many distinct, unrelated operations need to run over the structure, and you don't want to pollute the element classes with them.",
   ],
   pros: [
     "Adding an operation is just a new Visitor class. The element classes stay untouched (Open/Closed).",
@@ -36,7 +36,7 @@ export const pattern: PatternDefinition = {
     "The extra accept()/visit() indirection makes the call flow harder to follow than a plain virtual method call.",
   ],
   realWorld: [
-    "Compiler ASTs (abstract syntax trees, the in-memory tree a compiler builds from source code): Roslyn's CSharpSyntaxVisitor and javac's TreeVisitor use true double dispatch (an accept() method per node type) to type-check, optimize, or generate code.",
+    "Compiler ASTs (abstract syntax trees, the in-memory tree a compiler builds from source code): javac's internal JCTree.Visitor (behind its type checker and bytecode generator) and public com.sun.source.tree.TreeVisitor, and Roslyn's CSharpSyntaxVisitor for analyzers, all use true double dispatch (each node type implements accept()).",
     "ESLint and Babel plugins do visitor-style AST traversal, but dispatch by looking up node.type as a string key rather than by double dispatch.",
     "Serialization frameworks that add a new output format as a new visitor instead of new methods on every model class.",
   ],
@@ -68,12 +68,12 @@ export const pattern: PatternDefinition = {
     {
       id: "group",
       label: "Group",
-      role: "Composite Element",
+      role: "Concrete Element + Object Structure",
       kind: "class",
       x: 250,
       y: 190,
       description:
-        "Holds a list of child shapes and implements Shape itself, so a Group can contain Circles, Rectangles, or further nested Groups. Its accept() lets every child dispatch itself first, then calls visitor.visitGroup(this) for its own contribution.",
+        "Holds a list of child shapes and implements Shape itself, so a Group can contain Circles, Rectangles, or further nested Groups. In GoF terms it is also the Object Structure, which walks its elements: its accept() lets every child dispatch itself first, then calls visitor.visitGroup(this) for its own contribution.",
     },
     {
       id: "circle",
@@ -220,7 +220,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "visitRectangle(this)",
       description:
-        "Hop 2 for Rectangle: it calls visitRectangle(this) — the same call site in Group, a different method resolved entirely by Rectangle's own type.",
+        "Hop 2 for Rectangle: it calls visitRectangle(this) — the same call site in Group, a different visitX method, chosen by Rectangle's own type.",
       bend: 40,
       code: "visitRectangleMethod",
     },

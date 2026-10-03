@@ -15,7 +15,11 @@ class Order {
     readonly id: string,
     readonly customerId: string,
     readonly totalCents: number,
-  ) {}
+  ) {
+    // Invariant: the write model refuses a command that would create an invalid order.
+    if (totalCents <= 0)
+      throw new Error(`order ${id}: total must be positive, got ${totalCents} cents`);
+  }
 }
 // [/aggregate]
 

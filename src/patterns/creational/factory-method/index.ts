@@ -21,7 +21,7 @@ export const pattern: PatternDefinition = {
   whenToUse: [
     "A class cannot know ahead of time which concrete class of object it will need to create.",
     "You want specialized creators to choose the objects they create, without changing shared planning code.",
-    "You want product selection to live behind one factory method rather than in the client.",
+    "You want subclasses (or, in Go, other implementations) to decide which product the shared code creates, instead of one central function choosing for everyone.",
   ],
   pros: [
     "The creator is not tightly coupled to concrete product classes.",
@@ -29,7 +29,7 @@ export const pattern: PatternDefinition = {
     "Open/Closed: add a product by providing another creator implementation without changing the shared planning code.",
   ],
   cons: [
-    "Class-based versions may need a new creator subclass for every product variant; Go can add another interface implementation instead.",
+    "Every new product variant usually needs a new concrete creator (a subclass, or another Logistics implementation in Go).",
     "It adds a layer of indirection, which is overkill if there will only ever be one product type.",
   ],
   realWorld: [
@@ -42,7 +42,7 @@ export const pattern: PatternDefinition = {
     {
       id: "transport",
       label: "Transport",
-      role: "Product interface",
+      role: "Product",
       kind: "interface",
       x: 620,
       y: 90,
@@ -69,7 +69,7 @@ export const pattern: PatternDefinition = {
     {
       id: "logistics",
       label: "Logistics",
-      role: "Creator abstraction",
+      role: "Creator",
       kind: "abstract",
       x: 260,
       y: 90,

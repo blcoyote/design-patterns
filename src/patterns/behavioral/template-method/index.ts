@@ -16,12 +16,12 @@ export const pattern: PatternDefinition = {
   problem:
     "Two report exporters, CSV and PDF, follow almost the same procedure: fetch the data, format it, then write it out. Without a shared skeleton, every new format copies the same three steps and tweaks a line or two. A bug in the ordering, or a forgotten step, then has to be fixed in every copy separately.",
   solution:
-    "Put the fixed sequence of steps into one base-class method, generate(), which subclasses are not meant to override. Steps that must differ are declared abstract, so every subclass has to supply them. Steps that usually stay the same, but occasionally might not, get a default implementation that subclasses may override (a hook). Each subclass then writes only the few lines that are genuinely different.",
+    'Put the fixed sequence of steps into one base-class method, generate(), which subclasses are not meant to override. Steps that must differ are declared abstract, so every subclass has to supply them. Steps that usually stay the same, but occasionally might not, get a default implementation that subclasses may override (a hook). Each subclass then writes only the few lines that are genuinely different. Languages enforce "not meant to override" differently: C# methods are non-virtual by default and Java has `final`, while TypeScript cannot prevent overrides and Python\'s `@typing.final` is only a type-checker hint. Go has no inheritance, so there the skeleton calls the steps through an interface that each concrete generator supplies.',
   analogy:
     "A recipe card printed once and shared by every cook: preheat, mix, bake, cool. The steps and their order never change. Each cook can use their own mixing technique or skip the optional glaze, but the structure of the recipe stays exactly as printed.",
   whenToUse: [
     "Several classes implement the same algorithm but differ in only a few steps, and you want that shared structure in one place.",
-    "You want subclasses to customize individual steps while keeping the overall sequence fixed. Languages enforce this differently: C# methods are non-virtual by default, and Java can use `final`. TypeScript cannot prevent overrides; Python's `@typing.final` is only a type-checker hint. Go has no method overriding, so the template calls an interface and concrete generators provide the steps without replacing generate().",
+    "You want subclasses to customize individual steps while keeping the overall sequence fixed.",
     "You want optional extension points (hooks) that most subclasses can safely ignore.",
   ],
   pros: [
@@ -40,7 +40,7 @@ export const pattern: PatternDefinition = {
     "Test framework base classes that call setUp(), the test body, then tearDown() in a fixed sequence",
     "Abstract HTTP controller base classes that fix request validation and logging, leaving handle() to subclasses",
   ],
-  related: ["strategy", "factory-method", "iterator"],
+  related: ["strategy", "factory-method"],
   participants: [
     {
       id: "reportGenerator",
@@ -205,7 +205,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Concrete step: fetchData()",
       description:
-        "The skeleton calls this.fetchData() — a concrete method defined once on ReportGenerator and inherited unmodified by every subclass. For CsvReportGenerator it just returns the three clean CSV rows passed to the constructor.",
+        "The skeleton calls fetchData() — a concrete method defined once on ReportGenerator and inherited unmodified by every subclass. For CsvReportGenerator it just returns the three clean CSV rows passed to the constructor.",
       highlight: ["reportGenerator"],
       notes: { reportGenerator: "rows: 3" },
       code: "fetch",

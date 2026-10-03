@@ -196,7 +196,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Factory builds the checkbox",
       description:
-        "The same call pattern produces the other half of the family: createCheckbox() resolves to DarkFactory's override and returns a DarkCheckbox, so the two widgets automatically match.",
+        "The same call pattern produces the other half of the family: createCheckbox() resolves to DarkFactory's implementation and returns a DarkCheckbox, so the two widgets automatically match.",
       highlight: ["client", "client-calls", "darkFactory", "df-creates-checkbox", "checkbox"],
       packets: [
         { relation: "client-calls", label: "createCheckbox()" },

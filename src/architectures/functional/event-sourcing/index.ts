@@ -17,9 +17,9 @@ export const architecture: ArchitectureDefinition = {
   problem:
     "When an app saves only the latest value, it loses the changes that led there. A separate audit table can fall out of sync with the data it is meant to explain. Building another view, such as a dashboard or search index, may then require repeatedly scraping the current table.",
   solution:
-    "Store each change as a new event; never edit or delete earlier events. A pure `decide(command, state)` function returns the events for a command. A pure `evolve(state, event)` function applies one event to produce the next state. Replay the event stream to rebuild the current state. Other consumers can use that same stream to create audits or read views without asking the write side for extra data.",
+    'Store each change as a new event; never edit or delete earlier events. A pure `decide(command, state)` function returns the events for a command. A pure `evolve(state, event)` function applies one event to produce the next state. A thin command handler (the shell) loads the stream, replays it to rebuild the current state, calls `decide`, and appends the resulting events. Other consumers can use that same stream to create audits or read views without asking the write side for extra data. Event Sourcing itself is paradigm-neutral (object-oriented implementations put the same logic in aggregate methods); this page shows it in its functional form, the "Decider" formulation popularized by Jérémie Chassaing.',
   analogy:
-    'A bank statement, not a bank balance. The branch does not keep a single number that it edits in place — it keeps every deposit and withdrawal, in order, forever. Your current balance is just "add them all up". You can also hand the same statement to an accountant (a projection), a court (an audit), or your past self (a historical replay) and each will compute something different from identically the same facts.',
+    'A bank statement, not a bank balance. The branch does not keep a single number that it edits in place — it keeps every deposit and withdrawal, in order, forever. Your current balance is just "add them all up". You can also hand the same statement to an accountant (a projection), a court (an audit), or your past self (a historical replay) and each will compute something different from exactly the same facts.',
   whenToUse: [
     "An audit trail is a hard requirement, not a nice-to-have — regulators, finance, or support need to know exactly what happened and when, not just the final state.",
     "The domain is naturally about things happening over time (orders, bookings, ledgers) rather than things merely existing (a user's profile fields).",
@@ -35,14 +35,13 @@ export const architecture: ArchitectureDefinition = {
   cons: [
     "Reading current state is no longer a simple row lookup — without snapshots, rebuilding a long-lived stream means replaying everything that ever happened to it.",
     'Events are a permanent, public contract: changing their shape later means writing "upcasters" to translate old events forward, not just running a schema migration.',
-    "Projections are only eventually consistent with the write side, which forces every screen that reads a projection to decide how it tolerates a few milliseconds (or more) of staleness.",
+    "Projections are often (and asynchronous ones always) only eventually consistent with the write side, which forces every screen that reads a projection to decide how it tolerates a few milliseconds (or more) of staleness.",
     'The mental model is genuinely harder to onboard a new team onto than "there is a table, you update the row".',
   ],
   realWorld: [
-    "EventStoreDB, Axon Framework, and Marten (Postgres) are purpose-built event-sourcing stores and frameworks",
-    "Git itself is an event-sourced system: commits are immutable events, and `git checkout` is a fold over them",
+    "KurrentDB (formerly EventStoreDB), Axon Framework, and Marten (Postgres) are purpose-built event-sourcing stores and frameworks",
     "Accounting and ledger systems have always worked this way — you never erase a transaction, you post a correcting one",
-    'Kafka-backed "event-driven microservices" often use a topic as the append-only log and build consumer-side projections from it',
+    'Kafka-backed "event-driven microservices" often use a topic as the append-only log and build consumer-side projections from it — though Kafka lacks per-stream reads and expected-version appends, so it is usually paired with a real event store rather than used as one',
   ],
   concepts: [
     {
@@ -63,7 +62,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "decide / evolve",
       description:
-        "The two pure functions at the core: decide(command, state) → events applies business rules; evolve(state, event) → state applies one fact. Together they are the entire domain model.",
+        'The two pure functions at the core: decide(command, state) → events applies business rules; evolve(state, event) → state applies one fact. Together they are the entire domain model. This is the functional "Decider" formulation popularized by Jérémie Chassaing; OO implementations put the same logic in aggregate methods.',
     },
     {
       term: "Replay / fold",
@@ -91,7 +90,7 @@ export const architecture: ArchitectureDefinition = {
     designPatterns: [
       {
         slug: "memento",
-        why: "A snapshot is exactly a Memento: an opaque capture of state at a point in time, created so a later replay can resume from it instead of starting over.",
+        why: "A snapshot plays a Memento-like role: a captured state at a point in time, kept so a later replay can resume from it instead of starting over.",
       },
       {
         slug: "command",
@@ -108,10 +107,6 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "iterator",
         why: "Replaying a stream to rebuild state walks it one event at a time through a uniform interface, exactly what Iterator abstracts over any collection.",
-      },
-      {
-        slug: "state",
-        why: "evolve(state, event) is state transition made explicit and total — the account's behavior at any moment is entirely determined by which events it has already folded.",
       },
     ],
     architectures: [
@@ -133,7 +128,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "mvu",
-        why: "An MVU runtime keeps every Model it has produced as a history list — the same idea as an event log, except each entry is already the folded state rather than the event that produced it, so time-travel is a lookup instead of a replay.",
+        why: "An MVU runtime can keep every Model it has produced as a history list — the same idea as an event log, except each entry is already the folded state rather than the event that produced it, so time-travel is a lookup instead of a replay.",
       },
     ],
   },
@@ -151,51 +146,63 @@ export const architecture: ArchitectureDefinition = {
         'Sends a plain command — "Withdraw(30)" — and never touches the event store, the fold, or any state directly.',
     },
     {
-      id: "decide",
-      label: "decide()",
-      role: "Decision function",
+      id: "handler",
+      label: "handle()",
+      role: "Command handler (shell)",
       kind: "object",
-      x: 340,
+      x: 360,
       y: 70,
       width: 170,
       description:
-        "Pure function decide(command, state) → Event[]. The only place business rules live: it looks at the current state and returns the events a command implies, or rejects it outright.",
-      code: "decide",
-      patterns: ["command"],
+        "The imperative shell around the pure core. It loads the stream, folds it into the current state, calls decide, and appends the returned events at the version it loaded. All of the I/O lives here; none of the business rules do.",
+      code: "handle",
     },
     {
       id: "store",
       label: "EventStore",
       role: "Append-only store",
       kind: "class",
-      x: 620,
+      x: 640,
       y: 70,
       width: 180,
       description:
-        "The append-only log, keyed by stream. Enforces optimistic concurrency on every append, and notifies subscribers once an event is durably written.",
+        "The append-only log, keyed by stream. Enforces optimistic concurrency on every append, and notifies subscribers once the append has succeeded.",
       code: "append",
       patterns: ["pub-sub"],
+    },
+    {
+      id: "decide",
+      label: "decide()",
+      role: "Decision function",
+      kind: "object",
+      x: 110,
+      y: 230,
+      width: 170,
+      description:
+        "Pure function decide(command, state) → Event[]. The only place business rules live: it looks at the current state and returns the events a command implies, or rejects it outright. It never touches the store.",
+      code: "decide",
+      patterns: ["command"],
     },
     {
       id: "fold",
       label: "fold (replay)",
       role: "Rebuild state",
       kind: "object",
-      x: 340,
-      y: 210,
+      x: 360,
+      y: 230,
       width: 170,
       description:
-        "Loads a stream's events and reduces them through evolve, starting from an initial value, to produce the current state. There is no other way state exists.",
+        "Reduces a stream's events through evolve, starting from an initial value, to produce the current state. Pure: it is handed the events and never reads the store itself.",
       code: "fold",
-      patterns: ["iterator", "state"],
+      patterns: ["iterator"],
     },
     {
       id: "snapshot",
       label: "Snapshot",
       role: "Cached fold result",
       kind: "object",
-      x: 620,
-      y: 210,
+      x: 360,
+      y: 380,
       width: 170,
       description:
         "A cached (version, state) pair. A later read folds only the events appended after this version instead of replaying the whole stream from zero.",
@@ -207,8 +214,8 @@ export const architecture: ArchitectureDefinition = {
       label: "Projection",
       role: "Read model",
       kind: "class",
-      x: 620,
-      y: 350,
+      x: 640,
+      y: 330,
       width: 180,
       description:
         "Subscribes to appended events and evolves its own, independently-shaped read model — here, a running count of withdrawals — without ever calling back into the store.",
@@ -220,41 +227,53 @@ export const architecture: ArchitectureDefinition = {
     {
       id: "command",
       from: "client",
-      to: "decide",
+      to: "handler",
       type: "calls",
       label: "Withdraw(30)",
       description:
-        "The client sends a plain command object. It has no idea whether this will succeed, or what events (if any) it will produce.",
-      code: "decide",
-    },
-    {
-      id: "replay",
-      from: "decide",
-      to: "fold",
-      type: "calls",
-      label: "replay()",
-      description:
-        "Before deciding anything, decide needs the entity's current state — and the only way to get it is to replay its history.",
-      code: "fold",
+        "The client sends a plain command object to the command handler. It has no idea whether this will succeed, or what events (if any) it will produce.",
+      code: "handle",
     },
     {
       id: "load",
-      from: "fold",
+      from: "handler",
       to: "store",
       type: "calls",
       label: "load(stream)",
       description:
-        'fold reads every event recorded for this stream so far. No separate "current balance" is stored anywhere for it to read instead.',
+        'The handler reads every event recorded for this stream so far. No separate "current balance" is stored anywhere for it to read instead.',
+      bend: -30,
+      code: "handle",
+    },
+    {
+      id: "replay",
+      from: "handler",
+      to: "fold",
+      type: "calls",
+      label: "fold(events)",
+      description:
+        "The handler replays the loaded events through evolve to rebuild the current state — the only way to get it.",
       code: "fold",
     },
     {
+      id: "decideCall",
+      from: "handler",
+      to: "decide",
+      type: "calls",
+      label: "decide(cmd, state)",
+      description:
+        "The handler passes the command and the rebuilt state to the pure decide function, which returns the events to append (or rejects the command).",
+      code: "decide",
+    },
+    {
       id: "append",
-      from: "decide",
+      from: "handler",
       to: "store",
       type: "calls",
       label: "append(v2, [Withdrawn(30)])",
       description:
-        "Once decide produces an event, it is appended at the version the reader last saw. If another writer got there first, the append is rejected.",
+        "The handler appends the new events at the version it loaded. If another writer appended in the meantime, the append is rejected.",
+      bend: 30,
       code: "append",
     },
     {
@@ -269,12 +288,12 @@ export const architecture: ArchitectureDefinition = {
     },
     {
       id: "cache",
-      from: "store",
+      from: "fold",
       to: "snapshot",
       type: "creates",
       label: "snapshot(v3, state)",
       description:
-        "Periodically, the already-folded state is cached at its version, so the next read does not have to replay from event zero.",
+        "Periodically, an already-folded state is cached together with its version, so the next read does not have to replay from event zero.",
       code: "snapshot",
     },
   ],
@@ -283,27 +302,28 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "An append-only tape of events",
       description:
-        'EventStore holds every stream as a sequence of immutable, past-tense events. There is no "current row" anywhere — decide and evolve are the entire domain model, and fold is the only way state comes into being.',
-      highlight: ["client", "decide", "store", "fold", "snapshot", "projection"],
+        'EventStore holds every stream as a sequence of immutable, past-tense events. There is no "current row" anywhere — decide and evolve are the entire domain model, fold is the only way state comes into being, and a thin command handler does all the I/O around them.',
+      highlight: ["client", "handler", "decide", "store", "fold", "snapshot", "projection"],
       code: "evolve",
     },
     {
       title: "Client sends a command",
       description:
-        "The client does not touch the event store directly — it sends a plain command, Withdraw(30), to the decision function and waits.",
-      highlight: ["client", "command", "decide"],
+        "The client does not touch the event store directly — it sends a plain command, Withdraw(30), to the command handler and waits.",
+      highlight: ["client", "command", "handler"],
       packets: [{ relation: "command", label: "Withdraw(30)" }],
-      notes: { decide: "command received" },
-      code: "decide",
+      notes: { handler: "command received" },
+      code: "handle",
     },
     {
       title: "Rebuilding current state by folding the stream",
       description:
-        "Before it can decide anything, decide needs the account's current state. fold loads every event appended so far and replays it through evolve, one event at a time — the fold cursor sweeps the tape from the start.",
-      highlight: ["decide", "replay", "fold", "load", "store"],
+        "Before anything can be decided, the handler needs the account's current state. It loads every event appended so far and folds them through evolve, one event at a time — the fold cursor sweeps the tape from the start.",
+      highlight: ["handler", "load", "store", "replay", "fold"],
       packets: [
-        { relation: "replay", label: "replay()" },
-        { relation: "load", label: "load(stream)", after: 0 },
+        { relation: "load", label: "load(stream)" },
+        { relation: "load", label: "2 events", reverse: true, after: 0 },
+        { relation: "replay", label: "fold(events)", after: 1 },
       ],
       notes: { fold: "balance 0 → 100" },
       code: "fold",
@@ -311,16 +331,20 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "decide checks the invariant",
       description:
-        "With state = { balance: 100 } in hand, decide(Withdraw(30), state) checks the withdrawal against the balance and returns a Withdrawn(30) event. It never touches the store itself — only the event comes back out.",
-      highlight: ["decide"],
+        "With state = { balance: 100 } in hand, the handler calls decide(Withdraw(30), state). decide checks the withdrawal against the balance and returns a Withdrawn(30) event. It never touches the store itself — only the event comes back out.",
+      highlight: ["handler", "decideCall", "decide"],
+      packets: [
+        { relation: "decideCall", label: "decide(cmd, state)" },
+        { relation: "decideCall", label: "[Withdrawn(30)]", reverse: true, after: 0 },
+      ],
       notes: { decide: "returns Withdrawn(30)" },
       code: "decide",
     },
     {
       title: "EventStore appends the new event",
       description:
-        "decide hands its event to the store. The append only succeeds because the stream is still at version 2, the version decide read it at — optimistic concurrency catches any writer that raced in ahead of it.",
-      highlight: ["decide", "append", "store"],
+        "The handler appends the event at version 2, the version of the history it loaded. The append succeeds because the stream is still at version 2 — optimistic concurrency would reject it if another writer had appended in the meantime.",
+      highlight: ["handler", "append", "store"],
       packets: [{ relation: "append", label: "append(v2, [Withdrawn(30)])" }],
       notes: { store: "v2 → v3" },
       code: "append",
@@ -345,7 +369,7 @@ export const architecture: ArchitectureDefinition = {
       title: "A snapshot skips the replay",
       description:
         "Replaying every event on every read does not scale forever. A Snapshot caches the folded state at a known version, so the next read folds only the events appended after v3 instead of starting from event zero.",
-      highlight: ["store", "cache", "snapshot"],
+      highlight: ["fold", "cache", "snapshot"],
       packets: [{ relation: "cache", label: "snapshot(v3, state)" }],
       notes: { snapshot: "cached @ v3" },
       code: "snapshot",

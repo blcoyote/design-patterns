@@ -1,6 +1,7 @@
-// In production C# you'd often reach for System.Threading.Channels or a
-// broker library like MassTransit instead of hand-rolling this, but we keep
-// the explicit pattern structure here for clarity (no NuGet dependency).
+// In production C# you'd often reach for a library instead of hand-rolling
+// this: MediatR notifications in-process, or MassTransit / a message broker
+// across processes. We keep the explicit pattern structure here for clarity
+// (no NuGet dependency).
 
 // Usage (top-level statements must come before type declarations in a
 // C# file, so this runs first even though it reads last).
@@ -20,30 +21,43 @@ checkout.PlaceOrder("A2", 15); // email and analytics react; inventory does not
 record OrderPlaced(string OrderId, decimal Total);
 record UserSignedUp(string UserId, string Email);
 
+// One entry per Subscribe() call. A class (not a record), so List.Remove
+// compares by reference and finds exactly this subscription.
+sealed class Subscription(Delegate handler)
+{
+    public Delegate Handler { get; } = handler;
+}
+
 // [eventBus]
 class EventBus
 {
-    private readonly Dictionary<string, List<Delegate>> _topics = new();
+    // A list of subscriptions per topic, kept in subscription order.
+    private readonly Dictionary<string, List<Subscription>> _topics = new();
 
     // [subscribe]
     public Action Subscribe<T>(string topic, Action<T> handler)
     {
-        if (!_topics.TryGetValue(topic, out var handlers))
+        if (!_topics.TryGetValue(topic, out var subscriptions))
         {
-            handlers = new List<Delegate>();
-            _topics[topic] = handlers;
+            subscriptions = new List<Subscription>();
+            _topics[topic] = subscriptions;
         }
-        handlers.Add(handler);
-        return () => handlers.Remove(handler);
+        // Each call gets its own subscription, so subscribing the same handler
+        // twice delivers twice, and each unsubscribe removes only its own entry.
+        var subscription = new Subscription(handler);
+        subscriptions.Add(subscription);
+        return () => subscriptions.Remove(subscription);
     }
     // [/subscribe]
 
     public void Publish<T>(string topic, T payload)
     {
         // [dispatch]
-        if (_topics.TryGetValue(topic, out var handlers))
+        // Loop over a snapshot so a handler that subscribes or unsubscribes
+        // mid-publish doesn't affect the round we're already delivering.
+        if (_topics.TryGetValue(topic, out var subscriptions))
         {
-            foreach (var handler in handlers.ToArray()) ((Action<T>)handler)(payload);
+            foreach (var subscription in subscriptions.ToArray()) ((Action<T>)subscription.Handler)(payload);
         }
         // [/dispatch]
     }
@@ -94,10 +108,11 @@ class AnalyticsService
 {
     public AnalyticsService(EventBus bus)
     {
-        bus.Subscribe<OrderPlaced>("order.placed", e => Track("order.placed", e));
-        bus.Subscribe<UserSignedUp>("user.signedUp", e => Track("user.signedUp", e));
+        bus.Subscribe<OrderPlaced>("order.placed", e =>
+            Track("order.placed", FormattableString.Invariant($"orderId={e.OrderId} total={e.Total}")));
+        bus.Subscribe<UserSignedUp>("user.signedUp", e => Track("user.signedUp", $"userId={e.UserId} email={e.Email}"));
     }
-    private void Track(string topic, object payload) => Console.WriteLine($"analytics: {topic} {payload}");
+    private void Track(string topic, string details) => Console.WriteLine($"analytics: {topic} {details}");
 }
 // [/analyticsService]
 

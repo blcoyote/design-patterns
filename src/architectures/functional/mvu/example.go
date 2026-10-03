@@ -131,8 +131,8 @@ func (r *Runtime) Subscribe(fn func(rendered string)) {
 
 func (r *Runtime) Dispatch(msg Msg) {
 	next, cmds := update(r.Model(), msg)
-	// A dispatch after time-travel discards any history past the current cursor,
-	// the same way Redux DevTools / Elm's debugger fork a new timeline.
+	// A dispatch after time-travel discards any history past the current cursor --
+	// an undo-stack policy chosen for this demo (Redux DevTools keeps the later actions).
 	r.history = append(slices.Clone(r.history[:r.cursor+1]), next)
 	r.cursor = len(r.history) - 1
 	r.notify()

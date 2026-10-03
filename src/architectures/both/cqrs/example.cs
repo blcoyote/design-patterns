@@ -55,6 +55,9 @@ class Order
 
     public Order(string id, string customerId, int totalCents)
     {
+        // Invariant: the write model refuses a command that would create an invalid order.
+        if (totalCents <= 0)
+            throw new ArgumentException($"order {id}: total must be positive, got {totalCents} cents");
         Id = id;
         CustomerId = customerId;
         TotalCents = totalCents;

@@ -19,7 +19,7 @@ export const pattern: PatternDefinition = {
   solution:
     "Make every rule of the grammar a class that implements a shared Expression interface with one method, interpret(context). Terminal expressions (literals, variables) implement it directly. Non-terminal expressions (Add, Multiply, And, Or, ...) hold references to their own sub-expressions, interpret each child, and combine the results. A sentence in the language becomes a tree of these objects, and evaluating it means calling interpret() once on the root. The recursion that walks the grammar is spread across the classes instead of sitting in one function. Interpreter only covers this evaluation step. Turning source text into the tree (parsing) is a separate job that the pattern leaves to you. Here the client simply builds the tree by hand.",
   analogy:
-    "Think of a calculator reading “x + (2 × 3)”. It doesn't swallow the whole formula at once. It splits it into an addition of two smaller formulas, each of which is a literal, a variable, or another smaller formula. It solves the smallest pieces first and combines the answers on the way back up.",
+    "Think of working out “x + (2 × 3)” from a formula already drawn as a tree. To evaluate the + node, you first evaluate each of its branches: x is looked up, and (2 × 3) is itself a smaller tree to evaluate the same way. The smallest pieces are solved first, and the answers are combined on the way back up.",
   whenToUse: [
     "The grammar is simple and fairly stable. Interpreter does not scale well to complex languages.",
     "Raw speed isn't critical, because a tree-walking interpreter is slower than a compiled or table-driven one.",
@@ -33,10 +33,9 @@ export const pattern: PatternDefinition = {
   cons: [
     "One class per grammar rule becomes unwieldy for anything beyond a small language.",
     "Deeply nested expressions mean a deep call stack, so large sentences can be slow and use a lot of stack.",
-    "A tree of many tiny classes is harder to read and debug than one linear parsing function.",
+    "A tree of many tiny classes is harder to read and debug than one evaluator function.",
   ],
   realWorld: [
-    "GoF's own canonical example: compiling a regular-expression grammar into a tree of Literal/Sequence/Repetition expression objects",
     "SQL and spreadsheet formula engines evaluating expression trees",
     "Rule engines for feature flags, pricing or routing built from boolean/arithmetic expression trees",
     "Template languages that interpret a compiled node tree against render-time data",

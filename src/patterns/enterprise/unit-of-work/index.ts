@@ -15,14 +15,13 @@ export const pattern: PatternDefinition = {
   intent:
     "Track all the changes made during one business operation and write them out together, so either everything is saved or nothing is.",
   problem:
-    "A checkout touches half a dozen rows: a new Order is inserted, the Customer's loyalty points are updated, and a stale Cart is deleted. If each change is saved the instant it happens, a crash halfway through leaves the database in a state no business rule allows, such as an Order with no matching Cart cleanup, or points awarded for a purchase that never completed. Nothing holds the whole operation together as one transaction.",
+    "A checkout touches several rows: a new Order is inserted, the Customer's loyalty points are updated, and a stale Cart is deleted. If each change is saved the instant it happens, a crash halfway through leaves the database in a state no business rule allows, such as an Order inserted but the loyalty points never awarded, or points awarded for a purchase that never completed. Nothing holds the whole operation together as one transaction.",
   solution:
     "Give each business operation a UnitOfWork. Instead of saving anything the moment it changes, application code just reports what happened (registerNew, registerDirty, registerRemoved), and the UnitOfWork keeps each object in the right pending list. Only when the caller calls commit() does it open a single database transaction, write every pending insert, update and delete through it, and commit. If any write fails, the whole transaction rolls back and none of the changes take effect.",
   analogy:
     "A restaurant order pad. A server does not walk to the kitchen after writing down each item. They collect the whole table's order first, then send it in as one ticket. If the kitchen cannot make one of the dishes, the whole ticket is handed back, instead of half the meal silently never arriving.",
   whenToUse: [
     "One business operation touches several objects that must be saved together or not at all.",
-    "You want all the writes from one business operation to succeed or fail together, as a single transaction.",
     "You need one place to decide the order of writes (inserts before updates before deletes, say), regardless of when the application code made each change.",
   ],
   pros: [
@@ -33,12 +32,12 @@ export const pattern: PatternDefinition = {
   cons: [
     "Adds bookkeeping: every change has to be registered instead of just saved directly.",
     "A long-lived Unit of Work can build up large pending lists and hold locks or memory longer than it should.",
-    "It is easy to forget to register a change, which means a write silently never happens. Real ORMs (EF Core, Hibernate, SQLAlchemy) avoid this by tracking changes automatically instead of relying on manual register calls.",
+    "It is easy to forget to register a change, which means a write silently never happens. Real ORMs (EF Core, Hibernate, SQLAlchemy) detect modifications to loaded objects automatically; you still add() new objects and remove() deleted ones, though cascades can cover related objects.",
   ],
   realWorld: [
     "Entity Framework Core's DbContext — SaveChanges() flushes every tracked Added/Modified/Deleted entity in one transaction.",
     "Hibernate / NHibernate's Session, which tracks the changes you make and flushes them together to the database.",
-    "SQLAlchemy's Session object, which tracks pending objects until session.commit().",
+    "SQLAlchemy's Session object, which tracks new and changed objects, flushes them inside one transaction (automatically before queries, and at commit), and makes them permanent on session.commit().",
   ],
   related: ["repository", "command", "memento"],
 
@@ -75,7 +74,7 @@ export const pattern: PatternDefinition = {
       y: 130,
       width: 150,
       description:
-        "Executes the actual BEGIN, INSERT/UPDATE/DELETE and COMMIT or ROLLBACK statements. It has no idea these writes were batched — from its side, commit() just looks like one ordinary transaction.",
+        "Executes the actual BEGIN, INSERT/UPDATE/DELETE and COMMIT or ROLLBACK statements. It has no idea these writes were collected up front — from its side, commit() just looks like one ordinary transaction.",
     },
     {
       id: "pendingNew",
@@ -251,7 +250,7 @@ export const pattern: PatternDefinition = {
     {
       title: "A different commit fails — and rolls back",
       description:
-        "In another operation, the UPDATE to a Customer violates a constraint partway through the flush — before the removed-list deletes even run. The UnitOfWork catches the failure, issues ROLLBACK instead of COMMIT: the Order INSERT that already ran is undone, and the Cart DELETE further down the list never runs at all.",
+        "In another operation (Order #105, Customer #61, Cart #12), the UPDATE to Customer #61 violates a constraint partway through the flush — before the removed-list deletes even run. The UnitOfWork catches the failure and issues ROLLBACK instead of COMMIT: the Order #105 INSERT that already ran is undone, and the Cart #12 DELETE further down the list never runs at all.",
       highlight: ["unitOfWork", "flush", "database"],
       packets: [{ relation: "flush", label: "ROLLBACK", reverse: true }],
       notes: { unitOfWork: "pending kept", database: "ROLLBACK ✗" },

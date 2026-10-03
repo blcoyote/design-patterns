@@ -16,7 +16,7 @@ G = TypeVar("G")
 # [types]
 @dataclass(frozen=True)
 class Candidate:
-    """What parse_lines() produces: a raw line split into (at most) its comma-separated fields."""
+    """What parse_lines() produces: a raw line split into all of its comma-separated fields."""
 
     line_no: int
     raw: str
@@ -169,7 +169,7 @@ DISCOUNT_RATE = 0.1
 
 
 def apply_discount(lines: Iterable[Line]) -> Iterator[Line]:
-    """Pure filter, added to the pipeline after the other four already existed — a 10%
+    """Pure filter, added to the pipeline after the other five already existed — a 10%
     discount for orders of 5 or more units. Nothing about parse_lines, validate_lines,
     add_line_total, add_tax or format_lines changed to make room for it; only the pipe() call did."""
     for line in lines:

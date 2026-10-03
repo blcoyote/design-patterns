@@ -8,14 +8,15 @@ from enum import Enum
 
 
 # [money]
+@dataclass(frozen=True)
 class Money:
-    """Immutable value object: no identity, compared by value, every op returns a new instance."""
+    """Immutable value object: no identity, compared by value, every op returns a new instance.
 
-    __slots__ = ("_cents", "currency")
+    frozen=True makes assignment raise FrozenInstanceError and generates __eq__/__hash__ by value.
+    """
 
-    def __init__(self, cents: int, currency: str = "USD") -> None:
-        self._cents = cents
-        self.currency = currency
+    _cents: int
+    currency: str = "USD"
 
     @staticmethod
     def of(amount: float, currency: str = "USD") -> "Money":
@@ -27,9 +28,6 @@ class Money:
     def add(self, other: "Money") -> "Money":
         self._assert_same_currency(other)
         return Money(self._cents + other._cents, self.currency)
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, Money) and self._cents == other._cents and self.currency == other.currency
 
     def __str__(self) -> str:
         return f"{self._cents / 100:.2f} {self.currency}"
@@ -43,7 +41,7 @@ class Money:
 # [orderLine]
 @dataclass(frozen=True)
 class OrderLine:
-    """Entity: has identity (sku + its position on the order) even though its fields never change."""
+    """Value object: no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable."""
 
     sku: str
     unit_price: Money
@@ -119,7 +117,7 @@ class Order:
 
     @staticmethod
     def create(order_id: str, customer_id: str) -> "Order":
-        # Factory method: callers never build an Order directly.
+        # Factory (Evans): a static creation method, so callers never build an Order directly.
         return Order(order_id, customer_id)
 
     @property
@@ -180,6 +178,8 @@ class InMemoryOrderRepository(OrderRepository):
 
 # [shipping]
 # Shipping bounded context: its own vocabulary. It has never heard of an "Order".
+# Money and the domain-event interface are the only types it shares with Ordering —
+# a deliberately tiny shared kernel.
 @dataclass(frozen=True)
 class ShipmentRequested(DomainEvent):
     shipment_id: str
@@ -200,9 +200,10 @@ class ShippingService:
 
 
 # [acl]
-# Anti-Corruption Layer: translates Ordering's language into Shipping's, so neither
-# bounded context has to know the other's model. OrderPlaced never crosses the
-# boundary as-is — only ShipmentRequested does.
+# Anti-Corruption Layer: conceptually owned by the downstream Shipping context. It
+# translates upstream Ordering's language into Shipping's own, so Ordering's model
+# never leaks into Shipping. OrderPlaced never crosses the boundary as-is — only
+# ShipmentRequested does.
 class OrderingToShippingAcl:
     def __init__(self, shipping: ShippingService) -> None:
         self._shipping = shipping

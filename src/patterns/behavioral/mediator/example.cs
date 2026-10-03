@@ -110,7 +110,8 @@ class SubmitButton : IColleague
     public void SetEnabled(bool enabled)
     {
         Enabled = enabled;
-        Console.WriteLine($"submit: enabled = {enabled}");
+        // C# would print a bool as "True"; lowercase it to match the other tabs.
+        Console.WriteLine($"submit: enabled = {(enabled ? "true" : "false")}");
     }
 }
 // [/submit]

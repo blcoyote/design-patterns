@@ -3,7 +3,8 @@ using System.Globalization;
 
 // [test]
 // Testing the core needs no mocks, no fake clock class, no in-memory database —
-// just values in, a value out, compared with ==/Equals.
+// just values in, a value out, compared field by field (Effects with SequenceEqual,
+// since record equality compares the list by reference).
 var testAccount = new Account("acc-1", "ops@example.com", 4200, new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc), null);
 var testNow = new DateTime(2026, 9, 10, 0, 0, 0, DateTimeKind.Utc);
 

@@ -10,12 +10,18 @@ store.Subscribe((streamId, @event) => projection.Handle(streamId, @event));
 
 const string streamId = "account-42";
 
+// [handle]
+// The command handler is the imperative shell around the pure core: load the stream,
+// fold it, decide, then append at the version that was loaded. If another writer
+// appended in between, the store sees a different length and rejects the append.
 void Handle(Command command)
 {
-    var state = Fold(store.Load(streamId));
+    var history = store.Load(streamId);
+    var state = Fold(history);
     var events = Decide(command, state);
-    store.Append(streamId, store.Load(streamId).Count, events);
+    store.Append(streamId, history.Count, events);
 }
+// [/handle]
 
 // [decide]
 // Decide(command, state) -> IReadOnlyList<Event>: the only place business rules live. It looks
@@ -84,7 +90,8 @@ record Account(string? Owner, decimal Balance)
 static class EventSourcing
 {
     // [evolve]
-    // Evolve(state, event) -> state: a pure, total function with no branch that can fail.
+    // Evolve(state, event) -> state: a pure, total function with no branch that can fail
+    // (the `_` arm only exists to satisfy the compiler; every Event subtype is handled).
     // It only ever applies an event that already happened — it never judges whether it should have.
     public static Account Evolve(Account state, Event @event) => @event switch
     {

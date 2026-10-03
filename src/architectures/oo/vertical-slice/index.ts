@@ -23,7 +23,7 @@ export const architecture: ArchitectureDefinition = {
     'A codebase has accumulated "shared" service and repository classes that only one feature actually uses, so every change ripples sideways into unrelated features.',
     "Features vary enormously in complexity, and a one-size-fits-all layered stack forces a trivial feature through just as much ceremony as a complex one.",
     "Teams are organized around features rather than technical layers, and want their code structure to match.",
-    "A command/query split is wanted but standing up a fully separate read and write store (CQRS) is overkill for most endpoints.",
+    "A command/query split per request is wanted, without separate read and write models (CQRS) for the whole system.",
   ],
   pros: [
     "A feature can be understood, tested and deleted by looking at one slice, instead of hunting across shared layers.",
@@ -39,7 +39,7 @@ export const architecture: ArchitectureDefinition = {
   ],
   realWorld: [
     "MediatR-based .NET APIs organized as Features/PlaceOrder, Features/GetOrder folders, each with its own Command or Query, Handler and validator",
-    "FastEndpoints and similar .NET libraries that pair one endpoint with one request, one response and one handler file",
+    "FastEndpoints and similar .NET libraries built on REPR: one request DTO, one endpoint class (whose HandleAsync is the handler) and one response DTO",
     'Jimmy Bogard\'s "Vertical Slice Architecture" talks and blog posts, which popularized the term',
     "Serverless functions-per-endpoint designs, where each function is effectively its own slice with its own data access",
   ],
@@ -101,7 +101,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "command",
-        why: "PlaceOrder is a plain command object (type, orderId, customerId, totalCents) describing an intent, handled by exactly one handler — the Command pattern.",
+        why: "PlaceOrder is a plain request object (type, orderId, customerId, totalCents) describing an intent, handled by exactly one handler — a command message. Unlike a GoF Command it carries no execute(); the mediator finds the handler that does the work.",
       },
       {
         slug: "chain-of-responsibility",
@@ -372,7 +372,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "Cut by feature, not by layer",
       description:
-        "PlaceOrder and GetOrder are each a self-contained slice: their own request, their own handler, their own data access. A shared Mediator and a pipeline of behaviours are the only things that cross slice boundaries.",
+        "PlaceOrder and GetOrder are each a self-contained slice: their own request, their own handler, their own data access. A shared Mediator, a pipeline of behaviours and the shared OrdersTable are the only things that cross slice boundaries.",
       highlight: [
         "client",
         "mediator",

@@ -180,7 +180,8 @@ class OrdersProducer
         return orderId;
     }
 
-    // Simulates an at-least-once broker redelivering a message it already delivered once.
+    // Simulates a duplicate delivery, as an at-least-once broker redelivery or a producer
+    // retry after a lost ack would cause, by publishing the same event again.
     public void Redeliver(int orderId, string item, int quantity)
     {
         var @event = new OrderPlaced(orderId, item, quantity);

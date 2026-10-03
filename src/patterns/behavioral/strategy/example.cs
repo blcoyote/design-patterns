@@ -4,13 +4,13 @@
 
 // Usage
 var nav = new Navigator(new FastestRoute());
-nav.CalculateRoute("Home", "Office"); // { Minutes = 12, ... }
+nav.Route("Home", "Office"); // { Minutes = 12, ... }
 
 nav.SetStrategy(new ScenicRoute());
-nav.CalculateRoute("Home", "Office"); // { Minutes = 35, ... } — same call, different algorithm
+nav.Route("Home", "Office"); // { Minutes = 35, ... } — same call, different algorithm
 
 nav.SetStrategy(new ShortestRoute());
-nav.CalculateRoute("Home", "Office"); // { Minutes = 18, ... }
+nav.Route("Home", "Office"); // { Minutes = 18, ... }
 
 // [routeStrategy]
 interface IRouteStrategy
@@ -62,7 +62,7 @@ class Navigator
     // [/setStrategy]
 
     // [route]
-    public Route CalculateRoute(string from, string to)
+    public Route Route(string from, string to)
     {
         return _strategy.Calculate(from, to);
     }

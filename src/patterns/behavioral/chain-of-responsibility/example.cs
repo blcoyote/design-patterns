@@ -2,13 +2,17 @@
 var chain = new AuthHandler();
 chain.SetNext(new RateLimitHandler()).SetNext(new ValidationHandler()).SetNext(new Controller());
 
-chain.Handle(new HttpRequest("/orders/42", "client-1", "abc123")); // { Status: 200, Body: "handled /orders/42" }
-chain.Handle(new HttpRequest("/orders/42", "client-1", "expired")); // { Status: 401, ... } — stops at AuthHandler
+Console.WriteLine(chain.Handle(new HttpRequest("/orders/42", "client-1", "abc123"))); // status=200, body='handled /orders/42'
+Console.WriteLine(chain.Handle(new HttpRequest("/orders/42", "client-1", "expired"))); // status=401, ... — stops at AuthHandler
 // [/entry]
 
 record HttpRequest(string Path, string ClientId, string? Token = null, object? Body = null);
 
-record HttpResponse(int Status, string Body);
+record HttpResponse(int Status, string Body)
+{
+    // Prints the same text on every tab: HttpResponse(status=200, body='...')
+    public override string ToString() => $"HttpResponse(status={Status}, body='{Body}')";
+}
 
 // [handler]
 abstract class Handler
@@ -35,7 +39,7 @@ class AuthHandler : Handler
     // [auth]
     public override HttpResponse Handle(HttpRequest req)
     {
-        if (req.Token is null or "expired")
+        if (string.IsNullOrEmpty(req.Token) || req.Token == "expired")
         {
             return new HttpResponse(401, "Unauthorized");
         }

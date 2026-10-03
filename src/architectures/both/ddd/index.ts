@@ -7,7 +7,7 @@ import { DddVisualization } from './Visualization'
 export const architecture: ArchitectureDefinition = {
   slug: 'ddd',
   name: 'Domain-Driven Design',
-  paradigm: 'oo',
+  paradigm: 'both',
   order: 3,
   summary: 'Model the business in its own language, split into bounded contexts that stay honest about where one model ends and another begins.',
   intent:
@@ -15,7 +15,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     'A single shared model that tries to serve every team eventually serves nobody: "Order" means something subtly different to sales, fulfillment and billing, and forcing them into one class produces a bloated, contradictory mess of optional fields and special cases. Business rules leak out of the model into scattered validation code, and developers and domain experts end up talking past each other because the code uses different words than the business does.',
   solution:
-    'Draw explicit bounded contexts, each with its own model and its own ubiquitous language — the same word can mean different things in different contexts, and that is fine, because the contexts never share a database. Inside a context, model the domain with aggregates that guard their own invariants, value objects that carry no identity, and domain events that announce what happened. Where two contexts need to talk, put an explicit translation layer at the seam instead of letting one context\'s model leak into the other.',
+    'Draw explicit bounded contexts, each with its own model and its own ubiquitous language — the same word can mean different things in different contexts, and that is fine, because the contexts never share a database. Inside a context, model the domain with aggregates that guard their own invariants, value objects that carry no identity, and domain events that announce what happened. Where two contexts need to talk, put an explicit translation layer at the seam instead of letting one context\'s model leak into the other. The strategic half (bounded contexts, context maps) is architecture and independent of programming paradigm; the tactical half (aggregates, value objects, repositories, domain events) is a set of design patterns that works in an object-oriented or a functional style.',
   analogy:
     'A hospital has an Admissions department and a Billing department. Both talk about "the patient", but Admissions cares about allergies and next of kin while Billing cares about insurance codes and copays — neither needs the other\'s fields, and forcing one "Patient" record to serve both departments would bloat it for everyone. Paperwork that crosses from Admissions to Billing goes through an intake form that translates one department\'s concerns into the other\'s, instead of Billing reaching into Admissions\' filing cabinet directly.',
   whenToUse: [

@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: "Attach new behaviour to an object by wrapping it, layer by layer.",
   intent:
-    'Add behavior to an object by wrapping it in another object with the same interface, rather than creating a type for every feature combination.',
+    "Add behavior to an object by wrapping it in another object with the same interface, rather than creating a type for every feature combination.",
   problem:
     "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any mix of them, in any order. If a class-based design subclasses every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee and so on), the number of types explodes, and each combination is fixed at compile time. Go has the same combinatorial problem even though it uses structs and embedding rather than class inheritance.",
   solution:

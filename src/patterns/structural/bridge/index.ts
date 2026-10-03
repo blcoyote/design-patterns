@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   summary:
     "Split an abstraction from its implementation so the two can vary independently.",
   intent:
-    'Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.',
+    "Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.",
   problem:
     "A remote control has to work with many kinds of devices (TVs, radios, maybe a projector next year), and there are also several kinds of remotes, such as a basic one and an advanced one with extra buttons. In class-based languages, modeling both dimensions with inheritance alone would require BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote and so on. With M remote kinds and N device kinds that is M × N combinations; Go avoids the same coupling with interfaces and embedding rather than subclasses.",
   solution:

@@ -2,7 +2,7 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
-import goExample from './example.go?raw'
+import goExample from "./example.go?raw";
 import { SingletonVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
@@ -13,7 +13,7 @@ export const pattern: PatternDefinition = {
   summary:
     "Guarantee a class has exactly one instance, with one global point of access to it.",
   intent:
-    'Make sure a class has exactly one instance, and give everyone a single, well-known way to reach it.',
+    "Make sure a class has exactly one instance, and give everyone a single, well-known way to reach it.",
   problem:
     "Some objects, like a configuration store, a connection pool or a logger, only make sense as one shared instance. If any code can call `new` freely, you can end up with several copies that disagree with each other, waste resources, or overwrite each other's state.",
   solution:

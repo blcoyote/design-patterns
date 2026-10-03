@@ -154,9 +154,14 @@ export function SingletonVisualization({
                     stroke="#f43f5e"
                     strokeWidth={2.5}
                     strokeLinecap="round"
-                    initial={reduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
+                    initial={
+                      reduceMotion ? { pathLength: 1 } : { pathLength: 0 }
+                    }
                     animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.3, delay: reduceMotion ? 0 : 0.85 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: reduceMotion ? 0 : 0.85,
+                    }}
                   />
                 )}
               </motion.g>

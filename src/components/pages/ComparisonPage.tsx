@@ -4,7 +4,7 @@ import { AdrExport } from "@/components/content/AdrExport";
 import { CodeBlock } from "@/components/content/CodeBlock";
 import { Seo } from "@/components/content/Seo";
 import { ScenarioQuiz } from "@/components/content/ScenarioQuiz";
-import { BulletList, Section } from "@/components/content/Section";
+import { BulletList, Panel, Section } from "@/components/content/Section";
 import { getComparison } from "@/comparisons/registry";
 import { useCodeLanguage } from "@/hooks/useCodeLanguage";
 import type { AdrSubject } from "@/lib/adr";
@@ -124,10 +124,7 @@ export function ComparisonPage() {
           const subject = subjectBySlug.get(option.subject);
           if (!subject) return null;
           return (
-            <section
-              key={option.subject}
-              className="space-y-4 rounded-2xl bg-slate-900/40 p-6 ring-1 ring-slate-800"
-            >
+            <Panel key={option.subject} className="space-y-4 p-6">
               <h2
                 className="text-xl font-semibold"
                 style={{ color: subject.color }}
@@ -185,7 +182,7 @@ export function ComparisonPage() {
                   })}
                 </div>
               )}
-            </section>
+            </Panel>
           );
         })}
       </div>

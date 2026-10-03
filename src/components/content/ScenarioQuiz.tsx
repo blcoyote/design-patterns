@@ -1,18 +1,19 @@
-import type { ComparisonDefinition } from '@/types/comparison'
+import type { ComparisonDefinition } from "@/types/comparison";
+import { Panel, PanelHeading } from "./Section";
 
-type Verdict = ComparisonDefinition['scenario']['choices'][number]['verdict']
+type Verdict = ComparisonDefinition["scenario"]["choices"][number]["verdict"];
 
 const VERDICT_LABEL: Record<Verdict, string> = {
-  best: 'Best fit',
-  workable: 'Workable',
-  poor: 'Poor fit',
-}
+  best: "Best fit",
+  workable: "Workable",
+  poor: "Poor fit",
+};
 
 const VERDICT_STYLE: Record<Verdict, string> = {
-  best: 'bg-emerald-400/10 text-emerald-300 ring-emerald-400/30',
-  workable: 'bg-amber-400/10 text-amber-300 ring-amber-400/30',
-  poor: 'bg-rose-400/10 text-rose-300 ring-rose-400/30',
-}
+  best: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/30",
+  workable: "bg-amber-400/10 text-amber-300 ring-amber-400/30",
+  poor: "bg-rose-400/10 text-rose-300 ring-rose-400/30",
+};
 
 /**
  * A "which should I choose?" quiz: the reader picks a choice and sees its verdict and
@@ -25,21 +26,27 @@ export function ScenarioQuiz({
   picked,
   onPick,
 }: {
-  scenario: ComparisonDefinition['scenario']
-  picked: string | null
-  onPick: (id: string) => void
+  scenario: ComparisonDefinition["scenario"];
+  picked: string | null;
+  onPick: (id: string) => void;
 }) {
-  const revealAll = picked !== null
-  const pickedChoice = scenario.choices.find((c) => c.id === picked)
+  const revealAll = picked !== null;
+  const pickedChoice = scenario.choices.find((c) => c.id === picked);
 
   return (
-    <section className="rounded-2xl bg-slate-900/40 p-6 ring-1 ring-slate-800">
-      <h2 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">Which should you choose?</h2>
-      <p className="mt-3 text-lg leading-relaxed text-slate-200">{scenario.prompt}</p>
+    <Panel className="p-6">
+      <PanelHeading>Which should you choose?</PanelHeading>
+      <p className="mt-3 text-lg leading-relaxed text-slate-200">
+        {scenario.prompt}
+      </p>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-3" role="group" aria-label="Choices">
+      <div
+        className="mt-5 grid gap-3 sm:grid-cols-3"
+        role="group"
+        aria-label="Choices"
+      >
         {scenario.choices.map((choice) => {
-          const show = revealAll || choice.id === picked
+          const show = revealAll || choice.id === picked;
           return (
             <button
               key={choice.id}
@@ -47,10 +54,14 @@ export function ScenarioQuiz({
               aria-pressed={choice.id === picked}
               onClick={() => onPick(choice.id)}
               className={`rounded-xl p-4 text-left ring-1 transition ${
-                choice.id === picked ? 'bg-slate-900 ring-slate-500' : 'ring-slate-800 hover:bg-slate-900/60 hover:ring-slate-600'
+                choice.id === picked
+                  ? "bg-slate-900 ring-slate-500"
+                  : "ring-slate-800 hover:bg-slate-900/60 hover:ring-slate-600"
               }`}
             >
-              <span className="block font-semibold text-white">{choice.label}</span>
+              <span className="block font-semibold text-white">
+                {choice.label}
+              </span>
               {show && (
                 <>
                   <span
@@ -58,17 +69,21 @@ export function ScenarioQuiz({
                   >
                     {VERDICT_LABEL[choice.verdict]}
                   </span>
-                  <span className="mt-2 block text-sm leading-relaxed text-slate-400">{choice.explanation}</span>
+                  <span className="mt-2 block text-sm leading-relaxed text-slate-400">
+                    {choice.explanation}
+                  </span>
                 </>
               )}
             </button>
-          )
+          );
         })}
       </div>
 
       <p aria-live="polite" className="sr-only">
-        {pickedChoice ? `${pickedChoice.label}: ${VERDICT_LABEL[pickedChoice.verdict]}. ${pickedChoice.explanation}` : ''}
+        {pickedChoice
+          ? `${pickedChoice.label}: ${VERDICT_LABEL[pickedChoice.verdict]}. ${pickedChoice.explanation}`
+          : ""}
       </p>
-    </section>
-  )
+    </Panel>
+  );
 }

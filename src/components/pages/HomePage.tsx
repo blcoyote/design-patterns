@@ -1,6 +1,9 @@
 import { motion } from "motion/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ExplorableCard } from "@/components/content/ExplorableCard";
+import { AreaTeaserCard } from "@/components/content/AreaTeaserCard";
+import { FilterChip } from "@/components/content/FilterChip";
 import { UsedBadge } from "@/components/content/UsedInThisSite";
 import { Seo } from "@/components/content/Seo";
 import { comparisons } from "@/comparisons/registry";
@@ -66,50 +69,24 @@ export function HomePage() {
       </section>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link
+        <AreaTeaserCard
           to="/architecture"
-          className="group flex items-center justify-between gap-4 rounded-2xl bg-linear-to-r from-rose-500/10 via-indigo-500/10 to-lime-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
-        >
-          <div>
-            <p className="text-xs font-mono uppercase tracking-wider text-slate-500">
-              // same explorer, bigger boxes
-            </p>
-            <p className="mt-1 text-lg font-semibold text-white">
-              Zoom out:{" "}
-              <span className="text-slate-300">architectural patterns</span>
-            </p>
-            <p className="mt-1 text-sm text-slate-400">
-              Layered, Hexagonal, DDD, CQRS, Microservices, Event-Driven, MVU
-              and more — see which of the patterns above each one is built from.
-            </p>
-          </div>
-          <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">
-            →
-          </span>
-        </Link>
+          variant="architecture"
+          eyebrow="// same explorer, bigger boxes"
+          title="Zoom out:"
+          highlight="architectural patterns"
+          description="Layered, Hexagonal, DDD, CQRS, Microservices, Event-Driven, MVU and more — see which of the patterns above each one is built from."
+        />
 
         {comparisons.length > 0 && (
-          <Link
+          <AreaTeaserCard
             to="/compare"
-            className="group flex items-center justify-between gap-4 rounded-2xl bg-linear-to-r from-amber-500/10 via-slate-500/10 to-slate-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
-          >
-            <div>
-              <p className="text-xs font-mono uppercase tracking-wider text-slate-500">
-                // look-alikes, told apart
-              </p>
-              <p className="mt-1 text-lg font-semibold text-white">
-                Not sure which?{" "}
-                <span className="text-slate-300">Which should I choose?</span>
-              </p>
-              <p className="mt-1 text-sm text-slate-400">
-                Patterns that look nearly identical on a class diagram, compared
-                side by side with a scenario to test yourself against.
-              </p>
-            </div>
-            <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">
-              →
-            </span>
-          </Link>
+            variant="comparison"
+            eyebrow="// look-alikes, told apart"
+            title="Not sure which?"
+            highlight="Which should I choose?"
+            description="Patterns that look nearly identical on a class diagram, compared side by side with a scenario to test yourself against."
+          />
         )}
       </div>
 
@@ -170,74 +147,29 @@ export function HomePage() {
           {shown.map((p, i) => {
             const cat = categories[p.category];
             return (
-              <motion.li
-                layout
+              <ExplorableCard
                 key={p.slug}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-              >
-                <Link
-                  to={`/patterns/${p.slug}`}
-                  className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900/50 p-5 ring-1 ring-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-900 hover:ring-slate-600"
-                >
-                  <span
-                    className="absolute -top-16 -right-16 size-40 rounded-full opacity-0 blur-3xl transition group-hover:opacity-30"
-                    style={{ backgroundColor: cat.color }}
-                    aria-hidden
-                  />
-                  <span className="flex items-center gap-2">
-                    <span className={`text-xs font-medium ${cat.text}`}>
-                      {cat.label}
-                    </span>
-                    {used.has(p.slug) && <UsedBadge />}
-                  </span>
-                  <span className="mt-1 text-xl font-semibold text-white">
-                    {p.name}
-                  </span>
-                  <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
-                    {p.summary}
-                  </span>
-                  <span className="mt-4 flex items-center gap-3 font-mono text-xs text-slate-500">
+                to={`/patterns/${p.slug}`}
+                accentColor={cat.color}
+                label={cat.label}
+                labelClass={`text-xs font-medium ${cat.text}`}
+                used={used.has(p.slug)}
+                name={p.name}
+                summary={p.summary}
+                index={i}
+                footer={
+                  <>
                     <span>{p.participants.length} participants</span>
                     <span>·</span>
                     <span>{p.steps.length} steps</span>
-                    <span className="ml-auto text-slate-400 transition group-hover:translate-x-1 group-hover:text-white">
-                      →
-                    </span>
-                  </span>
-                </Link>
-              </motion.li>
+                  </>
+                }
+              />
             );
           })}
         </motion.ul>
       </section>
     </div>
-  );
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm ring-1 transition ${
-        active
-          ? "bg-slate-800 text-white ring-slate-600"
-          : "text-slate-400 ring-slate-800 hover:text-white"
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

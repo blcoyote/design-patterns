@@ -1,12 +1,19 @@
 import { Link, useLocation } from 'react-router-dom'
 import { architectures } from '@/architectures/registry'
+import { comparisons } from '@/comparisons/registry'
+import { areaOf } from '@/lib/areas'
 import { patterns } from '@/patterns/registry'
+
+const COUNTS = {
+  patterns: { count: patterns.length, unit: 'patterns' },
+  architecture: { count: architectures.length, unit: 'architectures' },
+  compare: { count: comparisons.length, unit: 'comparisons' },
+} as const
 
 export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boolean }) {
   const { pathname } = useLocation()
-  const inArchitectureArea = pathname.startsWith('/architecture')
-  const count = inArchitectureArea ? architectures.length : patterns.length
-  const unit = inArchitectureArea ? 'architectures' : 'patterns'
+  const area = areaOf(pathname)
+  const { count, unit } = COUNTS[area]
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur">
@@ -27,11 +34,14 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
           </span>
         </Link>
         <nav className="ml-2 flex items-center gap-1" aria-label="Areas">
-          <HeaderLink to="/" active={!inArchitectureArea}>
+          <HeaderLink to="/" active={area === 'patterns'}>
             Design patterns
           </HeaderLink>
-          <HeaderLink to="/architecture" active={inArchitectureArea}>
+          <HeaderLink to="/architecture" active={area === 'architecture'}>
             Architecture
+          </HeaderLink>
+          <HeaderLink to="/compare" active={area === 'compare'}>
+            Which should I choose?
           </HeaderLink>
         </nav>
         <span className="ml-auto hidden font-mono text-xs text-slate-500 sm:block">

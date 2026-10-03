@@ -1,16 +1,20 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { ComparisonTeaser } from '@/components/content/ComparisonTeaser'
 import { CrossReferenceBox } from '@/components/content/CrossReferenceBox'
 import { BulletList, ProsCons, Section } from '@/components/content/Section'
 import { UsedInThisSite } from '@/components/content/UsedInThisSite'
 import { PatternExplorer } from '@/components/viz/PatternExplorer'
+import { comparisonsFor } from '@/comparisons/registry'
 import { architecturesUsing } from '@/lib/crossRefs'
 import { usagesOf } from '@/lib/selfUsage'
+import { parseStepParam } from '@/lib/stepParam'
 import { categories } from '@/patterns/categories'
 import { getPattern, neighbours } from '@/patterns/registry'
 import { NotFound } from './NotFound'
 
 export function PatternPage() {
   const { slug } = useParams()
+  const [searchParams] = useSearchParams()
   const pattern = getPattern(slug)
   if (!pattern) return <NotFound />
 
@@ -19,6 +23,8 @@ export function PatternPage() {
   const related = pattern.related.map(getPattern).filter((p) => p !== undefined)
   const usedByArchitectures = architecturesUsing(pattern.slug)
   const usages = usagesOf(pattern.slug)
+  const comparisons = comparisonsFor(pattern.slug)
+  const initialStep = parseStepParam(searchParams.get('step'), pattern.steps.length)
 
   return (
     <article className="space-y-8">
@@ -31,7 +37,7 @@ export function PatternPage() {
         <p className="mt-4 text-lg leading-relaxed text-slate-300">{pattern.intent}</p>
       </header>
 
-      <PatternExplorer key={pattern.slug} pattern={pattern} color={cat.color} />
+      <PatternExplorer key={pattern.slug} pattern={pattern} color={cat.color} initialStep={initialStep} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Section title="The problem">{pattern.problem}</Section>
@@ -53,6 +59,8 @@ export function PatternPage() {
       {usedByArchitectures.length > 0 && (
         <CrossReferenceBox title={`Architectural patterns that commonly use ${pattern.name}`} architectures={usedByArchitectures} />
       )}
+
+      <ComparisonTeaser comparisons={comparisons} />
 
       <UsedInThisSite usages={usages} />
 

@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
-import { CodeBlock, type CodeSource } from "@/components/content/CodeBlock";
-import { useCodeLanguage, type CodeLanguage } from "@/hooks/useCodeLanguage";
+import { CodeBlock } from "@/components/content/CodeBlock";
+import { useCodeLanguage } from "@/hooks/useCodeLanguage";
 import { useStepPlayer } from "@/hooks/useStepPlayer";
 import { resolvePattern } from "@/lib/crossRefs";
-import { parseCode, type ParsedCode } from "@/lib/codeRegions";
+import { buildCodeSources, parseLanguages } from "@/lib/codeLanguages";
 import { stepDuration } from "@/lib/packetTiming";
 import type { ExplorableDefinition } from "@/types/pattern";
 import { findSelection } from "@/lib/selection";
@@ -19,25 +19,22 @@ import { StepPlayer } from "./StepPlayer";
 export function PatternExplorer({
   pattern,
   color,
+  initialStep,
 }: {
   pattern: ExplorableDefinition;
   color: string;
+  /** Deep-link into a specific step (e.g. `?step=2`). Starts paused on that step. */
+  initialStep?: number;
 }) {
   const durationOf = useCallback(
     (index: number, speed: number) => stepDuration(pattern.steps[index], speed),
     [pattern.steps],
   );
-  const player = useStepPlayer(pattern.steps.length, durationOf);
+  const player = useStepPlayer(pattern.steps.length, durationOf, initialStep);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const step = pattern.steps[player.index] ?? null;
   const selection = findSelection(pattern, selectedId);
-  const parsed: { lang: CodeLanguage; code: ParsedCode }[] = [
-    { lang: "typescript", code: parseCode(pattern.code) },
-  ];
-  if (pattern.csharp)
-    parsed.push({ lang: "csharp", code: parseCode(pattern.csharp) });
-  if (pattern.python)
-    parsed.push({ lang: "python", code: parseCode(pattern.python) });
+  const parsed = parseLanguages(pattern);
 
   const [preferredLang, setPreferredLang] = useCodeLanguage();
   // fall back to TypeScript without touching the stored preference when the preferred language isn't available here
@@ -56,11 +53,7 @@ export function PatternExplorer({
       : selection && (selection.item.code ?? regionOf(selection.item.from));
   const region = selection ? selectedRegion : step?.code;
 
-  const sources: CodeSource[] = parsed.map(({ lang, code }) => ({
-    lang,
-    text: code.text,
-    highlight: region ? code.regions[region] : undefined,
-  }));
+  const sources = buildCodeSources(parsed, region);
 
   // @pattern strategy: every scene implements VisualizationProps, and the explorer never knows which scene it is rendering
   const Visualization = pattern.Visualization ?? GenericVisualization;

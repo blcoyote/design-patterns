@@ -57,9 +57,16 @@ src/
     <paradigm>/<slug>/example.ts/.cs/.py # code samples, same convention as patterns
     <paradigm>/<slug>/Visualization.tsx # optional custom animated scene
     _template/               # copy me to add an architecture (ignored by the registry)
+  comparisons/
+    registry.ts              # auto-discovers every src/comparisons/*/index.ts (one level deep)
+    validate.ts              # validateComparison — takes a subject resolver, never imports a registry
+    <slug>/index.ts          # one folder per comparison; no example.ts/.cs/.py of its own
+    _template/               # copy me to add a comparison (ignored by the registry)
   components/
     viz/                     # Diagram, DiagramNode, DiagramEdge, Packet, StepPlayer, DetailPanel, PatternExplorer
-    content/CrossReferenceBox.tsx # "commonly used with" links between the two areas
+    content/CrossReferenceBox.tsx # "commonly used with" links between patterns and architectures
+    content/ComparisonTeaser.tsx # "often confused with…" links from a pattern/architecture to a comparison
+    content/ScenarioQuiz.tsx # the "which should I choose?" quiz at the end of a comparison
     pages/ layout/ content/
   lib/codeRegions.ts         # `// [id]` … `// [/id]` code region markers
   lib/crossRefs.ts           # the only module importing both registries — see "Architecture" below
@@ -156,6 +163,40 @@ the dependency one-directional everywhere else and avoids a circular import betw
 
 That's it: the sidebar (grouped by paradigm under `/architecture*`), the architecture index and the route
 (`#/architecture/<slug>`) pick it up automatically.
+
+## Which should I choose? (comparisons)
+
+A third area, **Which should I choose?** (`/compare`), pits two or three look-alike patterns or architectures against
+each other — same class shape, different intent — with a problem, a dimensions table, one card per option with inline
+code and "see it animated" links into that subject's own diagram, a "no pattern at all" note, an optional overlap note,
+and a scenario quiz the reader can try themselves. The page ends with an **export-as-ADR** section (`src/lib/adr.ts` +
+`AdrExport.tsx`) that turns the chosen option into a downloadable, MADR-style decision record with YAML frontmatter,
+ready to drop into a new project's `docs/decisions/`.
+
+A comparison is pure data: it has no `example.ts`/`.cs`/`.py` and no diagram of its own. `code` and `steps` on each
+option are references (`{ kind, slug, region }` / `{ kind, slug, step }`) into regions and step indices that already
+exist on the subjects, so there is never a fourth copy of an example to keep in sync across three languages. A pattern
+or architecture page shows a derived **"Often confused with…"** box (`comparisonsFor(slug)`) when a comparison names it
+— the pattern/architecture data itself never declares the link.
+
+`src/comparisons/validate.ts` takes a subject resolver as a parameter instead of importing either registry, the same
+way `DetailPanel` takes a `resolvePattern` prop — `src/lib/crossRefs.ts` stays the only module that imports both
+`patterns/registry` and `architectures/registry`, via its `resolveSubject(ref)` helper.
+
+### Adding a comparison
+
+1. Copy `src/comparisons/_template/` to `src/comparisons/<slug>/` and set `slug` to the folder name.
+2. Re-read the `index.ts` and all three example files of every subject you reference — every claim in `dimensions`,
+   `options[].changes` and `options[].chooseWhen` must be literally true of all three languages, not just the one you
+   remember. Use neutral wording where languages differ (see the "Honest about the pattern" rule in CLAUDE.md).
+3. Point `options[].code` at existing region ids and `options[].steps` at existing 0-based step indices — `npm test`
+   checks that every region and step reference resolves and is in range.
+4. Give the `scenario` exactly one choice with `verdict: 'best'`, unique choice `id`s, and a non-empty `explanation` for
+   every choice — `npm test` checks all three.
+5. Run `npm test` — it reports an unresolved subject, an unknown region, an out-of-range step, or a malformed scenario.
+
+That's it: the sidebar (under `/compare*`), the comparison index, the route (`#/compare/<slug>`) and any "Often
+confused with…" box on the subjects' own pages pick it up automatically.
 
 ## Used in this site
 

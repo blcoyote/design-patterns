@@ -6,6 +6,7 @@ import {
   patternsReferencedByArchitectures,
   resolveArchitecture,
   resolvePattern,
+  resolveSubject,
 } from './crossRefs'
 
 describe('crossRefs', () => {
@@ -51,5 +52,22 @@ describe('crossRefs', () => {
 
   it('architecturesUsedBy resolves sibling architecture refs', () => {
     expect(architecturesUsedBy({ commonlyUsedWith: { designPatterns: [], architectures: [] } } as never)).toEqual([])
+  })
+
+  it('resolveSubject resolves a pattern subject with its definition', () => {
+    const resolved = resolveSubject({ kind: 'pattern', slug: 'repository' })
+    expect(resolved).toMatchObject({ slug: 'repository', name: 'Repository', href: '/patterns/repository' })
+    expect(resolved?.def.slug).toBe('repository')
+  })
+
+  it('resolveSubject resolves an architecture subject with its definition', () => {
+    const resolved = resolveSubject({ kind: 'architecture', slug: 'layered' })
+    expect(resolved).toMatchObject({ slug: 'layered', name: 'Layered (N-tier)', href: '/architecture/layered' })
+    expect(resolved?.def.slug).toBe('layered')
+  })
+
+  it('resolveSubject returns undefined for an unknown slug', () => {
+    expect(resolveSubject({ kind: 'pattern', slug: 'does-not-exist' })).toBeUndefined()
+    expect(resolveSubject({ kind: 'architecture', slug: 'does-not-exist' })).toBeUndefined()
   })
 })

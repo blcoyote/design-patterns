@@ -31,7 +31,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     "Entity Framework Core's DbContext — SaveChanges() flushes every tracked Added/Modified/Deleted entity in one transaction.",
-    "Hibernate / NHibernate's Session, which batches inserts, updates and deletes and flushes them together.",
+    "Hibernate / NHibernate's Session, which tracks the changes you make and flushes them together to the database.",
     "SQLAlchemy's Session object, which tracks pending objects until session.commit().",
   ],
   related: ['repository', 'command', 'memento'],

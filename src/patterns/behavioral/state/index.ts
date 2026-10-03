@@ -14,7 +14,7 @@ export const pattern: PatternDefinition = {
   intent:
     'Let an object change its behaviour when its internal state changes, by handing the work to a separate object for each state.',
   problem:
-    'A document behaves differently depending on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. If you handle this in one method full of if (status === "draft") … else if (status === "inReview") … checks, that method grows with every new stage or action. Nothing stops a caller from triggering a transition that should be impossible, either.',
+    'A document behaves differently depending on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. If you handle this in one method full of if (status === "draft") … else if (status === "inReview") … checks, that method grows with every new stage or action. Rules about which transitions are allowed end up scattered across those branches, so they are easy to miss or get wrong.',
   solution:
     "Give every stage its own class that implements a shared DocumentState interface, and let Document hold just a reference to its current state. Each method on Document (submit, approve, reject, revise) simply forwards to the same method on whichever state object is current. That state object decides what happens, including which state replaces it. Document itself never checks which stage it is in.",
   analogy:

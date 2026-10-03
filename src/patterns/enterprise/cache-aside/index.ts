@@ -21,12 +21,12 @@ export const pattern: PatternDefinition = {
   whenToUse: [
     "Reads far outnumber writes, and the same keys are requested again and again.",
     "The source is slow, rate-limited or expensive to query, and a little staleness is acceptable.",
-    "You want the cache to be optional: if it is empty or unavailable, the application still works, just more slowly.",
+    "You want the cache to be optional: if it is empty, the application still works, just more slowly. (If the cache can be unavailable, the code that talks to it must catch those errors and fall back to the source.)",
     "You want the caching and invalidation rules in application code that you can read, test and change, not hidden inside a transparent interception layer.",
   ],
   pros: [
     "Only keys that are actually requested get cached, so there is nothing to warm up or pre-fill.",
-    "A cold or failed cache just means every read goes to the source. It is slower, not broken.",
+    "A cold cache just means every read goes to the source. It is slower, not broken. (A cache that is down needs explicit fallback handling in your code.)",
     "What to cache, for how long and when to invalidate is ordinary application code, easy to read and change.",
   ],
   cons: [
@@ -37,7 +37,7 @@ export const pattern: PatternDefinition = {
   realWorld: [
     "Redis or Memcached in front of a SQL database, the classic case the pattern is named for",
     'The "Cache-Aside" entry in Azure\'s cloud design patterns catalogue',
-    "HTTP caching at a CDN edge, with explicit invalidation (purge) when the origin changes",
+    "Application code that wraps a Redis or Memcached lookup around a database query and deletes the key when the row changes",
     "React Query and similar client-side data-fetching caches, which check a cache before calling the network and invalidate on mutations",
     "This site: parseCode in src/lib/codeRegions.ts checks an in-memory Map before re-parsing a source string, and fills it on a miss. It is the in-process memoization variant, not the TTL-bounded version demoed here: entries never expire and are never invalidated, which is safe because a pattern's source text never changes once loaded",
   ],

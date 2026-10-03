@@ -14,7 +14,7 @@ export const pattern: PatternDefinition = {
   problem:
     'Your checkout code is written against a clean PaymentProcessor interface. But the payment provider you were handed only offers a legacy, cents-based API with a different method name and a different shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.',
   solution:
-    'Write an Adapter that implements the interface your client already expects and holds an instance of the incompatible class (the adaptee) inside it. The adapter translates each call: it converts the arguments, calls the legacy method, and converts the result back. Neither the client nor the legacy class needs to know about the other. This is the object adapter form, built on composition (the adaptee is a field). A class adapter would instead inherit from the adaptee, which only works in languages with multiple inheritance and ties the adapter to one concrete adaptee class.',
+    'Write an Adapter that implements the interface your client already expects and holds an instance of the incompatible class (the adaptee) inside it. The adapter translates each call: it converts the arguments, calls the legacy method, and converts the result back. Neither the client nor the legacy class needs to know about the other. This is the object adapter form, built on composition (the adaptee is a field). A class adapter would instead inherit from the adaptee, which ties the adapter to one concrete adaptee class.',
   analogy:
     'A travel power plug adapter does not change what your laptop charger does, and it does not change the wall socket. It just sits between them and turns one physical shape into the other.',
   whenToUse: [

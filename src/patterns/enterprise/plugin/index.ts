@@ -15,7 +15,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A host program that calls concrete implementations directly has to be edited, recompiled and redeployed every time a new one shows up: a new export format, a new payment provider, a new notification channel. The host and every implementation are compiled together, so adding one more case means touching code that otherwise has nothing to do with it. A big if/switch keyed on type keeps growing.",
   solution:
-    "Define a narrow interface that the host depends on, plus a registry that looks plugins up by id. A loader reads a manifest, which is a plain list of plugin ids and the factories that build them, and registers one instance per entry before the host runs. The host only ever calls registry.get(id) and never names a concrete plugin class, so adding a plugin is purely a manifest change.",
+    "Define a narrow interface that the host depends on, plus a registry that looks plugins up by id. A loader reads a manifest, which is a plain list of plugin ids and the factories that build them, and registers one instance per entry before the host runs. The host only ever calls registry.get(id) and never names a concrete plugin class, so enabling an already-available plugin is just a manifest change. (A brand-new implementation also needs its code and a factory entry the loader can find.)",
   analogy:
     "A power strip only knows the shape of a plug, not which appliance is attached. Adding a lamp or a charger never means rewiring the strip. You plug it in and it works, because both sides agreed on the socket shape ahead of time.",
   whenToUse: [

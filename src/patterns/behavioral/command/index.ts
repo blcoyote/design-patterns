@@ -26,7 +26,7 @@ export const pattern: PatternDefinition = {
   pros: [
     "Decouples the invoker from the receiver: neither needs to know about the other.",
     "Commands can be queued, logged, serialized, or combined into macros.",
-    "Undo/redo comes almost for free once you keep the executed commands.",
+    "Once commands are objects, undo/redo has a natural home: keep a history of executed commands and give each one an undo().",
   ],
   cons: [
     "Every distinct action needs its own class (or object), which adds boilerplate.",

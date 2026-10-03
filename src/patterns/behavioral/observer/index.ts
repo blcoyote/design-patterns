@@ -14,7 +14,7 @@ export const pattern: PatternDefinition = {
   problem:
     'Several parts of an app need to react when some data changes. For example, a chart, a table and a badge all show the same stock price. Asking the data source over and over ("polling") wastes work. Wiring the data source directly to each view ties it to every one of them, so it has to change whenever a view is added or removed.',
   solution:
-    'The Subject keeps a list of Observers, and every Observer follows one tiny interface with a single update method. Observers subscribe and unsubscribe themselves while the program runs. When the Subject changes, it loops over its list and calls update on each Observer. It never needs to know their concrete types.',
+    'The Subject keeps a list of Observers, and every Observer follows one tiny interface with a single update method. Observers can be subscribed and unsubscribed while the program runs (client code calls subscribe and unsubscribe on the Subject). When the Subject changes, it loops over its list and calls update on each Observer. It never needs to know their concrete types.',
   analogy:
     'Think of a newsletter. Readers sign up once, and every new issue goes to everyone currently subscribed. The publisher does not care who the readers are, and any reader can unsubscribe at any time.',
   whenToUse: [

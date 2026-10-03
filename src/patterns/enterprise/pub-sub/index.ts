@@ -31,7 +31,7 @@ export const pattern: PatternDefinition = {
   ],
   cons: [
     'Harder to trace: reading publish("order.placed", …) alone does not tell you what will run.',
-    "Delivery order and timing depend on the implementation, and one slow handler can delay the others unless dispatch is made async.",
+    "Delivery order and timing depend on the implementation, and one slow handler can delay the others unless the broker isolates handlers, for example by running them concurrently or through queues.",
     "A typo in a topic name fails silently: nobody is subscribed, so nothing happens and there is no error.",
   ],
   realWorld: [

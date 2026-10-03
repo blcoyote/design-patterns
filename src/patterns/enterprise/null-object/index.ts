@@ -32,7 +32,7 @@ export const pattern: PatternDefinition = {
   cons: [
     "Can hide real bugs: sometimes a missing dependency should be a loud error, not a silent no-op.",
     "Adds a class that does nothing observable, which can confuse readers who do not know the pattern.",
-    "Does not help when callers need a meaningful return value. Returning a safe default is a smaller cousin of this pattern, not a true Null Object.",
+    "A do-nothing object only fits when a neutral result (nothing happens, or an empty value) is a sensible answer. If callers need a real result, the missing case should still be handled explicitly.",
     'Only works when "do nothing" is a genuinely sensible default. If no neutral behavior exists, forcing one in is the wrong fix.',
   ],
   realWorld: [

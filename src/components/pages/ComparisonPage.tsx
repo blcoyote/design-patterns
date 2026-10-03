@@ -80,7 +80,7 @@ export function ComparisonPage() {
       </div>
 
       <Section title="Side by side" className="overflow-x-auto">
-        <table className="w-full min-w-[32rem] border-collapse text-sm">
+        <table className="w-full min-w-lg border-collapse text-sm">
           <thead>
             <tr>
               <th

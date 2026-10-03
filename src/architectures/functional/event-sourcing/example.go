@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 // Domain: a bank account, modeled the event-sourced way. Nothing here is a type with
 // mutable fields -- state is always *derived* from the events that happened to it.
@@ -96,6 +99,7 @@ func fold(events []Event) Account {
 // concurrency -- the caller must say which version it last read, and the append is
 // rejected if the stream moved on in the meantime.
 type EventStore struct {
+	mu         sync.Mutex
 	streams     map[string][]Event
 	subscribers []func(streamID string, event Event)
 }
@@ -105,18 +109,24 @@ func NewEventStore() *EventStore {
 }
 
 func (s *EventStore) Load(streamID string) []Event {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	// a copy, so callers cannot mutate the stored history behind Append's back
 	return append([]Event(nil), s.streams[streamID]...)
 }
 
 func (s *EventStore) Append(streamID string, expectedVersion int, events []Event) error {
-	existing := s.Load(streamID)
+	s.mu.Lock()
+	existing := append([]Event(nil), s.streams[streamID]...)
 	if len(existing) != expectedVersion {
+		s.mu.Unlock()
 		return fmt.Errorf("concurrency conflict: expected version %d, found %d", expectedVersion, len(existing))
 	}
 	s.streams[streamID] = append(existing, events...)
+	subscribers := append([]func(streamID string, event Event){}, s.subscribers...)
+	s.mu.Unlock()
 	for _, event := range events {
-		for _, subscriber := range s.subscribers {
+		for _, subscriber := range subscribers {
 			subscriber(streamID, event)
 		}
 	}
@@ -124,6 +134,8 @@ func (s *EventStore) Append(streamID string, expectedVersion int, events []Event
 }
 
 func (s *EventStore) Subscribe(fn func(streamID string, event Event)) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.subscribers = append(s.subscribers, fn)
 }
 

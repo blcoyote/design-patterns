@@ -2,7 +2,7 @@
  * All three patterns put one object in front of another and forward calls through it, which is
  * why they blur together at a glance. Every claim below was checked against
  * `src/patterns/structural/adapter`, `src/patterns/structural/facade` and
- * `src/patterns/structural/decorator` (index.ts and all three example files) rather than against
+ * `src/patterns/structural/decorator` (index.ts and all four language examples) rather than against
  * the patterns in the abstract.
  */
 import type { ComparisonDefinition } from '@/types/comparison'

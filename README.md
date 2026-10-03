@@ -174,9 +174,9 @@ and a scenario quiz the reader can try themselves. The page ends with an **expor
 `AdrExport.tsx`) that turns the chosen option into a downloadable, MADR-style decision record with YAML frontmatter,
 ready to drop into a new project's `docs/decisions/`.
 
-A comparison is pure data: it has no `example.ts`/`.cs`/`.py` and no diagram of its own. `code` and `steps` on each
+A comparison is pure data: it has no `example.ts`/`.cs`/`.py`/`.go` and no diagram of its own. `code` and `steps` on each
 option are references (`{ kind, slug, region }` / `{ kind, slug, step }`) into regions and step indices that already
-exist on the subjects, so there is never a fourth copy of an example to keep in sync across three languages. A pattern
+exist on the subjects, so there is never a fourth copy of an example to keep in sync across four languages. A pattern
 or architecture page shows a derived **"Often confused with…"** box (`comparisonsFor(slug)`) when a comparison names it
 — the pattern/architecture data itself never declares the link.
 
@@ -187,8 +187,8 @@ way `DetailPanel` takes a `resolvePattern` prop — `src/lib/crossRefs.ts` stays
 ### Adding a comparison
 
 1. Copy `src/comparisons/_template/` to `src/comparisons/<slug>/` and set `slug` to the folder name.
-2. Re-read the `index.ts` and all three example files of every subject you reference — every claim in `dimensions`,
-   `options[].changes` and `options[].chooseWhen` must be literally true of all three languages, not just the one you
+2. Re-read the `index.ts` and all four example files of every subject you reference — every claim in `dimensions`,
+   `options[].changes` and `options[].chooseWhen` must be literally true of all four languages, not just the one you
    remember. Use neutral wording where languages differ (see the "Honest about the pattern" rule in CLAUDE.md).
 3. Point `options[].code` at existing region ids and `options[].steps` at existing 0-based step indices — `npm test`
    checks that every region and step reference resolves and is in range.

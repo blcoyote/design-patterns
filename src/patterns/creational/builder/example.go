@@ -156,7 +156,10 @@ type RequestDirector struct{}
 func (RequestDirector) PostJson(builder RequestBuilder, payload any) {
 	builder.SetMethod("POST")
 	builder.SetHeader("Content-Type", "application/json")
-	data, _ := json.Marshal(payload) // compact, like JSON.stringify
+	data, err := json.Marshal(payload) // compact, like JSON.stringify
+	if err != nil {
+		panic(err)
+	}
 	builder.SetBody(string(data))
 }
 

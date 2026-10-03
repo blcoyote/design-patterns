@@ -91,22 +91,22 @@ export interface ExplorableDefinition {
    */
   code: string;
   /**
-   * Optional C# example, shown as a second tab next to TypeScript. Use the
+   * Required C# example, shown as a second tab next to TypeScript. Use the
    * same `// [id]` … `// [/id]` markers, with the SAME region ids as `code`,
    * so participant/relation/step highlighting works in either language.
    */
-  csharp?: string;
+  csharp: string;
   /**
-   * Optional Python example, shown as another tab. Same rules as `csharp`,
+   * Required Python example, shown as another tab. Same rules as `csharp`,
    * but markers use Python comments: `# [id]` … `# [/id]`.
    */
-  python?: string;
+  python: string;
   /**
    * Required Go example, shown as another tab. Same rules as `csharp`, with
    * `// [id]` … `// [/id]` markers. A single `package main` file whose usage
    * lives in `func main()` at the bottom.
    */
-  go?: string;
+  go: string;
   /** Diagram viewBox, defaults to "0 0 800 460". */
   viewBox?: string;
   /** Optional custom scene replacing the generic diagram. */

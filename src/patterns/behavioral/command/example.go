@@ -4,8 +4,8 @@ import "fmt"
 
 // [command]
 type Command interface {
-	Execute()
-	Undo()
+	Execute() bool
+	Undo(wasOn bool)
 }
 
 // [/command]
@@ -34,22 +34,20 @@ func (l *Light) TurnOff() {
 // [onCommand]
 type LightOnCommand struct {
 	light *Light
-	// What Undo() needs: whether the light was already on before Execute()
-	// ran. Undo can't just assume "the opposite action" is correct.
-	wasOn bool
 }
 
 func NewLightOnCommand(light *Light) *LightOnCommand {
 	return &LightOnCommand{light: light}
 }
 
-func (c *LightOnCommand) Execute() {
-	c.wasOn = c.light.On()
+func (c *LightOnCommand) Execute() bool {
+	wasOn := c.light.On()
 	c.light.TurnOn()
+	return wasOn
 }
 
-func (c *LightOnCommand) Undo() {
-	if !c.wasOn {
+func (c *LightOnCommand) Undo(wasOn bool) {
+	if !wasOn {
 		c.light.TurnOff()
 	}
 }
@@ -59,20 +57,20 @@ func (c *LightOnCommand) Undo() {
 // [offCommand]
 type LightOffCommand struct {
 	light *Light
-	wasOn bool
 }
 
 func NewLightOffCommand(light *Light) *LightOffCommand {
 	return &LightOffCommand{light: light}
 }
 
-func (c *LightOffCommand) Execute() {
-	c.wasOn = c.light.On()
+func (c *LightOffCommand) Execute() bool {
+	wasOn := c.light.On()
 	c.light.TurnOff()
+	return wasOn
 }
 
-func (c *LightOffCommand) Undo() {
-	if c.wasOn {
+func (c *LightOffCommand) Undo(wasOn bool) {
+	if wasOn {
 		c.light.TurnOn()
 	}
 }
@@ -82,7 +80,12 @@ func (c *LightOffCommand) Undo() {
 // [remote]
 type RemoteButton struct {
 	current Command
-	history []Command
+	history []ExecutedCommand
+}
+
+type ExecutedCommand struct {
+	command Command
+	wasOn   bool
 }
 
 // [setCommand]
@@ -97,8 +100,10 @@ func (r *RemoteButton) Press() {
 	if r.current == nil {
 		return
 	}
-	r.current.Execute()
-	r.history = append(r.history, r.current)
+	r.history = append(r.history, ExecutedCommand{
+		command: r.current,
+		wasOn:   r.current.Execute(),
+	})
 }
 
 // [/execute]
@@ -108,9 +113,9 @@ func (r *RemoteButton) UndoLast() {
 	if len(r.history) == 0 {
 		return
 	}
-	command := r.history[len(r.history)-1]
+	executed := r.history[len(r.history)-1]
 	r.history = r.history[:len(r.history)-1]
-	command.Undo()
+	executed.command.Undo(executed.wasOn)
 }
 
 // [/undo]

@@ -4,7 +4,7 @@
  * (one for writes, one for reads); Event Sourcing is a statement about how the *write side*
  * stores state (an append-only log instead of a mutable row). Every claim below was checked
  * against `src/architectures/both/cqrs` and `src/architectures/functional/event-sourcing`
- * (index.ts and all three example files), not against the pairing in the abstract.
+ * (index.ts and all four language examples), not against the pairing in the abstract.
  */
 import type { ComparisonDefinition } from '@/types/comparison'
 

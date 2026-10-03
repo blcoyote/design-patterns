@@ -15,7 +15,7 @@ export const pattern: PatternDefinition = {
   intent:
     "Save a snapshot of an object's state so you can restore it later, without breaking its encapsulation.",
   problem:
-    "An undo feature needs to save an object's internal state so it can roll back to it later. The obvious fix is to add public getters and setters so an outside \"history\" manager can read and later rewrite that state. But that breaks encapsulation, and it invites the rest of the program to depend on internals that were never meant to be public.",
+    'An undo feature needs to save an object\'s internal state so it can roll back to it later. The obvious fix is to add public getters and setters so an outside "history" manager can read and later rewrite that state. But that breaks encapsulation, and it invites the rest of the program to depend on internals that were never meant to be public.',
   solution:
     "Let the object itself (the Originator) produce an opaque Memento that captures its own state. It hands the memento to a Caretaker, whose only job is to store it and give it back, never to look inside. When you want to roll back, the Caretaker returns the memento, and only the Originator knows how to unpack it and restore its state.",
   analogy:
@@ -73,7 +73,7 @@ export const pattern: PatternDefinition = {
       x: 620,
       y: 110,
       description:
-        "A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor can read it (a module-private WeakMap in TypeScript, a private nested class in C#, a module-private-by-convention WeakKeyDictionary in Python, an unexported field in Go), so HistoryShelf has no accessor to peek through.",
+        "A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor is expected to read it (a module-private WeakMap in TypeScript, a private nested class in C#, a module-private-by-convention WeakKeyDictionary in Python, and an unexported field convention in Go), so HistoryShelf has no accessor to peek through.",
     },
     {
       id: "history",
@@ -137,7 +137,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "unseal()",
       description:
-        "Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, by casting to its private nested ConcreteMemento in C#, via the module-private-by-convention WeakKeyDictionary in Python, or by reading the unexported field in Go), recovering the content it sealed away earlier.",
+        "Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, by casting to its private nested ConcreteMemento in C#, via the module-private-by-convention WeakKeyDictionary in Python, or by reading the package-scoped field in Go), recovering the content it sealed away earlier.",
       bend: 24,
       code: "getState",
     },

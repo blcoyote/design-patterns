@@ -3,7 +3,7 @@
  * enforces a price invariant, and saves it. They differ in which axis they cut along: by technical
  * layer, by dependency direction, or by feature. Every claim below was checked against
  * `src/architectures/oo/layered`, `src/architectures/oo/hexagonal` and
- * `src/architectures/oo/vertical-slice` (index.ts and all three example files) rather than against
+ * `src/architectures/oo/vertical-slice` (index.ts and all four language examples) rather than against
  * the architectures in the abstract.
  */
 import type { ComparisonDefinition } from '@/types/comparison'

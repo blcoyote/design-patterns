@@ -2,7 +2,7 @@
  * Strategy and State share the exact same class diagram — a context holding an interface, with
  * concrete classes behind it — which is why they are so often confused. Every claim below was
  * checked against `src/patterns/behavioral/strategy` and `src/patterns/behavioral/state`
- * (index.ts and all three example files) rather than against the pattern in the abstract.
+ * (index.ts and all four language examples) rather than against the pattern in the abstract.
  */
 import type { ComparisonDefinition } from '@/types/comparison'
 

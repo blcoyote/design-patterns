@@ -13,13 +13,13 @@ export const pattern: PatternDefinition = {
   summary:
     "Step through a collection one element at a time through a uniform next() interface, without exposing how it is stored.",
   intent:
-    'Walk through a collection one element at a time without knowing, or caring, how it stores its items.',
+    "Walk through a collection one element at a time without knowing, or caring, how it stores its items.",
   problem:
     "A Playlist might be backed by an array today and by a linked list, or a lazily fetched page of results, tomorrow. If every caller loops over playlist.songs[i] directly, that internal detail leaks into every call site. The moment the storage changes, all of those loops break.",
   solution:
     "Give the collection one method that returns an Iterator: a small object whose job is to hand out the next value and say when there are none left. In TypeScript, next() returns a result with a done flag. In C#, MoveNext() returns false. In Python, __next__() raises StopIteration. In Go, Next() returns the value plus an ok flag. Callers step through with next() (or let a for...of / foreach / for ... in loop do it for them) without ever knowing whether the elements live in an array, a tree, or are generated on demand.",
   analogy:
-    "Think of a museum audio guide. You press \"next\" and it describes the next exhibit, in order, one at a time. You never need the floor plan or the storage room. The guide keeps track of your position and gives a clear \"that was the last one\" cue when the tour ends.",
+    'Think of a museum audio guide. You press "next" and it describes the next exhibit, in order, one at a time. You never need the floor plan or the storage room. The guide keeps track of your position and gives a clear "that was the last one" cue when the tour ends.',
   whenToUse: [
     "You need to walk through a collection without exposing how it is stored (array, linked list, tree, ...).",
     "You want one uniform way to step through different kinds of collections with the same client code.",
@@ -52,7 +52,7 @@ export const pattern: PatternDefinition = {
       x: 110,
       y: 250,
       description:
-        "Drives the traversal with a for...of loop (or by calling next() directly), without knowing whether Playlist stores songs in an array, a tree, or streams them lazily.",
+        "Drives the traversal with the language's loop protocol or by calling the iterator directly, without knowing whether Playlist stores songs in an array, a tree, or streams them lazily.",
       code: "usage",
     },
     {
@@ -64,7 +64,7 @@ export const pattern: PatternDefinition = {
       y: 70,
       width: 160,
       description:
-        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python, GetIterator() in Go (which has no built-in protocol for custom collections). Any class implementing it works with the language's built-in loop.",
+        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python, and GetIterator() in Go. Go has no built-in iterator protocol for custom collections, so the client drives the loop manually by calling Next() on the returned iterator.",
     },
     {
       id: "playlist",
@@ -75,7 +75,7 @@ export const pattern: PatternDefinition = {
       y: 250,
       width: 160,
       description:
-        "Stores the actual songs in a private array and implements the iterable method by handing back a brand-new PlaylistIterator positioned at the start.",
+        "Stores the actual songs in a private array and implements the collection method by handing back a brand-new PlaylistIterator positioned at the start.",
     },
     {
       id: "iteratorInterface",
@@ -108,7 +108,7 @@ export const pattern: PatternDefinition = {
       to: "iterable",
       type: "implements",
       description:
-        "Playlist implements Iterable<Song>, so anything that accepts an Iterable — including a for...of loop — accepts a Playlist.",
+        "Playlist implements the language's iterable interface where one exists, so built-in loops can consume it in TS, C#, and Python. Go uses the same iterator explicitly because custom collections have no built-in iteration protocol.",
     },
     {
       id: "implIterator",
@@ -163,9 +163,9 @@ export const pattern: PatternDefinition = {
 
   steps: [
     {
-      title: "Client starts a for...of loop",
+      title: "Client requests an iterator",
       description:
-        "A for...of loop over playlist implicitly asks it for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / __iter__() / GetIterator()). Playlist creates a brand-new PlaylistIterator and hands it back — the loop never touches the song array directly.",
+        "The client asks Playlist for an iterator (playlist[Symbol.iterator]() / GetEnumerator() / iter(playlist) / playlist.GetIterator()). TS, C#, and Python loops request it through their language protocols; Go requests it explicitly. Playlist creates a brand-new PlaylistIterator and hands it back, and the client never touches the song array directly.",
       highlight: [
         "client",
         "clientGetIterator",

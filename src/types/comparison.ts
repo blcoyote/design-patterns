@@ -4,7 +4,7 @@ export interface SubjectRef {
   slug: string
 }
 
-/** Points at a code region id that must exist in all three example files of the subject. */
+/** Points at a code region id that must exist in all four language examples of the subject. */
 export interface CodeRef extends SubjectRef {
   region: string
 }

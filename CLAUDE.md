@@ -24,7 +24,7 @@ Follow these every time. If a task seems to need a different route, stop and ask
 - Comparisons (`src/comparisons/<slug>/`, `ComparisonDefinition`, template in `src/comparisons/_template/`) follow the same data/registry rules, one level deep (no category/paradigm folder). A comparison has no code or diagram of its own — it only references region ids and step indices that already exist on the patterns/architectures it compares, resolved through `crossRefs.ts`'s `resolveSubject` so `comparisons/registry.ts` never imports either registry directly.
 - When this site's own code uses a pattern it teaches, tag the usage with `// @pattern <slug>: <explanation>` directly above the code (see "Used in this site" in the README) instead of listing files anywhere.
 
-### 2. Three languages, one set of regions
+### 2. Four languages, one set of regions
 
 - `example.ts` → `code`, `example.cs` → `csharp`, `example.py` → `python`, `example.go` → `go`, all imported with `?raw`.
 - Region markers go on their own lines: `// [id]` … `// [/id]` in TS/C#/Go, `# [id]` … `# [/id]` in Python. Every file must use **exactly the same set of region ids** (`npm test` enforces this).
@@ -34,8 +34,8 @@ Follow these every time. If a task seems to need a different route, stop and ask
   - **C#:** usage goes at the top, because top-level statements must come before type declarations.
   - **Python:** imports first, usage at the bottom, `asyncio.run(main())` when TS uses `await`.
   - **Go:** package declaration first, usage in `func main()` at the bottom.
-- When you change one example, change the other two in the same task. Never leave the tabs out of step.
-- Description text in `index.ts` must hold for every tab. If it names a mechanism, name all three (e.g. Memento: WeakMap / private nested class / WeakKeyDictionary) or use neutral wording.
+- When you change one example, change the other three in the same task. Never leave the tabs out of step.
+- Description text in `index.ts` must hold for every tab. If it names a mechanism, name all four (e.g. Memento: WeakMap / private nested class / WeakKeyDictionary / unexported field) or use neutral wording.
 
 ### 3. Known parity traps (each one has already bitten us)
 

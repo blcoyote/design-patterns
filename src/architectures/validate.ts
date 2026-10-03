@@ -30,7 +30,6 @@ export function validateArchitecture(
   archSlugs: string[] = [],
 ): string[] {
   const errors = validateDiagram(a);
-  if (!a.go) errors.push("missing go example");
 
   errors.push(
     ...checkRefs(

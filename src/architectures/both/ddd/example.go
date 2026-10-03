@@ -60,12 +60,16 @@ type OrderLine struct {
 	Quantity  int
 }
 
-func (l OrderLine) LineTotal() Money {
+func (l OrderLine) LineTotal() (Money, error) {
 	total := MoneyOf(0, l.UnitPrice.currency)
 	for i := 0; i < l.Quantity; i++ {
-		total, _ = total.Add(l.UnitPrice) // same currency by construction
+		var err error
+		total, err = total.Add(l.UnitPrice) // same currency by construction
+		if err != nil {
+			return Money{}, err
+		}
 	}
-	return total
+	return total, nil
 }
 
 // [/orderLine]
@@ -143,12 +147,19 @@ func (o *Order) AddLine(line OrderLine) error {
 	return nil
 }
 
-func (o *Order) Total() Money {
+func (o *Order) Total() (Money, error) {
 	total := MoneyOf(0, "USD")
 	for _, line := range o.lines {
-		total, _ = total.Add(line.LineTotal())
+		lineTotal, err := line.LineTotal()
+		if err != nil {
+			return Money{}, err
+		}
+		total, err = total.Add(lineTotal)
+		if err != nil {
+			return Money{}, err
+		}
 	}
-	return total
+	return total, nil
 }
 
 func (o *Order) Place(policy OrderPolicy) error {
@@ -158,8 +169,12 @@ func (o *Order) Place(policy OrderPolicy) error {
 	if !policy.IsSatisfiedBy(o) {
 		return fmt.Errorf("cannot place order %s: %s", o.ID, policy.Describe())
 	}
+	total, err := o.Total()
+	if err != nil {
+		return err
+	}
 	o.status = StatusPlaced
-	o.events = append(o.events, NewOrderPlaced(o.ID, o.CustomerID, o.Total()))
+	o.events = append(o.events, NewOrderPlaced(o.ID, o.CustomerID, total))
 	return nil
 }
 
@@ -300,7 +315,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("order %s placed, total: %s\n", placed.ID, placed.Total())
+	total, err := placed.Total()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("order %s placed, total: %s\n", placed.ID, total)
 
 	// Invariant in action: the aggregate refuses to grow once it has been placed.
 	if err := placed.AddLine(OrderLine{"LATE-ITEM", MoneyOf(5, "USD"), 1}); err != nil {

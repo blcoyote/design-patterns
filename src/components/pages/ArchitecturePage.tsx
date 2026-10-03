@@ -1,10 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
 import { CrossReferenceBox } from '@/components/content/CrossReferenceBox'
 import { BulletList, ProsCons, Section } from '@/components/content/Section'
+import { UsedInThisSite } from '@/components/content/UsedInThisSite'
 import { PatternExplorer } from '@/components/viz/PatternExplorer'
 import { paradigms } from '@/architectures/paradigms'
 import { architectureNeighbours, getArchitecture } from '@/architectures/registry'
 import { architecturesUsedBy, designPatternsUsedBy } from '@/lib/crossRefs'
+import { usagesOf } from '@/lib/selfUsage'
 import { NotFound } from './NotFound'
 
 /** Mirrors PatternPage, with the paradigm badge/colour instead of category, a cross-reference box
@@ -18,6 +20,7 @@ export function ArchitecturePage() {
   const { prev, next } = architectureNeighbours(architecture.slug)
   const designPatterns = designPatternsUsedBy(architecture)
   const siblingArchitectures = architecturesUsedBy(architecture)
+  const usages = usagesOf(architecture.slug)
 
   return (
     <article className="space-y-8">
@@ -37,6 +40,8 @@ export function ArchitecturePage() {
         designPatterns={designPatterns}
         architectures={siblingArchitectures}
       />
+
+      <UsedInThisSite usages={usages} />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Section title="The problem">{architecture.problem}</Section>

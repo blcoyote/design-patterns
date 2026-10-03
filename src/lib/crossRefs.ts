@@ -1,3 +1,4 @@
+// @pattern facade: the only module that imports both registries — pages ask it one question instead of combining two registries themselves
 import { architectures, getArchitecture } from '@/architectures/registry'
 import { paradigms } from '@/architectures/paradigms'
 import { categories } from '@/patterns/categories'
@@ -41,6 +42,7 @@ export function architecturesUsedBy(architecture: ArchitectureDefinition): Resol
     .filter((r) => r !== undefined)
 }
 
+// @pattern cqrs: the reverse links are a read model projected from the single write side (commonlyUsedWith)
 /**
  * Reverse index: which architectures declare `designSlug` in their `commonlyUsedWith.designPatterns`,
  * and why. Design patterns never declare their own architecture links — this is derived.
@@ -51,6 +53,7 @@ export function architecturesUsing(designSlug: string): ResolvedRef[] {
     .map(({ architecture, why }) => ({ ...resolveArchitecture(architecture.slug)!, why }))
 }
 
+// @pattern adapter: resolvePattern and resolveArchitecture turn two different definition shapes into one ResolvedLink
 /** Resolves a design-pattern slug to the shape `DetailPanel`'s "Built with" chips and
  * `CrossReferenceBox` need. Returns `undefined` for an unknown slug. */
 export function resolvePattern(slug: string): ResolvedLink | undefined {

@@ -3,12 +3,15 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { paradigmOrder, paradigms } from '@/architectures/paradigms'
 import { architectures } from '@/architectures/registry'
+import { UsedBadge } from '@/components/content/UsedInThisSite'
+import { usedSlugs } from '@/lib/selfUsage'
 import type { Paradigm } from '@/types/architecture'
 
 /** Mirrors HomePage, one level zoomed out: architectures instead of design patterns, filtered by paradigm instead of category. */
 export function ArchitectureIndexPage() {
   const [filter, setFilter] = useState<Paradigm | 'all'>('all')
   const shown = filter === 'all' ? architectures : architectures.filter((a) => a.paradigm === filter)
+  const used = usedSlugs()
 
   return (
     <div className="space-y-12">
@@ -64,7 +67,10 @@ export function ArchitectureIndexPage() {
                     style={{ backgroundColor: meta.color }}
                     aria-hidden
                   />
-                  <span className={`text-xs font-medium ${meta.text}`}>{meta.label}</span>
+                  <span className="flex items-center gap-2">
+                    <span className={`text-xs font-medium ${meta.text}`}>{meta.label}</span>
+                    {used.has(a.slug) && <UsedBadge />}
+                  </span>
                   <span className="mt-1 text-xl font-semibold text-white">{a.name}</span>
                   <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">{a.summary}</span>
                   <span className="mt-4 flex items-center gap-3 font-mono text-xs text-slate-500">

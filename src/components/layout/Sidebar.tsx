@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { byParadigm } from '@/architectures/registry'
 import { paradigms } from '@/architectures/paradigms'
+import { UsedBadge } from '@/components/content/UsedInThisSite'
+import { usedSlugs } from '@/lib/selfUsage'
 import { categories } from '@/patterns/categories'
 import { byCategory } from '@/patterns/registry'
 
@@ -10,6 +12,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
   const inArchitectureArea = pathname.startsWith('/architecture')
   const [query, setQuery] = useState('')
   const q = query.trim().toLowerCase()
+  const used = usedSlugs()
 
   const patternGroups = byCategory()
     .map((g) => ({
@@ -63,12 +66,13 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                         to={`/architecture/${a.slug}`}
                         onClick={onClose}
                         className={({ isActive }) =>
-                          `block rounded-md px-3 py-1.5 text-sm transition ${
+                          `flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition ${
                             isActive ? 'bg-slate-800 font-medium text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                           }`
                         }
                       >
                         {a.name}
+                        {used.has(a.slug) && <UsedBadge />}
                       </NavLink>
                     </li>
                   ))}
@@ -91,12 +95,13 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
                         to={`/patterns/${p.slug}`}
                         onClick={onClose}
                         className={({ isActive }) =>
-                          `block rounded-md px-3 py-1.5 text-sm transition ${
+                          `flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition ${
                             isActive ? 'bg-slate-800 font-medium text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
                           }`
                         }
                       >
                         {p.name}
+                        {used.has(p.slug) && <UsedBadge />}
                       </NavLink>
                     </li>
                   ))}

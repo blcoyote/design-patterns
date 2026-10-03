@@ -8,6 +8,8 @@ export interface CodeSource {
   text: string
   /** Inclusive 1-based line range to highlight. */
   highlight?: [number, number]
+  /** Header label; defaults to the example file name for `lang`. */
+  fileName?: string
 }
 
 interface Props {
@@ -96,14 +98,14 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
                     boxShadow: selected ? `inset 0 -2px 0 0 ${color}` : undefined,
                   }}
                 >
-                  {FILE_NAME[s.lang]}
+                  {s.fileName ?? FILE_NAME[s.lang]}
                 </button>
               )
             })}
           </div>
         ) : (
           <span id={tabId(current.lang)} className="font-mono">
-            {FILE_NAME[current.lang]}
+            {current.fileName ?? FILE_NAME[current.lang]}
           </span>
         )}
         <button type="button" onClick={copy} className="rounded px-2 py-0.5 hover:bg-slate-800 hover:text-white">

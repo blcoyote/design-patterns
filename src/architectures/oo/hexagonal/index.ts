@@ -89,6 +89,10 @@ export const architecture: ArchitectureDefinition = {
         slug: 'null-object',
         why: 'A no-op adapter (a mailer that does not actually send, a repository that discards writes) is a Null Object slotted into a driven port for tests or local development.',
       },
+      {
+        slug: 'plugin',
+        why: 'Adapters are plugged into ports at composition time: the core only knows the port interface, and which implementation fills it (Postgres, in-memory, a no-op) is chosen by configuration, not by the core.',
+      },
     ],
     architectures: [
       { slug: 'layered', why: 'Hexagonal keeps Layered\'s top-to-bottom flow for a single request, but turns the dependency rule inside-out: every arrow points toward the core instead of toward the database.' },
@@ -170,7 +174,7 @@ export const architecture: ArchitectureDefinition = {
       width: 140,
       description: 'An interface the core owns and calls out through. The core knows it can `save` an order; it has no idea whether that write lands in Postgres or a plain array.',
       code: 'repoPort',
-      patterns: ['repository', 'strategy'],
+      patterns: ['repository', 'strategy', 'plugin'],
     },
     {
       id: 'postgresAdapter',

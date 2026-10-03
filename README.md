@@ -127,3 +127,25 @@ the dependency one-directional everywhere else and avoids a circular import betw
 
 That's it: the sidebar (grouped by paradigm under `/architecture*`), the architecture index and the route
 (`#/architecture/<slug>`) pick it up automatically.
+
+## Used in this site
+
+Many of the patterns above aren't just taught by this site — the site's own code uses them. A pattern or architecture
+page shows a **"Used in this site"** box when its own code is tagged.
+
+To tag a usage, add a comment directly above the code it describes, on its own line:
+
+```ts
+// @pattern observer: every CodeBlock subscribes to the shared language preference
+```
+
+- The grammar is `// @pattern <slug>: <explanation>`. `<slug>` is a design-pattern or architecture slug.
+- The snippet shown in the box is the tag's following lines, up to the first blank line, capped at about 15 lines.
+- Only `src/{components,hooks,lib}/**` and the two `registry.ts` files are scanned — **never** tag inside
+  `src/patterns/**` or `src/architectures/**`, or every teaching example would tag itself.
+
+A small Vite plugin (`vite-plugins/patternUsages.ts`) scans those files at build time and on dev-server start,
+providing the result as the virtual module `virtual:pattern-usages` — only the extracted `{ slug, file, line,
+explanation, snippet }` data, never full file contents. `src/lib/selfUsage.ts` reads that module and exposes
+`usagesOf(slug)` and `usedSlugs()`, which `PatternPage`, `ArchitecturePage`, the home grid, the architecture index and
+the sidebar all use. GitHub links point at `main`, since that's what's deployed.

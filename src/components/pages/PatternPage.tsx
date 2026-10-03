@@ -1,8 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
 import { CrossReferenceBox } from '@/components/content/CrossReferenceBox'
 import { BulletList, ProsCons, Section } from '@/components/content/Section'
+import { UsedInThisSite } from '@/components/content/UsedInThisSite'
 import { PatternExplorer } from '@/components/viz/PatternExplorer'
 import { architecturesUsing } from '@/lib/crossRefs'
+import { usagesOf } from '@/lib/selfUsage'
 import { categories } from '@/patterns/categories'
 import { getPattern, neighbours } from '@/patterns/registry'
 import { NotFound } from './NotFound'
@@ -16,6 +18,7 @@ export function PatternPage() {
   const { prev, next } = neighbours(pattern.slug)
   const related = pattern.related.map(getPattern).filter((p) => p !== undefined)
   const usedByArchitectures = architecturesUsing(pattern.slug)
+  const usages = usagesOf(pattern.slug)
 
   return (
     <article className="space-y-8">
@@ -50,6 +53,8 @@ export function PatternPage() {
       {usedByArchitectures.length > 0 && (
         <CrossReferenceBox title={`Architectural patterns that commonly use ${pattern.name}`} architectures={usedByArchitectures} />
       )}
+
+      <UsedInThisSite usages={usages} />
 
       {related.length > 0 && (
         <Section title="Related patterns">

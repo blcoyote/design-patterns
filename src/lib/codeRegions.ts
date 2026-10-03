@@ -15,6 +15,7 @@ const cache = new Map<string, ParsedCode>()
  * Strips `// [id]` / `// [/id]` (or `# [id]` / `# [/id]`) marker lines from a code sample and
  * records the line range each region covers. Regions may nest.
  */
+// @pattern cache-aside: look the parsed result up in the cache; on a miss, parse it and store it
 export function parseCode(source: string): ParsedCode {
   const cached = cache.get(source)
   if (cached) return cached

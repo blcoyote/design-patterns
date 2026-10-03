@@ -47,6 +47,7 @@ export function PatternExplorer({ pattern, color }: { pattern: ExplorableDefinit
     highlight: region ? code.regions[region] : undefined,
   }))
 
+  // @pattern strategy: every scene implements VisualizationProps, and the explorer never knows which scene it is rendering
   const Visualization = pattern.Visualization ?? GenericVisualization
 
   return (

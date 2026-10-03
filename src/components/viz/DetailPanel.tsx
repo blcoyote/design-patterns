@@ -21,6 +21,7 @@ interface Props {
   selection: Selection | null
   color: string
   onSelect: (id: string | null) => void
+  // @pattern dependency-injection: the resolver is passed in, so the patterns side never imports the architectures side
   resolvePattern?: ResolvePattern
 }
 

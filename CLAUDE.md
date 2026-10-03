@@ -21,6 +21,7 @@ Follow these every time. If a task seems to need a different route, stop and ask
 - New patterns start from `src/patterns/_template/` (see README → "Adding a pattern").
 - Shared behaviour goes in `src/components`, `src/hooks` or `src/lib`, never inside a pattern folder.
 - Architectures follow the same rules in `src/architectures/<paradigm>/<slug>/` (`ArchitectureDefinition`, template in `src/architectures/_template/`). Only architectures declare cross-references (`commonlyUsedWith`); design-pattern → architecture links are derived in `src/lib/crossRefs.ts`, and architecture ↔ architecture links must be declared on both sides (`npm test` enforces this).
+- When this site's own code uses a pattern it teaches, tag the usage with `// @pattern <slug>: <explanation>` directly above the code (see "Used in this site" in the README) instead of listing files anywhere.
 
 ### 2. Three languages, one set of regions
 

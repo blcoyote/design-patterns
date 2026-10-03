@@ -14,6 +14,7 @@ import { comparisonsFor } from "@/comparisons/registry";
 import { architecturesUsing } from "@/lib/crossRefs";
 import { usagesOf } from "@/lib/selfUsage";
 import { parseStepParam } from "@/lib/stepParam";
+import { patternSeoPage } from "@/lib/seoPages";
 import { categories } from "@/patterns/categories";
 import { getPattern, neighbours } from "@/patterns/registry";
 import { NotFound } from "./NotFound";
@@ -39,10 +40,7 @@ export function PatternPage() {
 
   return (
     <article className="space-y-8">
-      <Seo
-        title={`${pattern.name} Design Pattern`}
-        description={pattern.intent}
-      />
+      <Seo page={patternSeoPage(pattern)} />
       <ExplorableHeader
         label={cat.label}
         kind="pattern"

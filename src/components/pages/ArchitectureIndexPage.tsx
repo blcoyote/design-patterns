@@ -6,6 +6,7 @@ import { architectures } from "@/architectures/registry";
 import { ExplorableCard } from "@/components/content/ExplorableCard";
 import { FilterChip } from "@/components/content/FilterChip";
 import { Seo } from "@/components/content/Seo";
+import { architectureIndexSeoPage } from "@/lib/seoPages";
 import { usedSlugs } from "@/lib/selfUsage";
 import type { Paradigm } from "@/types/architecture";
 
@@ -20,10 +21,7 @@ export function ArchitectureIndexPage() {
 
   return (
     <div className="space-y-12">
-      <Seo
-        title="Architectural Patterns"
-        description="Explore architectural patterns such as Layered, Hexagonal, DDD, CQRS, and Event Sourcing through animated diagrams and their underlying design patterns."
-      />
+      <Seo page={architectureIndexSeoPage} />
       <section className="max-w-3xl">
         <p className="font-mono text-sm text-slate-500">
           // zoom out from objects to systems

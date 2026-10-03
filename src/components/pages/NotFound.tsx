@@ -1,13 +1,11 @@
 import { Link } from "react-router-dom";
 import { Seo } from "@/components/content/Seo";
+import { notFoundSeoPage } from "@/lib/seoPages";
 
 export function NotFound() {
   return (
     <div className="py-24 text-center">
-      <Seo
-        title="Page Not Found"
-        description="The requested page could not be found."
-      />
+      <Seo page={notFoundSeoPage} />
       <p className="font-mono text-sm text-slate-500">404</p>
       <h1 className="mt-2 text-3xl font-bold text-white">Pattern not found</h1>
       <p className="mt-3 text-slate-400">

@@ -2,15 +2,13 @@ import { Link } from "react-router-dom";
 import { Seo } from "@/components/content/Seo";
 import { comparisons } from "@/comparisons/registry";
 import { resolveSubject } from "@/lib/crossRefs";
+import { comparisonIndexSeoPage } from "@/lib/seoPages";
 
 /** Lists every comparison, each as a card naming the subjects it pits against one another. */
 export function ComparisonIndexPage() {
   return (
     <div className="space-y-12">
-      <Seo
-        title="Design Pattern Comparisons"
-        description="Compare similar software design and architecture patterns side by side, see when to choose each, and test your decision with a scenario."
-      />
+      <Seo page={comparisonIndexSeoPage} />
       <section className="max-w-3xl">
         <p className="font-mono text-sm text-slate-500">
           // look-alikes, told apart

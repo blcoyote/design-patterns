@@ -19,6 +19,7 @@ import { comparisonsFor } from "@/comparisons/registry";
 import { architecturesUsedBy, designPatternsUsedBy } from "@/lib/crossRefs";
 import { usagesOf } from "@/lib/selfUsage";
 import { parseStepParam } from "@/lib/stepParam";
+import { architectureSeoPage } from "@/lib/seoPages";
 import { NotFound } from "./NotFound";
 
 /** Mirrors PatternPage, with the paradigm badge/colour instead of category, a cross-reference box
@@ -42,10 +43,7 @@ export function ArchitecturePage() {
 
   return (
     <article className="space-y-8">
-      <Seo
-        title={`${architecture.name} Architecture Pattern`}
-        description={architecture.intent}
-      />
+      <Seo page={architectureSeoPage(architecture)} />
       <ExplorableHeader
         label={meta.label}
         kind="architecture"

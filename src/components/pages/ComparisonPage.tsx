@@ -10,6 +10,7 @@ import { useCodeLanguage } from "@/hooks/useCodeLanguage";
 import type { AdrSubject } from "@/lib/adr";
 import { buildCodeSources, parseLanguages } from "@/lib/codeLanguages";
 import { resolveSubject, type ResolvedSubject } from "@/lib/crossRefs";
+import { comparisonSeoPage } from "@/lib/seoPages";
 import type { ArchitectureDefinition } from "@/types/architecture";
 import type { PatternDefinition } from "@/types/pattern";
 import { NotFound } from "./NotFound";
@@ -47,7 +48,7 @@ export function ComparisonPage() {
 
   return (
     <article className="space-y-8">
-      <Seo title={comparison.title} description={comparison.summary} />
+      <Seo page={comparisonSeoPage(comparison)} />
       <header className="max-w-4xl">
         <span className="inline-flex items-center gap-2 rounded-full bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-400/30">
           Which should I choose?

@@ -6,6 +6,7 @@ import { AreaTeaserCard } from "@/components/content/AreaTeaserCard";
 import { FilterChip } from "@/components/content/FilterChip";
 import { UsedBadge } from "@/components/content/UsedInThisSite";
 import { Seo } from "@/components/content/Seo";
+import { homeSeoPage } from "@/lib/seoPages";
 import { comparisons } from "@/comparisons/registry";
 import { categories, categoryOrder } from "@/patterns/categories";
 import { patterns } from "@/patterns/registry";
@@ -28,10 +29,7 @@ export function HomePage() {
 
   return (
     <div className="space-y-12">
-      <Seo
-        title="Interactive Software Design Patterns and Architecture Guide"
-        description="Learn software design patterns and architectures through animated diagrams, runnable examples, and practical side-by-side comparisons."
-      />
+      <Seo page={homeSeoPage} />
       <section className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
         <div>
           <p className="font-mono text-sm text-slate-500">

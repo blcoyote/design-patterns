@@ -1,4 +1,4 @@
-import { Prism } from 'prism-react-renderer'
+import { Prism as prismInstance } from "prism-react-renderer";
 
 /**
  * `prismjs/components/prism-*` language files are plain UMD-ish scripts that
@@ -16,6 +16,6 @@ import { Prism } from 'prism-react-renderer'
  * module evaluation follows import order depth-first.
  */
 // @pattern singleton: there is exactly one shared Prism instance, so the C# grammar registers on the instance that renders
-;(globalThis as unknown as { Prism: typeof Prism }).Prism = Prism
+Object.assign(globalThis, { Prism: prismInstance });
 
-export { Prism }
+export { prismInstance as Prism };

@@ -6,7 +6,7 @@ import { validatePattern } from './validate'
 
 const slugs = patterns.map((p) => p.slug)
 
-const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./*/*/index.ts', '!./_*/**'], {
+const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./**/index.ts', '!./_*/**'], {
   eager: true,
 })
 
@@ -16,6 +16,8 @@ describe('pattern registry', () => {
   })
 
   it('every pattern lives at ./<category>/<slug>/index.ts', () => {
+    // the glob is deliberately broad, so a misplaced index.ts (wrong depth) fails here instead of going unseen
+    expect(Object.keys(modules).length).toBe(patterns.length)
     for (const [path, mod] of Object.entries(modules)) {
       const { pattern } = mod
       expect(path).toBe(`./${pattern.category}/${pattern.slug}/index.ts`)

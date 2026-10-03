@@ -8,7 +8,7 @@ import { validateArchitecture } from './validate'
 const designSlugs = patterns.map((p) => p.slug)
 const archSlugs = architectures.map((a) => a.slug)
 
-const modules = import.meta.glob<{ architecture: ArchitectureDefinition }>(['./*/*/index.ts', '!./_*/**'], {
+const modules = import.meta.glob<{ architecture: ArchitectureDefinition }>(['./**/index.ts', '!./_*/**'], {
   eager: true,
 })
 
@@ -18,6 +18,8 @@ describe('architecture registry', () => {
   })
 
   it('every architecture lives at ./<paradigm>/<slug>/index.ts', () => {
+    // the glob is deliberately broad, so a misplaced index.ts (wrong depth) fails here instead of going unseen
+    expect(Object.keys(modules).length).toBe(architectures.length)
     for (const [path, mod] of Object.entries(modules)) {
       const { architecture } = mod
       expect(path).toBe(`./${architecture.paradigm}/${architecture.slug}/index.ts`)
@@ -32,6 +34,10 @@ describe('architecture registry', () => {
     expect(validateArchitecture(a, designSlugs, archSlugs)).toEqual([])
     expect(a.steps.length).toBeGreaterThan(0)
     expect(a.participants.length).toBeGreaterThan(0)
+    // architectures must ship all three languages
+    expect(a.code.trim()).not.toBe('')
+    expect(a.csharp?.trim()).toBeTruthy()
+    expect(a.python?.trim()).toBeTruthy()
   })
 
   it.each(architectures.map((a) => [a.slug, a] as const))('%s code has no unclosed or stray markers', (_slug, a) => {

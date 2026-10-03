@@ -146,7 +146,7 @@ class HttpOrderController
         _useCase = useCase;
     }
 
-    public (int Status, string OrderId) HandlePost(string customerId, List<LineItem> items)
+    public (int Status, string CustomerId) HandlePost(string customerId, List<LineItem> items)
     {
         var order = _useCase.Execute(new PlaceOrderCommand(customerId, items));
         return (201, order.CustomerId);

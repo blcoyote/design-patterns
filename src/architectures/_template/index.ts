@@ -26,8 +26,8 @@ export const architecture: ArchitectureDefinition = {
   // variants: [{ name: 'Variant name', description: 'How it differs.' }],
 
   commonlyUsedWith: {
-    // Design patterns this architecture is typically built with. Each slug must also be
-    // referenced by at least one `participant.patterns` entry below (enforced by validate.ts).
+    // Design patterns this architecture is typically built with. Every slug used in a
+    // `participant.patterns` entry below must be listed here (enforced by validate.ts).
     designPatterns: [{ slug: 'repository', why: 'Why this architecture commonly uses the Repository pattern.' }],
     // Sibling architectures. Must be declared symmetrically: if A lists B, B must list A
     // (enforced by architectures/registry.test.ts).

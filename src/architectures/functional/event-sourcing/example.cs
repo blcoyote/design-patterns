@@ -105,8 +105,9 @@ class EventStore
     private readonly Dictionary<string, List<Event>> _streams = new();
     private readonly List<Action<string, Event>> _subscribers = new();
 
+    // a copy, so callers cannot mutate the stored history behind Append()'s back
     public List<Event> Load(string streamId) =>
-        _streams.TryGetValue(streamId, out var events) ? events : new List<Event>();
+        _streams.TryGetValue(streamId, out var events) ? new List<Event>(events) : new List<Event>();
 
     public void Append(string streamId, int expectedVersion, IReadOnlyList<Event> events)
     {

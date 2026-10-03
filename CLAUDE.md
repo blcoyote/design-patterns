@@ -70,3 +70,11 @@ for f in src/patterns/*/*/example.py src/architectures/*/*/example.py; do PYTHON
 - Work on a feature branch. Commit or open a PR only when asked.
 - Large, parallel work (e.g. porting all 30 patterns) is split across subagents by pattern folder. Each subagent owns its folders exclusively and gets a written brief with these rules. Review their output yourself before reporting: re-run everything in step 4 and read the code.
 - Keep the README ("Adding a pattern", project structure) up to date when the workflow changes.
+
+### 6. Beads issue tracking
+
+- Before selecting tracked work, run `bd ready`; claim the issue you take with `bd update <id> --claim` and inspect its details with `bd show <id>`.
+- Respect blocking dependencies. Use `bd dep tree <id>` to understand them; add dependencies when one issue must wait for another.
+- Create issues for meaningful follow-up work discovered during a task, rather than silently expanding scope. Use `bd create` with a clear title and relevant description, and link it with `bd dep add` when appropriate.
+- Close an issue with `bd close <id>` only after its work and applicable verification are complete. Do not close unrelated issues.
+- Beads uses Dolt for storage and team sync. Pull or push with `bd dolt pull` / `bd dolt push` when collaboration requires it; do not treat JSONL export as sync.

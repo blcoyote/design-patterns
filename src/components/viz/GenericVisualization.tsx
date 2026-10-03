@@ -1,8 +1,16 @@
-import type { VisualizationProps } from '@/types/pattern'
-import { Diagram } from './Diagram'
+import type { VisualizationProps } from "@/types/pattern";
+import { Diagram } from "./Diagram";
 
 /** Default visualisation: renders the pattern's participants/relations/steps as a diagram. */
-export function GenericVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function GenericVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  speed,
+  selectedId,
+  onSelect,
+}: VisualizationProps) {
   return (
     <Diagram
       participants={pattern.participants}
@@ -15,7 +23,8 @@ export function GenericVisualization({ pattern, color, step, stepIndex, selected
       selectedId={selectedId}
       onSelect={onSelect}
       animationKey={stepIndex}
+      packetSpeed={speed}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

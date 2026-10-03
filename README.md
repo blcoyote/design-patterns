@@ -72,6 +72,7 @@ src/
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
    - send `packets` along relations (`reverse: true` for return values),
+   - sequence packets in shared `Diagram` or `PacketLayer` scenes with `after: 0` to wait for the first packet's animation to finish (indices are zero-based and must point to an earlier packet),
    - show small `notes` badges under participants,
    - highlight a `code` region.
 4. Put the TypeScript example in `example.ts` (imported with `?raw` as `code`; excluded from `tsc` and lint). Mark regions with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
@@ -83,7 +84,9 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 ### Custom visualisations
 
-The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+
+For packet animation, pass `packetSpeed={speed}` to `Diagram`, or use `PacketLayer` from `src/components/viz/PacketLayer.tsx` in a custom SVG with `packets`, relation-keyed `geometry` (a Map or record), `color`, `speed` and `animationKey`. Dependencies start on animation completion, not a fixed stagger; sibling packets with the same `after` value run in parallel. Longer chains use shorter journeys to fit the step interval. Under reduced motion, only terminal packets are shown, without animation. Leave `after` unset for independent packets.
 
 ## Architecture
 

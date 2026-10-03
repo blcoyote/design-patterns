@@ -3,7 +3,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { paradigmOrder, paradigms } from "@/architectures/paradigms";
 import { architectures } from "@/architectures/registry";
-import { UsedBadge } from "@/components/content/UsedInThisSite";
+import { ExplorableCard } from "@/components/content/ExplorableCard";
+import { FilterChip } from "@/components/content/FilterChip";
+import { Seo } from "@/components/content/Seo";
+import { architectureIndexSeoPage } from "@/lib/seoPages";
 import { usedSlugs } from "@/lib/selfUsage";
 import type { Paradigm } from "@/types/architecture";
 
@@ -18,13 +21,14 @@ export function ArchitectureIndexPage() {
 
   return (
     <div className="space-y-12">
+      <Seo page={architectureIndexSeoPage} />
       <section className="max-w-3xl">
         <p className="font-mono text-sm text-slate-500">
           // zoom out from objects to systems
         </p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-6xl">
           {architectures.length} architectural patterns,{" "}
-          <span className="bg-gradient-to-r from-rose-300 via-indigo-300 to-lime-300 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-rose-300 via-indigo-300 to-lime-300 bg-clip-text text-transparent">
             animated
           </span>
           .
@@ -92,71 +96,26 @@ export function ArchitectureIndexPage() {
             const meta = paradigms[a.paradigm];
             const designPatternCount = a.commonlyUsedWith.designPatterns.length;
             return (
-              <motion.li
-                layout
+              <ExplorableCard
                 key={a.slug}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-              >
-                <Link
-                  to={`/architecture/${a.slug}`}
-                  className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-slate-900/50 p-5 ring-1 ring-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-900 hover:ring-slate-600"
-                >
-                  <span
-                    className="absolute -top-16 -right-16 size-40 rounded-full opacity-0 blur-3xl transition group-hover:opacity-30"
-                    style={{ backgroundColor: meta.color }}
-                    aria-hidden
-                  />
-                  <span className="flex items-center gap-2">
-                    <span className={`text-xs font-medium ${meta.text}`}>
-                      {meta.label}
-                    </span>
-                    {used.has(a.slug) && <UsedBadge />}
-                  </span>
-                  <span className="mt-1 text-xl font-semibold text-white">
-                    {a.name}
-                  </span>
-                  <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
-                    {a.summary}
-                  </span>
-                  <span className="mt-4 flex items-center gap-3 font-mono text-xs text-slate-500">
+                to={`/architecture/${a.slug}`}
+                accentColor={meta.color}
+                label={meta.label}
+                labelClass={`text-xs font-medium ${meta.text}`}
+                used={used.has(a.slug)}
+                name={a.name}
+                summary={a.summary}
+                index={i}
+                footer={
+                  <>
                     <span>uses {designPatternCount} design patterns</span>
-                    <span className="ml-auto text-slate-400 transition group-hover:translate-x-1 group-hover:text-white">
-                      →
-                    </span>
-                  </span>
-                </Link>
-              </motion.li>
+                  </>
+                }
+              />
             );
           })}
         </motion.ul>
       </section>
     </div>
-  );
-}
-
-function FilterChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm ring-1 transition ${
-        active
-          ? "bg-slate-800 text-white ring-slate-600"
-          : "text-slate-400 ring-slate-800 hover:text-white"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

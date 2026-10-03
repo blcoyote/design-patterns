@@ -1,15 +1,57 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from "react";
 
-export function Section({ title, children, className = '' }: { title: string; children: ReactNode; className?: string }) {
+export function Panel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <section className={`min-w-0 rounded-2xl bg-slate-900/40 p-4 ring-1 sm:p-6 ring-slate-800 ${className}`}>
-      <h2 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">{title}</h2>
-      <div className="mt-3 leading-relaxed [overflow-wrap:anywhere] text-slate-300">{children}</div>
+    <section
+      className={`min-w-0 rounded-2xl bg-slate-900/40 ring-1 ring-slate-800 ${className}`}
+    >
+      {children}
     </section>
-  )
+  );
 }
 
-export function BulletList({ items, marker = '•', markerClass = 'text-slate-500' }: { items: string[]; marker?: string; markerClass?: string }) {
+export function PanelHeading({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
+      {children}
+    </h2>
+  );
+}
+
+export function Section({
+  title,
+  children,
+  className = "",
+}: {
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <Panel className={`p-4 sm:p-6 ${className}`}>
+      <PanelHeading>{title}</PanelHeading>
+      <div className="mt-3 leading-relaxed wrap-anywhere text-slate-300">
+        {children}
+      </div>
+    </Panel>
+  );
+}
+
+export function BulletList({
+  items,
+  marker = "•",
+  markerClass = "text-slate-500",
+}: {
+  items: string[];
+  marker?: string;
+  markerClass?: string;
+}) {
   return (
     <ul className="space-y-2">
       {items.map((item) => (
@@ -21,7 +63,7 @@ export function BulletList({ items, marker = '•', markerClass = 'text-slate-50
         </li>
       ))}
     </ul>
-  )
+  );
 }
 
 export function ProsCons({ pros, cons }: { pros: string[]; cons: string[] }) {
@@ -34,5 +76,5 @@ export function ProsCons({ pros, cons }: { pros: string[]; cons: string[] }) {
         <BulletList items={cons} marker="−" markerClass="text-rose-400" />
       </Section>
     </div>
-  )
+  );
 }

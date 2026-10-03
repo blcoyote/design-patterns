@@ -257,13 +257,13 @@ export function MementoVisualization({
               TextEditor
             </text>
             <foreignObject x={32} y={56} width={236} height={96}>
-              <div className="break-words font-mono text-[13px] leading-snug text-slate-100">
+              <div className="wrap-break-word font-mono text-[13px] leading-snug text-slate-100">
                 {live.content || (
                   <span className="text-slate-600">(empty)</span>
                 )}
                 <motion.span
                   aria-hidden
-                  className="ml-0.5 inline-block h-[14px] w-[2px] translate-y-[2px] bg-slate-100 align-middle"
+                  className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 bg-slate-100 align-middle"
                   animate={
                     reduceMotion ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }
                   }

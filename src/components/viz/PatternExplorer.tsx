@@ -66,7 +66,7 @@ export function PatternExplorer({
       <div className="min-w-0 space-y-5 rounded-2xl bg-slate-900/40 p-3 ring-1 ring-slate-800 sm:p-6">
         {/* diagrams are drawn on an ~800px canvas; below that width they scroll sideways instead of shrinking the text to nothing */}
         <div className="overflow-x-auto overflow-y-hidden rounded-xl bg-slate-950 ring-1 ring-slate-800">
-          <div className="min-w-[40rem]">
+          <div className="min-w-160">
             <Visualization
               pattern={pattern}
               color={color}

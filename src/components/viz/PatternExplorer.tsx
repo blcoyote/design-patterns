@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { CodeBlock } from '@/components/content/CodeBlock'
+import { CodeBlock, type CodeSource } from '@/components/content/CodeBlock'
+import { useCodeLanguage, type CodeLanguage } from '@/hooks/useCodeLanguage'
 import { useStepPlayer } from '@/hooks/useStepPlayer'
-import { parseCode } from '@/lib/codeRegions'
+import { parseCode, type ParsedCode } from '@/lib/codeRegions'
 import { categories } from '@/patterns/categories'
 import type { PatternDefinition } from '@/types/pattern'
 import { findSelection } from '@/lib/selection'
@@ -19,11 +20,19 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const step = pattern.steps[player.index] ?? null
   const selection = findSelection(pattern, selectedId)
-  const { text, regions } = parseCode(pattern.code)
+  const parsed: { lang: CodeLanguage; code: ParsedCode }[] = [{ lang: 'typescript', code: parseCode(pattern.code) }]
+  if (pattern.csharp) parsed.push({ lang: 'csharp', code: parseCode(pattern.csharp) })
+  if (pattern.python) parsed.push({ lang: 'python', code: parseCode(pattern.python) })
+
+  const [preferredLang, setPreferredLang] = useCodeLanguage()
+  // fall back to TypeScript without touching the stored preference when the preferred language isn't available here
+  const active = parsed.find((p) => p.lang === preferredLang) ?? parsed[0]
+  const activeLang = active.lang
+  const activeRegions = active.code.regions
 
   const regionOf = (id: string) => {
     const p = pattern.participants.find((x) => x.id === id)
-    return p?.code ?? (regions[id] ? id : undefined)
+    return p?.code ?? (activeRegions[id] ? id : undefined)
   }
   // arrows without their own region fall back to the class they start from
   const selectedRegion =
@@ -31,6 +40,13 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
       ? regionOf(selection.item.id)
       : selection && (selection.item.code ?? regionOf(selection.item.from))
   const region = selection ? selectedRegion : step?.code
+
+  const sources: CodeSource[] = parsed.map(({ lang, code }) => ({
+    lang,
+    text: code.text,
+    highlight: region ? code.regions[region] : undefined,
+  }))
+
   const Visualization = pattern.Visualization ?? GenericVisualization
 
   return (
@@ -50,7 +66,7 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
 
       <div className="space-y-4">
         <DetailPanel pattern={pattern} selection={selection} color={color} onSelect={setSelectedId} />
-        <CodeBlock code={text} highlight={region ? regions[region] : undefined} color={color} />
+        <CodeBlock sources={sources} active={activeLang} onActiveChange={setPreferredLang} color={color} />
       </div>
     </section>
   )

@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'factory-method',
@@ -17,7 +20,7 @@ export const pattern: PatternDefinition = {
   whenToUse: [
     'A class cannot anticipate the exact class of objects it must create ahead of time.',
     'You want to let subclasses specify the objects they create, without changing shared code.',
-    'You want to centralize the knowledge of which concrete class to instantiate, instead of scattering `new SomeClass()` everywhere.',
+    'You want subclasses — not the base class — to decide which concrete product to instantiate, by overriding a single creation method.',
   ],
   pros: [
     'Avoids tight coupling between the creator class and concrete product classes.',
@@ -30,8 +33,8 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     'Document.createPage() in editors that support multiple page/document types',
-    'java.util.Calendar.getInstance() returns a locale-specific subclass',
-    'UI toolkit Button factories that return platform-specific buttons (Windows, macOS, Web)',
+    'java.util.Collection.iterator() — each concrete collection overrides it to return its own Iterator implementation',
+    'A Dialog base class whose subclasses override createButton() to return a platform-specific button',
     'Framework "create" hooks that let app code supply its own object type (e.g. a custom HttpClient)',
   ],
   related: ['abstract-factory', 'prototype', 'builder', 'template-method'],
@@ -134,6 +137,15 @@ export const pattern: PatternDefinition = {
       bend: -40,
       code: 'usage',
     },
+    {
+      id: 'logistics-delivers',
+      from: 'logistics',
+      to: 'transport',
+      type: 'calls',
+      label: 'deliver()',
+      description: 'planDelivery() calls deliver() on the Transport it got back from createTransport(), through the interface only.',
+      code: 'logistics',
+    },
   ],
   steps: [
     {
@@ -160,7 +172,8 @@ export const pattern: PatternDefinition = {
     {
       title: 'Deliver, polymorphically',
       description: 'planDelivery() calls deliver() on the Transport it got back, without ever knowing it is a Truck.',
-      highlight: ['logistics', 'transport', 'truck'],
+      highlight: ['logistics', 'transport', 'truck', 'logistics-delivers'],
+      packets: [{ relation: 'logistics-delivers', label: 'deliver()' }],
       notes: { truck: 'deliver() ran' },
       code: 'logistics',
     },
@@ -173,66 +186,7 @@ export const pattern: PatternDefinition = {
       code: 'seaLogistics',
     },
   ],
-  code: `
-// [transport]
-interface Transport {
-  deliver(): string
-}
-// [/transport]
-
-// [truck]
-class Truck implements Transport {
-  deliver(): string {
-    return 'Delivering by road in a truck'
-  }
-}
-// [/truck]
-
-// [ship]
-class Ship implements Transport {
-  deliver(): string {
-    return 'Delivering by sea in a ship'
-  }
-}
-// [/ship]
-
-// [logistics]
-abstract class Logistics {
-  // The factory method — subclasses decide what this returns.
-  abstract createTransport(): Transport
-
-  // Shared logic that relies on createTransport() without knowing the concrete type.
-  planDelivery(): string {
-    const transport = this.createTransport()
-    return \`Planned. \${transport.deliver()}\`
-  }
-}
-// [/logistics]
-
-// [roadLogistics]
-class RoadLogistics extends Logistics {
-  createTransport(): Transport {
-    return new Truck()
-  }
-}
-// [/roadLogistics]
-
-// [seaLogistics]
-class SeaLogistics extends Logistics {
-  createTransport(): Transport {
-    return new Ship()
-  }
-}
-// [/seaLogistics]
-
-// Usage
-// [usage]
-function runDelivery(logistics: Logistics) {
-  console.log(logistics.planDelivery())
-}
-
-runDelivery(new RoadLogistics()) // "Planned. Delivering by road in a truck"
-runDelivery(new SeaLogistics()) // "Planned. Delivering by sea in a ship"
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

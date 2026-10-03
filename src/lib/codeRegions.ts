@@ -5,13 +5,14 @@ export interface ParsedCode {
   regions: Record<string, [number, number]>
 }
 
-const OPEN = /^\s*\/\/ \[([\w-]+)\]\s*$/
-const CLOSE = /^\s*\/\/ \[\/([\w-]+)\]\s*$/
+// `//` for TypeScript/C#, `#` for Python
+const OPEN = /^\s*(?:\/\/|#) \[([\w-]+)\]\s*$/
+const CLOSE = /^\s*(?:\/\/|#) \[\/([\w-]+)\]\s*$/
 
 const cache = new Map<string, ParsedCode>()
 
 /**
- * Strips `// [id]` / `// [/id]` marker lines from a code sample and
+ * Strips `// [id]` / `// [/id]` (or `# [id]` / `# [/id]`) marker lines from a code sample and
  * records the line range each region covers. Regions may nest.
  */
 export function parseCode(source: string): ParsedCode {
@@ -43,4 +44,32 @@ export function parseCode(source: string): ParsedCode {
   const parsed = { text: out.join('\n'), regions }
   cache.set(source, parsed)
   return parsed
+}
+
+/**
+ * Checks marker pairing in a raw code sample. `parseCode` silently drops
+ * unmatched markers, so malformed samples have to be caught on the source.
+ */
+export function findMarkerErrors(source: string): string[] {
+  const errors: string[] = []
+  const open = new Set<string>()
+  const seen = new Set<string>()
+
+  source.split('\n').forEach((line, i) => {
+    const start = OPEN.exec(line)
+    if (start) {
+      if (seen.has(start[1])) errors.push(`line ${i + 1}: region "${start[1]}" opened twice`)
+      seen.add(start[1])
+      open.add(start[1])
+      return
+    }
+    const end = CLOSE.exec(line)
+    if (end) {
+      if (!open.delete(end[1])) errors.push(`line ${i + 1}: "[/${end[1]}]" has no matching opening marker`)
+      return
+    }
+    if (/(?:\/\/|#) \[\/?[\w-]+\]/.test(line)) errors.push(`line ${i + 1}: marker must be on its own line`)
+  })
+  for (const id of open) errors.push(`region "${id}" is never closed`)
+  return errors
 }

@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { StateVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -8,7 +11,7 @@ export const pattern: PatternDefinition = {
   order: 5,
   summary: 'Let an object change its behavior by swapping the internal state object that defines it.',
   intent:
-    'Allow an object to alter its behavior when its internal state changes, so it appears to change its class — all without the object or its clients writing a single conditional.',
+    'Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.',
   problem:
     'A document’s behavior depends on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. Encoding this as one method full of if (status === "draft") … else if (status === "inReview") … grows every time a stage or an action is added, and nothing stops a caller from triggering a transition that should be impossible.',
   solution:
@@ -22,8 +25,8 @@ export const pattern: PatternDefinition = {
   ],
   pros: [
     'Replaces sprawling conditionals with small, focused classes — one per state.',
-    'Makes illegal transitions hard to reach by accident: a state only implements the transitions that make sense from it.',
-    'New states can be added without touching the existing ones (Open/Closed).',
+    'Each state decides which actions it honours; invalid ones are absorbed (or could throw) instead of being handled ad hoc by callers.',
+    'State-specific behaviour is localized to one class, but adding a state still means updating every existing state that can transition into it.',
   ],
   cons: [
     'Overkill for objects with only two or three simple states.',
@@ -32,7 +35,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     'TCP connection states (Listen, SynReceived, Established, Closed, …)',
-    'UI widgets: a button’s Idle/Hover/Pressed/Disabled states',
+    'Media players: a playback engine’s Stopped/Playing/Paused/Buffering states',
     'Game character states (Standing, Jumping, Crouching, Dead)',
     'Document and order workflow engines (Draft → InReview → Published/Rejected)',
   ],
@@ -288,171 +291,8 @@ export const pattern: PatternDefinition = {
       code: 'published',
     },
   ],
-  code: `
-// [documentState]
-interface DocumentState {
-  readonly name: string
-  submit(): DocumentState
-  approve(): DocumentState
-  reject(): DocumentState
-  revise(): DocumentState
-}
-// [/documentState]
-
-// [draft]
-class DraftState implements DocumentState {
-  readonly name = 'Draft'
-
-  // [submit]
-  submit(): DocumentState {
-    console.log('Draft submitted for review')
-    return new InReviewState()
-  }
-  // [/submit]
-
-  approve(): DocumentState {
-    return this // not a valid transition from Draft
-  }
-
-  reject(): DocumentState {
-    return this
-  }
-
-  revise(): DocumentState {
-    return this
-  }
-}
-// [/draft]
-
-// [review]
-class InReviewState implements DocumentState {
-  readonly name = 'InReview'
-
-  submit(): DocumentState {
-    return this
-  }
-
-  // [approve]
-  approve(): DocumentState {
-    console.log('Review approved — publishing')
-    return new PublishedState()
-  }
-  // [/approve]
-
-  // [reject]
-  reject(): DocumentState {
-    console.log('Review rejected — back for changes')
-    return new RejectedState()
-  }
-  // [/reject]
-
-  revise(): DocumentState {
-    return this
-  }
-}
-// [/review]
-
-// [published]
-class PublishedState implements DocumentState {
-  readonly name = 'Published'
-
-  // Published is terminal: every action is a no-op.
-  submit(): DocumentState {
-    return this
-  }
-
-  approve(): DocumentState {
-    return this
-  }
-
-  reject(): DocumentState {
-    return this
-  }
-
-  revise(): DocumentState {
-    return this
-  }
-}
-// [/published]
-
-// [rejected]
-class RejectedState implements DocumentState {
-  readonly name = 'Rejected'
-
-  submit(): DocumentState {
-    return this
-  }
-
-  approve(): DocumentState {
-    return this
-  }
-
-  reject(): DocumentState {
-    return this
-  }
-
-  // [revise]
-  revise(): DocumentState {
-    console.log('Revised — back to Draft')
-    return new DraftState()
-  }
-  // [/revise]
-}
-// [/rejected]
-
-// [document]
-class Document {
-  // [holds]
-  private state: DocumentState = new DraftState()
-  // [/holds]
-
-  get status(): string {
-    return this.state.name
-  }
-
-  // [delegate]
-  submit() {
-    this.state = this.state.submit()
-  }
-
-  approve() {
-    this.state = this.state.approve()
-  }
-
-  reject() {
-    this.state = this.state.reject()
-  }
-
-  revise() {
-    this.state = this.state.revise()
-  }
-  // [/delegate]
-}
-// [/document]
-
-// [client]
-// Usage
-const doc = new Document()
-console.log(doc.status) // "Draft"
-
-doc.submit()
-console.log(doc.status) // "InReview"
-
-doc.reject()
-console.log(doc.status) // "Rejected"
-
-doc.revise()
-console.log(doc.status) // "Draft"
-
-doc.submit()
-console.log(doc.status) // "InReview"
-
-doc.approve()
-console.log(doc.status) // "Published"
-
-doc.submit() // ignored — Published is terminal
-console.log(doc.status) // "Published"
-// [/client]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: StateVisualization,
 }

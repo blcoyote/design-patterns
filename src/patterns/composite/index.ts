@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { CompositeVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -32,7 +35,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     'File systems: directories and files share one interface (size, delete, search…)',
-    'DOM / UI widget trees: a container element and a leaf widget both implement render()',
+    'The DOM tree: every Node, element or text, shares the same interface for appendChild and traversal',
     'GUI menus: a menu holds menu items and other (sub)menus behind the same interface',
     'Bill-of-materials and org-chart trees that total cost or headcount recursively',
   ],
@@ -183,13 +186,10 @@ export const pattern: PatternDefinition = {
       code: 'usage',
     },
     {
-      title: 'The call ripples down to root’s children',
-      description: 'root/ does not know how to measure itself directly — it loops over its children and calls getSize() on each one: docs/ and readme.md.',
-      highlight: ['root', 'rootDocs', 'docs', 'rootReadme', 'readme'],
-      packets: [
-        { relation: 'rootDocs', label: 'getSize()' },
-        { relation: 'rootReadme', label: 'getSize()' },
-      ],
+      title: 'root/ asks its first child, docs/',
+      description: 'root/ does not know how to measure itself directly — it loops over its children in order and calls getSize() on the first one, docs/, waiting for that whole subtree to resolve before it moves on to readme.md.',
+      highlight: ['root', 'rootDocs', 'docs'],
+      packets: [{ relation: 'rootDocs', label: 'getSize()' }],
       code: 'folder',
     },
     {
@@ -204,89 +204,56 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Leaves hit bottom and answer immediately',
-      description: 'photo.jpg, logo.png and readme.md have no children to delegate to — each one just returns its own stored size, right away.',
-      highlight: ['photo', 'docsPhoto', 'logo', 'docsLogo', 'readme', 'rootReadme'],
+      description: 'photo.jpg and logo.png have no children to delegate to — each one just returns its own stored size, right away. readme.md has not even been asked yet.',
+      highlight: ['photo', 'docsPhoto', 'logo', 'docsLogo'],
       packets: [
-        { relation: 'docsPhoto', label: '2.4 MB', reverse: true },
-        { relation: 'docsLogo', label: '0.8 MB', reverse: true },
-        { relation: 'rootReadme', label: '1.1 MB', reverse: true },
+        { relation: 'docsPhoto', label: '2400 KB', reverse: true },
+        { relation: 'docsLogo', label: '800 KB', reverse: true },
       ],
-      notes: { photo: '2.4 MB', logo: '0.8 MB', readme: '1.1 MB' },
+      notes: { photo: '2400 KB', logo: '800 KB' },
       code: 'file',
     },
     {
       title: 'docs/ totals its children and bubbles up',
-      description: 'docs/ adds 2.4 MB + 0.8 MB from its two children and returns that 3.2 MB subtotal back up to root/.',
+      description: 'docs/ adds 2400 KB + 800 KB from its two children and returns that 3200 KB subtotal back up to root/. Only now, with that whole subtree resolved, does root/ move on.',
       highlight: ['docs', 'rootDocs', 'root'],
-      packets: [{ relation: 'rootDocs', label: '3.2 MB', reverse: true }],
-      notes: { docs: '3.2 MB' },
+      packets: [{ relation: 'rootDocs', label: '3200 KB', reverse: true }],
+      notes: { docs: '3200 KB' },
       code: 'folder',
     },
     {
+      title: 'root/ asks its next child, readme.md',
+      description: 'With the docs/ subtotal in hand, root/ moves to the next entry in its children array and calls getSize() on readme.md.',
+      highlight: ['root', 'rootReadme', 'readme'],
+      packets: [{ relation: 'rootReadme', label: 'getSize()' }],
+      code: 'folder',
+    },
+    {
+      title: 'readme.md answers immediately',
+      description: 'readme.md has no children either — it returns its own stored size straight away.',
+      highlight: ['readme', 'rootReadme'],
+      packets: [{ relation: 'rootReadme', label: '1100 KB', reverse: true }],
+      notes: { readme: '1100 KB' },
+      code: 'file',
+    },
+    {
       title: 'root/ totals everything and returns to the client',
-      description: 'root/ adds the 3.2 MB subtotal from docs/ to readme.md’s 1.1 MB, for a grand total of 4.3 MB, and returns that single number to the client.',
+      description: 'root/ adds the 3200 KB subtotal from docs/ to readme.md’s 1100 KB, for a grand total of 4300 KB, and returns that single number to the client.',
       highlight: ['root', 'call', 'client'],
-      packets: [{ relation: 'call', label: '4.3 MB', reverse: true }],
-      notes: { root: '4.3 MB' },
+      packets: [{ relation: 'call', label: '4300 KB', reverse: true }],
+      notes: { root: '4300 KB' },
       code: 'folder',
     },
     {
       title: 'One call, whole tree measured',
       description: 'The client made a single getSize() call and got back the total size of an entire nested tree — it never had to know how deep that tree went.',
       highlight: ['client'],
-      notes: { client: 'total: 4.3 MB' },
+      notes: { client: 'total: 4300 KB' },
       code: 'usage',
     },
   ],
-  code: `
-// [component]
-interface FileSystemItem {
-  getSize(): number
-}
-// [/component]
-
-// [file]
-class File implements FileSystemItem {
-  constructor(private name: string, private size: number) {}
-
-  getSize(): number {
-    return this.size
-  }
-}
-// [/file]
-
-// [folder]
-class Folder implements FileSystemItem {
-  private children: FileSystemItem[] = []
-
-  constructor(private name: string) {}
-
-  add(item: FileSystemItem): void {
-    this.children.push(item)
-  }
-
-  getSize(): number {
-    // Delegate to every child and combine — works whether each child
-    // is a leaf File or another, deeper Folder.
-    return this.children.reduce((total, child) => total + child.getSize(), 0)
-  }
-}
-// [/folder]
-
-// [usage]
-// [build]
-const root = new Folder('root')
-const docs = new Folder('docs')
-
-root.add(docs)
-root.add(new File('readme.md', 1.1))
-docs.add(new File('photo.jpg', 2.4))
-docs.add(new File('logo.png', 0.8))
-// [/build]
-
-// One call, regardless of how deep the tree underneath root actually is.
-console.log(root.getSize()) // 4.3
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: CompositeVisualization,
 }

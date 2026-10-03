@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'repository',
@@ -7,7 +10,7 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: 'Hide persistence behind a collection-like interface so domain code never sees SQL.',
   intent:
-    'Mediate between the domain/application layer and the data store with an interface that looks like an in-memory collection of objects — findById, findByCustomer, add, remove — so the rest of the application can work with domain objects without knowing how, or where, they are actually stored.',
+    'Mediate between the domain/application layer and the data store with an interface that looks like an in-memory collection of objects — findById, findByCustomer, add, save, remove — so the rest of the application can work with domain objects without knowing how, or where, they are actually stored.',
   problem:
     'Without a boundary, SQL strings, ORM query builders and connection handling creep into services and controllers, so every piece of code that needs an Order ends up knowing the shape of the orders table. The same query gets copy-pasted in three places, unit tests require a real database just to exercise business logic, and swapping or upgrading the data store means hunting down every call site that touches it.',
   solution:
@@ -59,7 +62,7 @@ export const pattern: PatternDefinition = {
       x: 400,
       y: 90,
       width: 230,
-      description: 'Declares a collection-like contract — findById, findByCustomer, add, remove — expressed purely in terms of domain objects, with no hint of SQL or any other storage technology.',
+      description: 'Declares a collection-like contract — findById, findByCustomer, add, save, remove — expressed purely in terms of domain objects, with no hint of SQL or any other storage technology.',
     },
     {
       id: 'sqlOrderRepository',
@@ -99,7 +102,7 @@ export const pattern: PatternDefinition = {
       x: 650,
       y: 390,
       width: 220,
-      description: 'Implements the same OrderRepository interface backed by a plain Map instead of a database — used in unit tests so business logic can run with no real storage at all.',
+      description: 'Implements the same OrderRepository interface backed by a plain in-memory map (Map / Dictionary / dict) instead of a database — used in unit tests so business logic can run with no real storage at all.',
     },
   ],
   relations: [
@@ -154,8 +157,8 @@ export const pattern: PatternDefinition = {
       from: 'inMemoryOrderRepository',
       to: 'order',
       type: 'holds',
-      label: 'Map<id, Order>',
-      description: 'The in-memory repository keeps Order instances directly in a Map, so a lookup is just orders.get(id) — no SQL, no mapping step.',
+      label: 'map: id → Order',
+      description: 'The in-memory repository keeps Order instances directly in an in-memory map keyed by id, so a lookup is a single key read — no SQL, no mapping step.',
       code: 'inMemoryOrderRepository',
     },
   ],
@@ -173,7 +176,7 @@ export const pattern: PatternDefinition = {
       title: 'Two implementations satisfy the same contract',
       description: 'SqlOrderRepository and InMemoryOrderRepository both implement OrderRepository, which is exactly what lets either one be handed to OrderService without it noticing.',
       highlight: ['orderRepository', 'sqlOrderRepository', 'sqlImpl', 'inMemoryOrderRepository', 'memImpl'],
-      notes: { orderRepository: 'findById, findByCustomer, add, remove' },
+      notes: { orderRepository: 'findById, findByCustomer, add, save, remove' },
       code: 'orderRepository',
     },
     {
@@ -188,7 +191,7 @@ export const pattern: PatternDefinition = {
       title: 'Repository builds a SQL query',
       description: 'SqlOrderRepository.findById() turns the request into a parameterized SELECT and sends it to the Database.',
       highlight: ['sqlOrderRepository', 'query', 'database'],
-      packets: [{ relation: 'query', label: "SELECT * WHERE id='482'" }],
+      packets: [{ relation: 'query', label: 'SELECT … FROM orders WHERE id = ? [482]' }],
       notes: { database: 'running query' },
       code: 'findById',
     },
@@ -218,7 +221,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Swapped for an in-memory repository in tests',
-      description: 'A unit test constructs the very same OrderService with an InMemoryOrderRepository instead. findById() now reads straight out of a Map — no database, no SQL — and OrderService does not change at all.',
+      description: 'A unit test constructs the very same OrderService with an InMemoryOrderRepository instead. findById() now reads straight out of an in-memory map — no database, no SQL — and OrderService does not change at all.',
       highlight: ['client', 'find', 'inMemoryOrderRepository', 'memImpl', 'memHolds', 'order'],
       packets: [{ relation: 'memHolds', label: 'orders.get(482)' }],
       notes: { inMemoryOrderRepository: 'test double' },
@@ -227,113 +230,9 @@ export const pattern: PatternDefinition = {
   ],
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-// [order]
-class Order {
-  constructor(
-    public readonly id: string,
-    public readonly customerId: string,
-    public readonly total: number,
-  ) {}
-}
-// [/order]
-
-// [orderRepository]
-interface OrderRepository {
-  findById(id: string): Order | undefined
-  findByCustomer(customerId: string): Order[]
-  add(order: Order): void
-  remove(id: string): void
-}
-// [/orderRepository]
-
-// [database]
-class Database {
-  query(sql: string, params: unknown[]): Record<string, unknown>[] {
-    console.log('SQL:', sql, params)
-    return [{ id: '482', customer_id: 'cst-9', total_cents: 4200 }]
-  }
-}
-// [/database]
-
-// [sqlOrderRepository]
-class SqlOrderRepository implements OrderRepository {
-  constructor(private db: Database) {}
-
-  // [findById]
-  findById(id: string): Order | undefined {
-    const rows = this.db.query('SELECT * FROM orders WHERE id = ?', [id])
-    return rows[0] ? this.mapRow(rows[0]) : undefined
-  }
-  // [/findById]
-
-  findByCustomer(customerId: string): Order[] {
-    const rows = this.db.query('SELECT * FROM orders WHERE customer_id = ?', [customerId])
-    return rows.map((row) => this.mapRow(row))
-  }
-
-  add(order: Order): void {
-    this.db.query('INSERT INTO orders (id, customer_id, total_cents) VALUES (?, ?, ?)', [
-      order.id,
-      order.customerId,
-      order.total * 100,
-    ])
-  }
-
-  remove(id: string): void {
-    this.db.query('DELETE FROM orders WHERE id = ?', [id])
-  }
-
-  // [mapRow]
-  private mapRow(row: Record<string, unknown>): Order {
-    return new Order(row.id as string, row.customer_id as string, (row.total_cents as number) / 100)
-  }
-  // [/mapRow]
-}
-// [/sqlOrderRepository]
-
-// [inMemoryOrderRepository]
-class InMemoryOrderRepository implements OrderRepository {
-  private orders = new Map<string, Order>()
-
-  findById(id: string): Order | undefined {
-    return this.orders.get(id)
-  }
-
-  findByCustomer(customerId: string): Order[] {
-    return [...this.orders.values()].filter((order) => order.customerId === customerId)
-  }
-
-  add(order: Order): void {
-    this.orders.set(order.id, order)
-  }
-
-  remove(id: string): void {
-    this.orders.delete(id)
-  }
-}
-// [/inMemoryOrderRepository]
-
-// [client]
-class OrderService {
-  constructor(private repo: OrderRepository) {}
-
-  getReceipt(orderId: string): string {
-    const order = this.repo.findById(orderId)
-    return order ? \`Order \${order.id}: $\${order.total.toFixed(2)}\` : 'not found'
-  }
-}
-// [/client]
-
-// [usage]
-// Production: wired to the real database
-const service = new OrderService(new SqlOrderRepository(new Database()))
-console.log(service.getReceipt('482'))
-
-// Tests: the exact same service, wired to an in-memory stand-in — no database involved
-const testService = new OrderService(new InMemoryOrderRepository())
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 
   // Generic diagram is used — no custom Visualization.
 }

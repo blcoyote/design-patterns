@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { NullObjectVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -29,12 +32,13 @@ export const pattern: PatternDefinition = {
     'Can hide real bugs: a missing dependency sometimes should be a loud error, not a silent no-op.',
     'Adds a class that does nothing observable, which can confuse readers unfamiliar with the pattern.',
     'Does not help when callers need a meaningful return value — a safe default return is a smaller cousin of this, not a true Null Object.',
+    'Only works when "do nothing" is itself a genuinely sensible default; if no neutral behavior exists, forcing one in is the wrong fix.',
   ],
   realWorld: [
     'NullLogger / NOPLogger implementations in logging frameworks (SLF4J\'s NOPLogger, many Node logging libs)',
     'Python\'s logging.NullHandler — attached by libraries so "no handler configured" never warns or crashes',
-    'A no-op AbortSignal or EventTarget used as a safe default instead of undefined',
-    'Optional/Maybe types in functional languages, where "nothing" is a value that responds to the same operations as "something"',
+    'A never-aborting `new AbortController().signal` used as a safe default instead of undefined',
+    '.NET\'s NullLogger.Instance, Stream.Null, Go\'s io.Discard, and Java\'s Collections.emptyList() — do-nothing implementations used as defaults instead of null',
   ],
   related: ['strategy', 'singleton', 'proxy', 'state'],
 
@@ -161,7 +165,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Before: null means "no logger"',
       description:
-        'A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed Logger | null, so every call site that wants to log now has to remember to guard it.',
+        'A batch job builds a ReportGenerator and passes null for the logger, since it does not want console noise. The field is typed as an optional Logger (Logger | null, ILogger?, Logger | None), so every call site that wants to log now has to remember to guard it.',
       highlight: ['client', 'client-create', 'reportGenerator'],
       packets: [{ relation: 'client-create', label: 'new ReportGenerator(null)' }],
       notes: { reportGenerator: 'logger: null' },
@@ -170,7 +174,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Two guarded calls behave',
       description:
-        'generate() checks if (this.logger != null) before its first two log calls. Since logger really is null here, both checks correctly skip the call and the method carries on safely.',
+        'generate() checks that the logger is not null before its first two log calls. Since logger really is null here, both checks correctly skip the call and the method carries on safely.',
       highlight: ['client', 'client-call', 'reportGenerator'],
       packets: [{ relation: 'client-call', label: 'generate()' }],
       notes: { reportGenerator: 'guards: 2 skipped' },
@@ -181,15 +185,15 @@ export const pattern: PatternDefinition = {
       description:
         'When the report has warnings, generate() calls this.logger.warn(...) directly — whoever added that branch forgot the null check every other call site remembered.',
       highlight: ['reportGenerator'],
-      notes: { reportGenerator: 'warnings: 2' },
+      notes: { reportGenerator: 'warnings: 1' },
       code: 'forgotten',
     },
     {
       title: 'It crashes',
       description:
-        "Because logger is null, .warn() throws TypeError: Cannot read properties of null (reading 'warn'). The exception unwinds past generate() and the whole report is lost — for want of one if.",
+        "Because logger is null, the .warn() call throws (TypeError in TS, NullReferenceException in C#, AttributeError in Python). The exception unwinds past generate() and the whole report is lost — for want of one if.",
       highlight: ['client', 'reportGenerator'],
-      notes: { reportGenerator: '💥 TypeError' },
+      notes: { reportGenerator: '💥 crash' },
       code: 'forgotten',
     },
     {
@@ -234,118 +238,8 @@ export const pattern: PatternDefinition = {
     },
   ],
 
-  code: `
-// Shared types used by both versions below.
-interface ReportData {
-  rows: unknown[]
-}
-interface Report {
-  warnings: string[]
-}
-declare function buildReport(data: ReportData): Report
-declare const cleanData: ReportData
-declare const dataWithWarnings: ReportData
-
-// ============================================================
-// Before: "no logger" is represented by null.
-// ============================================================
-// [before]
-interface Logger {
-  info(msg: string): void
-  warn(msg: string): void
-  error(msg: string): void
-}
-
-class ReportGeneratorBefore {
-  constructor(private logger: Logger | null) {}
-
-  generate(data: ReportData): Report {
-    // [guard]
-    if (this.logger != null) this.logger.info('starting report')
-    const result = buildReport(data)
-    if (this.logger != null) this.logger.info('report ready')
-    // [/guard]
-
-    // [forgotten]
-    if (result.warnings.length > 0) {
-      // forgot the null check every other call site remembered:
-      this.logger.warn(\`report has \${result.warnings.length} warnings\`)
-    }
-    // [/forgotten]
-
-    return result
-  }
-}
-
-// Fine on the happy path — the guarded calls just no-op:
-new ReportGeneratorBefore(null).generate(cleanData)
-
-// Crashes the moment a report has warnings:
-new ReportGeneratorBefore(null).generate(dataWithWarnings)
-// TypeError: Cannot read properties of null (reading 'warn')
-// [/before]
-
-// ============================================================
-// After: a Null Object stands in for "no logger".
-// ============================================================
-// [logger]
-interface Logger {
-  info(msg: string): void
-  warn(msg: string): void
-  error(msg: string): void
-}
-// [/logger]
-
-// [nullLogger]
-class NullLogger implements Logger {
-  info(): void {}
-  warn(): void {}
-  error(): void {}
-}
-// [/nullLogger]
-
-// [consoleLogger]
-class ConsoleLogger implements Logger {
-  info(msg: string): void {
-    console.info(msg)
-  }
-  warn(msg: string): void {
-    console.warn(msg)
-  }
-  error(msg: string): void {
-    console.error(msg)
-  }
-}
-// [/consoleLogger]
-
-// [reportGenerator]
-class ReportGenerator {
-  // [holds]
-  constructor(private logger: Logger = new NullLogger()) {}
-  // [/holds]
-
-  // [generate]
-  generate(data: ReportData): Report {
-    this.logger.info('starting report')
-    const result = buildReport(data)
-    this.logger.info('report ready')
-    if (result.warnings.length > 0) {
-      this.logger.warn(\`report has \${result.warnings.length} warnings\`)
-    }
-    return result
-  }
-  // [/generate]
-}
-// [/reportGenerator]
-
-// [client]
-// Usage
-const quiet = new ReportGenerator() // no logger passed — defaults to NullLogger
-quiet.generate(dataWithWarnings) // runs to completion: no guard, no crash, no noise
-
-const verbose = new ReportGenerator(new ConsoleLogger())
-verbose.generate(dataWithWarnings) // the exact same generate() — now it actually logs
-// [/client]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: NullObjectVisualization,
 }

@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { ObjectPoolVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -33,7 +36,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     'Database connection pools — HikariCP, node-postgres\'s Pool, ADO.NET connection pooling.',
-    'Thread pools and worker pools (java.util.concurrent.ThreadPoolExecutor, Node.js worker_threads pools).',
+    'java.util.concurrent.ThreadPoolExecutor (a task-submission variant of this pattern) and Node.js worker pools such as piscina — Node\'s own worker_threads module ships no pool.',
     'Game engines reusing bullet/particle/enemy objects instead of allocating and garbage-collecting them every frame.',
     'HTTP keep-alive / socket pools reused across outgoing requests to the same host.',
   ],
@@ -63,14 +66,14 @@ export const pattern: PatternDefinition = {
     },
     {
       id: 'pool',
-      label: 'ConnectionPool',
+      label: 'ObjectPool<T>',
       role: 'Object Pool',
       kind: 'class',
       x: 400,
       y: 240,
       width: 170,
       description:
-        'Owns the bounded set of PooledConnection objects: an idle list, an in-use set, and a FIFO queue of callers waiting for the next release(). Lazily creates new connections only up to maxSize.',
+        'Owns a bounded set of T objects — here, PooledConnection — behind an idle list, an in-use set, and a FIFO queue of callers waiting for the next release(). It only knows T through the Poolable interface, so swapping in a different poolable type needs no change to the pool itself. Lazily creates new instances only up to maxSize.',
     },
     {
       id: 'poolable',
@@ -151,8 +154,8 @@ export const pattern: PatternDefinition = {
       from: 'pool',
       to: 'connection',
       type: 'holds',
-      label: 'idle[] / inUse',
-      description: 'The pool holds every connection it has ever created, sorted into idle and in-use, instead of losing track of them to the garbage collector.',
+      label: 'idle: T[] / inUse: Set<T>',
+      description: 'The pool holds every object it has ever created, sorted into idle and in-use, typed only as T extends Poolable — instead of losing track of them to the garbage collector.',
       bend: -25,
       code: 'pool',
     },
@@ -247,24 +250,22 @@ export const pattern: PatternDefinition = {
       code: 'acquire',
     },
     {
-      title: 'A release hands off instead of going idle',
-      description:
-        "One of the three borrowers calls release(conn). Because Client B is waiting, the pool skips the idle list completely and resolves Client B's pending acquire() with this exact connection.",
-      highlight: ['releaseA', 'handoffB', 'connection'],
-      packets: [
-        { relation: 'releaseA', label: 'release(conn)' },
-        { relation: 'handoffB', label: 'resolve(conn)' },
-      ],
-      notes: { pool: 'idle:0 inUse:3 waiting:0', clientB: 'acquired!' },
-      code: 'release',
-    },
-    {
       title: 'Reset happens before the handoff',
       description:
-        'Before Client B ever touches it, reset() clears whatever the previous borrower left behind — such as an open transaction — so no stale state crosses between callers.',
-      highlight: ['connection'],
+        'One of the three borrowers calls release(conn). Before deciding where the connection goes next, release() calls reset() to clear whatever that borrower left behind — such as an open transaction — so no stale state can cross between callers.',
+      highlight: ['releaseA', 'connection'],
+      packets: [{ relation: 'releaseA', label: 'release(conn)' }],
       notes: { connection: 'reset' },
       code: 'reset',
+    },
+    {
+      title: 'A release hands off instead of going idle',
+      description:
+        "Because Client B is waiting, the pool skips the idle list completely and resolves Client B's pending acquire() with this exact, already-reset connection.",
+      highlight: ['releaseA', 'handoffB', 'connection'],
+      packets: [{ relation: 'handoffB', label: 'resolve(conn)' }],
+      notes: { pool: 'idle:0 inUse:3 waiting:0', clientB: 'acquired!' },
+      code: 'release',
     },
     {
       title: 'Steady state: three connections, endlessly reused',
@@ -277,116 +278,9 @@ export const pattern: PatternDefinition = {
   ],
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-// [database]
-/** The expensive real resource being pooled — e.g. a raw DB/TCP socket. */
-class RawDatabaseSocket {
-  constructor(public readonly id: number) {}
-
-  query(sql: string): void {
-    console.log(\`socket#\${this.id} -> \${sql}\`)
-  }
-}
-// [/database]
-
-// [poolable]
-interface Poolable {
-  /** Clears any per-borrower state before the object is handed to someone new. */
-  reset(): void
-}
-// [/poolable]
-
-// [connection]
-class PooledConnection implements Poolable {
-  private txOpen = false
-
-  constructor(private readonly socket: RawDatabaseSocket) {}
-
-  query(sql: string): void {
-    this.socket.query(sql)
-  }
-
-  beginTransaction(): void {
-    this.txOpen = true
-  }
-
-  // [reset]
-  reset(): void {
-    this.txOpen = false // never leak an open transaction to the next borrower
-  }
-  // [/reset]
-}
-// [/connection]
-
-// [pool]
-class ConnectionPool {
-  private readonly idle: PooledConnection[] = []
-  private readonly inUse = new Set<PooledConnection>()
-  private readonly waiting: Array<(conn: PooledConnection) => void> = []
-  private created = 0
-
-  constructor(
-    private readonly factory: () => PooledConnection,
-    private readonly maxSize: number,
-  ) {}
-
-  // [acquire]
-  acquire(): Promise<PooledConnection> {
-    const reused = this.idle.pop()
-    if (reused) {
-      this.inUse.add(reused)
-      return Promise.resolve(reused)
-    }
-    if (this.created < this.maxSize) {
-      const conn = this.factory() // lazy creation — if this throws, no slot is used up
-      this.created++ // only count it once the connection actually exists
-      this.inUse.add(conn)
-      return Promise.resolve(conn)
-    }
-    // Every slot is taken: queue this request until a release() frees one up.
-    return new Promise((resolve) => this.waiting.push(resolve))
-  }
-  // [/acquire]
-
-  // [release]
-  release(conn: PooledConnection): void {
-    if (!this.inUse.delete(conn)) {
-      throw new Error('release() called with a connection that is not checked out from this pool')
-    }
-    conn.reset() // scrub borrower state before anyone else sees this object
-    const next = this.waiting.shift()
-    if (next) {
-      this.inUse.add(conn)
-      next(conn) // hand it straight to the waiting caller — it never goes idle
-    } else {
-      this.idle.push(conn)
-    }
-  }
-  // [/release]
-
-  get stats() {
-    return { idle: this.idle.length, inUse: this.inUse.size, waiting: this.waiting.length }
-  }
-}
-// [/pool]
-
-// [usage]
-const pool = new ConnectionPool(() => new PooledConnection(new RawDatabaseSocket(Date.now())), 3)
-
-// [clientA]
-const connA = await pool.acquire() // pool is empty — lazily creates connection #1
-connA.query('SELECT 1')
-pool.release(connA) // reset, then back to idle (or straight to a waiter)
-// [/clientA]
-
-// [clientB]
-// Three more callers acquire, filling every slot (maxSize = 3). A fourth
-// caller's acquire() now queues instead of creating a fourth connection —
-// it resolves only once someone else calls release().
-const connB = await pool.acquire()
-// [/clientB]
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 
   Visualization: ObjectPoolVisualization,
 }

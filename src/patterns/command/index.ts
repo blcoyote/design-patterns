@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'command',
@@ -25,14 +28,14 @@ export const pattern: PatternDefinition = {
   ],
   cons: [
     'Introduces a class (or object) for every distinct action, which adds boilerplate.',
-    'Undo logic must be written and kept in sync with each command’s execute() by hand.',
+    'A command can’t just hard-code the opposite action as its undo() — it must capture whatever state execute() is about to overwrite (e.g. the previous value) so undo() can restore it, which is extra bookkeeping to keep in sync by hand.',
     'A long-lived history of commands can consume memory if never trimmed.',
   ],
   realWorld: [
     'Undo/redo stacks in text editors and design tools',
     'Task queues and job schedulers (each job is a serialized command)',
     'GUI menu items and toolbar buttons bound to an action object',
-    'Redux actions dispatched to a store, replayed for time-travel debugging',
+    'Redux-style serializable actions are Command-like in shape, but they carry no execute()/undo() — a reducer interprets them, which is what makes time-travel debugging possible',
   ],
   related: ['chain-of-responsibility', 'memento', 'unit-of-work', 'observer', 'strategy'],
   participants: [
@@ -158,7 +161,7 @@ export const pattern: PatternDefinition = {
       to: 'light',
       type: 'calls',
       label: 'turnOn()',
-      description: 'LightOnCommand’s execute() calls turnOn() on its receiver; its undo() calls turnOff() on the same receiver.',
+      description: 'LightOnCommand’s execute() records whether the light was already on, then calls turnOn(); its undo() calls turnOff() only if the light was off beforehand.',
     },
     {
       id: 'off-effect',
@@ -166,7 +169,7 @@ export const pattern: PatternDefinition = {
       to: 'light',
       type: 'calls',
       label: 'turnOff()',
-      description: 'LightOffCommand’s execute() calls turnOff() on its receiver; its undo() calls turnOn() on the same receiver.',
+      description: 'LightOffCommand’s execute() records whether the light was already on, then calls turnOff(); its undo() calls turnOn() only if the light was on beforehand.',
     },
   ],
   steps: [
@@ -208,108 +211,17 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Undo reverses the last command',
-      description: 'undoLast() pops LightOffCommand from the history and calls its undo(), which calls turnOn() — reversing the last press exactly.',
-      highlight: ['remote', 'off-effect', 'light'],
-      packets: [{ relation: 'off-effect', label: 'undo(): turnOn()', reverse: true }],
+      description: 'undoLast() pops LightOffCommand from the history and calls undo(). It had recorded the light as "on" right before it executed, so undo() calls turnOn() to restore exactly that state.',
+      highlight: ['remote', 'press-off', 'off-effect', 'light'],
+      packets: [
+        { relation: 'press-off', label: 'undo()' },
+        { relation: 'off-effect', label: 'turnOn()' },
+      ],
       notes: { remote: 'history: 1', light: 'on' },
       code: 'undo',
     },
   ],
-  code: `
-// [command]
-interface Command {
-  execute(): void
-  undo(): void
-}
-// [/command]
-
-// [light]
-class Light {
-  private isOn = false
-
-  turnOn() {
-    this.isOn = true
-    console.log('light: on')
-  }
-
-  turnOff() {
-    this.isOn = false
-    console.log('light: off')
-  }
-}
-// [/light]
-
-// [onCommand]
-class LightOnCommand implements Command {
-  constructor(private light: Light) {}
-
-  execute() {
-    this.light.turnOn()
-  }
-
-  undo() {
-    this.light.turnOff()
-  }
-}
-// [/onCommand]
-
-// [offCommand]
-class LightOffCommand implements Command {
-  constructor(private light: Light) {}
-
-  execute() {
-    this.light.turnOff()
-  }
-
-  undo() {
-    this.light.turnOn()
-  }
-}
-// [/offCommand]
-
-// [remote]
-class RemoteButton {
-  private current: Command | null = null
-  private history: Command[] = []
-
-  // [setCommand]
-  setCommand(command: Command) {
-    this.current = command
-  }
-  // [/setCommand]
-
-  // [execute]
-  press() {
-    if (!this.current) return
-    this.current.execute()
-    this.history.push(this.current)
-  }
-  // [/execute]
-
-  // [undo]
-  undoLast() {
-    const command = this.history.pop()
-    command?.undo()
-  }
-  // [/undo]
-}
-// [/remote]
-
-// Usage
-// [createCommands]
-const light = new Light()
-const on = new LightOnCommand(light)
-const off = new LightOffCommand(light)
-// [/createCommands]
-
-const remote = new RemoteButton()
-
-remote.setCommand(on)
-remote.press() // light turns on, pushed onto history
-
-remote.setCommand(off)
-remote.press() // light turns off, pushed onto history
-
-remote.undoLast() // pops LightOffCommand, calls undo() -> light turns back on
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

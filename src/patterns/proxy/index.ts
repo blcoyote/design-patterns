@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'proxy',
@@ -10,7 +13,7 @@ export const pattern: PatternDefinition = {
   problem:
     'Some objects are expensive to create, live behind a slow network, or need access rules enforced before every call. Creating them eagerly, or trusting every caller to check permissions themselves, wastes resources and scatters the same guard logic across the codebase.',
   solution:
-    'Give the proxy the exact same interface as the real object, so callers cannot tell them apart. The proxy forwards calls to the real object, but can delay creating it, cache results, check permissions, or add logging first — all without the caller or the real object knowing.',
+    'Give the proxy the exact same interface as the real object, so callers cannot tell them apart. The proxy forwards calls to the real object, but can delay creating it, cache results, check permissions, or add logging first — all without the caller or the real object knowing. This differs from Decorator, which is always handed an already-existing object to wrap: a proxy instead controls access to and often owns the lifecycle of the one real subject it stands in for.',
   analogy:
     'A credit card is a proxy for the cash in your bank account. The merchant accepts it exactly like cash, but it adds a layer that can check your balance, log the transaction, or decline the charge — without the account itself being touched for every tiny decision.',
   whenToUse: [
@@ -26,7 +29,7 @@ export const pattern: PatternDefinition = {
   cons: [
     'Adds an extra layer of indirection, which can complicate the code.',
     'A caching proxy can return stale data if invalidation is not handled carefully.',
-    'Response can be slightly delayed on the first call, since the proxy still has to reach the real object.',
+    'With a virtual proxy, the first call pays the deferred creation cost that every later call avoids.',
   ],
   realWorld: [
     'ES2015 Proxy objects for intercepting property access',
@@ -93,6 +96,16 @@ export const pattern: PatternDefinition = {
       type: 'implements',
       description: 'RealVideoService implements the same VideoService interface.',
       bend: 30,
+    },
+    {
+      id: 'holds-real',
+      from: 'proxy',
+      to: 'realService',
+      type: 'holds',
+      label: 'real',
+      description: 'The proxy stores its lazily-created real service in a field, starting out null until the first cache miss needs it.',
+      bend: 0,
+      code: 'proxy',
     },
     {
       id: 'lazy-create',
@@ -162,59 +175,7 @@ export const pattern: PatternDefinition = {
       code: 'getVideo',
     },
   ],
-  code: `
-// [videoService]
-interface VideoService {
-  getVideo(id: string): Video
-}
-// [/videoService]
-
-interface Video {
-  id: string
-  url: string
-}
-
-// [realService]
-class RealVideoService implements VideoService {
-  getVideo(id: string): Video {
-    console.log(\`fetching video \${id} from the network...\`)
-    // Pretend this is a slow call to a remote API.
-    return { id, url: \`https://cdn.example.com/\${id}.mp4\` }
-  }
-}
-// [/realService]
-
-// [proxy]
-class CachingVideoProxy implements VideoService {
-  private real: RealVideoService | null = null
-  private cache = new Map<string, Video>()
-
-  // [getVideo]
-  getVideo(id: string): Video {
-    const cached = this.cache.get(id)
-    if (cached) return cached
-
-    // [lazyCreate]
-    if (!this.real) {
-      this.real = new RealVideoService()
-    }
-    // [/lazyCreate]
-
-    // [forward]
-    const video = this.real.getVideo(id)
-    this.cache.set(id, video)
-    // [/forward]
-
-    return video
-  }
-  // [/getVideo]
-}
-// [/proxy]
-
-// Usage
-const client: VideoService = new CachingVideoProxy()
-
-client.getVideo('v1') // cache miss: lazily creates RealVideoService, fetches, caches
-client.getVideo('v1') // cache hit: served from the cache, RealVideoService untouched
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

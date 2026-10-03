@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { FlyweightVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -10,9 +13,9 @@ export const pattern: PatternDefinition = {
   intent:
     'Use sharing to support large numbers of fine-grained objects efficiently, by factoring out the state they have in common.',
   problem:
-    'A map editor needs to render a forest of thousands of trees, or a text editor needs an object per character on the page. If every Tree or every Glyph stores its own copy of the species texture or the font outline, memory use explodes — even though most of that data is identical across every instance and only the position, scale or color truly differs.',
+    'A map editor needs to render a forest of thousands of trees, or a text editor needs an object per character on the page. If every Tree or every Glyph stores its own copy of the species texture or the font outline, memory use explodes — even though most of that data is identical across every instance and only the position, age or scale truly differs.',
   solution:
-    'Split each object\'s state into intrinsic state (shared, context-independent — the texture, the font outline) and extrinsic state (unique per instance — position, age, color). Move the intrinsic state into a small set of shared Flyweight objects handed out by a factory that caches them by key, and keep only the extrinsic state in the many lightweight context objects. The same flyweight instance is reused by every object that needs that particular combination of shared data.',
+    'Split each object\'s state into intrinsic state (shared, context-independent — the texture, the font outline) and extrinsic state (unique per instance — position, age, scale). Move the intrinsic state into a small set of shared Flyweight objects handed out by a factory that caches them by key, and keep only the extrinsic state in the many lightweight context objects. The same flyweight instance is reused by every object that needs that particular combination of shared data.',
   analogy:
     'A print shop keeps one metal stamp per letter and reuses it everywhere that letter appears on the page, instead of casting a brand-new stamp for every single occurrence of "e".',
   whenToUse: [
@@ -24,7 +27,7 @@ export const pattern: PatternDefinition = {
   pros: [
     'Sharply reduces memory use when many objects share the same underlying data.',
     'Centralizes intrinsic state, so it is only ever built and validated once per variant.',
-    'Plays well with object pools and caches that already track a factory\'s output.',
+    'Different from an object pool: a pool lends out exclusive, mutable objects that the borrower can change and must return, while flyweights are shared, immutable, and never owned by any one caller.',
   ],
   cons: [
     'Adds complexity: state must be split into intrinsic/extrinsic, and extrinsic data threaded through method calls.',
@@ -34,7 +37,7 @@ export const pattern: PatternDefinition = {
   realWorld: [
     'Glyph rendering in text editors and browsers — one font-glyph object reused for every occurrence of a character.',
     'Game engines and map renderers that reuse a handful of mesh/texture objects across thousands of trees, rocks or units.',
-    'String interning — identical string literals share one underlying instance in languages like Java and Python.',
+    'String interning — Java string literals and String.intern(), or Python\'s sys.intern(), share one underlying instance for equal strings.',
     'Map libraries caching a handful of marker/icon objects reused across thousands of pins.',
   ],
   related: ['object-pool', 'proxy', 'composite', 'factory-method'],
@@ -108,8 +111,8 @@ export const pattern: PatternDefinition = {
       from: 'forest',
       to: 'factory',
       type: 'calls',
-      label: 'getTreeType(name)',
-      description: 'Before planting, Forest asks the factory for the TreeType matching this species — it never constructs one directly.',
+      label: 'getTreeType(name,color,texture)',
+      description: 'Before planting, Forest asks the factory for the TreeType matching this exact name:color:texture key — it never constructs one directly.',
       bend: -20,
       code: 'getTreeType',
     },
@@ -143,17 +146,17 @@ export const pattern: PatternDefinition = {
     {
       id: 'tree-holds',
       from: 'tree',
-      to: 'concreteType',
+      to: 'treeType',
       type: 'holds',
       label: 'type',
-      description: 'Each Tree stores only a reference to the shared ConcreteTreeType, never a private copy of its species data.',
+      description: 'Each Tree stores only a reference typed as TreeType — never a private copy of its species data, and never a reference typed to the concrete class.',
       bend: -25,
       code: 'holds',
     },
     {
       id: 'tree-draw',
       from: 'tree',
-      to: 'concreteType',
+      to: 'treeType',
       type: 'calls',
       label: 'draw(canvas,x,y,age)',
       description: 'When rendering, Tree forwards its own (x, y, age) to the shared flyweight instead of drawing itself.',
@@ -181,15 +184,15 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Ask for an Oak type',
-      description: 'Planting the first tree starts with a request: Forest asks the factory for the TreeType matching "Oak". The pool is empty, so this will be a cache miss.',
+      description: 'Planting the first tree starts with a request: Forest asks the factory for the TreeType matching the key "Oak:#2f6b3a:rough-bark.png" (name, color and texture together). The pool is empty, so this will be a cache miss.',
       highlight: ['request-type'],
-      packets: [{ relation: 'request-type', label: 'getTreeType("Oak")' }],
+      packets: [{ relation: 'request-type', label: 'getTreeType("Oak", "#2f6b3a", "rough-bark.png")' }],
       notes: { factory: 'pool: 0 types' },
       code: 'getTreeType',
     },
     {
       title: 'Factory builds the flyweight',
-      description: 'On the cache miss, the factory constructs one ConcreteTreeType holding the Oak color and texture, caches it under the key "Oak", and hands it back.',
+      description: 'On the cache miss, the factory constructs one ConcreteTreeType holding the Oak color and texture, caches it under the key "Oak:#2f6b3a:rough-bark.png", and hands it back.',
       highlight: ['factory-create', 'concrete-implements'],
       packets: [{ relation: 'request-type', label: 'OakType', reverse: true }],
       notes: { factory: 'pool: 1 type', concreteType: 'Oak (new)' },
@@ -205,10 +208,10 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'A second Oak — no new object',
-      description: 'Another Oak is planted elsewhere in the forest. The factory looks up "Oak" again, finds OakType already cached, and returns that exact same instance.',
+      description: 'Another Oak is planted elsewhere in the forest. The factory looks up the same "Oak:#2f6b3a:rough-bark.png" key again, finds OakType already cached, and returns that exact same instance.',
       highlight: ['request-type', 'plant-tree'],
       packets: [
-        { relation: 'request-type', label: 'getTreeType("Oak")' },
+        { relation: 'request-type', label: 'getTreeType("Oak", "#2f6b3a", "rough-bark.png")' },
         { relation: 'request-type', label: 'OakType (cached)', reverse: true },
       ],
       notes: { factory: 'pool: 1 type', tree: 'x:340 y:95' },
@@ -216,7 +219,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'A new species: Pine',
-      description: '"Pine" has not been requested before, so this lookup misses the cache too. The factory builds a second ConcreteTreeType and adds it to the pool.',
+      description: 'The key "Pine:#1f4d2e:needle-bark.png" has not been requested before, so this lookup misses the cache too. The factory builds a second ConcreteTreeType and adds it to the pool.',
       highlight: ['request-type', 'factory-create'],
       notes: { factory: 'pool: 2 types' },
       code: 'getTreeType',
@@ -230,7 +233,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Rendering, and the memory saved',
-      description: 'To draw a frame, each Tree forwards render() to its shared TreeType with its own (x, y, age); the flyweight paints using its intrinsic color and texture. Two shared objects now back thousands of trees.',
+      description: 'To draw a frame, each Tree.render() calls draw() on its shared TreeType with its own (x, y, age); the flyweight paints using its intrinsic color and texture. Two shared objects now back thousands of trees.',
       highlight: ['tree-draw', 'type-paint'],
       packets: [
         { relation: 'tree-draw', label: 'draw(canvas,x,y,age)' },
@@ -241,106 +244,8 @@ export const pattern: PatternDefinition = {
     },
   ],
 
-  code: `
-// [canvas]
-interface Canvas {
-  paintTree(color: string, texture: string, x: number, y: number, age: number): void
-}
-// [/canvas]
-
-// [treeType]
-interface TreeType {
-  draw(canvas: Canvas, x: number, y: number, age: number): void
-}
-// [/treeType]
-
-// [concreteType]
-class ConcreteTreeType implements TreeType {
-  // Intrinsic state: shared and identical for every tree of this species.
-  constructor(
-    private readonly name: string,
-    private readonly color: string,
-    private readonly texture: string,
-  ) {}
-
-  // [draw]
-  draw(canvas: Canvas, x: number, y: number, age: number): void {
-    // Extrinsic state (x, y, age) arrives as arguments — it is never stored here.
-    canvas.paintTree(this.color, this.texture, x, y, age)
-  }
-  // [/draw]
-}
-// [/concreteType]
-
-// [factory]
-class TreeTypeFactory {
-  private readonly pool = new Map<string, ConcreteTreeType>()
-
-  // [getTreeType]
-  getTreeType(name: string, color: string, texture: string): TreeType {
-    const key = \`\${name}:\${color}:\${texture}\`
-    let type = this.pool.get(key)
-    if (!type) {
-      type = new ConcreteTreeType(name, color, texture) // cache miss — build once
-      this.pool.set(key, type)
-    }
-    return type // cache hit — reuse the existing flyweight
-  }
-  // [/getTreeType]
-
-  get poolSize(): number {
-    return this.pool.size
-  }
-}
-// [/factory]
-
-// [tree]
-class Tree {
-  constructor(
-    // Extrinsic state: unique per tree, stored outside the flyweight.
-    private readonly x: number,
-    private readonly y: number,
-    private readonly age: number,
-    // [holds]
-    private readonly type: TreeType, // shared reference, not a private copy
-    // [/holds]
-  ) {}
-
-  // [treeDraw]
-  render(canvas: Canvas): void {
-    this.type.draw(canvas, this.x, this.y, this.age)
-  }
-  // [/treeDraw]
-}
-// [/tree]
-
-// [forest]
-class Forest {
-  private readonly trees: Tree[] = []
-  private readonly factory = new TreeTypeFactory()
-
-  // [plant]
-  plant(x: number, y: number, age: number, name: string, color: string, texture: string): void {
-    const type = this.factory.getTreeType(name, color, texture)
-    this.trees.push(new Tree(x, y, age, type))
-  }
-  // [/plant]
-
-  // [render]
-  render(canvas: Canvas): void {
-    for (const tree of this.trees) tree.render(canvas)
-  }
-  // [/render]
-}
-// [/forest]
-
-// [usage]
-const forest = new Forest()
-for (let i = 0; i < 10_000; i++) {
-  forest.plant(Math.random() * 1000, Math.random() * 1000, Math.random() * 50, 'Oak', '#2f6b3a', 'rough-bark.png')
-}
-// 10,000 Tree objects on the heap, backed by a single ConcreteTreeType instance
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: FlyweightVisualization,
 }

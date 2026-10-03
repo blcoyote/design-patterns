@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { PubSubVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -21,13 +24,13 @@ export const pattern: PatternDefinition = {
     'You want to add or remove a reaction to an event without touching the code that raises it.',
   ],
   pros: [
-    "Publishers and subscribers are fully decoupled — neither side references the other's type.",
+    'Publishers and subscribers are decoupled from each other — neither references the other\'s type — though both are still coupled to the topic/payload contract.',
     'New subscribers can be added, or removed, without changing a single publisher.',
     'One topic can fan out to any number of handlers, including zero.',
   ],
   cons: [
     'Harder to trace: reading publish("order.placed", …) alone does not tell you what will run.',
-    'Delivery order and timing are usually unspecified, and one slow handler can delay the others unless dispatch is made async.',
+    'Delivery order and timing are implementation-defined, and one slow handler can delay the others unless dispatch is made async.',
     'A typo in a topic name fails silently — nothing was subscribed, nothing happens, no error.',
   ],
   realWorld: [
@@ -171,7 +174,7 @@ export const pattern: PatternDefinition = {
       to: 'analyticsService',
       type: 'notifies',
       label: 'order.placed',
-      description: "The same publish() call also reaches AnalyticsService's order.placed handler, in no particular guaranteed order relative to the others.",
+      description: "The same publish() call also reaches AnalyticsService's order.placed handler; ordering is implementation-defined (this bus dispatches synchronously, in subscription order).",
       code: 'dispatch',
       bend: 18,
     },
@@ -289,124 +292,8 @@ export const pattern: PatternDefinition = {
   ],
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-interface EventMap {
-  'order.placed': { orderId: string; total: number }
-  'user.signedUp': { userId: string; email: string }
-}
-
-type Handler<T> = (payload: T) => void
-type Unsubscribe = () => void
-
-// [eventBus]
-class EventBus<Events extends Record<string, unknown>> {
-  private topics = new Map<keyof Events, Set<Handler<any>>>()
-
-  // [subscribe]
-  subscribe<K extends keyof Events>(topic: K, handler: Handler<Events[K]>): Unsubscribe {
-    const handlers = this.topics.get(topic) ?? new Set()
-    handlers.add(handler)
-    this.topics.set(topic, handlers)
-    return () => handlers.delete(handler)
-  }
-  // [/subscribe]
-
-  publish<K extends keyof Events>(topic: K, payload: Events[K]): void {
-    // [dispatch]
-    for (const handler of this.topics.get(topic) ?? []) {
-      handler(payload)
-    }
-    // [/dispatch]
-  }
-}
-
-const bus = new EventBus<EventMap>()
-// [/eventBus]
-
-// [checkoutService]
-class CheckoutService {
-  constructor(private bus: EventBus<EventMap>) {}
-
-  placeOrder(orderId: string, total: number) {
-    // ...charge the card, persist the order...
-    // [checkoutPublish]
-    this.bus.publish('order.placed', { orderId, total })
-    // [/checkoutPublish]
-  }
-}
-// [/checkoutService]
-
-// [userService]
-class UserService {
-  constructor(private bus: EventBus<EventMap>) {}
-
-  signUp(userId: string, email: string) {
-    // ...create the account...
-    // [userPublish]
-    this.bus.publish('user.signedUp', { userId, email })
-    // [/userPublish]
-  }
-}
-// [/userService]
-
-// [emailService]
-class EmailService {
-  constructor(bus: EventBus<EventMap>) {
-    bus.subscribe('order.placed', (e) => this.sendReceipt(e.orderId))
-    bus.subscribe('user.signedUp', (e) => this.sendWelcome(e.email))
-  }
-  private sendReceipt(orderId: string) {
-    console.log(\`email: receipt for order \${orderId}\`)
-  }
-  private sendWelcome(email: string) {
-    console.log(\`email: welcome \${email}\`)
-  }
-}
-// [/emailService]
-
-// [analyticsService]
-class AnalyticsService {
-  constructor(bus: EventBus<EventMap>) {
-    bus.subscribe('order.placed', (e) => this.track('order.placed', e))
-    bus.subscribe('user.signedUp', (e) => this.track('user.signedUp', e))
-  }
-  private track(topic: string, payload: unknown) {
-    console.log('analytics:', topic, payload)
-  }
-}
-// [/analyticsService]
-
-// [inventoryService]
-class InventoryService {
-  private stopListening: Unsubscribe
-
-  constructor(bus: EventBus<EventMap>) {
-    this.stopListening = bus.subscribe('order.placed', (e) => this.reserve(e.orderId))
-  }
-  private reserve(orderId: string) {
-    console.log(\`inventory: reserved stock for \${orderId}\`)
-  }
-
-  // [unsubscribe]
-  stopWatching() {
-    this.stopListening()
-  }
-  // [/unsubscribe]
-}
-// [/inventoryService]
-
-// Usage — nobody imports anybody else, only EventBus
-const checkout = new CheckoutService(bus)
-const users = new UserService(bus)
-new EmailService(bus)
-new AnalyticsService(bus)
-const inventory = new InventoryService(bus)
-
-checkout.placeOrder('A1', 42) // email, analytics and inventory all react
-users.signUp('U1', 'ada@example.com') // only email and analytics react
-
-inventory.stopWatching()
-checkout.placeOrder('A2', 15) // email and analytics react; inventory does not
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: PubSubVisualization,
 }

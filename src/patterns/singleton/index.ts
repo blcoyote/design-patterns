@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { SingletonVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -21,7 +24,7 @@ export const pattern: PatternDefinition = {
   ],
   pros: [
     'Guarantees a single instance and a well-known access point to it.',
-    'The instance is created lazily, only when first requested.',
+    'Can be created lazily, only when first requested.',
     'Centralizes state that genuinely is global, instead of scattering it.',
   ],
   cons: [
@@ -33,7 +36,7 @@ export const pattern: PatternDefinition = {
     'A single application-wide configuration object (process.env wrappers, feature-flag stores).',
     'Database connection pools and caches shared across an app.',
     'java.lang.Runtime.getRuntime() in Java',
-    'A single Redux/Zustand store instance per application',
+    'A single Redux/Zustand store per application — singleton-like by convention, not by enforced construction',
   ],
   related: ['dependency-injection', 'facade', 'abstract-factory', 'flyweight'],
   participants: [
@@ -46,7 +49,7 @@ export const pattern: PatternDefinition = {
       y: 90,
       width: 180,
       description:
-        'Has a private constructor and a private static field holding the one instance. getInstance() creates it on first call and returns the cached object thereafter.',
+        'Its constructor is off-limits to outside code (private in TS and C#, a runtime guard in Python) and a static field holds the one instance. getInstance() creates it on first call and returns the cached object thereafter.',
     },
     {
       id: 'userService',
@@ -91,7 +94,8 @@ export const pattern: PatternDefinition = {
   steps: [
     {
       title: 'Private constructor',
-      description: 'AppConfig’s constructor is marked private. No outside code can write `new AppConfig()` — it fails to compile.',
+      description:
+        'AppConfig’s constructor is marked private. No outside code can write `new AppConfig()` directly — enforced at compile time in typed languages, or by a runtime guard in Python.',
       highlight: ['config'],
       notes: { config: 'instance: null' },
       code: 'class',
@@ -114,75 +118,14 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Same object, everywhere',
-      description: 'Both services hold a reference to the identical AppConfig object: a change one of them makes is immediately visible to the other.',
+      description: 'PaymentService calls updateApiUrl() on its config reference. Because UserService holds a reference to that exact same AppConfig object, it immediately sees the new value too.',
       highlight: ['userService', 'paymentService', 'config'],
       notes: { userService: 'shares state', paymentService: 'shares state' },
       code: 'usage',
     },
   ],
-  code: `
-// [config]
-class AppConfig {
-  private static instance: AppConfig | null = null
-
-  private readonly settings = new Map<string, string>()
-
-  // [class]
-  // A private constructor blocks \`new AppConfig()\` from outside this file.
-  private constructor() {
-    this.settings.set('apiUrl', 'https://api.example.com')
-  }
-  // [/class]
-
-  // [getInstance]
-  static getInstance(): AppConfig {
-    if (!AppConfig.instance) {
-      AppConfig.instance = new AppConfig()
-    }
-    return AppConfig.instance
-  }
-  // [/getInstance]
-
-  get(key: string): string | undefined {
-    return this.settings.get(key)
-  }
-
-  set(key: string, value: string): void {
-    this.settings.set(key, value)
-  }
-}
-// [/config]
-
-// [userService]
-class UserService {
-  private readonly config = AppConfig.getInstance()
-
-  apiUrl(): string | undefined {
-    return this.config.get('apiUrl')
-  }
-}
-// [/userService]
-
-// [paymentService]
-class PaymentService {
-  private readonly config = AppConfig.getInstance()
-
-  apiUrl(): string | undefined {
-    return this.config.get('apiUrl')
-  }
-}
-// [/paymentService]
-
-// Usage
-// [usage]
-const users = new UserService()
-const payments = new PaymentService()
-
-users.apiUrl() // "https://api.example.com"
-payments.apiUrl() // the exact same value, from the exact same object
-
-// new AppConfig() // compile error: constructor is private
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: SingletonVisualization,
 }

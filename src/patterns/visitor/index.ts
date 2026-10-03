@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { VisitorVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -31,9 +34,8 @@ export const pattern: PatternDefinition = {
     'The extra accept()/visit() indirection makes the call flow harder to follow than a plain virtual method call.',
   ],
   realWorld: [
-    'Compiler ASTs: a single Visitor walks Node/Expression/Statement classes to type-check, optimize, or generate code.',
-    'ESLint and Babel plugins, which visit AST nodes (visitIdentifier, visitFunctionDeclaration, …) without editing the parser.',
-    'XML/DOM traversal and XPath-style evaluators built around a visitor walking the node tree.',
+    'Compiler ASTs: Roslyn\'s CSharpSyntaxVisitor and javac\'s TreeVisitor use true double dispatch (an accept() method per node type) to type-check, optimize, or generate code.',
+    'ESLint and Babel plugins do visitor-style AST traversal, but dispatch by looking up node.type as a string key rather than by double dispatch.',
     'Serialization frameworks that add a new output format as a new visitor instead of new methods on every model class.',
   ],
   related: ['composite', 'iterator', 'interpreter'],
@@ -257,7 +259,7 @@ export const pattern: PatternDefinition = {
     {
       title: 'Hop 2: Circle calls back the matching method',
       description:
-        'Inside its own accept(), Circle calls visitor.visitCircle(this). Because the visitor is an AreaCalculator, that call lands on AreaCalculator.visitCircle — chosen purely by the visitor’s concrete class.',
+        'Inside its own accept(), Circle calls visitor.visitCircle(this). The two dispatches together pick the pair that runs: Circle’s own type picked the visitCircle method name, and the visitor’s concrete class — AreaCalculator — picks which implementation of it executes.',
       highlight: ['dispatchCircle', 'areaCalculator'],
       packets: [{ relation: 'dispatchCircle', label: 'visitCircle(this)' }],
       notes: { areaCalculator: '+28.27' },
@@ -300,127 +302,8 @@ export const pattern: PatternDefinition = {
   ],
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-// [element]
-interface Shape {
-  accept(visitor: ShapeVisitor): void
-}
-// [/element]
-
-// [visitor]
-interface ShapeVisitor {
-  visitCircle(circle: Circle): void
-  visitRectangle(rectangle: Rectangle): void
-  visitGroup(group: Group): void
-}
-// [/visitor]
-
-// [circle]
-class Circle implements Shape {
-  constructor(public readonly radius: number) {}
-
-  accept(visitor: ShapeVisitor): void {
-    // [visitCircleMethod]
-    visitor.visitCircle(this) // hop 2: dispatches on the visitor's own class
-    // [/visitCircleMethod]
-  }
-}
-// [/circle]
-
-// [rectangle]
-class Rectangle implements Shape {
-  constructor(public readonly width: number, public readonly height: number) {}
-
-  accept(visitor: ShapeVisitor): void {
-    // [visitRectangleMethod]
-    visitor.visitRectangle(this)
-    // [/visitRectangleMethod]
-  }
-}
-// [/rectangle]
-
-// [group]
-class Group implements Shape {
-  private children: Shape[] = []
-
-  add(shape: Shape): void {
-    this.children.push(shape)
-  }
-
-  get childCount(): number {
-    return this.children.length
-  }
-
-  // [groupAccept]
-  accept(visitor: ShapeVisitor): void {
-    for (const child of this.children) child.accept(visitor) // hop 1, per child
-    // [visitGroupMethod]
-    visitor.visitGroup(this) // hop 2, for the group itself
-    // [/visitGroupMethod]
-  }
-  // [/groupAccept]
-}
-// [/group]
-
-// [areaCalculator]
-class AreaCalculator implements ShapeVisitor {
-  total = 0
-
-  visitCircle(circle: Circle): void {
-    this.total += Math.PI * circle.radius ** 2
-  }
-
-  visitRectangle(rectangle: Rectangle): void {
-    this.total += rectangle.width * rectangle.height
-  }
-
-  visitGroup(_group: Group): void {
-    // Children already added themselves in above — nothing left to do here.
-  }
-}
-// [/areaCalculator]
-
-// [jsonExporter]
-class JsonExporter implements ShapeVisitor {
-  private parts: string[] = []
-
-  visitCircle(circle: Circle): void {
-    this.parts.push(\`{"type":"circle","r":\${circle.radius}}\`)
-  }
-
-  visitRectangle(rectangle: Rectangle): void {
-    this.parts.push(\`{"type":"rectangle","w":\${rectangle.width},"h":\${rectangle.height}}\`)
-  }
-
-  visitGroup(group: Group): void {
-    // Every child (leaf or nested group) left exactly one entry behind, so this
-    // group's children are the last childCount entries — siblings stay untouched.
-    const children = this.parts.splice(this.parts.length - group.childCount)
-    this.parts.push(\`{"type":"group","children":[\${children.join(',')}]}\`)
-  }
-
-  toJSON(): string {
-    return this.parts[0] ?? '{}'
-  }
-}
-// [/jsonExporter]
-
-// [build]
-const circle = new Circle(3)
-const rectangle = new Rectangle(4, 3)
-const group = new Group()
-group.add(circle)
-group.add(rectangle)
-// [/build]
-
-// Usage: swap the operation without changing Circle, Rectangle or Group.
-const areaCalculator = new AreaCalculator()
-group.accept(areaCalculator)
-console.log(areaCalculator.total) // ≈ 40.27
-
-const exporter = new JsonExporter()
-group.accept(exporter)
-console.log(exporter.toJSON()) // {"type":"group","children":[...]}
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: VisitorVisualization,
 }

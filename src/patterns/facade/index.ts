@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'facade',
@@ -32,7 +35,7 @@ export const pattern: PatternDefinition = {
     'jQuery wrapping raw DOM APIs behind a simpler interface',
     'A checkout() service that coordinates inventory, payment and shipping subsystems',
     'An SDK\'s top-level client class hiding networking, auth and retry logic',
-    'Operating system system calls facading kernel subsystems',
+    'The C standard library (e.g. fopen/fread) facading raw OS syscalls',
   ],
   related: ['adapter', 'mediator', 'repository', 'proxy'],
   participants: [
@@ -187,72 +190,7 @@ export const pattern: PatternDefinition = {
       code: 'facade',
     },
   ],
-  code: `
-// [amplifier]
-class Amplifier {
-  on() {
-    console.log('amp: on')
-  }
-  setVolume(level: number) {
-    console.log(\`amp: volume \${level}\`)
-  }
-}
-// [/amplifier]
-
-// [dvdPlayer]
-class DvdPlayer {
-  play(movie: string) {
-    console.log(\`dvd: playing \${movie}\`)
-  }
-}
-// [/dvdPlayer]
-
-// [projector]
-class Projector {
-  on() {
-    console.log('projector: on')
-  }
-  wideScreenMode() {
-    console.log('projector: widescreen')
-  }
-}
-// [/projector]
-
-// [screen]
-class Screen {
-  down() {
-    console.log('screen: down')
-  }
-}
-// [/screen]
-
-// [facade]
-class HomeTheaterFacade {
-  constructor(
-    private amp: Amplifier,
-    private dvd: DvdPlayer,
-    private projector: Projector,
-    private screen: Screen,
-  ) {}
-
-  // [watchMovie]
-  watchMovie(movie: string) {
-    this.screen.down()
-    this.projector.on()
-    this.projector.wideScreenMode()
-    this.amp.on()
-    this.amp.setVolume(5)
-    this.dvd.play(movie)
-  }
-  // [/watchMovie]
-}
-// [/facade]
-
-// [usage]
-// Usage
-const facade = new HomeTheaterFacade(new Amplifier(), new DvdPlayer(), new Projector(), new Screen())
-
-facade.watchMovie('Inception')
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

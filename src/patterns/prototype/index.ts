@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'prototype',
@@ -32,10 +35,9 @@ export const pattern: PatternDefinition = {
     'Classes that wrap non-cloneable resources, like open sockets or file handles, need special-case handling.',
   ],
   realWorld: [
-    'Object.create(proto) and structuredClone() in JavaScript',
+    'structuredClone() in JavaScript for deep copies, or `{ ...obj }` / Object.assign() for a shallow copy',
     'java.lang.Object.clone() and the Cloneable marker interface',
     'Editor "duplicate" commands that copy a fully configured shape, layer or component',
-    'Immer/Redux-style state updates that clone-then-modify a draft instead of mutating state in place',
   ],
   related: ['factory-method', 'abstract-factory', 'builder', 'composite'],
 
@@ -84,7 +86,7 @@ export const pattern: PatternDefinition = {
       kind: 'client',
       x: 660,
       y: 150,
-      description: 'Asks the registry for a clone by name, then customizes only the fields it cares about — it never imports Circle or Rectangle.',
+      description: 'Asks the registry for a clone by name, then customizes the Style every shape shares through the Shape interface — only a shape-specific tweak needs a cast to the concrete type.',
       code: 'usage',
     },
   ],
@@ -141,7 +143,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Client asks for a clone',
-      description: 'The client calls registry.clone("circle"). It names a key, not a class — Circle is never imported by client code.',
+      description: 'The client calls registry.clone("circle"). It names a key, not a class — the registry does the construction, not the caller.',
       highlight: ['client', 'client-request', 'registry'],
       packets: [{ relation: 'client-request', label: 'clone("circle")' }],
       code: 'usage',
@@ -172,7 +174,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Customize without touching the original',
-      description: 'The client changes the clone\'s radius and style color. Because the Style was deep-copied, the registered prototype keeps its original values untouched.',
+      description: "The client changes the clone's style color through the Shape interface, and casts to Circle only to tweak its radius. Because the Style was deep-copied, the registered prototype keeps its original values untouched.",
       highlight: ['client', 'circle'],
       notes: { circle: 'prototype unchanged' },
       code: 'usage',
@@ -193,89 +195,14 @@ export const pattern: PatternDefinition = {
       code: 'rectangleClone',
     },
     {
-      title: 'New types need no new classes',
-      description: 'Adding a third shape later means registering one more instance in the registry — no new Creator subclass, no change to client code.',
+      title: 'New presets, or new types',
+      description: 'Registering one more instance in the registry adds a new preset of an existing shape. Adding a genuinely new shape type needs only that one new class implementing Shape — never a parallel Creator subclass or factory change.',
       highlight: ['prototype', 'registry', 'circle', 'rectangle'],
       code: 'registry',
     },
   ],
 
-  code: `
-// [style]
-class Style {
-  constructor(public color: string, public lineWidth: number) {}
-
-  clone(): Style {
-    return new Style(this.color, this.lineWidth)
-  }
-}
-// [/style]
-
-// [prototype]
-interface Shape {
-  clone(): Shape
-}
-// [/prototype]
-
-// [circle]
-class Circle implements Shape {
-  constructor(public radius: number, public style: Style) {}
-
-  // [circleClone]
-  clone(): Circle {
-    // Deep copy: a fresh Style, not a shared reference to the original's.
-    return new Circle(this.radius, this.style.clone())
-  }
-  // [/circleClone]
-}
-// [/circle]
-
-// [rectangle]
-class Rectangle implements Shape {
-  constructor(public width: number, public height: number, public style: Style) {}
-
-  // [rectangleClone]
-  clone(): Rectangle {
-    return new Rectangle(this.width, this.height, this.style.clone())
-  }
-  // [/rectangleClone]
-}
-// [/rectangle]
-
-// [registry]
-class ShapeRegistry {
-  // [holds]
-  private prototypes = new Map<string, Shape>()
-  // [/holds]
-
-  // [seed]
-  register(key: string, prototype: Shape) {
-    this.prototypes.set(key, prototype)
-  }
-  // [/seed]
-
-  // [registryClone]
-  clone(key: string): Shape {
-    const prototype = this.prototypes.get(key)
-    if (!prototype) throw new Error(\`Unknown prototype: \${key}\`)
-    return prototype.clone()
-  }
-  // [/registryClone]
-}
-// [/registry]
-
-// Usage
-// [usage]
-const registry = new ShapeRegistry()
-registry.register('circle', new Circle(5, new Style('black', 1)))
-registry.register('rectangle', new Rectangle(10, 20, new Style('blue', 2)))
-
-const myCircle = registry.clone('circle') as Circle
-myCircle.radius = 50
-myCircle.style.color = 'red' // safe: myCircle.style is its own copy
-
-const myRect = registry.clone('rectangle') as Rectangle
-myRect.width = 100
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

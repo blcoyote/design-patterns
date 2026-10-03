@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { CircuitBreakerVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -33,7 +36,7 @@ export const pattern: PatternDefinition = {
   realWorld: [
     'Netflix Hystrix — the library that popularized the pattern for service-to-service calls',
     'Resilience4j\'s CircuitBreaker module for the JVM',
-    'Polly\'s CircuitBreakerPolicy for .NET',
+    'Polly for .NET (v8 resilience pipelines via AddCircuitBreaker; v7 CircuitBreakerPolicy)',
     'Envoy and Istio outlier detection, which ejects unhealthy upstream hosts from the load-balancing pool',
   ],
   related: ['state', 'proxy', 'decorator'],
@@ -57,7 +60,7 @@ export const pattern: PatternDefinition = {
       x: 340,
       y: 230,
       width: 170,
-      description: 'Wraps every call to RemoteService. Tracks a failure count and a current mode (Closed, Open or Half-Open) and decides, before each call, whether RemoteService gets touched at all.',
+      description: 'Wraps every call to RemoteService. Tracks a failure count and a current mode (Closed, Open or Half-Open) and decides, before each call, whether RemoteService gets touched at all. Here the modes are a simple enum switched on in one class, not separate State objects (see the State pattern) — fine at this size, worth revisiting if the transition logic grows.',
     },
     {
       id: 'service',
@@ -162,7 +165,7 @@ export const pattern: PatternDefinition = {
       to: 'halfOpen',
       type: 'notifies',
       label: 'cooldown elapsed',
-      description: 'Once cooldownMs has passed since the trip, the breaker moves itself to Half-Open — no external caller triggers this, the breaker checks it on the next incoming call.',
+      description: 'On the next call after cooldownMs has passed since the trip, the breaker switches itself to Half-Open — no external caller triggers this directly, it is checked lazily when that call arrives.',
       bend: 40,
       code: 'halfOpenCheck',
     },
@@ -249,7 +252,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'The cooldown elapses',
-      description: 'After cooldownMs has passed, the breaker moves itself to Half-Open. It is willing to find out whether RemoteService has recovered — but only with a single trial call.',
+      description: 'When the first call arrives after cooldownMs has passed, the breaker switches to Half-Open and lets that same call through as the single trial. It is willing to find out whether RemoteService has recovered — but only with that one call.',
       highlight: ['cooldown', 'halfOpen', 'state-halfOpen'],
       packets: [{ relation: 'cooldown', label: 'cooldown elapsed' }],
       notes: { breaker: 'HALF_OPEN', halfOpen: 'trial pending' },
@@ -257,7 +260,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'One trial request gets through',
-      description: 'The next call is allowed to reach RemoteService — Half-Open permits exactly one attempt, to test whether the dependency has actually recovered.',
+      description: 'That call is allowed to reach RemoteService — Half-Open permits exactly one attempt, to test whether the dependency has actually recovered. Any other call arriving while it is in flight still fails fast.',
       highlight: ['request', 'forward', 'service', 'halfOpen', 'state-halfOpen'],
       packets: [
         { relation: 'request', label: 'call(fn)' },
@@ -291,88 +294,8 @@ export const pattern: PatternDefinition = {
   ],
 
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-// [service]
-/** A downstream dependency that can start failing under load. */
-class RemoteService {
-  constructor(private isHealthy: () => boolean) {}
-
-  async request(): Promise<string> {
-    if (!this.isHealthy()) {
-      throw new Error('service unavailable')
-    }
-    return 'ok'
-  }
-}
-// [/service]
-
-type BreakerState = 'CLOSED' | 'OPEN' | 'HALF_OPEN'
-
-// [breaker]
-class CircuitBreaker {
-  private state: BreakerState = 'CLOSED'
-  private failureCount = 0
-  private nextAttempt = 0
-  private trialInFlight = false
-
-  constructor(
-    private readonly failureThreshold: number,
-    private readonly cooldownMs: number,
-  ) {}
-
-  // [call]
-  async call<T>(fn: () => Promise<T>): Promise<T> {
-    // [openCheck]
-    if (this.state === 'OPEN') {
-      if (Date.now() < this.nextAttempt) {
-        throw new Error('circuit open — failing fast') // fn() never runs
-      }
-      // [halfOpenCheck]
-      this.state = 'HALF_OPEN' // cooldown elapsed: let exactly one trial through
-      // [/halfOpenCheck]
-    }
-    // Only one probe at a time: while it is in flight, everyone else keeps failing fast.
-    if (this.state === 'HALF_OPEN' && this.trialInFlight) {
-      throw new Error('circuit half-open — trial in progress')
-    }
-    // [/openCheck]
-
-    const isTrial = this.state === 'HALF_OPEN'
-    if (isTrial) this.trialInFlight = true
-    try {
-      // [invoke]
-      const result = await fn()
-      // [/invoke]
-      // [onSuccess]
-      this.failureCount = 0
-      this.state = 'CLOSED'
-      // [/onSuccess]
-      return result
-    } catch (err) {
-      // [onFailure]
-      this.failureCount++
-      if (this.state === 'HALF_OPEN' || this.failureCount >= this.failureThreshold) {
-        this.state = 'OPEN'
-        this.nextAttempt = Date.now() + this.cooldownMs
-      }
-      // [/onFailure]
-      throw err
-    } finally {
-      if (isTrial) this.trialInFlight = false
-    }
-  }
-  // [/call]
-}
-// [/breaker]
-
-// [client]
-// Usage
-let serviceIsHealthy = true
-const service = new RemoteService(() => serviceIsHealthy)
-const breaker = new CircuitBreaker(/* failureThreshold */ 3, /* cooldownMs */ 4000)
-
-await breaker.call(() => service.request())
-// [/client]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: CircuitBreakerVisualization,
 }

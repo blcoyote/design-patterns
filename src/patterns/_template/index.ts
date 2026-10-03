@@ -4,6 +4,9 @@
  * See README.md → "Adding a pattern" for details.
  */
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw' // optional: delete along with `csharp` below
+import pyExample from './example.py?raw' // optional: delete along with `python` below
 
 export const pattern: PatternDefinition = {
   slug: 'my-pattern', // must match the folder name; used in the URL (#/patterns/my-pattern)
@@ -42,20 +45,19 @@ export const pattern: PatternDefinition = {
     },
   ],
 
+  // Example code lives in example.ts / example.cs / example.py next to this file.
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
-  code: `
-// [service]
-class Service {
-  run() {}
-}
-// [/service]
+  code: tsExample,
 
-// [usage]
-// [client]
-new Service().run()
-// [/client]
-// [/usage]
-`,
+  // Optional: a C# example shown as a second tab next to TypeScript. Must use
+  // the SAME region ids as example.ts (`npm test` checks this).
+  // NOTE: C# top-level statements must appear before any type declarations
+  // in the file, so usage code goes FIRST in example.cs even though TS puts it last.
+  csharp: csExample,
+
+  // Optional: a Python example shown as another tab. Same region ids as
+  // example.ts, but markers use Python comments: `# [id]` … `# [/id]`.
+  python: pyExample,
 
   // Optional: a custom scene. Create Visualization.tsx next to this file and set
   // Visualization: MyVisualization,

@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { StrategyVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -21,7 +24,7 @@ export const pattern: PatternDefinition = {
     'You want to add new algorithms without touching the code that uses them (Open/Closed).',
   ],
   pros: [
-    'Swaps algorithms at runtime without changing the client or the context.',
+    'Swaps algorithms at runtime without changing the context.',
     'Eliminates large conditional blocks that select between related behaviors.',
     'New strategies can be added without touching existing ones (Open/Closed).',
   ],
@@ -172,7 +175,7 @@ export const pattern: PatternDefinition = {
     },
     {
       title: 'Swap to ScenicRoute',
-      description: 'At runtime, the client calls setStrategy() with a different implementation. The navigator itself is never modified.',
+      description: 'At runtime, the client calls setStrategy() with a different implementation. The navigator’s code is never modified.',
       highlight: ['holds', 'scenic'],
       notes: { navigator: 'strategy: scenic' },
       code: 'setStrategy',
@@ -207,71 +210,8 @@ export const pattern: PatternDefinition = {
       code: 'route',
     },
   ],
-  code: `
-// [routeStrategy]
-interface RouteStrategy {
-  calculate(from: string, to: string): Route
-}
-// [/routeStrategy]
-
-interface Route {
-  minutes: number
-  summary: string
-}
-
-// [fastest]
-class FastestRoute implements RouteStrategy {
-  calculate(from: string, to: string): Route {
-    return { minutes: 12, summary: \`highway from \${from} to \${to}\` }
-  }
-}
-// [/fastest]
-
-// [shortest]
-class ShortestRoute implements RouteStrategy {
-  calculate(from: string, to: string): Route {
-    return { minutes: 18, summary: \`direct path from \${from} to \${to}\` }
-  }
-}
-// [/shortest]
-
-// [scenic]
-class ScenicRoute implements RouteStrategy {
-  calculate(from: string, to: string): Route {
-    return { minutes: 35, summary: \`coastal road from \${from} to \${to}\` }
-  }
-}
-// [/scenic]
-
-// [navigator]
-class Navigator {
-  // [holds]
-  constructor(private strategy: RouteStrategy) {}
-  // [/holds]
-
-  // [setStrategy]
-  setStrategy(strategy: RouteStrategy) {
-    this.strategy = strategy
-  }
-  // [/setStrategy]
-
-  // [route]
-  route(from: string, to: string): Route {
-    return this.strategy.calculate(from, to)
-  }
-  // [/route]
-}
-// [/navigator]
-
-// Usage
-const nav = new Navigator(new FastestRoute())
-nav.route('Home', 'Office') // { minutes: 12, ... }
-
-nav.setStrategy(new ScenicRoute())
-nav.route('Home', 'Office') // { minutes: 35, ... } — same call, different algorithm
-
-nav.setStrategy(new ShortestRoute())
-nav.route('Home', 'Office') // { minutes: 18, ... }
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
   Visualization: StrategyVisualization,
 }

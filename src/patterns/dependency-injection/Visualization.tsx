@@ -40,10 +40,10 @@ const MANUAL_RELATIONS: Relation[] = [
   {
     id: 'm-svc-repo',
     from: 'orderService',
-    to: 'orderRepository',
+    to: 'sqlOrderRepository',
     type: 'creates',
-    label: 'new OrderRepository(...)',
-    description: 'OrderService constructs its own OrderRepository — it now knows exactly which concrete class that is.',
+    label: 'new SqlOrderRepository(...)',
+    description: 'OrderService constructs its own SqlOrderRepository — it now knows exactly which concrete class that is.',
   },
   {
     id: 'm-svc-email',
@@ -55,11 +55,18 @@ const MANUAL_RELATIONS: Relation[] = [
   },
   {
     id: 'm-repo-config',
-    from: 'orderRepository',
+    from: 'sqlOrderRepository',
     to: 'config',
     type: 'creates',
     label: 'new Config()',
-    description: 'OrderRepository constructs its own Config, so it can never be pointed at a different one without a code change.',
+    description: 'SqlOrderRepository constructs its own Config, so it can never be pointed at a different one without a code change.',
+  },
+  {
+    id: 'm-repo-impl',
+    from: 'sqlOrderRepository',
+    to: 'orderRepository',
+    type: 'implements',
+    description: 'SqlOrderRepository still implements OrderRepository — but OrderService holds a concrete SqlOrderRepository, not the interface, so that fact buys it nothing.',
   },
   {
     id: 'm-email-impl',

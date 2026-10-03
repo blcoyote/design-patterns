@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { DependencyInjectionVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -30,6 +33,7 @@ export const pattern: PatternDefinition = {
     'Adds indirection — instead of following a chain of `new` calls you now follow a container.',
     'Misconfigured wiring (a missing registration, a lifetime mismatch) only fails at resolve time, not compile time.',
     'Overkill for small scripts with only one or two straightforward dependencies.',
+    'Passing the container itself into a class so it can call resolve() whenever it needs something is Service Locator, not Dependency Injection — it hides the dependency instead of declaring it.',
   ],
   realWorld: [
     'Angular and NestJS: constructor injection driven by decorators (@Injectable, @Inject)',
@@ -43,12 +47,12 @@ export const pattern: PatternDefinition = {
     {
       id: 'container',
       label: 'Container',
-      role: 'Composition Root',
+      role: 'DI Container / Injector',
       kind: 'client',
       x: 110,
       y: 230,
       description:
-        'Builds and wires every object in the graph at startup, leaves first. Nothing else in the app calls new on a dependency — only the container does.',
+        'Builds and wires every object in the graph at startup, leaves first. Nothing else in the app calls new on a dependency — only the container does. The startup code that configures and invokes it (see the usage snippet) is the real Composition Root.',
     },
     {
       id: 'orderController',
@@ -74,12 +78,12 @@ export const pattern: PatternDefinition = {
     {
       id: 'orderRepository',
       label: 'OrderRepository',
-      role: 'Dependency',
-      kind: 'class',
+      role: 'Abstraction',
+      kind: 'interface',
       x: 230,
       y: 300,
       width: 170,
-      description: 'Persists orders. Needs a Config, injected through its constructor rather than constructed internally.',
+      description: 'Declares save() and findById(). OrderService depends only on this interface, never on a concrete storage mechanism.',
     },
     {
       id: 'emailSender',
@@ -109,6 +113,16 @@ export const pattern: PatternDefinition = {
       width: 170,
       description: 'Sends real email over SMTP — one of possibly several implementations of EmailSender the container could hand out.',
     },
+    {
+      id: 'sqlOrderRepository',
+      label: 'SqlOrderRepository',
+      role: 'Concrete implementation',
+      kind: 'class',
+      x: 110,
+      y: 400,
+      width: 170,
+      description: 'Persists orders to SQL. Needs a Config, injected through its constructor rather than constructed internally — one of possibly several implementations of OrderRepository the container could hand out.',
+    },
   ],
 
   relations: [
@@ -125,11 +139,11 @@ export const pattern: PatternDefinition = {
     {
       id: 'create-repo',
       from: 'container',
-      to: 'orderRepository',
+      to: 'sqlOrderRepository',
       type: 'creates',
-      label: 'new OrderRepository()',
-      description: 'Once Config exists, the container builds OrderRepository and passes the Config instance straight into its constructor.',
-      code: 'orderRepository',
+      label: 'new SqlOrderRepository()',
+      description: 'Once Config exists, the container builds SqlOrderRepository and passes the Config instance straight into its constructor.',
+      code: 'sqlOrderRepository',
       bend: 20,
     },
     {
@@ -164,12 +178,12 @@ export const pattern: PatternDefinition = {
     },
     {
       id: 'repo-holds-config',
-      from: 'orderRepository',
+      from: 'sqlOrderRepository',
       to: 'config',
       type: 'holds',
       label: 'config',
-      description: 'OrderRepository stores the Config instance it was handed; it never constructs one itself.',
-      code: 'orderRepository',
+      description: 'SqlOrderRepository stores the Config instance it was handed; it never constructs one itself.',
+      code: 'sqlOrderRepository',
     },
     {
       id: 'email-implements',
@@ -179,12 +193,20 @@ export const pattern: PatternDefinition = {
       description: 'SmtpEmailSender implements the EmailSender interface — the only thing OrderService is allowed to know about it.',
     },
     {
+      id: 'repo-implements',
+      from: 'sqlOrderRepository',
+      to: 'orderRepository',
+      type: 'implements',
+      description: 'SqlOrderRepository implements the OrderRepository interface — the only thing OrderService is allowed to know about it.',
+      bend: 15,
+    },
+    {
       id: 'service-holds-repo',
       from: 'orderService',
       to: 'orderRepository',
       type: 'holds',
       label: 'repository',
-      description: 'OrderService stores the OrderRepository instance passed into its constructor.',
+      description: 'OrderService stores its repository only as OrderRepository — it has no idea SqlOrderRepository (or a fake) is behind it.',
       code: 'orderService',
       bend: 15,
     },
@@ -213,7 +235,7 @@ export const pattern: PatternDefinition = {
       to: 'orderController',
       type: 'calls',
       label: 'handle()',
-      description: 'After resolving OrderController, the application calls it exactly like any other object — DI only changes how it was built, not how it is used.',
+      description: 'Shown from the container for proximity, but it is application code — not the container — that calls handle() on the resolved OrderController, exactly like any other object. DI only changes how it was built, not how it is used.',
       code: 'usage',
       bend: -60,
     },
@@ -237,15 +259,15 @@ export const pattern: PatternDefinition = {
       code: 'config',
     },
     {
-      title: 'OrderRepository is wired to it',
-      description: 'The container builds OrderRepository next, and the Config instance built a moment ago flies straight into its constructor slot.',
-      highlight: ['create-repo', 'repo-holds-config', 'orderRepository'],
+      title: 'SqlOrderRepository is wired to it',
+      description: 'The container builds SqlOrderRepository next — the registered implementation of OrderRepository — and the Config instance built a moment ago flies straight into its constructor slot.',
+      highlight: ['create-repo', 'repo-holds-config', 'repo-implements', 'sqlOrderRepository', 'orderRepository'],
       packets: [
-        { relation: 'create-repo', label: 'new OrderRepository()' },
+        { relation: 'create-repo', label: 'new SqlOrderRepository()' },
         { relation: 'repo-holds-config', label: 'config', reverse: true },
       ],
-      notes: { config: 'built ✓', orderRepository: 'built ✓' },
-      code: 'orderRepository',
+      notes: { config: 'built ✓', sqlOrderRepository: 'built ✓' },
+      code: 'sqlOrderRepository',
     },
     {
       title: 'The other branch: SmtpEmailSender',
@@ -253,19 +275,19 @@ export const pattern: PatternDefinition = {
         'SmtpEmailSender is also a leaf. The container builds it independently of the repository branch — order between independent branches does not matter, only dependency order does.',
       highlight: ['create-email', 'email-implements', 'smtpEmailSender'],
       packets: [{ relation: 'create-email', label: 'new SmtpEmailSender()' }],
-      notes: { config: 'built ✓', orderRepository: 'built ✓', smtpEmailSender: 'built ✓' },
+      notes: { config: 'built ✓', sqlOrderRepository: 'built ✓', smtpEmailSender: 'built ✓' },
       code: 'smtpEmailSender',
     },
     {
       title: 'OrderService receives both dependencies',
-      description: 'Only now that OrderRepository and an EmailSender exist can OrderService be constructed. Both instances fly into its constructor at once.',
+      description: 'Only now that an OrderRepository and an EmailSender exist can OrderService be constructed. Both instances fly into its constructor at once, each typed as the interface.',
       highlight: ['create-service', 'service-holds-repo', 'service-holds-email', 'orderService'],
       packets: [
         { relation: 'create-service', label: 'new OrderService()' },
         { relation: 'service-holds-repo', label: 'repository', reverse: true },
         { relation: 'service-holds-email', label: 'emailSender', reverse: true },
       ],
-      notes: { orderRepository: 'built ✓', smtpEmailSender: 'built ✓', orderService: 'built ✓' },
+      notes: { sqlOrderRepository: 'built ✓', smtpEmailSender: 'built ✓', orderService: 'built ✓' },
       code: 'orderService',
     },
     {
@@ -288,122 +310,17 @@ export const pattern: PatternDefinition = {
       code: 'usage',
     },
     {
-      title: 'Swap the mailer for tests',
-      description: 'A test wires OrderService to a FakeEmailSender instead of SmtpEmailSender. OrderService never notices — it only ever depended on the EmailSender interface.',
-      highlight: ['service-holds-email', 'smtpEmailSender', 'emailSender'],
-      notes: { smtpEmailSender: 'swapped → FakeEmailSender (test)' },
+      title: 'Tests skip the container entirely',
+      description: 'A unit test just calls new OrderService(fakeRepo, new FakeEmailSender()) directly — no container involved. OrderService never notices the difference: it only ever depended on the OrderRepository and EmailSender interfaces.',
+      highlight: ['service-holds-repo', 'service-holds-email', 'orderRepository', 'emailSender'],
+      notes: { orderService: 'wired by hand (test)' },
       code: 'test',
     },
   ],
 
-  code: `
-// [emailSender]
-interface EmailSender {
-  send(to: string, subject: string, body: string): void
-}
-// [/emailSender]
-
-// [smtpEmailSender]
-class SmtpEmailSender implements EmailSender {
-  send(to: string, subject: string, body: string) {
-    console.log(\`SMTP -> \${to}: \${subject}\`)
-  }
-}
-// [/smtpEmailSender]
-
-// [config]
-class Config {
-  constructor(public readonly dbUrl: string = 'postgres://localhost/orders') {}
-}
-// [/config]
-
-// [orderRepository]
-class OrderRepository {
-  constructor(private config: Config) {}
-
-  save(orderId: string) {
-    console.log(\`INSERT INTO orders (\${this.config.dbUrl}) ...\`)
-  }
-}
-// [/orderRepository]
-
-// [orderService]
-class OrderService {
-  constructor(
-    private repository: OrderRepository,
-    private emailSender: EmailSender,
-  ) {}
-
-  placeOrder(orderId: string, customerEmail: string) {
-    this.repository.save(orderId)
-    this.emailSender.send(customerEmail, 'Order placed', \`Order \${orderId} is confirmed.\`)
-  }
-}
-// [/orderService]
-
-// [orderController]
-class OrderController {
-  constructor(private service: OrderService) {}
-
-  handle(orderId: string, customerEmail: string) {
-    this.service.placeOrder(orderId, customerEmail)
-  }
-}
-// [/orderController]
-
-// [container]
-// A container is nothing magical: a map of providers (each listing the keys it
-// needs) plus a resolve() that builds those dependencies first, recursively,
-// and caches every result as a singleton.
-class Container {
-  private providers = new Map<string, { deps: string[]; create: (...deps: any[]) => unknown }>()
-  private singletons = new Map<string, unknown>()
-
-  register(key: string, deps: string[], create: (...deps: any[]) => unknown) {
-    this.providers.set(key, { deps, create })
-  }
-
-  resolve<T>(key: string): T {
-    if (!this.singletons.has(key)) {
-      const provider = this.providers.get(key)
-      if (!provider) throw new Error('No provider registered for ' + key)
-      // Build whatever it needs first (recursively), then construct it.
-      const args = provider.deps.map((dep) => this.resolve(dep))
-      this.singletons.set(key, provider.create(...args))
-    }
-    return this.singletons.get(key) as T
-  }
-}
-// [/container]
-
-// [usage]
-const container = new Container()
-
-container.register('config', [], () => new Config())
-container.register('orderRepository', ['config'], (config: Config) => new OrderRepository(config))
-container.register('emailSender', [], () => new SmtpEmailSender())
-container.register('orderService', ['orderRepository', 'emailSender'], (repo: OrderRepository, email: EmailSender) => new OrderService(repo, email))
-container.register('orderController', ['orderService'], (service: OrderService) => new OrderController(service))
-
-// Ask only for the root — the container works out the rest of the graph.
-const orderController = container.resolve<OrderController>('orderController')
-orderController.handle('A-1001', 'ada@example.com')
-// [/usage]
-
-// [test]
-// Swapping an implementation needs no change to OrderService — only the registration:
-class FakeEmailSender implements EmailSender {
-  sent: string[] = []
-  send(to: string, subject: string) {
-    this.sent.push(\`\${to}: \${subject}\`)
-  }
-}
-
-const testContainer = new Container()
-// ...same registrations as above, except the email provider returns the fake:
-testContainer.register('emailSender', [], () => new FakeEmailSender())
-// [/test]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 
   Visualization: DependencyInjectionVisualization,
 }

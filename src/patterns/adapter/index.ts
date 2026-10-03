@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'adapter',
@@ -11,7 +14,7 @@ export const pattern: PatternDefinition = {
   problem:
     'Your checkout code is written against a clean PaymentProcessor interface, but the payment provider you were just handed only exposes a legacy, cents-based API with a completely different method name and shape. You cannot change the vendor code, and you do not want to rewrite every call site to match it.',
   solution:
-    'Introduce an Adapter that implements the interface your client already expects, and holds an instance of the incompatible class internally. The adapter translates each call — converting arguments, invoking the legacy method, and converting the result back — so neither the client nor the legacy class needs to know about the other.',
+    'Introduce an Adapter that implements the interface your client already expects, and holds an instance of the incompatible class internally. The adapter translates each call — converting arguments, invoking the legacy method, and converting the result back — so neither the client nor the legacy class needs to know about the other. This is the object adapter form, built on composition and holding the adaptee as a field; a class adapter instead inherits from the adaptee, which only works in languages with multiple inheritance and ties the adapter to one concrete adaptee class.',
   analogy:
     'A travel power plug adapter does not change what your laptop charger does, and it does not change the wall socket. It just sits between them, translating one physical shape into the other.',
   whenToUse: [
@@ -29,8 +32,8 @@ export const pattern: PatternDefinition = {
     'Can hide a poor underlying API rather than fixing the real problem.',
   ],
   realWorld: [
-    'Array.from() adapting iterables and array-likes to the Array interface',
-    'Node.js streams adapters between callback and Promise-based APIs',
+    'Node.js util.promisify()/util.callbackify() adapting between callback-based and Promise-based function signatures',
+    'Node.js Readable.toWeb()/Readable.fromWeb() adapting between Node streams and the Web Streams API',
     'ORMs adapting different database drivers to one query interface',
     'Payment SDKs wrapping each provider’s raw HTTP API behind a common interface',
   ],
@@ -117,7 +120,7 @@ export const pattern: PatternDefinition = {
   steps: [
     {
       title: 'Adapter wraps the legacy gateway',
-      description: 'A StripeAdapter is constructed around the existing LegacyStripeGateway instance. From here on, the gateway is only reachable through the adapter.',
+      description: 'A StripeAdapter is constructed around the existing LegacyStripeGateway instance. From here on, the client only ever reaches the gateway through the adapter.',
       highlight: ['adapter', 'wraps', 'adaptee'],
       notes: { adapter: 'wraps gateway' },
       code: 'adapter',
@@ -154,45 +157,7 @@ export const pattern: PatternDefinition = {
       code: 'charge',
     },
   ],
-  code: `
-// [paymentProcessor]
-interface PaymentProcessor {
-  charge(amount: number): string
-}
-// [/paymentProcessor]
-
-// [adaptee]
-class LegacyStripeGateway {
-  // [chargeCents]
-  chargeCents(cents: number): { ok: boolean; cents: number } {
-    console.log(\`legacy gateway: charging \${cents}¢\`)
-    return { ok: true, cents }
-  }
-  // [/chargeCents]
-}
-// [/adaptee]
-
-// [adapter]
-class StripeAdapter implements PaymentProcessor {
-  constructor(private gateway: LegacyStripeGateway) {}
-
-  // [charge]
-  charge(amount: number): string {
-    const cents = Math.round(amount * 100)
-    const result = this.gateway.chargeCents(cents)
-    return result.ok ? \`charged $\${(result.cents / 100).toFixed(2)}\` : 'failed'
-  }
-  // [/charge]
-}
-// [/adapter]
-
-// [usage]
-// Usage
-function checkout(processor: PaymentProcessor, amount: number) {
-  console.log(processor.charge(amount))
-}
-
-checkout(new StripeAdapter(new LegacyStripeGateway()), 4.5)
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

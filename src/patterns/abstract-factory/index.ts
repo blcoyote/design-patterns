@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'abstract-factory',
@@ -29,7 +32,7 @@ export const pattern: PatternDefinition = {
     'Can introduce a lot of interfaces and classes for what might otherwise be a simple set of objects.',
   ],
   realWorld: [
-    'javax.xml.parsers.DocumentBuilderFactory / XPathFactory in Java, which build a matching family of XML parsing components',
+    'ADO.NET\'s DbProviderFactory, which creates a matching Connection, Command and Parameter for one database provider',
     'Cross-platform UI toolkits whose look-and-feel engine (e.g. Java Swing\'s UIManager) swaps an entire family of native-looking widgets at once',
     'Database-agnostic ORMs whose "dialect" object creates matching Connection, QueryBuilder and Schema classes for Postgres vs MySQL',
     'Cloud SDK abstractions that create a matching family of Storage/Queue/Secrets clients per provider (AWS vs GCP vs Azure)',
@@ -208,94 +211,12 @@ export const pattern: PatternDefinition = {
     },
     {
       title: "Families can't be mixed",
-      description: "Because each concrete factory only ever returns its own matching products, there is no code path that pairs a DarkButton with a LightCheckbox — consistency is enforced by construction, not by convention.",
+      description: "Because each concrete factory only ever returns its own matching products, there is no code path that pairs a DarkButton with a LightCheckbox — as long as the client builds from one factory, consistency is enforced by construction, not by convention.",
       highlight: ['uiFactory', 'lightFactory', 'darkFactory'],
       code: 'uiFactory',
     },
   ],
-  code: `
-// [button]
-interface Button {
-  render(): string
-}
-// [/button]
-
-// [checkbox]
-interface Checkbox {
-  render(): string
-}
-// [/checkbox]
-
-// [uiFactory]
-interface UIFactory {
-  createButton(): Button
-  createCheckbox(): Checkbox
-}
-// [/uiFactory]
-
-// [lightFactory]
-class LightButton implements Button {
-  render() {
-    return 'button [light]'
-  }
-}
-
-class LightCheckbox implements Checkbox {
-  render() {
-    return 'checkbox [light]'
-  }
-}
-
-class LightFactory implements UIFactory {
-  createButton(): Button {
-    return new LightButton()
-  }
-  createCheckbox(): Checkbox {
-    return new LightCheckbox()
-  }
-}
-// [/lightFactory]
-
-// [darkFactory]
-class DarkButton implements Button {
-  render() {
-    return 'button [dark]'
-  }
-}
-
-class DarkCheckbox implements Checkbox {
-  render() {
-    return 'checkbox [dark]'
-  }
-}
-
-class DarkFactory implements UIFactory {
-  createButton(): Button {
-    return new DarkButton()
-  }
-  createCheckbox(): Checkbox {
-    return new DarkCheckbox()
-  }
-}
-// [/darkFactory]
-
-// Usage
-// [usage]
-// [client]
-function renderDialog(factory: UIFactory) {
-  const button = factory.createButton()
-  const checkbox = factory.createCheckbox()
-  return [button.render(), checkbox.render()]
-}
-// [/client]
-
-const theme: 'light' | 'dark' = getUserTheme()
-const factory: UIFactory = theme === 'dark' ? new DarkFactory() : new LightFactory()
-
-renderDialog(factory) // ["button [dark]", "checkbox [dark]"]
-
-// Switch the whole family just by swapping the factory:
-renderDialog(new LightFactory()) // ["button [light]", "checkbox [light]"]
-// [/usage]
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

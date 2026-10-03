@@ -1,4 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
+import tsExample from './example.ts?raw'
+import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'observer',
@@ -25,7 +28,7 @@ export const pattern: PatternDefinition = {
     'Relationships can be established at runtime.',
   ],
   cons: [
-    'Observers are notified in an unspecified order.',
+    'Clients shouldn\'t rely on notification order.',
     'Forgotten subscriptions cause memory leaks (the "lapsed listener" problem).',
     'Cascading updates can be hard to trace and debug.',
   ],
@@ -105,7 +108,7 @@ export const pattern: PatternDefinition = {
   steps: [
     {
       title: 'Observers subscribe',
-      description: 'Each observer registers itself with the ticker. The ticker just stores them in a list of Observer.',
+      description: 'The client subscribes each observer with the ticker. The ticker just stores them in a list of Observer.',
       highlight: ['subject', 'holds', 'chart', 'alert', 'logger'],
       notes: { subject: 'observers: 3' },
       code: 'subscribe',
@@ -143,82 +146,7 @@ export const pattern: PatternDefinition = {
       code: 'unsubscribe',
     },
   ],
-  code: `
-// [observer]
-interface Observer {
-  update(price: number): void
-}
-// [/observer]
-
-// [subject]
-class StockTicker {
-  private observers: Observer[] = []
-  private price = 0
-
-  // [subscribe]
-  subscribe(o: Observer) {
-    this.observers.push(o)
-  }
-  // [/subscribe]
-
-  // [unsubscribe]
-  unsubscribe(o: Observer) {
-    this.observers = this.observers.filter((x) => x !== o)
-  }
-  // [/unsubscribe]
-
-  // [setPrice]
-  setPrice(price: number) {
-    this.price = price
-    this.notify()
-  }
-  // [/setPrice]
-
-  // [notify]
-  private notify() {
-    for (const o of this.observers) o.update(this.price)
-  }
-  // [/notify]
-}
-// [/subject]
-
-// [concrete]
-// [chart]
-class PriceChart implements Observer {
-  update(price: number) {
-    console.log(\`chart: plot \${price}\`)
-  }
-}
-// [/chart]
-
-// [alert]
-class PriceAlert implements Observer {
-  constructor(private limit: number) {}
-  update(price: number) {
-    if (price > this.limit) console.warn(\`price above \${this.limit}!\`)
-  }
-}
-// [/alert]
-
-// [logger]
-class AuditLog implements Observer {
-  entries: number[] = []
-  update(price: number) {
-    this.entries.push(price)
-  }
-}
-// [/logger]
-// [/concrete]
-
-// Usage
-const ticker = new StockTicker()
-const alert = new PriceAlert(100)
-ticker.subscribe(new PriceChart())
-ticker.subscribe(alert)
-ticker.subscribe(new AuditLog())
-
-ticker.setPrice(101.5) // all three react
-ticker.unsubscribe(alert)
-ticker.setPrice(99) // only chart + log
-`,
+  code: tsExample,
+  csharp: csExample,
+  python: pyExample,
 }

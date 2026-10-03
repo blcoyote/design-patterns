@@ -8,6 +8,7 @@ import { areaOf } from "@/lib/areas";
 import { usedSlugs } from "@/lib/selfUsage";
 import { categories } from "@/patterns/categories";
 import { byCategory } from "@/patterns/registry";
+import { GitHubIcon, REPO_URL } from "./GitHubLink";
 
 export function Sidebar({
   open,
@@ -194,6 +195,16 @@ export function Sidebar({
               Which should I choose? →
             </Link>
           )}
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white lg:hidden"
+          >
+            <GitHubIcon className="size-4 fill-current" />
+            View source on GitHub
+          </a>
         </div>
       </aside>
     </>

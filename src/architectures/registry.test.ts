@@ -76,6 +76,23 @@ describe('architecture registry', () => {
     expect(pyRegionIds).toEqual(tsRegionIds)
   })
 
+  // Go is optional while the rollout is in progress; the REVIEW task makes it mandatory.
+  const withGo = architectures.filter((a) => a.go)
+  it.each(withGo.map((a) => [a.slug, a] as const))('%s go code has no unclosed or stray markers', (_slug, a) => {
+    expect(findMarkerErrors(a.go!)).toEqual([])
+  })
+
+  it.each(withGo.map((a) => [a.slug, a] as const))('%s go is a runnable package main file', (_slug, a) => {
+    expect(a.go).toMatch(/^package main$/m)
+    expect(a.go).toMatch(/^func main\(\) \{$/m)
+  })
+
+  it.each(withGo.map((a) => [a.slug, a] as const))('%s go regions match the typescript regions', (_slug, a) => {
+    const tsRegionIds = Object.keys(parseCode(a.code).regions).sort()
+    const goRegionIds = Object.keys(parseCode(a.go!).regions).sort()
+    expect(goRegionIds).toEqual(tsRegionIds)
+  })
+
   it('architecture cross-references are symmetric', () => {
     const bySlug = new Map(architectures.map((a) => [a.slug, a]))
     for (const a of architectures) {

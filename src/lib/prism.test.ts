@@ -11,4 +11,9 @@ describe('prism C# registration', () => {
     const { Prism } = await import('./prism')
     expect(Prism.languages.python).toBeTruthy()
   })
+
+  it('has the go grammar available', async () => {
+    const { Prism } = await import('./prism')
+    expect(Prism.languages.go).toBeTruthy()
+  })
 })

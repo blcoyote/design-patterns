@@ -7,6 +7,7 @@ import type { ArchitectureDefinition } from '@/types/architecture'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
 import pyExample from './example.py?raw'
+import goExample from './example.go?raw'
 
 export const architecture: ArchitectureDefinition = {
   slug: 'my-architecture', // must match the folder name; used in the URL (/architecture/my-architecture)
@@ -64,12 +65,13 @@ export const architecture: ArchitectureDefinition = {
     },
   ],
 
-  // Example code lives in example.ts / example.cs / example.py next to this file.
+  // Example code lives in example.ts / example.cs / example.py / example.go next to this file.
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   // All three are required for real architectures (the persisted language tab needs them everywhere).
   code: tsExample,
   csharp: csExample,
   python: pyExample,
+  go: goExample,
 
   // Optional: a custom scene. Create Visualization.tsx next to this file and set
   // Visualization: MyVisualization,

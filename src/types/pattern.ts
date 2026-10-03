@@ -101,6 +101,12 @@ export interface ExplorableDefinition {
    * but markers use Python comments: `# [id]` … `# [/id]`.
    */
   python?: string;
+  /**
+   * Optional Go example, shown as another tab. Same rules as `csharp`, with
+   * `// [id]` … `// [/id]` markers. A single `package main` file whose usage
+   * lives in `func main()` at the bottom.
+   */
+  go?: string;
   /** Diagram viewBox, defaults to "0 0 800 460". */
   viewBox?: string;
   /** Optional custom scene replacing the generic diagram. */

@@ -44,6 +44,7 @@ export function validateComparison(c: ComparisonDefinition, resolveSubject: Subj
     if (!parseCode(def.code).regions[region]) errors.push(`${where}: unknown typescript region "${region}"`)
     if (def.csharp && !parseCode(def.csharp).regions[region]) errors.push(`${where}: unknown csharp region "${region}"`)
     if (def.python && !parseCode(def.python).regions[region]) errors.push(`${where}: unknown python region "${region}"`)
+    if (def.go && !parseCode(def.go).regions[region]) errors.push(`${where}: unknown go region "${region}"`)
   }
 
   for (const option of c.options) {

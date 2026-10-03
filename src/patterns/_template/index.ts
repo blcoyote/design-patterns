@@ -7,6 +7,7 @@ import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw' // optional: delete along with `csharp` below
 import pyExample from './example.py?raw' // optional: delete along with `python` below
+import goExample from './example.go?raw' // optional: delete along with `go` below
 
 export const pattern: PatternDefinition = {
   slug: 'my-pattern', // must match the folder name; used in the URL (#/patterns/my-pattern)
@@ -45,7 +46,7 @@ export const pattern: PatternDefinition = {
     },
   ],
 
-  // Example code lives in example.ts / example.cs / example.py next to this file.
+  // Example code lives in example.ts / example.cs / example.py / example.go next to this file.
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: tsExample,
 
@@ -58,6 +59,10 @@ export const pattern: PatternDefinition = {
   // Optional: a Python example shown as another tab. Same region ids as
   // example.ts, but markers use Python comments: `# [id]` … `# [/id]`.
   python: pyExample,
+
+  // Optional: a Go example shown as another tab. Same region ids as example.ts,
+  // `// [id]` markers. One `package main` file; usage goes in `func main()` at the bottom.
+  go: goExample,
 
   // Optional: a custom scene. Create Visualization.tsx next to this file and set
   // Visualization: MyVisualization,

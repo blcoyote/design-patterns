@@ -33,13 +33,13 @@ export function PatternPage() {
 
       <PatternExplorer key={pattern.slug} pattern={pattern} color={cat.color} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Section title="The problem">{pattern.problem}</Section>
         <Section title="The solution">{pattern.solution}</Section>
         <Section title="Real-world analogy">{pattern.analogy}</Section>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="When to use it">
           <BulletList items={pattern.whenToUse} marker="→" markerClass={cat.text} />
         </Section>

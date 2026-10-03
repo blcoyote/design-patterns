@@ -43,14 +43,14 @@ export function ArchitecturePage() {
 
       <UsedInThisSite usages={usages} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Section title="The problem">{architecture.problem}</Section>
         <Section title="The solution">{architecture.solution}</Section>
         <Section title="Real-world analogy">{architecture.analogy}</Section>
       </div>
 
       <Section title="Key concepts">
-        <dl className="grid gap-4 sm:grid-cols-2">
+        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {architecture.concepts.map((c) => (
             <div key={c.term}>
               <dt className="font-semibold text-white">{c.term}</dt>
@@ -62,7 +62,7 @@ export function ArchitecturePage() {
 
       {architecture.variants && architecture.variants.length > 0 && (
         <Section title="Variants">
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {architecture.variants.map((v) => (
               <div key={v.name}>
                 <dt className="font-semibold text-white">{v.name}</dt>
@@ -73,7 +73,7 @@ export function ArchitecturePage() {
         </Section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="When to use it">
           <BulletList items={architecture.whenToUse} marker="→" markerClass={meta.text} />
         </Section>

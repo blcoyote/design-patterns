@@ -1,6 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { UnitOfWorkVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -248,5 +249,6 @@ export const pattern: PatternDefinition = {
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: tsExample,
   csharp: csExample,
+  python: pyExample,
   Visualization: UnitOfWorkVisualization,
 }

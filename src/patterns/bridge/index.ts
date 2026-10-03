@@ -1,6 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'bridge',
@@ -282,4 +283,5 @@ export const pattern: PatternDefinition = {
   ],
   code: tsExample,
   csharp: csExample,
+  python: pyExample,
 }

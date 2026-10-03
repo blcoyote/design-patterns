@@ -1,6 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 
 export const pattern: PatternDefinition = {
   slug: 'mediator',
@@ -255,6 +256,7 @@ export const pattern: PatternDefinition = {
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: tsExample,
   csharp: csExample,
+  python: pyExample,
 
   // Generic diagram is used — no custom Visualization.
 }

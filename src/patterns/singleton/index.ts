@@ -1,6 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { SingletonVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -93,7 +94,8 @@ export const pattern: PatternDefinition = {
   steps: [
     {
       title: 'Private constructor',
-      description: 'AppConfig’s constructor is marked private. No outside code can write `new AppConfig()` — it fails to compile.',
+      description:
+        'AppConfig’s constructor is marked private. No outside code can write `new AppConfig()` directly — enforced at compile time in typed languages, or by a runtime guard in Python.',
       highlight: ['config'],
       notes: { config: 'instance: null' },
       code: 'class',
@@ -124,5 +126,6 @@ export const pattern: PatternDefinition = {
   ],
   code: tsExample,
   csharp: csExample,
+  python: pyExample,
   Visualization: SingletonVisualization,
 }

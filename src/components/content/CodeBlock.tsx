@@ -22,11 +22,13 @@ interface Props {
 const FILE_NAME: Record<CodeLanguage, string> = {
   typescript: 'example.ts',
   csharp: 'Example.cs',
+  python: 'example.py',
 }
 
 const PRISM_LANGUAGE: Record<CodeLanguage, string> = {
   typescript: 'tsx',
   csharp: 'csharp',
+  python: 'python',
 }
 
 export function CodeBlock({ sources, active, onActiveChange, color, className = '' }: Props) {

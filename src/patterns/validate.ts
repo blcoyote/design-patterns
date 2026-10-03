@@ -6,6 +6,7 @@ export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): 
   const errors: string[] = []
   const { regions } = parseCode(p.code)
   const csRegions = p.csharp ? parseCode(p.csharp).regions : null
+  const pyRegions = p.python ? parseCode(p.python).regions : null
   const participantIds = new Set(p.participants.map((x) => x.id))
   const relationIds = new Set(p.relations.map((x) => x.id))
   const ids = new Set([...participantIds, ...relationIds])
@@ -17,6 +18,7 @@ export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): 
     if (!region) return
     if (!regions[region]) errors.push(`${where}: unknown code region "${region}"`)
     if (csRegions && !csRegions[region]) errors.push(`${where}: unknown csharp code region "${region}"`)
+    if (pyRegions && !pyRegions[region]) errors.push(`${where}: unknown python code region "${region}"`)
   }
 
   for (const part of p.participants) checkRegion(`participant ${part.id}`, part.code)

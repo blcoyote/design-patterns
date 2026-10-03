@@ -1,12 +1,15 @@
 import { useSyncExternalStore } from 'react'
 
-export type CodeLanguage = 'typescript' | 'csharp'
+export type CodeLanguage = 'typescript' | 'csharp' | 'python'
+
+const LANGUAGES: readonly CodeLanguage[] = ['typescript', 'csharp', 'python']
 
 const STORAGE_KEY = 'dp:code-lang'
 
 function readStored(): CodeLanguage {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'csharp' ? 'csharp' : 'typescript'
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return LANGUAGES.find((lang) => lang === stored) ?? 'typescript'
   } catch {
     return 'typescript'
   }
@@ -56,9 +59,9 @@ function setPreferredCodeLanguage(lang: CodeLanguage) {
 }
 
 /**
- * The user's preferred code-example language ('typescript' | 'csharp'),
+ * The user's preferred code-example language ('typescript' | 'csharp' | 'python'),
  * persisted to localStorage and shared across every `CodeBlock` instance so
- * picking C# on one pattern keeps C# selected on the next.
+ * picking C# or Python on one pattern keeps it selected on the next.
  *
  * Callers must fall back to 'typescript' themselves when the preferred
  * language isn't available for the current pattern — do so without calling

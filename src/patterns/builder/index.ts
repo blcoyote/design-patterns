@@ -1,6 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { BuilderVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -218,5 +219,6 @@ export const pattern: PatternDefinition = {
   ],
   code: tsExample,
   csharp: csExample,
+  python: pyExample,
   Visualization: BuilderVisualization,
 }

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { CodeBlock, type CodeSource } from '@/components/content/CodeBlock'
 import { useCodeLanguage, type CodeLanguage } from '@/hooks/useCodeLanguage'
 import { useStepPlayer } from '@/hooks/useStepPlayer'
-import { parseCode } from '@/lib/codeRegions'
+import { parseCode, type ParsedCode } from '@/lib/codeRegions'
 import { categories } from '@/patterns/categories'
 import type { PatternDefinition } from '@/types/pattern'
 import { findSelection } from '@/lib/selection'
@@ -20,14 +20,15 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const step = pattern.steps[player.index] ?? null
   const selection = findSelection(pattern, selectedId)
-  const ts = parseCode(pattern.code)
-  const cs = pattern.csharp ? parseCode(pattern.csharp) : null
+  const parsed: { lang: CodeLanguage; code: ParsedCode }[] = [{ lang: 'typescript', code: parseCode(pattern.code) }]
+  if (pattern.csharp) parsed.push({ lang: 'csharp', code: parseCode(pattern.csharp) })
+  if (pattern.python) parsed.push({ lang: 'python', code: parseCode(pattern.python) })
 
   const [preferredLang, setPreferredLang] = useCodeLanguage()
-  const availableLangs: CodeLanguage[] = cs ? ['typescript', 'csharp'] : ['typescript']
-  // fall back to TypeScript without touching the stored preference when C# isn't available here
-  const activeLang = availableLangs.includes(preferredLang) ? preferredLang : 'typescript'
-  const activeRegions = activeLang === 'csharp' && cs ? cs.regions : ts.regions
+  // fall back to TypeScript without touching the stored preference when the preferred language isn't available here
+  const active = parsed.find((p) => p.lang === preferredLang) ?? parsed[0]
+  const activeLang = active.lang
+  const activeRegions = active.code.regions
 
   const regionOf = (id: string) => {
     const p = pattern.participants.find((x) => x.id === id)
@@ -40,8 +41,11 @@ export function PatternExplorer({ pattern }: { pattern: PatternDefinition }) {
       : selection && (selection.item.code ?? regionOf(selection.item.from))
   const region = selection ? selectedRegion : step?.code
 
-  const sources: CodeSource[] = [{ lang: 'typescript', text: ts.text, highlight: region ? ts.regions[region] : undefined }]
-  if (cs) sources.push({ lang: 'csharp', text: cs.text, highlight: region ? cs.regions[region] : undefined })
+  const sources: CodeSource[] = parsed.map(({ lang, code }) => ({
+    lang,
+    text: code.text,
+    highlight: region ? code.regions[region] : undefined,
+  }))
 
   const Visualization = pattern.Visualization ?? GenericVisualization
 

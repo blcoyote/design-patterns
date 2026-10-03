@@ -1,6 +1,7 @@
 import type { PatternDefinition } from '@/types/pattern'
 import tsExample from './example.ts?raw'
 import csExample from './example.cs?raw'
+import pyExample from './example.py?raw'
 import { MementoVisualization } from './Visualization'
 
 export const pattern: PatternDefinition = {
@@ -70,7 +71,7 @@ export const pattern: PatternDefinition = {
       x: 620,
       y: 110,
       description:
-        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor can read it (a module-private WeakMap in TypeScript, a private nested class in C#), so even HistoryShelf has no way to peek inside.',
+        'A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor can read it (a module-private WeakMap in TypeScript, a private nested class in C#, a module-private WeakKeyDictionary in Python), so even HistoryShelf has no way to peek inside.',
     },
     {
       id: 'history',
@@ -129,7 +130,7 @@ export const pattern: PatternDefinition = {
       to: 'memento',
       type: 'calls',
       label: 'unseal()',
-      description: 'Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, or by casting to its private nested ConcreteMemento in C#), recovering the content it sealed away earlier.',
+      description: 'Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, by casting to its private nested ConcreteMemento in C#, or via the module-private WeakKeyDictionary in Python), recovering the content it sealed away earlier.',
       bend: 24,
       code: 'getState',
     },
@@ -246,6 +247,7 @@ export const pattern: PatternDefinition = {
   // Regions: `// [id]` … `// [/id]`. A participant highlights the region with its own id by default.
   code: tsExample,
   csharp: csExample,
+  python: pyExample,
 
   Visualization: MementoVisualization,
 }

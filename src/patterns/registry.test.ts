@@ -39,6 +39,22 @@ describe('pattern registry', () => {
     const csRegionIds = Object.keys(parseCode(p.csharp!).regions).sort()
     expect(csRegionIds).toEqual(tsRegionIds)
   })
+
+  const withPython = patterns.filter((p) => p.python)
+  it.each(withPython.map((p) => [p.slug, p] as const))('%s python code has no unclosed or stray markers', (_slug, p) => {
+    expect(findMarkerErrors(p.python!)).toEqual([])
+  })
+
+  it.each(withPython.map((p) => [p.slug, p] as const))('%s python uses # markers, not //', (_slug, p) => {
+    // a `// [id]` line in Python is a syntax error; it usually means a marker was copied over unconverted
+    expect(p.python!.split('\n').filter((line) => /^\s*\/\/ \[/.test(line))).toEqual([])
+  })
+
+  it.each(withPython.map((p) => [p.slug, p] as const))('%s python regions match the typescript regions', (_slug, p) => {
+    const tsRegionIds = Object.keys(parseCode(p.code).regions).sort()
+    const pyRegionIds = Object.keys(parseCode(p.python!).regions).sort()
+    expect(pyRegionIds).toEqual(tsRegionIds)
+  })
 })
 
 describe('findMarkerErrors', () => {
@@ -48,6 +64,8 @@ describe('findMarkerErrors', () => {
     expect(findMarkerErrors('// [a]\nx')).toEqual(['region "a" is never closed'])
     expect(findMarkerErrors('// [a]\n// [/a]\n// [a]\n// [/a]')).toEqual(['line 3: region "a" opened twice'])
     expect(findMarkerErrors('foo() // [a]')).toEqual(['line 1: marker must be on its own line'])
+    expect(findMarkerErrors('# [a]\nx\n# [/a]')).toEqual([])
+    expect(findMarkerErrors('foo()  # [a]')).toEqual(['line 1: marker must be on its own line'])
   })
 })
 
@@ -55,6 +73,12 @@ describe('parseCode', () => {
   it('strips markers and records nested regions', () => {
     const { text, regions } = parseCode('// [a]\nline1\n// [b]\nline2\n// [/b]\n// [/a]\nline3')
     expect(text).toBe('line1\nline2\nline3')
+    expect(regions).toEqual({ a: [1, 2], b: [2, 2] })
+  })
+
+  it('accepts Python # markers', () => {
+    const { text, regions } = parseCode('# [a]\nx = 1\n    # [b]\n    y = 2\n    # [/b]\n# [/a]')
+    expect(text).toBe('x = 1\n    y = 2')
     expect(regions).toEqual({ a: [1, 2], b: [2, 2] })
   })
 })

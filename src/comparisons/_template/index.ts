@@ -48,9 +48,10 @@ export const comparison: ComparisonDefinition = {
   scenario: {
     prompt: 'A concrete "which should I choose?" question for the reader.',
     choices: [
-      { id: 'pattern-a', label: 'Pattern A', verdict: 'best', explanation: 'Why this is the best fit.' },
-      { id: 'pattern-b', label: 'Pattern B', verdict: 'poor', explanation: 'Why this is a poor fit.' },
-      { id: 'no-pattern', label: 'No pattern', verdict: 'workable', explanation: 'Why this is workable but not ideal.' },
+      // `option` (a subject slug or 'none') preselects the ADR export when the reader picks this answer
+      { id: 'pattern-a', option: 'pattern-a', label: 'Pattern A', verdict: 'best', explanation: 'Why this is the best fit.' },
+      { id: 'pattern-b', option: 'pattern-b', label: 'Pattern B', verdict: 'poor', explanation: 'Why this is a poor fit.' },
+      { id: 'no-pattern', option: 'none', label: 'No pattern', verdict: 'workable', explanation: 'Why this is workable but not ideal.' },
     ],
   },
 }

@@ -25,16 +25,14 @@ export function ComparisonPage() {
 
   const subjects = comparison.subjects.map((ref) => resolveSubject(ref)).filter((s): s is ResolvedSubject => s !== undefined)
   const subjectBySlug = new Map(subjects.map((s) => [s.slug, s]))
-  const subjectSlugs = new Set(subjects.map((s) => s.slug))
   // Both PatternDefinition and ArchitectureDefinition add pros/cons to the shared ExplorableDefinition
   // (see src/types/{pattern,architecture}.ts) — ResolvedSubject only types `def` as the shared base.
   const adrSubjects: AdrSubject[] = subjects.map((s) => {
     const def = s.def as PatternDefinition | ArchitectureDefinition
     return { slug: s.slug, name: s.name, href: s.href, pros: def.pros, cons: def.cons }
   })
-  // The scenario's "best"/"workable"/"poor" choices aren't required to name a subject (e.g. a
-  // "plain function map" choice) — only preselect the ADR export when the pick genuinely is one.
-  const preselected = picked && subjectSlugs.has(picked) ? picked : undefined
+  // A quiz answer preselects the ADR export only when it declares which option it stands for.
+  const preselected = comparison.scenario.choices.find((c) => c.id === picked)?.option
 
   return (
     <article className="space-y-8">

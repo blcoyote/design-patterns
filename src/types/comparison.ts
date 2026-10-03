@@ -48,6 +48,14 @@ export interface ComparisonDefinition {
   overlap?: string
   scenario: {
     prompt: string
-    choices: { id: string; label: string; verdict: 'best' | 'workable' | 'poor'; explanation: string }[]
+    choices: {
+      id: string
+      label: string
+      verdict: 'best' | 'workable' | 'poor'
+      explanation: string
+      /** The option this answer stands for: a subject slug, or 'none' for "no pattern". Preselects
+       * the ADR export. Leave it out when the answer is not a single option (e.g. "both"). */
+      option?: string
+    }[]
   }
 }

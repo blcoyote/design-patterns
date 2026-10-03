@@ -117,6 +117,7 @@ export const comparison: ComparisonDefinition = {
     choices: [
       {
         id: 'strategy',
+        option: 'strategy',
         label: 'Strategy — one PaymentMethod interface, chosen by the client',
         verdict: 'best',
         explanation:
@@ -124,6 +125,7 @@ export const comparison: ComparisonDefinition = {
       },
       {
         id: 'function-map',
+        option: 'none',
         label: 'A plain function map — no pattern at all',
         verdict: 'workable',
         explanation:
@@ -131,6 +133,7 @@ export const comparison: ComparisonDefinition = {
       },
       {
         id: 'state',
+        option: 'state',
         label: 'State — treat the payment method as internal state',
         verdict: 'poor',
         explanation:

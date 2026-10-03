@@ -79,6 +79,9 @@ export function validateComparison(c: ComparisonDefinition, resolveSubject: Subj
     choiceIds.add(choice.id)
     if (!choice.explanation.trim()) errors.push(`scenario: choice "${choice.id}" is missing an explanation`)
     if (choice.verdict === 'best') bestCount++
+    if (choice.option !== undefined && choice.option !== 'none' && !subjectSlugs.has(choice.option)) {
+      errors.push(`scenario: choice "${choice.id}" names unknown option "${choice.option}"`)
+    }
   }
   if (bestCount !== 1) errors.push(`scenario: expected exactly one "best" choice, found ${bestCount}`)
 

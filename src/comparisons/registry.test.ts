@@ -90,4 +90,13 @@ describe('validateComparison', () => {
     const errors = validateComparison(bad, resolveSubject)
     expect(errors.some((e) => e.toLowerCase().includes('best'))).toBe(true)
   })
+
+  it('flags a choice naming an unknown option', () => {
+    const bad: ComparisonDefinition = {
+      ...base,
+      scenario: { ...base.scenario, choices: base.scenario.choices.map((choice, i) => (i === 0 ? { ...choice, option: 'nope' } : choice)) },
+    }
+    const errors = validateComparison(bad, resolveSubject)
+    expect(errors.some((e) => e.includes('"nope"'))).toBe(true)
+  })
 })

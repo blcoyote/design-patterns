@@ -17,7 +17,7 @@ function IconButton({ label, onClick, children }: { label: string; onClick: () =
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="grid size-9 place-items-center rounded-lg text-slate-300 ring-1 ring-slate-700 transition hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+      className="grid size-10 place-items-center sm:size-9 rounded-lg text-slate-300 ring-1 ring-slate-700 transition hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
     >
       {children}
     </button>
@@ -38,7 +38,7 @@ export function StepPlayer({ steps, player, color }: Props) {
           type="button"
           onClick={player.toggle}
           aria-label={player.playing ? 'Pause' : 'Play'}
-          className="flex h-9 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-slate-950 transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-white"
+          className="flex h-10 items-center gap-2 sm:h-9 rounded-lg px-4 text-sm font-semibold text-slate-950 transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-white"
           style={{ backgroundColor: color }}
         >
           {player.playing ? (
@@ -62,7 +62,7 @@ export function StepPlayer({ steps, player, color }: Props) {
               type="button"
               onClick={() => player.setSpeed(s)}
               aria-pressed={player.speed === s}
-              className={`rounded-md px-2 py-1 text-xs font-mono transition ${
+              className={`rounded-md px-2.5 py-1.5 text-xs font-mono sm:px-2 sm:py-1 transition ${
                 player.speed === s ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -84,7 +84,7 @@ export function StepPlayer({ steps, player, color }: Props) {
               }}
               aria-label={`Step ${i + 1}: ${s.title}`}
               aria-current={i === player.index ? 'step' : undefined}
-              className="group block w-full py-2"
+              className="group block w-full py-3"
             >
               <span className="relative block h-1.5 overflow-hidden rounded-full bg-slate-800 group-hover:bg-slate-700">
                 {i < player.index && <span className="absolute inset-0" style={{ backgroundColor: color, opacity: 0.5 }} />}

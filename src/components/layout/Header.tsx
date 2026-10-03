@@ -10,13 +10,13 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-[96rem] items-center gap-3 px-4 sm:px-8">
+      <div className="mx-auto flex h-14 max-w-[96rem] items-center gap-2 px-4 sm:gap-3 sm:px-8">
         <button
           type="button"
           onClick={onMenu}
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
-          className="rounded-md p-1.5 text-slate-300 hover:bg-slate-800 lg:hidden"
+          className="-ml-2 rounded-md p-2 text-slate-300 hover:bg-slate-800 lg:hidden"
         >
           <svg viewBox="0 0 24 24" className="size-6 fill-current"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" /></svg>
         </button>
@@ -26,9 +26,10 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
             Design Patterns <span className="font-normal text-slate-400">· interactive</span>
           </span>
         </Link>
-        <nav className="ml-2 flex items-center gap-1" aria-label="Areas">
+        <nav className="flex items-center gap-1 sm:ml-2" aria-label="Areas">
           <HeaderLink to="/" active={!inArchitectureArea}>
-            Design patterns
+            <span className="min-[400px]:hidden">Patterns</span>
+            <span className="hidden min-[400px]:inline">Design patterns</span>
           </HeaderLink>
           <HeaderLink to="/architecture" active={inArchitectureArea}>
             Architecture
@@ -47,7 +48,7 @@ function HeaderLink({ to, active, children }: { to: string; active: boolean; chi
     <Link
       to={to}
       aria-current={active ? 'page' : undefined}
-      className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+      className={`rounded-md px-2.5 py-2 text-sm font-medium whitespace-nowrap transition sm:px-3 sm:py-1.5 ${
         active ? 'bg-slate-800 text-white' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-100'
       }`}
     >

@@ -1,8 +1,8 @@
 import { parseCode } from '@/lib/codeRegions'
-import type { PatternDefinition } from '@/types/pattern'
+import type { ExplorableDefinition, PatternDefinition } from '@/types/pattern'
 
-/** Returns a list of authoring mistakes in a pattern definition (empty if valid). */
-export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): string[] {
+/** Returns a list of authoring mistakes in the diagram/steps/code shared by patterns and architectures. */
+export function validateDiagram(p: ExplorableDefinition): string[] {
   const errors: string[] = []
   const { regions } = parseCode(p.code)
   const csRegions = p.csharp ? parseCode(p.csharp).regions : null
@@ -39,6 +39,12 @@ export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): 
     }
     checkRegion(`step ${i + 1}`, step.code)
   })
+  return errors
+}
+
+/** Returns a list of authoring mistakes in a pattern definition (empty if valid). */
+export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): string[] {
+  const errors = validateDiagram(p)
   if (allSlugs.length) {
     for (const slug of p.related) {
       if (!allSlugs.includes(slug)) errors.push(`unknown related pattern "${slug}"`)

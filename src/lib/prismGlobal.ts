@@ -15,6 +15,7 @@ import { Prism } from 'prism-react-renderer'
  * ordering, but importing this module first in another file does, because
  * module evaluation follows import order depth-first.
  */
+// @pattern singleton: there is exactly one shared Prism instance, so the C# grammar registers on the instance that renders
 ;(globalThis as unknown as { Prism: typeof Prism }).Prism = Prism
 
 export { Prism }

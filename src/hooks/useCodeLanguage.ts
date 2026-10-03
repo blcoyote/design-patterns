@@ -18,6 +18,7 @@ function readStored(): CodeLanguage {
 let cached = readStored()
 const listeners = new Set<() => void>()
 
+// @pattern observer: every CodeBlock subscribes to the shared language preference, so picking C# once switches all of them
 function emit() {
   for (const listener of listeners) listener()
 }
@@ -32,6 +33,7 @@ function subscribe(listener: () => void) {
       listener()
     }
   }
+  // @pattern pub-sub: the browser's storage event carries a language change to other tabs, and the tabs don't know about each other
   window.addEventListener('storage', onStorage)
   return () => {
     listeners.delete(listener)

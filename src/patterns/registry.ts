@@ -2,11 +2,13 @@ import type { Category, PatternDefinition } from '@/types/pattern'
 import { categoryOrder } from './categories'
 import { validatePattern } from './validate'
 
+// @pattern plugin: adding a folder adds a page with no registration code — the virtual module behind "Used in this site" is a second example
 /**
- * Every folder in src/patterns with an index.ts exporting `pattern` is picked up
- * automatically. Folders starting with "_" (like _template) are ignored.
+ * Every folder in src/patterns/<category>/<slug> with an index.ts exporting `pattern` is
+ * picked up automatically. The template at src/patterns/_template is naturally excluded
+ * since it isn't nested one level deeper, but it's also excluded explicitly for clarity.
  */
-const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./*/index.ts', '!./_*/index.ts'], {
+const modules = import.meta.glob<{ pattern: PatternDefinition }>(['./*/*/index.ts', '!./_*/**'], {
   eager: true,
 })
 
@@ -21,6 +23,7 @@ export const patterns: PatternDefinition[] = Object.values(modules)
 
 const bySlug = new Map(patterns.map((p) => [p.slug, p]))
 
+// @pattern repository: getPattern, byCategory and neighbours give the UI a collection-like interface over the definitions, so it never sees how they are loaded
 export function getPattern(slug: string | undefined): PatternDefinition | undefined {
   return slug ? bySlug.get(slug) : undefined
 }
@@ -37,6 +40,7 @@ export function neighbours(slug: string) {
   return { prev: patterns[i - 1], next: patterns[i + 1] }
 }
 
+// @pattern functional-core: validatePattern and the pattern definitions are pure and immutable; this DEV-only block is the imperative shell around them
 if (import.meta.env.DEV) {
   const slugs = patterns.map((p) => p.slug)
   for (const p of patterns) {

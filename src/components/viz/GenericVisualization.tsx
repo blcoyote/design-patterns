@@ -1,14 +1,13 @@
-import { categories } from '@/patterns/categories'
 import type { VisualizationProps } from '@/types/pattern'
 import { Diagram } from './Diagram'
 
 /** Default visualisation: renders the pattern's participants/relations/steps as a diagram. */
-export function GenericVisualization({ pattern, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
+export function GenericVisualization({ pattern, color, step, stepIndex, selectedId, onSelect }: VisualizationProps) {
   return (
     <Diagram
       participants={pattern.participants}
       relations={pattern.relations}
-      color={categories[pattern.category].color}
+      color={color}
       viewBox={pattern.viewBox}
       highlight={step?.highlight}
       packets={step?.packets}

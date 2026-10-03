@@ -23,6 +23,11 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
-  "exclude": ["src/patterns/*/example.ts"]
+  "include": ["src", "vite-plugins/types.ts"],
+  "exclude": [
+    "src/patterns/_template/example.ts",
+    "src/patterns/*/*/example.ts",
+    "src/architectures/_template/example.ts",
+    "src/architectures/*/*/example.ts"
+  ]
 }

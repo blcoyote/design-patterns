@@ -2,7 +2,7 @@
 
 ## Purpose
 
-An interactive, animated teaching site for the 23 Gang of Four patterns plus 7 architectural patterns (React 19 + TypeScript + Tailwind v4, Vite, hash routing, static deploy to GitHub Pages).
+An interactive, animated teaching site for the 23 Gang of Four patterns plus 7 enterprise patterns, and a separate Architecture area with 6 architectural patterns (DDD, Hexagonal, CQRS, …) cross-linked to them (React 19 + TypeScript + Tailwind v4, Vite, hash routing, static deploy to GitHub Pages).
 
 The product is **correct teaching material**. A diagram, a step note or a code comment that disagrees with the code is a bug, just as much as a crash. Every pattern must be:
 
@@ -16,10 +16,12 @@ Follow these every time. If a task seems to need a different route, stop and ask
 
 ### 1. Patterns are data, not code paths
 
-- One folder per pattern: `src/patterns/<slug>/` with `index.ts` (pure `PatternDefinition` data), `example.ts`, `example.cs`, `example.py`, and optionally `Visualization.tsx`.
+- One folder per pattern: `src/patterns/<category>/<slug>/` with `index.ts` (pure `PatternDefinition` data), `example.ts`, `example.cs`, `example.py`, and optionally `Visualization.tsx`.
 - The registry auto-discovers folders. Never hand-register a pattern, and never special-case a slug in shared components.
 - New patterns start from `src/patterns/_template/` (see README → "Adding a pattern").
 - Shared behaviour goes in `src/components`, `src/hooks` or `src/lib`, never inside a pattern folder.
+- Architectures follow the same rules in `src/architectures/<paradigm>/<slug>/` (`ArchitectureDefinition`, template in `src/architectures/_template/`). Only architectures declare cross-references (`commonlyUsedWith`); design-pattern → architecture links are derived in `src/lib/crossRefs.ts`, and architecture ↔ architecture links must be declared on both sides (`npm test` enforces this).
+- When this site's own code uses a pattern it teaches, tag the usage with `// @pattern <slug>: <explanation>` directly above the code (see "Used in this site" in the README) instead of listing files anywhere.
 
 ### 2. Three languages, one set of regions
 
@@ -52,7 +54,7 @@ Run all of these. Report the actual results, including failures:
 npm test                     # registry validation, marker/region parity
 npx tsc -b                   # type-check
 npm run lint
-for f in src/patterns/*/example.py; do PYTHONDONTWRITEBYTECODE=1 python3 -W error "$f" >/dev/null || echo "FAIL $f"; done
+for f in src/patterns/*/*/example.py src/architectures/*/*/example.py; do PYTHONDONTWRITEBYTECODE=1 python3 -W error "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
 - Compile and run any C# file you touched (e.g. copy it into a scratch `dotnet new console` project as `Program.cs`). Check the output matches the comments.

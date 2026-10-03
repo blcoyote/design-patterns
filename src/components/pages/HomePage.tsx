@@ -1,13 +1,19 @@
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { UsedBadge } from '@/components/content/UsedInThisSite'
 import { categories, categoryOrder } from '@/patterns/categories'
 import { patterns } from '@/patterns/registry'
+import { usedSlugs } from '@/lib/selfUsage'
 import type { Category } from '@/types/pattern'
 
+const USED_IN_SITE = 'used-in-site'
+
 export function HomePage() {
-  const [filter, setFilter] = useState<Category | 'all'>('all')
-  const shown = filter === 'all' ? patterns : patterns.filter((p) => p.category === filter)
+  const [filter, setFilter] = useState<Category | 'all' | typeof USED_IN_SITE>('all')
+  const used = usedSlugs()
+  const shown =
+    filter === 'all' ? patterns : filter === USED_IN_SITE ? patterns.filter((p) => used.has(p.slug)) : patterns.filter((p) => p.category === filter)
 
   return (
     <div className="space-y-12">
@@ -40,6 +46,22 @@ export function HomePage() {
         <HeroGraphic />
       </section>
 
+      <Link
+        to="/architecture"
+        className="group flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-indigo-500/10 to-lime-500/10 p-5 ring-1 ring-slate-800 transition hover:ring-slate-600"
+      >
+        <div>
+          <p className="text-xs font-mono uppercase tracking-wider text-slate-500">// same explorer, bigger boxes</p>
+          <p className="mt-1 text-lg font-semibold text-white">
+            Zoom out: <span className="text-slate-300">architectural patterns</span>
+          </p>
+          <p className="mt-1 text-sm text-slate-400">
+            Layered, Hexagonal, DDD, CQRS, Event Sourcing and Functional Core — see which of the patterns above each one is built from.
+          </p>
+        </div>
+        <span className="shrink-0 text-2xl text-slate-500 transition group-hover:translate-x-1 group-hover:text-white">→</span>
+      </Link>
+
       <section id="catalogue" className="scroll-mt-20">
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter by category">
           <FilterChip active={filter === 'all'} onClick={() => setFilter('all')}>
@@ -52,8 +74,17 @@ export function HomePage() {
               <span className="text-slate-500">{patterns.filter((p) => p.category === c).length}</span>
             </FilterChip>
           ))}
+          {used.size > 0 && (
+            <FilterChip active={filter === USED_IN_SITE} onClick={() => setFilter(USED_IN_SITE)}>
+              <UsedBadge />
+              Used in this site <span className="text-slate-500">{patterns.filter((p) => used.has(p.slug)).length}</span>
+            </FilterChip>
+          )}
         </div>
-        {filter !== 'all' && <p className="mt-3 text-sm text-slate-400">{categories[filter].description}</p>}
+        {filter !== 'all' && filter !== USED_IN_SITE && <p className="mt-3 text-sm text-slate-400">{categories[filter].description}</p>}
+        {filter === USED_IN_SITE && (
+          <p className="mt-3 text-sm text-slate-400">Patterns this site's own code uses on itself — see each page's "Used in this site" box.</p>
+        )}
 
         <motion.ul layout className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {shown.map((p, i) => {
@@ -75,7 +106,10 @@ export function HomePage() {
                     style={{ backgroundColor: cat.color }}
                     aria-hidden
                   />
-                  <span className={`text-xs font-medium ${cat.text}`}>{cat.label}</span>
+                  <span className="flex items-center gap-2">
+                    <span className={`text-xs font-medium ${cat.text}`}>{cat.label}</span>
+                    {used.has(p.slug) && <UsedBadge />}
+                  </span>
                   <span className="mt-1 text-xl font-semibold text-white">{p.name}</span>
                   <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">{p.summary}</span>
                   <span className="mt-4 flex items-center gap-3 font-mono text-xs text-slate-500">

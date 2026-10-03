@@ -1,16 +1,20 @@
 # design-patterns
 
-An interactive, animated guide to all 23 Gang of Four design patterns plus 7 common architectural patterns, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+An interactive, animated guide to all 23 Gang of Four design patterns plus 7 common enterprise patterns, and a second
+area covering 6 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
-Every pattern has:
+Every pattern and architecture has:
 
-- an **animated diagram** — press play and watch messages travel between objects, step by step
+- an **animated diagram** — press play and watch messages travel between objects (or layers, or services), step by step
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
 - TypeScript, C# and Python examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
-| Creational | Structural | Behavioral | Architectural |
+| Creational | Structural | Behavioral | Enterprise |
 | --- | --- | --- | --- |
 | Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool |
+
+Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, Domain-Driven Design, CQRS, Event Sourcing and
+Functional Core / Imperative Shell — see [Architecture](#architecture) below.
 
 ## Getting started
 
@@ -35,23 +39,35 @@ One-time setup: **Settings → Pages → Build and deployment → Source: GitHub
 
 ```
 src/
-  types/pattern.ts           # PatternDefinition – the shape of a pattern
+  types/pattern.ts           # ExplorableDefinition (shared) + PatternDefinition
+  types/architecture.ts      # ArchitectureDefinition (extends ExplorableDefinition)
   patterns/
-    registry.ts              # auto-discovers every src/patterns/*/index.ts
+    registry.ts              # auto-discovers every src/patterns/*/*/index.ts
     categories.ts            # category labels + colours
-    validate.ts              # consistency checks (used in dev + tests)
-    <slug>/index.ts          # one folder per pattern (pure data)
-    <slug>/Visualization.tsx # optional custom animated scene
+    validate.ts              # validateDiagram (shared) + validatePattern
+    <category>/<slug>/index.ts          # one folder per pattern, grouped by category (pure data)
+    <category>/<slug>/example.ts/.cs/.py # code samples, imported with ?raw
+    <category>/<slug>/Visualization.tsx # optional custom animated scene
     _template/               # copy me to add a pattern (ignored by the registry)
+  architectures/
+    registry.ts              # auto-discovers every src/architectures/*/*/index.ts
+    paradigms.ts             # paradigm labels + colours (oo / functional / both)
+    validate.ts              # validateDiagram (shared) + validateArchitecture
+    <paradigm>/<slug>/index.ts          # one folder per architecture, grouped by paradigm (pure data)
+    <paradigm>/<slug>/example.ts/.cs/.py # code samples, same convention as patterns
+    <paradigm>/<slug>/Visualization.tsx # optional custom animated scene
+    _template/               # copy me to add an architecture (ignored by the registry)
   components/
     viz/                     # Diagram, DiagramNode, DiagramEdge, Packet, StepPlayer, DetailPanel, PatternExplorer
+    content/CrossReferenceBox.tsx # "commonly used with" links between the two areas
     pages/ layout/ content/
   lib/codeRegions.ts         # `// [id]` … `// [/id]` code region markers
+  lib/crossRefs.ts           # the only module importing both registries — see "Architecture" below
 ```
 
 ## Adding a pattern
 
-1. Copy `src/patterns/_template/` to `src/patterns/<slug>/` and set `slug` to the folder name. Pick a `category` (`creational`, `structural`, `behavioral` or `architectural`); new categories go in `Category` (`src/types/pattern.ts`) and `src/patterns/categories.ts`.
+1. Copy `src/patterns/_template/` to `src/patterns/<category>/<slug>/` and set `slug` to the folder name. Pick a `category` (`creational`, `structural`, `behavioral` or `enterprise`) that matches the folder it lives in; new categories go in `Category` (`src/types/pattern.ts`) and `src/patterns/categories.ts`.
 2. Fill in the text fields, the `participants` (boxes) and `relations` (arrows). Coordinates are box centres in an 800 × 460 viewBox.
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
@@ -67,4 +83,69 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 ### Custom visualisations
 
-The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `step`, `stepIndex`, `selectedId`, `onSelect`). Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite` or `circuit-breaker` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+
+## Architecture
+
+A second area, **Architecture** (`/architecture`), explains *architectural* patterns — whole-system shapes like Layered or
+CQRS — the same way the patterns above explain class-level ones: an animated, clickable diagram, a step player, linked
+TypeScript/C#/Python code, and the usual problem/solution/pros/cons sections, plus a glossary of key concepts and (for a
+few) named variants.
+
+The six planned architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
+
+| Object-oriented | Functional | OO + Functional |
+| --- | --- | --- |
+| Layered (N-tier), Hexagonal (Ports & Adapters), Domain-Driven Design | Event Sourcing, Functional Core / Imperative Shell | CQRS |
+
+### Cross-reference model
+
+Architectures and design patterns link to each other through a **"Commonly used with"** box (`CrossReferenceBox`):
+
+- **Architecture → design pattern** is declared by the architecture, in `commonlyUsedWith.designPatterns`, each with a
+  `why` sentence. Every slug used in a `participant.patterns` array must also appear here (checked by `validateArchitecture`).
+- **Design pattern → architecture** is never declared — it is *derived*: `lib/crossRefs.ts` scans every architecture's
+  `commonlyUsedWith.designPatterns` for a given pattern slug and reuses that `why` text. This is why `patterns/registry.ts`
+  never has to import anything from `architectures/`.
+- **Architecture ↔ architecture** links must be declared on *both* sides, each with its own `why` — `architectures/registry.test.ts`
+  has a symmetry test that fails the build if `A` lists `B` but `B` doesn't list `A` back.
+
+`src/lib/crossRefs.ts` is the only module that imports both `patterns/registry` and `architectures/registry`; this keeps
+the dependency one-directional everywhere else and avoids a circular import between the two registries.
+
+### Adding an architecture
+
+1. Copy `src/architectures/_template/` to `src/architectures/<paradigm>/<slug>/` and set `slug` to the folder name. Pick a
+   `paradigm` (`oo`, `functional` or `both`) that matches the folder it lives in — the colours live in `src/architectures/paradigms.ts`.
+2. Fill in the text fields, `concepts` (a short glossary), optional `variants`, and the diagram (`participants`/`relations`),
+   exactly like a pattern. Use `participant.patterns` to mark which design-pattern slugs a box is built with.
+3. Fill in `commonlyUsedWith.designPatterns` (with a `why` for each) and `commonlyUsedWith.architectures` (declared
+   symmetrically with any sibling architecture you reference).
+4. Write the animated `steps`, and the TypeScript/C#/Python examples in `example.ts`/`.cs`/`.py` exactly as for a pattern —
+   all three are required so the persisted language tab works on every architecture page.
+5. Run `npm test` — besides the usual diagram/region checks, it also verifies the cross-reference symmetry rule above.
+
+That's it: the sidebar (grouped by paradigm under `/architecture*`), the architecture index and the route
+(`#/architecture/<slug>`) pick it up automatically.
+
+## Used in this site
+
+Many of the patterns above aren't just taught by this site — the site's own code uses them. A pattern or architecture
+page shows a **"Used in this site"** box when its own code is tagged.
+
+To tag a usage, add a comment directly above the code it describes, on its own line:
+
+```ts
+// @pattern observer: every CodeBlock subscribes to the shared language preference
+```
+
+- The grammar is `// @pattern <slug>: <explanation>`. `<slug>` is a design-pattern or architecture slug.
+- The snippet shown in the box is the tag's following lines, up to the first blank line, capped at about 15 lines.
+- Only `src/{components,hooks,lib}/**` and the two `registry.ts` files are scanned — **never** tag inside
+  `src/patterns/**` or `src/architectures/**`, or every teaching example would tag itself.
+
+A small Vite plugin (`vite-plugins/patternUsages.ts`) scans those files at build time and on dev-server start,
+providing the result as the virtual module `virtual:pattern-usages` — only the extracted `{ slug, file, line,
+explanation, snippet }` data, never full file contents. `src/lib/selfUsage.ts` reads that module and exposes
+`usagesOf(slug)` and `usedSlugs()`, which `PatternPage`, `ArchitecturePage`, the home grid, the architecture index and
+the sidebar all use. GitHub links point at `main`, since that's what's deployed.

@@ -21,7 +21,6 @@ export interface DiagramProps {
   /** Changes whenever packets should restart (e.g. the step index). */
   animationKey?: string | number;
   packetSpeed?: number;
-  // @pattern template-method: underlay and overlay are hooks in a fixed rendering skeleton, using composition instead of inheritance
   /** Extra SVG drawn beneath the nodes. */
   underlay?: ReactNode;
   /** Extra SVG drawn above everything. */

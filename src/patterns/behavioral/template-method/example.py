@@ -74,8 +74,8 @@ class PdfReportGenerator(ReportGenerator):
 # Usage
 # [usage]
 csv: ReportGenerator = CsvReportGenerator()
-csv.generate()  # "id,name,total\n1,Widget,42.00\n2,Gadget,17.50"
+print(csv.generate())  # "id,name,total\n1,Widget,42.00\n2,Gadget,17.50"
 
 pdf: ReportGenerator = PdfReportGenerator()
-pdf.generate()  # "%PDF-1.4\nInvoice #1042\nTotal due: $59.50"
+print(pdf.generate())  # "%PDF-1.4\nInvoice #1042\nTotal due: $59.50"
 # [/usage]

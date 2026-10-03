@@ -8,14 +8,14 @@ var doc = new Doc("Quarterly Report", "Revenue is up.");
 
 // The host starts with an empty registry, and the loader populates it from the manifest.
 var registry = new PluginRegistry();
-PluginLoader.Load(registry, Manifest.Entries);
+PluginLoader.Load(registry, Manifest.Modules);
 var host = new Host(registry);
 Console.WriteLine($"registered: {string.Join(", ", registry.RegisteredIds())}");
 
 Console.WriteLine(host.Export("html", doc));
 
 // A new plugin is added to the manifest — Host and PluginRegistry are untouched.
-var extendedManifest = Manifest.Entries.Append(new ManifestEntry("json", "json-exporter")).ToList();
+var extendedManifest = Manifest.Modules.Append("json-exporter").ToList();
 var registry2 = new PluginRegistry();
 PluginLoader.Load(registry2, extendedManifest);
 var host2 = new Host(registry2);
@@ -72,19 +72,13 @@ class JsonExporter : IExporter
 }
 
 // [manifest]
-// A plain list of plugin ids and the factory module each one maps to. In a
-// real build, this list itself would usually come from scanning a folder —
-// see the comment on `Factories` below — but the manifest *shape* is the
-// same either way: plugin id → the name of the thing that constructs it.
-record ManifestEntry(string Id, string Module);
-
+// A plain list of the plugin modules to load. In a real build, this list
+// itself would usually come from scanning a folder — see the comment on
+// `Factories` below — but the idea is the same either way: the manifest names
+// *what* to load, and each plugin reports its own id once it is constructed.
 static class Manifest
 {
-    public static readonly IReadOnlyList<ManifestEntry> Entries = new List<ManifestEntry>
-    {
-        new("markdown", "markdown-exporter"),
-        new("html", "html-exporter"),
-    };
+    public static readonly IReadOnlyList<string> Modules = ["markdown-exporter", "html-exporter"];
 }
 // [/manifest]
 
@@ -110,7 +104,7 @@ class PluginRegistry
 
 // [pluginLoader]
 // Real discovery mechanisms differ per platform — Vite's `import.meta.glob`
-// (this site uses exactly that, see the registry below), .NET assembly
+// (this site uses exactly that in src/patterns/registry.ts), .NET assembly
 // scanning or MEF, Python's `importlib.metadata` entry points. All of them
 // boil down to the same two steps this loader performs explicitly: read a
 // manifest, then look each entry up in a map of known factories.
@@ -123,11 +117,16 @@ static class PluginLoader
         ["json-exporter"] = () => new JsonExporter(),
     };
 
-    public static void Load(PluginRegistry registry, IEnumerable<ManifestEntry> entries)
+    public static void Load(PluginRegistry registry, IEnumerable<string> moduleNames)
     {
-        foreach (var entry in entries)
+        foreach (var moduleName in moduleNames)
         {
-            registry.Register(Factories[entry.Module]());
+            if (!Factories.TryGetValue(moduleName, out var factory))
+            {
+                throw new InvalidOperationException($"no factory for plugin module \"{moduleName}\"");
+            }
+            // Registered under the id the plugin itself reports.
+            registry.Register(factory());
         }
     }
 }

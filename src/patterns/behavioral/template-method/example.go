@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -116,10 +117,10 @@ func (PdfReportGenerator) ExportData(rows []string) string {
 // [usage]
 func main() {
 	csv := NewCsvReportGenerator()
-	csv.Generate() // "id,name,total\n1,Widget,42.00\n2,Gadget,17.50"
+	fmt.Println(csv.Generate()) // "id,name,total\n1,Widget,42.00\n2,Gadget,17.50"
 
 	pdf := NewPdfReportGenerator()
-	pdf.Generate() // "%PDF-1.4\nInvoice #1042\nTotal due: $59.50"
+	fmt.Println(pdf.Generate()) // "%PDF-1.4\nInvoice #1042\nTotal due: $59.50"
 }
 
 // [/usage]

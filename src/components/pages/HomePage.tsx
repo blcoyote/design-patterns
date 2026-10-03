@@ -41,7 +41,7 @@ export function HomePage() {
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
             Each pattern comes with an interactive diagram. Press play to watch the messages flow,
             step through the scenario, and click any class or arrow to see its role — and the exact
-            lines of TypeScript that implement it.
+            lines of code (TypeScript, C#, Python or Go) that implement it.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link

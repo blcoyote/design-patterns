@@ -41,7 +41,7 @@ export function useStepPlayer(
     return () => window.clearTimeout(id);
   }, [playing, index, count, speed, durationOf]);
 
-  // @pattern iterator: a cursor over the steps (next, prev, goTo) keeps the steps themselves plain data
+  // @pattern iterator: Iterator-like — a cursor (index + next, prev, goTo) over the steps array keeps the steps plain data, though callers still index the array themselves
   const next = useCallback(() => setIndex((i) => (i + 1) % count), [count]);
   const prev = useCallback(() => setIndex((i) => (i - 1 + count) % count), [count]);
   const goTo = useCallback((i: number) => setIndex(Math.max(0, Math.min(count - 1, i))), [count]);

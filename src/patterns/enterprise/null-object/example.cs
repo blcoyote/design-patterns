@@ -16,6 +16,7 @@ var verbose = new ReportGenerator(new ConsoleLogger());
 verbose.Generate(new ReportData(new List<object> { 1, 2, 3 })); // the exact same Generate() — now it actually logs
 // [/client]
 
+// Shared types used by both versions below.
 class ReportData(List<object> rows)
 {
     public List<object> Rows { get; } = rows;
@@ -33,7 +34,6 @@ static class ReportBuilder
 }
 
 // [before]
-// Shared types used by both versions below.
 static class BeforeDemo
 {
     public static void Run()
@@ -49,9 +49,9 @@ static class BeforeDemo
         {
             new ReportGeneratorBefore(null).Generate(dataWithWarnings);
         }
-        catch (NullReferenceException ex)
+        catch (NullReferenceException)
         {
-            Console.WriteLine($"crashed: {ex.Message}");
+            Console.WriteLine("crashed: no logger");
         }
     }
 }
@@ -71,8 +71,9 @@ class ReportGeneratorBefore(ILogger? logger)
         {
             // forgot the null check every other call site remembered. With nullable
             // reference types this is only a compiler warning (CS8602), not an error,
-            // so it is easy to miss — and it still throws a NullReferenceException at
-            // runtime, exactly the clutter Null Object removes.
+            // so it is easy to miss, and it still throws a NullReferenceException at
+            // runtime. The only fix is a guard at every call site, exactly the clutter
+            // Null Object removes.
             logger.Warn($"report has {result.Warnings.Count} warnings");
         }
         // [/forgotten]

@@ -127,11 +127,17 @@ store.subscribe((streamId, event) => projection.handle(streamId, event));
 
 const streamId = "account-42";
 
+// [handle]
+// The command handler is the imperative shell around the pure core: load the stream,
+// fold it, decide, then append at the version that was loaded. If another writer
+// appended in between, the store sees a different length and rejects the append.
 function handle(command: Command): void {
-  const state = fold(store.load(streamId));
+  const history = store.load(streamId);
+  const state = fold(history);
   const events = decide(command, state);
-  store.append(streamId, store.load(streamId).length, events);
+  store.append(streamId, history.length, events);
 }
+// [/handle]
 
 handle({ type: "OpenAccount", owner: "Ada" });
 handle({ type: "Deposit", amount: 100 });

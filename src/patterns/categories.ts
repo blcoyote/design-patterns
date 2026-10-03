@@ -44,7 +44,7 @@ export const categories: Record<Category, CategoryMeta> = {
     id: "enterprise",
     label: "Enterprise",
     description:
-      "Patterns from enterprise application architecture for structuring services, data access and resilience.",
+      "Patterns beyond the GoF catalogue, drawn from enterprise and cloud architecture literature (Fowler, Nygard, Hohpe & Woolf, …): data access, resilience, wiring, messaging and resource reuse.",
     color: "#fbbf24",
     badge: "bg-amber-400/10 text-amber-300 ring-amber-400/30",
     dot: "bg-amber-400",

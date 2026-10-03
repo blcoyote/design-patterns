@@ -51,7 +51,7 @@ class PriceChart implements Observer {
 class PriceAlert implements Observer {
   constructor(private limit: number) {}
   update(price: number) {
-    if (price > this.limit) console.warn(`price above ${this.limit}!`);
+    if (price > this.limit) console.log(`warning: price above ${this.limit}!`);
   }
 }
 // [/alert]

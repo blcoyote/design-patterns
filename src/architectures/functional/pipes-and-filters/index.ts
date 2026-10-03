@@ -17,7 +17,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     "A report job reads order lines, checks them, calculates totals and discounts, then formats the output. When one function does all of this across several passes, adding a rule means changing and retesting the whole job. It also cannot print anything until it has read every line.",
   solution:
-    "Break the job into small filters: parse, validate, enrich, and format. Each filter reads a stream and produces a stream without knowing about its neighbors. A `pipe()` helper connects the filters; a whole pipeline can be used like one filter inside another. Because the filters are lazy generators, each record flows through all stages before the next one starts. The pipeline can produce its first result before it has read all the input. Change the order by editing the `pipe()` call, not the filters themselves.",
+    "Break the job into small filters: parse, validate, enrich, and format. Each filter reads a stream and produces a stream without knowing about its neighbors. A `pipe()` helper connects the filters; a whole pipeline can be used like one filter inside another. Because the filters are lazy generators, each record flows through all stages before the next one starts. The pipeline can produce its first result before it has read all the input. Change the order by editing the `pipe()` call, not the filters themselves. Pipes and Filters itself is paradigm-neutral (Unix pipes connect OS processes, and the classic POSA description is object-oriented); this page shows it in its functional form, with each filter a pure function over a lazy stream.",
   analogy:
     "A row of inline water filters under a sink: one strips sediment, the next removes chlorine, the last adds a mineral boost — each one just a cylinder with water going in one end and different water coming out the other. You can add a filter mid-chain, skip one, or reorder two of them without taking anything else apart, and water flows continuously through all of them rather than being filtered one full tankful at a time.",
   whenToUse: [
@@ -42,7 +42,7 @@ export const architecture: ArchitectureDefinition = {
     "Unix shell pipelines (`cat orders.txt | ./parse | ./validate | ./format`) are the original pipes-and-filters architecture, with OS pipes doing the buffering",
     "Kafka Streams, Akka Streams and Reactive Extensions (Rx) implement the same idea for distributed or push-based streaming data",
     "Compiler toolchains are a classic pipes-and-filters design: lexer → parser → type checker → optimizer → code generator",
-    "Image- and audio-processing toolkits (ImageMagick's `-filter` chains, GStreamer pipelines) connect independent processing stages the same way",
+    "Media-processing toolkits (FFmpeg filter graphs such as `-vf scale,crop`, GStreamer pipelines) connect independent processing stages the same way",
   ],
   concepts: [
     {
@@ -63,12 +63,12 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Lazy stream",
       description:
-        "A sequence (generator / IEnumerable / iterator / Go iter.Seq) that computes each element on demand rather than all at once, which is what lets a pipeline process one record at a time.",
+        "A sequence (generator / IEnumerable / iterator / Go iter.Seq) that computes each element on demand rather than all at once, which is what lets a pipeline process one record at a time. Go's iter.Seq gets there by pushing each element to a yield callback rather than being asked for next().",
     },
     {
       term: "Pull-based evaluation",
       description:
-        "The consumer at the end of the pipeline drives the whole thing by asking for the next element; that request propagates backwards through every stage before the first element appears. Push-based streaming works the other way: the source decides when to emit.",
+        "The consumer at the end of the pipeline drives the whole thing by asking for the next element; that request propagates backwards through every stage before the first element appears (in Go, the consumer's range loop starts the chain and each stage yields one element at a time, giving the same order). Push-based streaming works the other way: the source decides when to emit.",
     },
     {
       term: "Source / sink",
@@ -153,7 +153,7 @@ export const architecture: ArchitectureDefinition = {
       y: 110,
       width: 150,
       description:
-        "Pure generator that splits each raw line on commas into a Candidate of up to three fields. It never rejects anything itself — it only restructures text.",
+        "Pure generator that splits each raw line on commas into a Candidate holding however many fields the line had. It never rejects anything itself — it only restructures text.",
       patterns: ["iterator"],
     },
     {
@@ -310,14 +310,14 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "parse splits each raw line into fields",
       description:
-        "parseLines turns each of the 4 raw strings into a Candidate of up to three comma-separated fields. It never judges whether those fields are valid — it only restructures text.",
+        "parseLines turns each of the 4 raw strings into a Candidate holding however many comma-separated fields the line had. It never judges whether those fields are valid — it only restructures text.",
       highlight: ["source", "toParse", "parse"],
       packets: [{ relation: "toParse", label: "raw line" }],
       notes: { parse: "4 candidates" },
       code: "parse",
     },
     {
-      title: "validate drops and reports the one bad line",
+      title: "validate tags the one bad line as rejected",
       description:
         '"bad-line" has no commas, so validateLines tags it rejected with a reason — and still lets it flow downstream, lazily, instead of throwing it away outright. The other 3 candidates pass through as valid lines with parsed numbers.',
       highlight: ["parse", "toValidate", "validate"],

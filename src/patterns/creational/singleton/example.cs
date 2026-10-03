@@ -35,6 +35,7 @@ class AppConfig
     // [getInstance]
     public static AppConfig GetInstance()
     {
+        // Not thread-safe: two threads can both see null and create two instances (see the cons).
         return _instance ??= new AppConfig();
     }
     // [/getInstance]

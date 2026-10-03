@@ -146,7 +146,7 @@ export function EventSourcingVisualization({
                       textAnchor="middle"
                       className="fill-slate-500 text-[9px] font-mono select-none"
                     >
-                      v{i}
+                      v{i + 1}
                     </text>
                   </motion.g>
                 );
@@ -263,7 +263,7 @@ export function EventSourcingVisualization({
                   className="text-[10px] font-bold font-mono select-none"
                   fill={color}
                 >
-                  snapshot @ v{events.length - 1}
+                  snapshot @ v{events.length}
                 </text>
               </motion.g>
             )}

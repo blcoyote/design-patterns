@@ -80,8 +80,8 @@ function getUserTheme(): "light" | "dark" {
 const theme: "light" | "dark" = getUserTheme();
 const factory: UIFactory = theme === "dark" ? new DarkFactory() : new LightFactory();
 
-renderDialog(factory); // ["button [dark]", "checkbox [dark]"]
+console.log(renderDialog(factory).join(", ")); // "button [dark], checkbox [dark]"
 
 // Switch the whole family just by swapping the factory:
-renderDialog(new LightFactory()); // ["button [light]", "checkbox [light]"]
+console.log(renderDialog(new LightFactory()).join(", ")); // "button [light], checkbox [light]"
 // [/usage]

@@ -152,7 +152,7 @@ export const comparison: ComparisonDefinition = {
     "These patterns can be combined. A Facade may use Adapters if some subsystem interfaces do not match; the HomeTheaterFacade example does not need them because its objects already work together. Adapter and Decorator both wrap an object and forward calls, but their interfaces differ: an Adapter changes the interface, while a Decorator keeps it and adds behavior.",
   scenario: {
     prompt:
-      "A codebase needs to call a third-party shipping library whose API is a single confusingly-named method, and the team also wants to log and retry every call to it. What fits best?",
+      "A codebase needs to call a third-party shipping library whose API is a single confusingly-named method that does not match the ShippingProvider interface the rest of the code uses. What fits best?",
     choices: [
       {
         id: "adapter",
@@ -168,7 +168,7 @@ export const comparison: ComparisonDefinition = {
         label: "Decorator — add a logging-and-retry layer around the adapter",
         verdict: "workable",
         explanation:
-          "First, the Adapter makes the library match ShippingProvider. Then a Decorator can wrap it to add logging and retries without changing the adapter or client. The Adapter solves the mismatch; the Decorator is an optional extra.",
+          "A Decorator keeps the interface it wraps, so it cannot fix the mismatch on its own — the Adapter still has to come first. Logging and retries are not part of this problem; if they are needed later, a Decorator can wrap the adapter without changing it or the client.",
       },
       {
         id: "facade",
@@ -181,10 +181,10 @@ export const comparison: ComparisonDefinition = {
       {
         id: "inline",
         option: "none",
-        label: "Call the library directly everywhere it’s needed, with logging inline",
+        label: "Call the library directly everywhere it’s needed",
         verdict: "workable",
         explanation:
-          "This works at one call site, but each caller would repeat the library-specific call and logging/retry code. A wrapper becomes useful when more callers or retry rules appear.",
+          "This works at one call site, but each caller would repeat the library-specific call and its translation. A wrapper becomes useful when a second caller appears.",
       },
     ],
   },

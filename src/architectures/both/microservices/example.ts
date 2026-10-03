@@ -4,7 +4,6 @@ interface OrderLine {
 }
 
 interface PlaceOrderCommand {
-  orderId: string;
   lines: OrderLine[];
 }
 
@@ -29,7 +28,7 @@ interface ProductDto {
   unitPriceCents: number;
 }
 
-/** The Inventory microservice: its own process, its own private store. */
+/** The Inventory microservice: stands in for a separate process with its own private store. */
 class InventoryService {
   calls = 0;
   private readonly products = new Map<string, ProductDto>([
@@ -49,8 +48,8 @@ class InventoryService {
 // [inventoryClient]
 /**
  * Orders' client proxy for Inventory: same interface shape Orders would use for a local
- * call, so Orders never deals with Inventory's transport directly (Proxy). It also reads
- * through a cache before calling out (Cache-Aside), and converts Inventory's ProductDto
+ * call, so Orders never deals with Inventory's transport directly (Proxy). It also checks
+ * its own cache before calling out (Cache-Aside), and converts Inventory's ProductDto
  * into Orders' own Product model (Adapter) so Inventory's wire shape never leaks in.
  */
 class InventoryServiceClient {
@@ -110,7 +109,7 @@ class CircuitBreaker {
 // [/breaker]
 
 // [payments]
-/** The Payments microservice: its own process, its own private store. */
+/** The Payments microservice: stands in for a separate process with its own private store. */
 class PaymentsService {
   calls = 0;
   private down = false;
@@ -173,9 +172,10 @@ interface PlaceOrderResult {
 }
 
 // [orders]
-/** The Orders microservice: its own process, with its own private store of the orders it has recorded. */
+/** The Orders microservice: stands in for a separate process, with its own private store of the orders it has recorded. */
 class OrderService {
   private readonly orders = new Map<string, OrderRecord>();
+  private nextOrderId = 1; // Orders owns its own ids: counter-based, never timestamps
 
   constructor(
     private readonly inventoryClient: InventoryServiceClient,
@@ -185,6 +185,7 @@ class OrderService {
   ) {}
 
   placeOrder(command: PlaceOrderCommand): PlaceOrderResult {
+    const orderId = `order-${this.nextOrderId++}`;
     let total = 0;
     for (const line of command.lines) {
       const product = this.inventoryClient.getProduct(line.sku);
@@ -194,7 +195,7 @@ class OrderService {
     let status: OrderStatus;
     let reason = "";
     try {
-      this.paymentsBreaker.call(() => this.payments.charge(command.orderId, total));
+      this.paymentsBreaker.call(() => this.payments.charge(orderId, total));
       status = "PAID";
     } catch (err) {
       status = "PAYMENT_FAILED";
@@ -202,13 +203,12 @@ class OrderService {
     }
 
     // Orders records every order it handled in its own private store, paid or not.
-    this.orders.set(command.orderId, { orderId: command.orderId, total, status });
+    this.orders.set(orderId, { orderId, total, status });
 
     // Only a paid order is announced -- a failed one never reaches Shipping.
-    if (status === "PAID")
-      this.broker.publish({ orderId: command.orderId, lines: command.lines, total });
+    if (status === "PAID") this.broker.publish({ orderId, lines: command.lines, total });
 
-    return { orderId: command.orderId, total, status, reason };
+    return { orderId, total, status, reason };
   }
 
   get recordedOrders(): OrderRecord[] {
@@ -218,15 +218,12 @@ class OrderService {
 // [/orders]
 
 // [gateway]
-/** The API Gateway: the one entry point clients see, hiding three separate services behind it (Facade). */
+/** The API Gateway: the one entry point clients see, hiding the services behind it (Facade). It only forwards -- no business logic, not even order ids. */
 class ApiGateway {
-  private nextOrderId = 1; // counter-based ids, never timestamps
-
   constructor(private readonly orders: OrderService) {}
 
   placeOrder(lines: OrderLine[]): PlaceOrderResult {
-    const orderId = `order-${this.nextOrderId++}`;
-    return this.orders.placeOrder({ orderId, lines });
+    return this.orders.placeOrder({ lines });
   }
 }
 // [/gateway]

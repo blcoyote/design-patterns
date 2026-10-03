@@ -52,8 +52,8 @@ func (m Money) assertSameCurrency(other Money) error {
 // [/money]
 
 // [orderLine]
-// OrderLine is an entity: it has identity (sku + its position on the order)
-// even though its fields never change.
+// OrderLine is a value object: no identity of its own and never changes after
+// creation — two lines with the same sku, price and quantity are interchangeable.
 type OrderLine struct {
 	Sku       string
 	UnitPrice Money
@@ -130,7 +130,7 @@ type Order struct {
 	events     []DomainEvent
 }
 
-// CreateOrder is a factory function: callers never build an Order directly.
+// CreateOrder is a factory (Evans) — a plain creation function: callers never build an Order directly.
 func CreateOrder(id, customerID string) *Order {
 	return &Order{ID: id, CustomerID: customerID, status: StatusDraft}
 }
@@ -214,6 +214,8 @@ func (r *InMemoryOrderRepository) Save(order *Order) {
 
 // [shipping]
 // Shipping bounded context: its own vocabulary. It has never heard of an "Order".
+// Money and the domain-event interface are the only types it shares with Ordering —
+// a deliberately tiny shared kernel.
 type ShipmentRequested struct {
 	ShipmentID  string
 	RecipientID string
@@ -237,9 +239,10 @@ func (ShippingService) RequestShipment(event ShipmentRequested) {
 // [/shipping]
 
 // [acl]
-// OrderingToShippingAcl is an Anti-Corruption Layer: it translates Ordering's
-// language into Shipping's, so neither bounded context has to know the other's
-// model. OrderPlaced never crosses the boundary as-is — only ShipmentRequested does.
+// OrderingToShippingAcl is an Anti-Corruption Layer, conceptually owned by the
+// downstream Shipping context: it translates upstream Ordering's language into
+// Shipping's own, so Ordering's model never leaks into Shipping. OrderPlaced never
+// crosses the boundary as-is — only ShipmentRequested does.
 type OrderingToShippingAcl struct {
 	shipping *ShippingService
 }

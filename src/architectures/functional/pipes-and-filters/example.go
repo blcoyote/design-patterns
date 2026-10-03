@@ -10,7 +10,7 @@ import (
 )
 
 // [types]
-// Candidate is what parseLines produces: a raw line split into (at most) its
+// Candidate is what parseLines produces: a raw line split into all of its
 // comma-separated fields.
 type Candidate struct {
 	LineNo int
@@ -56,8 +56,9 @@ func centsToDollars(cents int) string {
 
 // [pipe]
 // Filter is one pipeline stage: a function from a stream of A to a stream of B.
-// Go's iter.Seq is a lazy, pull-driven stream (the counterpart of a TS generator),
-// so elements flow through the stages one at a time, in the same order as in the other languages.
+// Go's iter.Seq is a lazy push iterator: the consumer's range loop starts it, and each
+// stage pushes one element at a time to yield, so elements still flow through the stages
+// one at a time, in the same order as in the other languages.
 type Filter[A, B any] func(iter.Seq[A]) iter.Seq[B]
 
 // Pipe2 chains two filters. A pipeline built from filters has exactly the same shape
@@ -191,7 +192,7 @@ const (
 	discountRate   = 0.1
 )
 
-// applyDiscount is a pure filter, added to the pipeline after the other four already
+// applyDiscount is a pure filter, added to the pipeline after the other five already
 // existed -- a 10% discount for orders of 5 or more units. Nothing about parseLines,
 // validateLines, addLineTotal, addTax or formatLines changed to make room for it; only
 // the pipeline construction did.

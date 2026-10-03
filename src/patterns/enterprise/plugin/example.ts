@@ -43,19 +43,11 @@ class JsonExporter implements Exporter {
 }
 
 // [manifest]
-// A plain list of plugin ids and the factory module each one maps to. In a
-// real build, this list itself would usually come from scanning a folder —
-// see the comment on `factories` below — but the manifest *shape* is the
-// same either way: plugin id → the name of the thing that constructs it.
-interface ManifestEntry {
-  id: string;
-  module: string;
-}
-
-const manifest: ManifestEntry[] = [
-  { id: "markdown", module: "markdown-exporter" },
-  { id: "html", module: "html-exporter" },
-];
+// A plain list of the plugin modules to load. In a real build, this list
+// itself would usually come from scanning a folder — see the comment on
+// `factories` below — but the idea is the same either way: the manifest names
+// *what* to load, and each plugin reports its own id once it is constructed.
+const manifest: string[] = ["markdown-exporter", "html-exporter"];
 // [/manifest]
 
 // [pluginRegistry]
@@ -84,22 +76,26 @@ class PluginRegistry {
 
 // [pluginLoader]
 // Real discovery mechanisms differ per platform — Vite's `import.meta.glob`
-// (this site uses exactly that, see the registry below), .NET assembly
+// (this site uses exactly that in src/patterns/registry.ts), .NET assembly
 // scanning or MEF, Python's `importlib.metadata` entry points. All of them
 // boil down to the same two steps this loader performs explicitly: read a
 // manifest, then look each entry up in a map of known factories.
 type ExporterFactory = () => Exporter;
 
-const factories: Record<string, ExporterFactory> = {
+const factories: Partial<Record<string, ExporterFactory>> = {
   "markdown-exporter": () => new MarkdownExporter(),
   "html-exporter": () => new HtmlExporter(),
   "json-exporter": () => new JsonExporter(),
 };
 
 class PluginLoader {
-  static load(registry: PluginRegistry, entries: ManifestEntry[]): void {
-    for (const entry of entries) {
-      const factory = factories[entry.module];
+  static load(registry: PluginRegistry, moduleNames: string[]): void {
+    for (const moduleName of moduleNames) {
+      const factory = factories[moduleName];
+      if (!factory) {
+        throw new Error(`no factory for plugin module "${moduleName}"`);
+      }
+      // Registered under the id the plugin itself reports.
       registry.register(factory());
     }
   }
@@ -128,7 +124,7 @@ console.log(`registered: ${registry.registeredIds().join(", ")}`);
 console.log(host.export("html", doc));
 
 // A new plugin is added to the manifest — Host and PluginRegistry are untouched.
-const extendedManifest: ManifestEntry[] = [...manifest, { id: "json", module: "json-exporter" }];
+const extendedManifest: string[] = [...manifest, "json-exporter"];
 const registry2 = new PluginRegistry();
 PluginLoader.load(registry2, extendedManifest);
 const host2 = new Host(registry2);

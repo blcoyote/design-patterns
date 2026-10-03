@@ -11,7 +11,7 @@ controller.HandlePlaceOrder("cust-42", new List<LineItem>
     new("GADGET", 29.99m),
 });
 
-// Anti-pattern in action: the controller reaches past three layers directly into the database.
+// Anti-pattern in action: the controller bypasses the data-access layer and queries the database itself.
 controller.HandleDebugLookup("42");
 
 record LineItem(string Sku, decimal Price);
@@ -89,7 +89,7 @@ class OrderController
     }
 
     // [violation]
-    // Anti-pattern: reaching straight past Application and Domain into Data access.
+    // Anti-pattern: going around the data-access layer and writing SQL here.
     // Nothing in a plain class stops this — only discipline and code review do.
     public List<object> HandleDebugLookup(string id)
     {

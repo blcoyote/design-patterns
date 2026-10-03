@@ -11,14 +11,14 @@ type Entity struct {
 	ID string
 }
 
-// Go has no try/catch, so the write methods return an error and Commit
-// rolls back when one fails.
+// Go has no try/catch, so the write and commit methods return an error and
+// Commit rolls back when one fails.
 type Database interface {
 	BeginTransaction()
 	Insert(entity *Entity) error
 	Update(entity *Entity) error
 	Delete(entity *Entity) error
-	CommitTransaction()
+	CommitTransaction() error
 	RollbackTransaction()
 }
 
@@ -44,8 +44,9 @@ func (SqlDatabase) Delete(entity *Entity) error {
 	return nil
 }
 
-func (SqlDatabase) CommitTransaction() {
+func (SqlDatabase) CommitTransaction() error {
 	fmt.Println("COMMIT")
+	return nil
 }
 
 func (SqlDatabase) RollbackTransaction() {
@@ -105,9 +106,9 @@ func (u *UnitOfWork) RegisterDirty(entity *Entity) {
 func (u *UnitOfWork) RegisterRemoved(entity *Entity) {
 	wasNew := slices.Contains(u.newObjects, entity)
 	// Whatever it was before, there is nothing left to insert or update.
-	isOther := func(e *Entity) bool { return e == entity }
-	u.newObjects = slices.DeleteFunc(u.newObjects, isOther)
-	u.dirtyObjects = slices.DeleteFunc(u.dirtyObjects, isOther)
+	isEntity := func(e *Entity) bool { return e == entity }
+	u.newObjects = slices.DeleteFunc(u.newObjects, isEntity)
+	u.dirtyObjects = slices.DeleteFunc(u.dirtyObjects, isEntity)
 	// A row that was never inserted has nothing to delete.
 	if !wasNew && !slices.Contains(u.removedObjects, entity) {
 		u.removedObjects = append(u.removedObjects, entity)
@@ -142,7 +143,10 @@ func (u *UnitOfWork) Commit() error {
 			return err
 		}
 	}
-	u.db.CommitTransaction()
+	if err := u.db.CommitTransaction(); err != nil {
+		u.db.RollbackTransaction() // none of the writes above take effect
+		return err
+	}
 	u.newObjects = nil
 	u.dirtyObjects = nil
 	u.removedObjects = nil

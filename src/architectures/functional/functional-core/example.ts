@@ -106,7 +106,8 @@ class ReminderHandler {
 
 // [test]
 // Testing the core needs no mocks, no fake clock class, no in-memory database —
-// just values in, a value out, compared with ===/deepEqual.
+// just values in, a value out, compared with deepEqual (=== would only compare
+// object references).
 const testAccount: Account = {
   id: "acc-1",
   email: "ops@example.com",

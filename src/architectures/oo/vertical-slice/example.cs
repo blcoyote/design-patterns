@@ -219,8 +219,8 @@ class PlaceOrderHandler
 
 // --- GetOrder slice ---------------------------------------------------------
 // A completely separate request type, handler, data access and validator —
-// it shares no code with the PlaceOrder slice above except the Mediator and
-// the pipeline.
+// it shares no code with the PlaceOrder slice above except the Mediator, the
+// pipeline and the shared OrdersTable.
 
 // [getOrderStore]
 class GetOrderStore

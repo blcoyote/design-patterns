@@ -134,9 +134,10 @@ func (c *Container) resolve(key string) any {
 	return c.singletons[key]
 }
 
-// Resolve is a function rather than a method because Go methods cannot have
-// type parameters. T only tells the compiler what comes back (via a type
-// assertion): the registered provider decides what is actually built.
+// Resolve is a function rather than a method so it also builds on Go versions
+// before 1.27, where methods could not declare their own type parameters. T only
+// tells the compiler what comes back (via a type assertion): the registered
+// provider decides what is actually built.
 func Resolve[T any](c *Container, key string) T {
 	return c.resolve(key).(T)
 }

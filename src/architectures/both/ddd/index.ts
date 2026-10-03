@@ -28,7 +28,7 @@ export const architecture: ArchitectureDefinition = {
   ],
   pros: [
     "Business rules live in one place — the aggregate — instead of being scattered across controllers, services and ad-hoc validation.",
-    "The ubiquitous language keeps code, conversation and documentation saying the same thing, which make domain bugs easier to spot in review.",
+    "The ubiquitous language keeps code, conversation and documentation saying the same thing, which makes domain bugs easier to spot in review.",
     "Bounded contexts let teams evolve their own models and release independently, without a single shared schema holding everyone back.",
     'Value objects and invariant-guarding aggregates make a whole category of "invalid state" bugs impossible to construct, not just unlikely.',
   ],
@@ -36,10 +36,10 @@ export const architecture: ArchitectureDefinition = {
     "Significant upfront investment: identifying bounded contexts and building a real ubiquitous language takes time and close domain-expert access.",
     "Overkill for simple, mostly-CRUD applications — the ceremony of aggregates, repositories and events costs more than it returns.",
     "Getting bounded-context boundaries wrong is expensive to fix later, since contexts are meant to evolve independently once drawn.",
-    "Anti-Corruption Layers and integration events add real plumbing and latency at every context boundary, compared to one shared model.",
+    "Anti-Corruption Layers and integration events add real plumbing and latency at every context boundary that needs translation, compared to one shared model.",
   ],
   realWorld: [
-    'Eric Evans\' original "Blue Book" examples — cargo shipping and route-booking domains — are the canonical reference point for the vocabulary.',
+    'Eric Evans\' original "Blue Book" examples — the cargo-shipping system (booking and routing cargo) and the loan-syndication case study — are the canonical reference point for the vocabulary.',
     "Reference e-commerce architectures (for example Microsoft's eShopOnContainers) split Catalog, Ordering, Basket and Identity into separate bounded contexts, each with its own database.",
     "Core banking and insurance platforms routinely separate Underwriting, Claims and Billing into distinct contexts connected by integration events.",
     'Large marketplaces split Catalog, Inventory, Ordering and Shipping so that each team\'s model of "a product" or "an order" only has to make sense inside its own context.',
@@ -63,7 +63,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Entity",
       description:
-        'An object defined by a thread of identity that persists even as its attributes change over time — an OrderLine is still "the same line" after its quantity is corrected.',
+        'An object defined by a thread of identity that persists even as its attributes change over time — Order "order-1" is still the same order after lines are added and it moves from draft to placed.',
     },
     {
       term: "Value Object",
@@ -98,7 +98,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Anti-Corruption Layer",
       description:
-        "A translation layer at a bounded-context boundary that converts one context's model and events into another's, so neither context's internals leak into the other.",
+        "A translation layer owned by the downstream context that converts the upstream context's model and events into its own, so the upstream model cannot corrupt it.",
     },
   ],
 
@@ -110,7 +110,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "factory-method",
-        why: "Order.create() is a factory method: it is the only way to construct an Order, guaranteeing the aggregate never exists in an invalid starting state.",
+        why: "Order.create() is a static creation method — Evans' FACTORY, not GoF Factory Method, where subclasses decide which class to instantiate. It is the only sanctioned way to construct an Order, so every Order starts as an empty draft.",
       },
       {
         slug: "unit-of-work",
@@ -134,7 +134,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "strategy",
-        why: 'Domain policies like "an order needs at least one line to be placed" are injected into the aggregate as interchangeable strategy objects instead of being hardcoded inside it.',
+        why: 'Domain policies like "an order needs at least one line to be placed" are passed into the aggregate as interchangeable strategy objects instead of being hardcoded inside it. With an isSatisfiedBy() signature, such a policy is also Evans and Fowler\'s Specification pattern.',
       },
       {
         slug: "state",
@@ -164,7 +164,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "microservices",
-        why: "Microservices is the usual deployment answer to a bounded context: Ordering and Shipping here are exactly the kind of contexts that would each become their own service, each keeping its own database.",
+        why: "Bounded contexts are a natural starting point for microservice boundaries: Ordering and Shipping here are exactly the kind of contexts that could each become their own service, each keeping its own database. A context can also span several services, or stay a module inside a monolith.",
       },
       {
         slug: "event-driven",
@@ -236,13 +236,13 @@ export const architecture: ArchitectureDefinition = {
     {
       id: "orderLine",
       label: "OrderLine",
-      role: "Entity",
+      role: "Value object",
       kind: "object",
       x: 380,
       y: 325,
       width: 160,
       description:
-        "Part of the Order aggregate, reachable only through it. It has identity inside the aggregate even though none of its own fields ever change.",
+        "Part of the Order aggregate, reachable only through it. A value object: it has no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.",
     },
     {
       id: "orderPlaced",
@@ -264,7 +264,7 @@ export const architecture: ArchitectureDefinition = {
       y: 440,
       width: 120,
       description:
-        "Sits directly on the seam between the two contexts and translates Ordering's OrderPlaced into Shipping's own ShipmentRequested, so neither context's model leaks into the other.",
+        "Sits on the seam between the two contexts and, conceptually owned by the downstream Shipping context, translates Ordering's OrderPlaced into Shipping's own ShipmentRequested, so Ordering's model never leaks into Shipping.",
       patterns: ["adapter", "facade"],
     },
     {
@@ -345,7 +345,7 @@ export const architecture: ArchitectureDefinition = {
       type: "creates",
       label: "raises OrderPlaced",
       description:
-        "The moment Order's state actually changes, it appends a domain event to its own internal list — it does not call out to anything to do this.",
+        "The moment Order's status changes to placed, it appends a domain event to its own internal list — it does not call out to anything to do this.",
       code: "orderPlaced",
     },
     {
@@ -386,7 +386,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "Two bounded contexts, bridged by an ACL",
       description:
-        "Ordering and Shipping are separate bounded contexts, each with its own model and its own language for an order. They share no code or database. An Anti-Corruption Layer translates between them.",
+        "Ordering and Shipping are separate bounded contexts, each with its own model and its own language for an order. They share no database, and no model types except a tiny shared kernel (Money and the domain-event interface). An Anti-Corruption Layer translates between them.",
       highlight: [
         "client",
         "appService",
@@ -441,7 +441,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "Placing the order raises a domain event",
       description:
-        "place() is the moment the aggregate's state actually changes. It appends an OrderPlaced domain event to its own list — the aggregate has no idea who, if anyone, is listening.",
+        "place() is the moment the order's status changes from draft to placed. It appends an OrderPlaced domain event to its own list — the aggregate has no idea who, if anyone, is listening.",
       highlight: ["order", "raise", "orderPlaced"],
       packets: [{ relation: "raise", label: "OrderPlaced" }],
       notes: { orderPlaced: "collected, not yet published" },

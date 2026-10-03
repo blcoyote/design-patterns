@@ -99,7 +99,7 @@ func fold(events []Event) Account {
 // concurrency -- the caller must say which version it last read, and the append is
 // rejected if the stream moved on in the meantime.
 type EventStore struct {
-	mu         sync.Mutex
+	mu          sync.Mutex
 	streams     map[string][]Event
 	subscribers []func(streamID string, event Event)
 }
@@ -188,16 +188,22 @@ func main() {
 	projection := &WithdrawalCountProjection{}
 	store.Subscribe(projection.Handle)
 
+	// [handle]
+	// The command handler is the imperative shell around the pure core: load the stream,
+	// fold it, decide, then append at the version that was loaded. If another writer
+	// appended in between, the store sees a different length and rejects the append.
 	handle := func(command Command) {
-		state := fold(store.Load(streamID))
+		history := store.Load(streamID)
+		state := fold(history)
 		events, err := decide(command, state)
 		if err != nil {
 			panic(err)
 		}
-		if err := store.Append(streamID, len(store.Load(streamID)), events); err != nil {
+		if err := store.Append(streamID, len(history), events); err != nil {
 			panic(err)
 		}
 	}
+	// [/handle]
 
 	handle(OpenAccount{"Ada"})
 	handle(Deposit{100})

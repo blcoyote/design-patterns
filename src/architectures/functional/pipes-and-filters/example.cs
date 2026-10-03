@@ -31,7 +31,7 @@ foreach (var line in pipelineNoDiscount(new[] { "SKU-3,5,2.00" }))
 // [/usage]
 
 // [types]
-/// <summary>What ParseLines produces: a raw line split into (at most) its comma-separated fields.</summary>
+/// <summary>What ParseLines produces: a raw line split into all of its comma-separated fields.</summary>
 record Candidate(int LineNo, string Raw, IReadOnlyList<string> Fields);
 
 /// <summary>
@@ -210,7 +210,7 @@ static class Filters
     const double DiscountRate = 0.1;
 
     /// <summary>
-    /// Pure filter, added to the pipeline after the other four already existed — a 10%
+    /// Pure filter, added to the pipeline after the other five already existed — a 10%
     /// discount for orders of 5 or more units. Nothing about ParseLines, ValidateLines,
     /// AddLineTotal, AddTax or FormatLines changed to make room for it; only the Pipe() call did.
     /// </summary>

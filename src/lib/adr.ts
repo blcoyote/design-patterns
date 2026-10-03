@@ -173,7 +173,7 @@ export function buildAdr(input: BuildAdrInput): string {
     "",
     "## Decision Outcome",
     "",
-    `Chosen option: "${chosenName}", because it fits these drivers:`,
+    `Chosen option: "${chosenName}", because these conditions hold:`,
     "",
     bulletList(reasons),
     "",

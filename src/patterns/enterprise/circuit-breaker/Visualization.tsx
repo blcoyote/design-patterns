@@ -11,11 +11,13 @@ import type { Packet, Step, VisualizationProps } from "@/types/pattern";
  * current, a failure meter that fills toward the trip threshold, and a live
  * cooldown readout while Open. A "Try it" row lets the visitor flip RemoteService
  * healthy/failing and fire requests themselves, independent of the step player —
- * including a real cooldown timer that promotes Open to Half-Open on its own.
+ * including a real cooldown countdown. As in the code, the countdown alone never
+ * changes the mode: the first request after it ends promotes Open to Half-Open
+ * and becomes the trial.
  */
 
 type BreakerState = "closed" | "open" | "halfOpen";
-type EventKind = "success" | "failure" | "failFast" | "cooldown";
+type EventKind = "success" | "failure" | "failFast";
 
 const STATE_IDS: BreakerState[] = ["closed", "open", "halfOpen"];
 
@@ -42,6 +44,8 @@ interface LiveState {
   failureCount: number;
   cooldownEndsAt: number | null;
   event: EventKind;
+  /** True when this request found the cooldown over and became the Half-Open trial. */
+  viaCooldown: boolean;
   token: number;
 }
 
@@ -51,6 +55,7 @@ function describeEvent(
   next: BreakerState,
   event: EventKind,
   failureCount: number,
+  viaCooldown: boolean,
 ): { highlight: string[]; packets: Packet[]; notes: Record<string, string> } {
   if (event === "failFast") {
     return {
@@ -62,29 +67,36 @@ function describeEvent(
       notes: { breaker: "OPEN — fail fast", service: "untouched" },
     };
   }
-  if (event === "cooldown") {
-    return {
-      highlight: ["cooldown", "halfOpen", "state-halfOpen"],
-      packets: [{ relation: "cooldown", label: "cooldown elapsed" }],
-      notes: { breaker: "HALF_OPEN", halfOpen: "trial pending" },
-    };
-  }
   const transition =
     next === prev
       ? []
       : next === "open"
         ? [prev === "halfOpen" ? "trial-failure" : "trip", "open"]
         : ["trial-success", "closed"];
+  // A request that arrives after the cooldown first promotes Open to Half-Open
+  // (lazily, inside call()), and only then runs fn() as the trial.
+  const cooldownPackets: Packet[] = viaCooldown
+    ? [{ relation: "cooldown", label: "cooldown elapsed", after: 0 }]
+    : [];
+  const o = cooldownPackets.length; // shifts every later packet's `after` index
   return {
-    highlight: ["client", "request", "forward", "service", ...transition],
+    highlight: [
+      "client",
+      "request",
+      "forward",
+      "service",
+      ...(viaCooldown ? ["cooldown", "halfOpen"] : []),
+      ...transition,
+    ],
     packets: [
       { relation: "request", label: "call(fn)" },
-      { relation: "forward", label: "fn()", after: 0 },
+      ...cooldownPackets,
+      { relation: "forward", label: "fn()", after: o },
       {
         relation: "forward",
         label: event === "success" ? "ok" : "error",
         reverse: true,
-        after: 1,
+        after: o + 1,
       },
       ...(next === prev
         ? []
@@ -92,14 +104,14 @@ function describeEvent(
             {
               relation: transition[0],
               label: next === "open" ? "⇒ OPEN" : "⇒ CLOSED",
-              after: 2,
+              after: o + 2,
             },
           ]),
       {
         relation: "request",
         label: event === "success" ? "ok" : "error",
         reverse: true,
-        after: next === prev ? 2 : 3,
+        after: next === prev ? o + 2 : o + 3,
       },
     ],
     notes: {
@@ -151,6 +163,7 @@ export function CircuitBreakerVisualization({
         effectiveLive.state,
         effectiveLive.event,
         effectiveLive.failureCount,
+        effectiveLive.viaCooldown,
       )
     : null;
   const displayHighlight = liveDisplay?.highlight ?? step?.highlight;
@@ -158,38 +171,17 @@ export function CircuitBreakerVisualization({
   const displayNotes = liveDisplay?.notes ?? step?.notes;
   const animationKey = effectiveLive ? `live-${effectiveLive.token}` : stepIndex;
 
-  // Auto-promote Open -> Half-Open once the cooldown elapses, exactly like the
-  // real CircuitBreaker checks `Date.now() < nextAttempt` on the next call.
+  // Re-render once the cooldown ends, so the readout can say the next request
+  // will be the trial. The mode itself stays Open: like the real CircuitBreaker,
+  // which checks `nowMs < nextAttempt` only when the next call arrives.
   useEffect(() => {
     if (!effectiveLive || effectiveLive.state !== "open" || effectiveLive.cooldownEndsAt == null)
       return;
-    const endsAt = effectiveLive.cooldownEndsAt;
-    const forStep = effectiveLive.forStep;
-    const remaining = Math.max(0, endsAt - Date.now());
-    const id = setTimeout(() => {
-      setLive((prev) => {
-        if (
-          !prev ||
-          prev.forStep !== forStep ||
-          prev.state !== "open" ||
-          prev.cooldownEndsAt !== endsAt
-        )
-          return prev;
-        tokenRef.current += 1;
-        return {
-          forStep,
-          prevState: "open",
-          state: "halfOpen",
-          failureCount: prev.failureCount,
-          cooldownEndsAt: null,
-          event: "cooldown",
-          token: tokenRef.current,
-        };
-      });
-      onSelect("halfOpen");
-    }, remaining);
+    const id = setTimeout(
+      () => setNow(Date.now()),
+      Math.max(0, effectiveLive.cooldownEndsAt - Date.now()),
+    );
     return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [effectiveLive]);
 
   // Tick the cooldown countdown while Open, so the "Try it" row shows real progress.
@@ -214,43 +206,56 @@ export function CircuitBreakerVisualization({
     const current = effectiveLive ?? {
       state: baseActiveId,
       failureCount: baseFailureCount,
+      cooldownEndsAt: null,
     };
 
+    // Open: fail fast until the cooldown is over. A scripted Open step has no
+    // timer of its own, so the first try there starts a fresh cooldown.
+    let fromState = current.state;
+    let viaCooldown = false;
     if (current.state === "open") {
-      tokenRef.current += 1;
-      setLive({
-        forStep: stepIndex,
-        prevState: "open",
-        state: "open",
-        failureCount: current.failureCount,
-        cooldownEndsAt: effectiveLive?.cooldownEndsAt ?? Date.now() + COOLDOWN_MS,
-        event: "failFast",
-        token: tokenRef.current,
-      });
-      onSelect("open");
-      return;
+      const endsAt = current.cooldownEndsAt;
+      if (endsAt == null || Date.now() < endsAt) {
+        tokenRef.current += 1;
+        setLive({
+          forStep: stepIndex,
+          prevState: "open",
+          state: "open",
+          failureCount: current.failureCount,
+          cooldownEndsAt: endsAt ?? Date.now() + COOLDOWN_MS,
+          event: "failFast",
+          viaCooldown: false,
+          token: tokenRef.current,
+        });
+        onSelect("open");
+        return;
+      }
+      // Cooldown over: this very request promotes Open to Half-Open and is the trial.
+      fromState = "halfOpen";
+      viaCooldown = true;
     }
 
     if (healthy) {
       tokenRef.current += 1;
       setLive({
         forStep: stepIndex,
-        prevState: current.state,
+        prevState: fromState,
         state: "closed",
         failureCount: 0,
         cooldownEndsAt: null,
         event: "success",
+        viaCooldown,
         token: tokenRef.current,
       });
       onSelect("closed");
       return;
     }
 
-    let nextState: BreakerState = current.state;
+    let nextState: BreakerState = fromState;
     let nextFailureCount = current.failureCount;
     let cooldownEndsAt: number | null = null;
-    if (current.state === "halfOpen") {
-      nextState = "open";
+    if (fromState === "halfOpen") {
+      nextState = "open"; // a failed trial reopens without touching the failure count
       cooldownEndsAt = Date.now() + COOLDOWN_MS;
     } else {
       nextFailureCount = current.failureCount + 1;
@@ -262,14 +267,15 @@ export function CircuitBreakerVisualization({
     tokenRef.current += 1;
     setLive({
       forStep: stepIndex,
-      prevState: current.state,
+      prevState: fromState,
       state: nextState,
       failureCount: nextFailureCount,
       cooldownEndsAt,
       event: "failure",
+      viaCooldown,
       token: tokenRef.current,
     });
-    onSelect(nextState === "open" ? "open" : current.state);
+    onSelect(nextState === "open" ? "open" : fromState);
   }
 
   const breakerP = byId.get("breaker");
@@ -357,9 +363,11 @@ export function CircuitBreakerVisualization({
           pointerEvents="none"
         >
           <text textAnchor="middle" className="fill-slate-400 text-[10px] font-mono select-none">
-            {reduceMotion
-              ? "cooling down…"
-              : `cooldown ${(cooldownRemainingMs / 1000).toFixed(1)}s`}
+            {cooldownRemainingMs <= 0
+              ? "cooldown over: next request is the trial"
+              : reduceMotion
+                ? "cooling down…"
+                : `cooldown ${(cooldownRemainingMs / 1000).toFixed(1)}s`}
           </text>
         </g>
       )}

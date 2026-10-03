@@ -100,8 +100,8 @@ class Runtime {
 
   dispatch(msg: Msg): void {
     const [next, cmds] = update(this.model, msg);
-    // A dispatch after time-travel discards any history past the current cursor,
-    // the same way Redux DevTools / Elm's debugger fork a new timeline.
+    // A dispatch after time-travel discards any history past the current cursor —
+    // an undo-stack policy chosen for this demo (Redux DevTools keeps the later actions).
     this.history = [...this.history.slice(0, this.cursor + 1), next];
     this.cursor = this.history.length - 1;
     this.notify();

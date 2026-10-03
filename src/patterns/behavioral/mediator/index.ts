@@ -37,7 +37,6 @@ export const pattern: PatternDefinition = {
   realWorld: [
     "UI dialogs and forms that coordinate field validation and enabling/disabling buttons (the classic GoF example)",
     "Chat room servers: clients only talk to the room, never directly to each other",
-    "Air traffic control towers coordinating planes that never communicate with each other directly",
     'Frontend "controller" components that orchestrate several otherwise simple child components',
   ],
   related: ["observer", "facade", "command", "chain-of-responsibility"],

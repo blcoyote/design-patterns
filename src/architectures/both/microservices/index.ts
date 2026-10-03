@@ -27,7 +27,7 @@ export const architecture: ArchitectureDefinition = {
     "The organization can afford the operational cost — service discovery, monitoring, deployment pipelines — that comes with running many small services instead of one.",
   ],
   pros: [
-    "Each service can be deployed, scaled and restarted independently, so a spike in order volume does not require scaling Inventory or Payments too.",
+    "Each service can be deployed, scaled and restarted independently, so a spike in product-catalog browsing only requires scaling Inventory, not Orders or Payments.",
     "A failure in one service — Payments going down — can be contained at the boundary instead of taking the whole system down with it.",
     "Teams can own a service end to end, including its own data store, and release it on their own schedule.",
     "Services can evolve or even be rewritten independently, as long as the interface they expose to callers stays the same.",
@@ -58,12 +58,12 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Service Client",
       description:
-        "A local object that stands in for a remote service behind the same interface a caller would use for a local call, hiding the fact that a call might cross a process boundary.",
+        "A local object that represents a remote service behind an interface in the caller's own terms, giving one place to handle transport, translation, caching and failure. It should not pretend the call is local: the caller still has to plan for slow or failed calls.",
     },
     {
-      term: "Read-Through Cache",
+      term: "Cache-Aside",
       description:
-        "A cache a service client checks before calling the remote service, populated on a miss so a repeated lookup for the same key does not cross the boundary again.",
+        "The service client itself checks a cache before calling the remote service, and populates it on a miss, so a repeated lookup for the same key does not cross the boundary again. (In a read-through cache, the cache would load from the service itself.)",
     },
     {
       term: "Circuit Breaker",
@@ -90,7 +90,7 @@ export const architecture: ArchitectureDefinition = {
     {
       name: "Modular monolith",
       description:
-        "A single deployable application internally split into modules with the same strict boundaries — no shared tables, calls only through an explicit interface — as a deliberate stepping stone before any module is pulled out into its own service.",
+        "A single deployable application internally split into modules with the same strict boundaries — no shared tables, calls only through an explicit interface — either as a destination in its own right or as a stepping stone before any module is pulled out into its own service.",
     },
     {
       name: "Synchronous vs. asynchronous integration",
@@ -129,11 +129,11 @@ export const architecture: ArchitectureDefinition = {
     architectures: [
       {
         slug: "ddd",
-        why: "One microservice per bounded context is the usual way to cut a system — Orders, Inventory and Payments here each keep their own model and their own data.",
+        why: "Bounded contexts are a natural starting point for service boundaries — Orders, Inventory and Payments here each keep their own model and their own data — though one context can also span several services.",
       },
       {
         slug: "hexagonal",
-        why: "Each service is internally a hexagon of its own: PaymentsService and InventoryService sit at the core, and the clients that call them from other services are driven adapters from the caller's point of view.",
+        why: "Each service is its own hexagon. Inside Orders, InventoryServiceClient and the Payments circuit breaker are driven adapters behind outbound ports, while Inventory and Payments each have a core of their own.",
       },
       {
         slug: "event-driven",
@@ -167,7 +167,7 @@ export const architecture: ArchitectureDefinition = {
       y: 140,
       width: 170,
       description:
-        "The one entry point clients see. It forwards placeOrder straight to the Orders service and has no business logic of its own.",
+        "The one entry point clients see. It forwards placeOrder straight to the Orders service and has no business logic of its own — it does not even assign order ids.",
       patterns: ["facade"],
     },
     {
@@ -179,7 +179,7 @@ export const architecture: ArchitectureDefinition = {
       y: 240,
       width: 170,
       description:
-        "Orchestrates one use case: price every line through its Inventory client, charge the customer through its Payments breaker, record the result in its own private store of orders, and publish OrderPlaced only when payment succeeded.",
+        "Orchestrates one use case: assign the next order id, price every line through its Inventory client, charge the customer through its Payments breaker, record the result in its own private store of orders, and publish OrderPlaced only when payment succeeded.",
     },
     {
       id: "inventoryClient",
@@ -214,7 +214,7 @@ export const architecture: ArchitectureDefinition = {
       y: 260,
       width: 170,
       description:
-        "Its own process with its own private product catalog. Nothing outside it ever reads that catalog directly — only through findProduct.",
+        "Stands in for a separate process with its own private product catalog. Nothing outside it ever reads that catalog directly — only through findProduct.",
     },
     {
       id: "payments",
@@ -225,7 +225,7 @@ export const architecture: ArchitectureDefinition = {
       y: 260,
       width: 170,
       description:
-        "Its own process, reachable only through charge(). In this scenario it is down, so every charge it receives fails.",
+        "Stands in for a separate process, reachable only through charge(). In this scenario it is down, so every charge it receives fails.",
     },
     {
       id: "broker",
@@ -267,7 +267,8 @@ export const architecture: ArchitectureDefinition = {
       to: "orders",
       type: "calls",
       label: "placeOrder(command)",
-      description: "The gateway assigns an order id and forwards straight to the Orders service.",
+      description:
+        "The gateway forwards the request straight to the Orders service, which assigns the order id itself.",
       code: "orders",
     },
     {
@@ -352,19 +353,19 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "A client places an order through the gateway",
       description:
-        "The client calls ApiGateway.placeOrder with two line items for the same product. The gateway assigns the order id order-1 and forwards the command — it has no business logic of its own.",
+        "The client calls ApiGateway.placeOrder with two line items for the same product. The gateway forwards the command — it has no business logic of its own, not even id assignment.",
       highlight: ["client", "toGateway", "gateway"],
       packets: [{ relation: "toGateway", label: "placeOrder(lines)" }],
-      notes: { gateway: "assigns order-1" },
+      notes: { gateway: "forwarding" },
       code: "gateway",
     },
     {
       title: "The gateway forwards to the Orders service",
       description:
-        "OrderService.placeOrder starts pricing the order by asking its Inventory client for each line item in turn.",
+        "OrderService.placeOrder assigns the order id order-1 — ids belong to the Orders service — and starts pricing the order by asking its Inventory client for each line item in turn.",
       highlight: ["gateway", "toOrders", "orders"],
       packets: [{ relation: "toOrders", label: "placeOrder(command)" }],
-      notes: { orders: "pricing order-1" },
+      notes: { orders: "assigns order-1, pricing" },
       code: "orders",
     },
     {

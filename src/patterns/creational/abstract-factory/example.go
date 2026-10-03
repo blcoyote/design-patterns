@@ -59,11 +59,6 @@ func (DarkFactory) CreateCheckbox() Checkbox { return DarkCheckbox{} }
 
 // [/darkFactory]
 
-// show prints a slice the way the Python example does: ['a', 'b'].
-func show(items []string) {
-	fmt.Println("['" + strings.Join(items, "', '") + "']")
-}
-
 // Usage
 // [usage]
 func main() {
@@ -85,10 +80,10 @@ func main() {
 		factory = DarkFactory{}
 	}
 
-	show(renderDialog(factory)) // ['button [dark]', 'checkbox [dark]']
+	fmt.Println(strings.Join(renderDialog(factory), ", ")) // "button [dark], checkbox [dark]"
 
 	// Switch the whole family just by swapping the factory:
-	show(renderDialog(LightFactory{})) // ['button [light]', 'checkbox [light]']
+	fmt.Println(strings.Join(renderDialog(LightFactory{}), ", ")) // "button [light], checkbox [light]"
 }
 
 // [/usage]

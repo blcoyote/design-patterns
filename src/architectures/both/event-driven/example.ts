@@ -134,7 +134,10 @@ class OrdersProducer {
     return orderId;
   }
 
-  /** Simulates an at-least-once broker redelivering a message it already delivered once. */
+  /**
+   * Simulates a duplicate delivery, as an at-least-once broker redelivery or a producer
+   * retry after a lost ack would cause, by publishing the same event again.
+   */
   redeliver(orderId: number, item: string, quantity: number): void {
     const event: OrderPlaced = { orderId, item, quantity };
     this.broker.publish("OrderPlaced", event);

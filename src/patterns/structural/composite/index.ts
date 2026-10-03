@@ -37,7 +37,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     "File systems, where directories and files share one interface (size, delete, search and so on)",
-    "The DOM tree, where every Node (element or text) shares the same interface for appendChild and traversal",
+    "The DOM, where every Node (element or text) shares one interface, though appendChild on a Text node throws, which is the transparency-vs-safety trade-off",
     "GUI menus, where a menu holds menu items and other submenus behind the same interface",
     "Bill-of-materials and org-chart trees that total cost or headcount recursively",
   ],
@@ -220,23 +220,21 @@ export const pattern: PatternDefinition = {
     {
       title: "docs/ ripples the call further down",
       description:
-        "docs/ is itself a composite, so it runs the exact same logic as root/: it calls getSize() on each of its own children, photo.jpg and logo.png.",
+        "docs/ is itself a composite, so it runs the exact same logic as root/: it calls getSize() on its own children one at a time, first photo.jpg, then logo.png.",
       highlight: ["docs", "docsPhoto", "photo", "docsLogo", "logo"],
       packets: [
         { relation: "docsPhoto", label: "getSize()" },
-        { relation: "docsLogo", label: "getSize()" },
+        { relation: "docsPhoto", label: "2400 KB", reverse: true, after: 0 },
+        { relation: "docsLogo", label: "getSize()", after: 1 },
+        { relation: "docsLogo", label: "800 KB", reverse: true, after: 2 },
       ],
       code: "folder",
     },
     {
       title: "Leaves hit bottom and answer immediately",
       description:
-        "photo.jpg and logo.png have no children to delegate to — each one just returns its own stored size, right away. readme.md has not even been asked yet.",
+        "photo.jpg and logo.png have no children to delegate to — each one returned its own stored size right away (2400 KB and 800 KB), without any further recursion. readme.md has not even been asked yet.",
       highlight: ["photo", "docsPhoto", "logo", "docsLogo"],
-      packets: [
-        { relation: "docsPhoto", label: "2400 KB", reverse: true },
-        { relation: "docsLogo", label: "800 KB", reverse: true },
-      ],
       notes: { photo: "2400 KB", logo: "800 KB" },
       code: "file",
     },

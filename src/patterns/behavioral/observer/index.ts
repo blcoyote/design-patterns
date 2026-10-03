@@ -36,10 +36,10 @@ export const pattern: PatternDefinition = {
   realWorld: [
     'DOM events: element.addEventListener("click", handler)',
     "RxJS Observables and Subjects",
-    "React state libraries (Redux store.subscribe, Zustand, MobX)",
+    "State-management stores (Redux store.subscribe, Zustand, MobX)",
     "Node.js EventEmitter",
   ],
-  related: ["pub-sub", "mediator", "command", "strategy"],
+  related: ["pub-sub", "mediator", "command", "chain-of-responsibility"],
   participants: [
     {
       id: "observer",

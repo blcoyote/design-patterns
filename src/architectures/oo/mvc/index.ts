@@ -39,9 +39,9 @@ export const architecture: ArchitectureDefinition = {
     'The term "MVC" is overloaded — web "MVC" frameworks (Controller returns a page, no live Observer link) look little like the desktop pattern GoF describes, which this example follows.',
   ],
   realWorld: [
-    "Smalltalk-80, where MVC was first named: Controllers and Views were separate objects and the Model used a true Observer (dependents) mechanism.",
-    "Desktop and mobile UI toolkits (Java Swing, classic Cocoa/AppKit) that keep a live Observer link between Model and View, closer to the original pattern.",
-    'Web "MVC" frameworks (Rails, Django, ASP.NET MVC), which reuse the name for a request/response cycle: Controller builds a page from the Model once per request, with no ongoing Observer notification.',
+    "Smalltalk-80's class library, the first widely used MVC implementation (the name comes from Trygve Reenskaug's 1979 notes at Xerox PARC): Controllers and Views were separate objects and the Model used a true Observer (dependents) mechanism.",
+    "Desktop UI toolkits such as Java Swing, whose models notify registered listeners, keeping a live Observer link between Model and View, closer to the original pattern. (Cocoa/AppKit instead routes Model → View updates through a mediating controller.)",
+    'Web "MVC" frameworks (Rails, ASP.NET MVC; Django calls its version "MTV"), which reuse the idea for a request/response cycle: Controller builds a page from the Model once per request, with no ongoing Observer notification.',
     "Any UI widget library where a data-bound list widget (the View) redraws itself whenever the underlying collection it is bound to (the Model) changes.",
   ],
   concepts: [
@@ -66,16 +66,16 @@ export const architecture: ArchitectureDefinition = {
         'The mechanism — plain subscribe/notify here — by which the Model tells every registered View to refresh. GoF describes this as the Model\'s "dependents" in the original Smalltalk form.',
     },
     {
-      term: "Passive vs. active View",
+      term: "Passive vs. active Model",
       description:
-        'In a "passive View", the Controller pushes rendered data in; in an "active View" (used here), the View pulls from the Model itself once notified. Both are legitimate MVC.',
+        'With a "passive Model", only the Controller changes the Model, so the Controller then tells the View to refresh. With an "active Model" (used here), the Model notifies its registered Views itself whenever it changes. Both are classic Smalltalk MVC.',
     },
   ],
   variants: [
     {
       name: "MVP (Model-View-Presenter)",
       description:
-        "The Presenter takes over both reading from the Model and pushing fully-formed data into a passive View, which exposes only simple setters and never reads the Model itself.",
+        "The Presenter takes over input handling and presentation logic. In its Passive View flavour, the Presenter also pushes fully-formed data into a View that exposes only simple setters and never reads the Model itself; in the Supervising Controller flavour, the View still binds to the Model for simple data.",
     },
     {
       name: "MVVM (Model-View-ViewModel)",
@@ -131,7 +131,7 @@ export const architecture: ArchitectureDefinition = {
       x: 90,
       y: 50,
       description:
-        "Clicks a button in the running app. The View is the only participant that ever sees this raw input.",
+        "Clicks a button in the running app. In this example, as in GoF's Strategy reading of MVC, the raw input arrives at the View; in Smalltalk-80 the Controller read the mouse and keyboard directly.",
     },
     {
       id: "controller",
@@ -213,7 +213,7 @@ export const architecture: ArchitectureDefinition = {
       type: "calls",
       label: "click",
       description:
-        "Raw input arrives at the View first. The View does not decide what it means — it only forwards it.",
+        "In this example, raw input arrives at the View first (in Smalltalk-80 the Controller read input devices directly). The View does not decide what it means — it only forwards it.",
       code: "usage",
     },
     {

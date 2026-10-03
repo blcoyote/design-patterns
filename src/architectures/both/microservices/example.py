@@ -51,7 +51,7 @@ class ProductDto:
 
 
 class InventoryService:
-    """The Inventory microservice: its own process, its own private store."""
+    """The Inventory microservice: stands in for a separate process with its own private store."""
 
     def __init__(self) -> None:
         self.calls = 0
@@ -73,8 +73,8 @@ class InventoryService:
 class InventoryServiceClient:
     """
     Orders' client proxy for Inventory: same interface shape Orders would use for a local
-    call, so Orders never deals with Inventory's transport directly (Proxy). It also reads
-    through a cache before calling out (Cache-Aside), and converts Inventory's ProductDto
+    call, so Orders never deals with Inventory's transport directly (Proxy). It also checks
+    its own cache before calling out (Cache-Aside), and converts Inventory's ProductDto
     into Orders' own Product model (Adapter) so Inventory's wire shape never leaks in.
     """
 
@@ -128,7 +128,7 @@ class CircuitBreaker:
 
 # [payments]
 class PaymentsService:
-    """The Payments microservice: its own process, its own private store."""
+    """The Payments microservice: stands in for a separate process with its own private store."""
 
     def __init__(self) -> None:
         self._down = False
@@ -176,7 +176,7 @@ class ShippingService:
 
 # [orders]
 class OrderService:
-    """The Orders microservice: its own process, with its own private store of the orders it has recorded."""
+    """The Orders microservice: stands in for a separate process, with its own private store of the orders it has recorded."""
 
     def __init__(
         self,
@@ -190,12 +190,15 @@ class OrderService:
         self._payments = payments
         self._broker = broker
         self._orders: dict[str, OrderRecord] = {}
+        self._next_order_id = 1  # Orders owns its own ids: counter-based, never timestamps
 
     @property
     def recorded_orders(self) -> list[OrderRecord]:
         return list(self._orders.values())
 
-    def place_order(self, order_id: str, lines: list[OrderLine]) -> PlaceOrderResult:
+    def place_order(self, lines: list[OrderLine]) -> PlaceOrderResult:
+        order_id = f"order-{self._next_order_id}"
+        self._next_order_id += 1
         total = 0.0
         for line in lines:
             product = self._inventory_client.get_product(line.sku)
@@ -222,16 +225,13 @@ class OrderService:
 
 # [gateway]
 class ApiGateway:
-    """The API Gateway: the one entry point clients see, hiding three separate services behind it (Facade)."""
+    """The API Gateway: the one entry point clients see, hiding the services behind it (Facade). It only forwards -- no business logic, not even order ids."""
 
     def __init__(self, orders: OrderService) -> None:
-        self._next_order_id = 1  # counter-based ids, never timestamps
         self._orders = orders
 
     def place_order(self, lines: list[OrderLine]) -> PlaceOrderResult:
-        order_id = f"order-{self._next_order_id}"
-        self._next_order_id += 1
-        return self._orders.place_order(order_id, lines)
+        return self._orders.place_order(lines)
 # [/gateway]
 
 

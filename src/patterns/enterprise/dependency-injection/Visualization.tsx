@@ -9,7 +9,7 @@ import type { Packet, Relation, VisualizationProps } from "@/types/pattern";
  * diagram for the step-driven scenario, but adds two things that make the idea
  * tangible:
  *
- *  - a "Dependency Injection / Manual wiring" toggle that swaps the relation set
+ *  - a "Dependency Injection / Hard-wired" toggle that swaps the relation set
  *    for one where every class calls `new` on its own dependencies — the exact
  *    "before" picture the pattern fixes, with nothing dimmed so the tight coupling
  *    is plain to see, and
@@ -205,7 +205,7 @@ export function DependencyInjectionVisualization({
         {(
           [
             { id: "di", label: "Dependency Injection", manual: false },
-            { id: "manual", label: "Manual wiring (before)", manual: true },
+            { id: "manual", label: "Hard-wired, no DI (before)", manual: true },
           ] as const
         ).map((opt) => {
           const isActive = isManual === opt.manual;

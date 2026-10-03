@@ -44,7 +44,6 @@ export function architecturesUsedBy(architecture: ArchitectureDefinition): Resol
     .filter((r) => r !== undefined);
 }
 
-// @pattern cqrs: the reverse links are a read model projected from the single write side (commonlyUsedWith)
 /**
  * Reverse index: which architectures declare `designSlug` in their `commonlyUsedWith.designPatterns`,
  * and why. Design patterns never declare their own architecture links — this is derived.

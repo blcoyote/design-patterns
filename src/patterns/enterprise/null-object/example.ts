@@ -53,10 +53,9 @@ new ReportGeneratorBefore(null).generate(cleanData);
 // Crashes the moment a report has warnings:
 try {
   new ReportGeneratorBefore(null).generate(dataWithWarnings);
-} catch (err) {
-  console.log(`crashed: ${(err as Error).message}`);
+} catch {
+  console.log("crashed: no logger"); // TypeError: Cannot read properties of null (reading 'warn')
 }
-// TypeError: Cannot read properties of null (reading 'warn')
 // [/before]
 
 // ============================================================

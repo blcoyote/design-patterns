@@ -17,7 +17,7 @@ export const pattern: PatternDefinition = {
   problem:
     'A document behaves differently depending on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. If you handle this in one method full of if (status === "draft") … else if (status === "inReview") … checks, that method grows with every new stage or action. Rules about which transitions are allowed end up scattered across those branches, so they are easy to miss or get wrong.',
   solution:
-    "Give every stage its own class that implements a shared DocumentState interface, and let Document hold just a reference to its current state. Each method on Document (submit, approve, reject, revise) simply forwards to the same method on whichever state object is current. That state object decides what happens, including which state replaces it. Document itself never checks which stage it is in.",
+    "Give every stage its own class that implements a shared DocumentState interface, and let Document hold just a reference to its current state. Each method on Document (submit, approve, reject, revise) simply forwards to the same method on whichever state object is current. That state object decides what happens, including which state replaces it. (GoF leaves open whether the Context or the states decide transitions; here the states do.) Document itself never checks which stage it is in.",
   analogy:
     "A vending machine acts differently depending on whether it is idle, has enough coins, or is dispensing. The same button press does something different in each state, and the machine moves itself to the next state once the action is done.",
   whenToUse: [
@@ -28,12 +28,12 @@ export const pattern: PatternDefinition = {
   pros: [
     "Replaces sprawling conditionals with small, focused classes, one per state.",
     "Each state decides which actions it accepts. Invalid ones are absorbed (or could throw) instead of being handled ad hoc by callers.",
-    "State-specific behaviour lives in one class. Adding a state still means updating every existing state that can move into it.",
+    "State-specific behaviour lives in one class.",
   ],
   cons: [
     "Overkill for objects with only two or three simple states.",
     "The overall state machine is spread across several classes, so the big picture is harder to see at a glance.",
-    "Each state must know which states it can hand off to, so the states are coupled to one another.",
+    "When states pick their own successor (as here), each state must know the states it hands off to, coupling them. Letting the Context own the transitions avoids this, but centralises the rules again.",
   ],
   realWorld: [
     "TCP connection states (Listen, SynReceived, Established, Closed, …)",

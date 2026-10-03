@@ -17,7 +17,7 @@ export const pattern: PatternDefinition = {
   solution:
     "Give the proxy the exact same interface as the real object, so callers cannot tell them apart. The proxy forwards calls to the real object, but first it can delay creating it, cache results, check permissions or add logging. Neither the caller nor the real object has to know. This differs from Decorator, which is always handed an existing object to wrap. A proxy controls access to the one real subject it stands in for, and it often owns that subject's lifecycle.",
   analogy:
-    "A credit card is a proxy for the cash in your bank account. The shop accepts it just like cash, but it adds a layer that can check your balance, log the payment or decline the charge, without your account being touched for every small decision.",
+    "A credit card is a proxy for the cash in your bank account. The shop accepts it just like cash, but it adds a layer that can check your balance, log the payment or decline the charge before any money moves.",
   whenToUse: [
     "Creating the real object is expensive and it may never be needed (virtual proxy, or lazy loading).",
     "Calls go over a network and you want a local stand-in with the same interface (remote proxy).",
@@ -34,7 +34,7 @@ export const pattern: PatternDefinition = {
     "With a virtual proxy, the first call pays the delayed creation cost that every later call avoids.",
   ],
   realWorld: [
-    "ES2015 Proxy objects, which intercept property access",
+    "ES2015 Proxy objects, which intercept fundamental operations such as property reads and writes and function calls",
     "ORMs that return lazy-loading proxies for related records",
     "CDN edge caches acting as caching proxies in front of an origin server",
     "gRPC and REST client stubs acting as remote proxies for a networked service",

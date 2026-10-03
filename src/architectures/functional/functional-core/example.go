@@ -129,7 +129,8 @@ func (h *ReminderHandler) Handle(accountID string) Decision {
 
 // [test]
 // Testing the core needs no mocks, no fake clock type, no in-memory database --
-// just values in, a value out, compared directly.
+// just values in, a value out, compared with reflect.DeepEqual (Decision holds a
+// slice, so == does not compile on it).
 var testAccount = Account{
 	ID:             "acc-1",
 	Email:          "ops@example.com",

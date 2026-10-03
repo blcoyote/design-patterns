@@ -57,7 +57,7 @@ class OrderController {
   }
 
   // [violation]
-  // Anti-pattern: reaching straight past Application and Domain into Data access.
+  // Anti-pattern: going around the data-access layer and writing SQL here.
   // Nothing in a plain class stops this — only discipline and code review do.
   handleDebugLookup(id: string): unknown[] {
     return databaseQuery(`SELECT * FROM orders WHERE id = '${id}'`);
@@ -78,5 +78,5 @@ controller.handlePlaceOrder("cust-42", [
   { sku: "GADGET", price: 29.99 },
 ]);
 
-// Anti-pattern in action: the controller reaches past three layers directly into the database.
+// Anti-pattern in action: the controller bypasses the data-access layer and queries the database itself.
 controller.handleDebugLookup("42");

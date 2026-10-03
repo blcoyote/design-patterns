@@ -5,7 +5,7 @@ import type { Step, VisualizationProps } from "@/types/pattern";
 
 /**
  * Object Pool keeps the generic structural diagram up top (Client A/B, the
- * ConnectionPool, Poolable, PooledConnection, Database) but replaces the usual
+ * ObjectPool, Poolable, PooledConnection, Database) but replaces the usual
  * "stats strip" below it with a literal pool: three slots that light up on
  * acquire() and dim on release(), a visible waiting queue for callers who
  * arrive once every slot is taken, and a live in-use/idle/waiting readout.

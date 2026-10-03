@@ -28,7 +28,7 @@ export const pattern: PatternDefinition = {
   pros: [
     "Separates traversal from the collection, so the collection is free to change how it stores its data.",
     "Supports several iterators over the same collection at once, each with its own cursor.",
-    "Gives every collection the same traversal interface, so client code (for...of, spread, destructuring) works the same everywhere.",
+    "Gives every collection the same traversal interface, so the same client code (for...of, foreach, for ... in, range) works on all of them.",
   ],
   cons: [
     "Overkill for a simple array that you could just loop over directly.",
@@ -36,12 +36,12 @@ export const pattern: PatternDefinition = {
     "Changing the collection while an iterator is in use can give inconsistent or skipped results.",
   ],
   realWorld: [
-    "Arrays, Strings, Maps and Sets all implement the iteration protocol, which is why for...of and spread (...) work on them.",
-    "Generator functions (function*) produce an Iterator<T> automatically: yield replaces hand-written next() bookkeeping.",
+    "JavaScript's Arrays, Strings, Maps and Sets all implement the iteration protocol, which is why for...of and spread (...) work on them.",
+    "Generators (JS function*, C# yield return, Python yield) and Go 1.23 iter.Seq functions: yield replaces hand-written next() bookkeeping.",
     "Java's Iterable/Iterator, C#'s IEnumerable/IEnumerator, Python's __iter__/__next__",
     "Database cursors and paginated API clients that fetch results lazily behind a uniform next() call",
   ],
-  related: ["composite", "factory-method", "template-method"],
+  related: ["composite", "factory-method", "memento", "template-method"],
 
   participants: [
     {
@@ -64,7 +64,7 @@ export const pattern: PatternDefinition = {
       y: 70,
       width: 160,
       description:
-        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python, and GetIterator() in Go. Go has no built-in iterator protocol for custom collections, so the client drives the loop manually by calling Next() on the returned iterator.",
+        "Declares the one method every traversable collection must provide — [Symbol.iterator]() in TS, GetEnumerator() in C#, __iter__() in Python, and GetIterator() in Go. Go has no iterator interface to implement, so the Go tab declares GoF-style Iterable/Iterator interfaces itself and the client calls Next() by hand; idiomatic Go 1.23+ would instead expose a method returning iter.Seq, which for ... range consumes directly.",
     },
     {
       id: "playlist",
@@ -108,7 +108,7 @@ export const pattern: PatternDefinition = {
       to: "iterable",
       type: "implements",
       description:
-        "Playlist implements the language's iterable interface where one exists, so built-in loops can consume it in TS, C#, and Python. Go uses the same iterator explicitly because custom collections have no built-in iteration protocol.",
+        "Playlist implements the language's iterable interface, so built-in loops can consume it in TS, C#, and Python. Go's range loop doesn't understand a hand-written interface like this (it ranges over iter.Seq functions instead), so the Go tab calls the iterator explicitly.",
     },
     {
       id: "implIterator",
@@ -230,7 +230,7 @@ export const pattern: PatternDefinition = {
     {
       title: "next() reports done",
       description:
-        "The cursor has now passed the last song. next() signals the end instead of wrapping back around: TS returns { value: undefined, done: true }, C# MoveNext() returns false, Python __next__() raises StopIteration, and Go Next() returns ok = false — the protocol's agreed end signal, which the loop catches for you.",
+        "The cursor has now passed the last song. next() signals the end instead of wrapping back around: TS returns { value: undefined, done: true }, C# MoveNext() returns false, Python __next__() raises StopIteration, and Go Next() returns ok = false — the protocol's agreed end signal, which the loop catches for you (in Go, the loop condition checks ok).",
       highlight: ["client", "clientNext", "playlistIterator"],
       packets: [
         { relation: "clientNext", label: "next()" },
@@ -247,7 +247,7 @@ export const pattern: PatternDefinition = {
     {
       title: "The loop exits cleanly",
       description:
-        "The loop checks for the end signal after every call and stops automatically. The client never had to know how many songs were in the playlist, or manage a cursor itself.",
+        "The loop checks for the end signal after every call and stops (automatically in TS, C# and Python; through the ok check in Go). The client never had to know how many songs were in the playlist, or manage a cursor itself.",
       highlight: ["client", "playlist", "playlistIterator"],
       code: "usage",
     },

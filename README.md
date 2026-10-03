@@ -6,7 +6,7 @@ Every pattern has:
 
 - an **animated diagram** — press play and watch messages travel between objects, step by step
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
-- a TypeScript example, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
+- TypeScript, C# and Python examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
 | Creational | Structural | Behavioral | Architectural |
 | --- | --- | --- | --- |

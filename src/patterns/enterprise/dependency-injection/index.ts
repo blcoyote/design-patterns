@@ -10,30 +10,26 @@ export const pattern: PatternDefinition = {
   category: 'enterprise',
   order: 1,
   summary: 'Hand objects their dependencies from the outside instead of letting them construct their own.',
-  intent:
-    'Separate the construction of an object’s dependencies from its own logic, so a class receives what it needs through its constructor instead of creating it internally.',
-  problem:
-    'OrderService needs a database repository and a way to send email. If it calls new OrderRepository() and new SmtpEmailSender() itself, it is now hard-wired to those concrete classes and to however many dependencies they in turn require. Testing OrderService means testing the real repository and the real mailer too, and swapping either one means editing OrderService’s source.',
-  solution:
-    'Classes declare what they need as constructor parameters, typed as interfaces where it matters, and never instantiate those parameters themselves. A container — or just a few lines of composition code — builds the dependency graph bottom-up, leaves first, and passes each finished instance into the constructor of whatever needs it, until the object the application actually wants is fully wired.',
-  analogy:
-    'A car factory does not have the engine build its own pistons: pistons, engine and chassis are built separately and assembled in order, each station handed exactly the finished parts it needs.',
+  intent: 'Give an object the collaborators it needs from the outside, instead of letting it create them itself.',
+  problem: "OrderService needs a database repository and a way to send email. If it calls new SqlOrderRepository() and new SmtpEmailSender() itself, it is hard-wired to those concrete classes, and to whatever they need in turn. Testing OrderService then means testing the real repository and the real mailer too. Swapping either one means editing OrderService's source.",
+  solution: 'Each class lists what it needs as constructor parameters, typed as interfaces where it matters, and never creates those dependencies itself. A container (or just a few lines of composition code) builds the dependency graph from the bottom up, leaves first, and passes each finished instance to the constructor of whatever needs it, until the object the application actually wants is fully wired.',
+  analogy: 'A car factory does not make the engine build its own pistons. Pistons, engine and chassis are built separately and assembled in order, and each station is handed exactly the finished parts it needs.',
   whenToUse: [
-    'A class’s dependencies have dependencies of their own, and wiring them by hand is repetitive or error-prone.',
-    'You want to substitute a fake or mock implementation in tests without touching the class under test.',
+    "A class's dependencies have dependencies of their own, and wiring them by hand is repetitive or error-prone.",
+    'You want to swap in a fake or mock implementation in tests without touching the class under test.',
     'Different environments (dev, test, prod) need different concrete implementations behind the same interface.',
-    'You want construction logic centralized instead of scattered across every class that happens to need an object.',
+    'You want construction logic in one place instead of scattered across every class that happens to need an object.',
   ],
   pros: [
-    'Classes depend on abstractions, not concrete classes — implementations are easy to swap.',
-    'Testing is trivial: hand the class under test a fake or mock instead of the real dependency.',
-    'Construction logic lives in one place instead of being duplicated across every consumer.',
+    'Classes depend on abstractions, not concrete classes, so implementations are easy to swap.',
+    'Testing is easy: give the class under test a fake or mock instead of the real dependency.',
+    'Construction logic lives in one place instead of being repeated in every consumer.',
   ],
   cons: [
-    'Adds indirection — instead of following a chain of `new` calls you now follow a container.',
-    'Misconfigured wiring (a missing registration, a lifetime mismatch) only fails at resolve time, not compile time.',
-    'Overkill for small scripts with only one or two straightforward dependencies.',
-    'Passing the container itself into a class so it can call resolve() whenever it needs something is Service Locator, not Dependency Injection — it hides the dependency instead of declaring it.',
+    'Adds indirection: instead of following a chain of `new` calls, you now follow a container.',
+    'Wiring mistakes (a missing registration, a lifetime mismatch) show up when something is resolved, not at compile time.',
+    'Overkill for small scripts with only one or two simple dependencies.',
+    'Passing the container itself into a class so it can call resolve() whenever it needs something is Service Locator, not Dependency Injection. It hides the dependency instead of declaring it.',
   ],
   realWorld: [
     'Angular and NestJS: constructor injection driven by decorators (@Injectable, @Inject)',

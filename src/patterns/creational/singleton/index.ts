@@ -12,33 +12,33 @@ export const pattern: PatternDefinition = {
   summary:
     "Guarantee a class has exactly one instance, with one global point of access to it.",
   intent:
-    "Ensure a class has only one instance, and provide a global point of access to it.",
+    'Make sure a class has exactly one instance, and give everyone a single, well-known way to reach it.',
   problem:
-    "Some objects — a configuration store, a connection pool, a logger — only make sense as a single shared instance. If any code can call `new` freely, you can end up with several copies that disagree with each other, waste resources, or step on each other’s state.",
+    "Some objects, like a configuration store, a connection pool or a logger, only make sense as one shared instance. If any code can call `new` freely, you can end up with several copies that disagree with each other, waste resources, or overwrite each other's state.",
   solution:
-    "Make the constructor private so outside code cannot call `new` directly. Expose a static getInstance() method instead: the first call creates the one object and stores it; every later call returns that same stored object.",
+    "Make the constructor private so outside code cannot call `new` directly. Instead, expose a static getInstance() method: the first call creates the one object and stores it, and every later call returns that same stored object. (How strict \"private\" is depends on the language: TypeScript checks it at compile time only, and Python has no private constructors, so it uses a runtime guard.)",
   analogy:
-    'A country has exactly one government at a time. You do not "construct" a new government whenever you need one — you go through the single, already-existing office.',
+    'A country has exactly one government at a time. You do not "construct" a new government whenever you need one. You go through the single office that already exists.',
   whenToUse: [
-    "Exactly one instance of a class must exist, and it must be reachable from many places.",
-    "You want stricter control over global state than a plain module-level variable gives you.",
-    "Lazily creating an expensive shared resource the first time it is actually needed.",
+    "Exactly one instance of a class must exist, and many parts of the program need to reach it.",
+    "You want stricter control over shared global state than a plain module-level variable gives you.",
+    "You want to create an expensive shared resource lazily, the first time it is actually needed.",
   ],
   pros: [
-    "Guarantees a single instance and a well-known access point to it.",
-    "Can be created lazily, only when first requested.",
-    "Centralizes state that genuinely is global, instead of scattering it.",
+    "You are guaranteed a single instance and one well-known way to get it.",
+    "It can be created lazily, only when first requested.",
+    "State that really is global lives in one place instead of being scattered around.",
   ],
   cons: [
-    "Introduces global state, which hides dependencies and makes code harder to reason about.",
-    "Hard to unit test: classes that reach for the singleton directly cannot easily be given a mock instance.",
-    "In multi-threaded environments the lazy-init check must be synchronized, or two threads can race and create two instances.",
+    "It introduces global state, which hides dependencies and makes code harder to reason about.",
+    "It is hard to unit test: classes that grab the singleton directly cannot easily be given a mock instance.",
+    "With multiple threads, the lazy-creation check must be synchronized, or two threads can race and create two instances.",
   ],
   realWorld: [
-    "A single application-wide configuration object (process.env wrappers, feature-flag stores).",
-    "Database connection pools and caches shared across an app.",
+    "A single application-wide configuration object or feature-flag store",
+    "Database connection pools and caches shared across an app",
     "java.lang.Runtime.getRuntime() in Java",
-    "A single Redux/Zustand store per application — singleton-like by convention, not by enforced construction",
+    "A single Redux or Zustand store per application, which is a singleton by convention rather than by enforced construction",
   ],
   related: ["dependency-injection", "facade", "abstract-factory", "flyweight"],
   participants: [

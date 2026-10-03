@@ -12,32 +12,32 @@ export const pattern: PatternDefinition = {
   summary:
     "Capture and restore an object’s private state without ever exposing it.",
   intent:
-    "Without violating encapsulation, capture and externalize an object’s internal state so that it can be restored to that state later.",
+    "Save a snapshot of an object's state so you can restore it later, without breaking its encapsulation.",
   problem:
-    'An undo feature needs to save an object’s internal state so it can roll back to it later. The obvious fix — adding public getters and setters so some outside "history" manager can read and later rewrite that state — breaks encapsulation, and invites every other part of the program to depend on internals that were never meant to be public.',
+    "An undo feature needs to save an object's internal state so it can roll back to it later. The obvious fix is to add public getters and setters so an outside \"history\" manager can read and later rewrite that state. But that breaks encapsulation, and it invites the rest of the program to depend on internals that were never meant to be public.",
   solution:
-    "Let the object itself (the Originator) produce an opaque Memento capturing its own state, and hand that memento to a Caretaker whose only job is to store and return it — never to look inside. When a rollback is needed, the Caretaker hands the memento back, and only the Originator knows how to unpack and restore from it.",
+    "Let the object itself (the Originator) produce an opaque Memento that captures its own state. It hands the memento to a Caretaker, whose only job is to store it and give it back, never to look inside. When you want to roll back, the Caretaker returns the memento, and only the Originator knows how to unpack it and restore its state.",
   analogy:
-    "A video game’s save file: the game writes it, and only the game knows how to load it back. Your file system — the caretaker — happily stores and hands back the file on request, with no idea, and no need to know, what is inside it.",
+    "Think of a video game's save file. The game writes it, and only the game knows how to load it back. Your file system (the caretaker) happily stores the file and hands it back on request, with no idea what is inside and no need to know.",
   whenToUse: [
-    "You need undo/redo, checkpoints, or rollback for an object’s internal state.",
-    "A direct snapshot would otherwise require exposing private fields through public getters and setters.",
-    "You want a history mechanism (the caretaker) that stays completely decoupled from exactly what it is storing.",
+    "You need undo/redo, checkpoints, or rollback for an object's internal state.",
+    "Taking a snapshot would otherwise force you to expose private fields through public getters and setters.",
+    "You want a history mechanism (the caretaker) that stays completely independent of what it is storing.",
   ],
   pros: [
-    "Preserves encapsulation — only the originator ever reads or writes its own state.",
-    "Simplifies the originator: it just produces and consumes snapshots, instead of tracking its own history.",
+    "Preserves encapsulation: only the originator ever reads or writes its own state.",
+    "Keeps the originator simple: it just produces and consumes snapshots instead of tracking its own history.",
     "A caretaker can manage any number of mementos (a stack, a timeline, branches) without knowing their contents.",
   ],
   cons: [
-    "Storing many large mementos can be expensive if snapshots are not kept small or incremental.",
-    "Caretakers must still manage memento lifetimes carefully — an unbounded history can leak memory.",
-    "Languages without true private members need another idiom (e.g. a package-private accessor) to keep the memento genuinely opaque.",
+    "Storing many large mementos can be expensive unless snapshots are kept small or incremental.",
+    "The caretaker must manage memento lifetimes carefully, because an unbounded history can leak memory.",
+    "Languages without true private members need another trick to keep the memento opaque (for example a package-private accessor).",
   ],
   realWorld: [
     "Undo/redo stacks in text editors and image editors (Ctrl+Z / Ctrl+Shift+Z)",
     "Database transaction savepoints and rollback (memento-like, though usually implemented at a lower level)",
-    "Git commits — memento-like immutable snapshots a working tree can be reset back to",
+    "Git commits: memento-like immutable snapshots that a working tree can be reset back to",
     "Game save states and level checkpoints",
   ],
   related: ["command", "prototype", "state"],

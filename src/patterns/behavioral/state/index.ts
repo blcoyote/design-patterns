@@ -12,27 +12,27 @@ export const pattern: PatternDefinition = {
   summary:
     "Let an object change its behavior by swapping the internal state object that defines it.",
   intent:
-    "Allow an object to alter its behavior when its internal state changes. The object will appear to change its class.",
+    'Let an object change its behaviour when its internal state changes, by handing the work to a separate object for each state.',
   problem:
-    'A document’s behavior depends on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. Encoding this as one method full of if (status === "draft") … else if (status === "inReview") … grows every time a stage or an action is added, and nothing stops a caller from triggering a transition that should be impossible.',
+    'A document behaves differently depending on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. If you handle this in one method full of if (status === "draft") … else if (status === "inReview") … checks, that method grows with every new stage or action. Rules about which transitions are allowed end up scattered across those branches, so they are easy to miss or get wrong.',
   solution:
-    "Give every stage its own class implementing a shared DocumentState interface, and let Document hold only a reference to its current state. Each method on Document (submit, approve, reject, revise) simply forwards to the same method on whichever state object is current — and that state object is the one that decides what happens next, including which state replaces it. Document itself never branches on what stage it is in.",
+    "Give every stage its own class that implements a shared DocumentState interface, and let Document hold just a reference to its current state. Each method on Document (submit, approve, reject, revise) simply forwards to the same method on whichever state object is current. That state object decides what happens, including which state replaces it. Document itself never checks which stage it is in.",
   analogy:
-    "A vending machine behaves differently depending on whether it is idle, has received enough coins, or is dispensing a product. The same button press does something different in each state, and the machine transitions into the next state itself once that action completes.",
+    "A vending machine acts differently depending on whether it is idle, has enough coins, or is dispensing. The same button press does something different in each state, and the machine moves itself to the next state once the action is done.",
   whenToUse: [
-    'An object’s behavior changes based on an internal "mode" or "stage", and that behavior spans many methods.',
-    "You see a method riddled with conditionals that all branch on the same status field.",
-    "Transitions between states follow rules you want enforced in one place, not scattered across every caller.",
+    'An object behaves differently depending on an internal "mode" or "stage", and this affects many of its methods.',
+    "You have methods full of conditionals that all check the same status field.",
+    "You want the rules for moving between states enforced in one place, not scattered across every caller.",
   ],
   pros: [
-    "Replaces sprawling conditionals with small, focused classes — one per state.",
-    "Each state decides which actions it honours; invalid ones are absorbed (or could throw) instead of being handled ad hoc by callers.",
-    "State-specific behaviour is localized to one class, but adding a state still means updating every existing state that can transition into it.",
+    "Replaces sprawling conditionals with small, focused classes, one per state.",
+    "Each state decides which actions it accepts. Invalid ones are absorbed (or could throw) instead of being handled ad hoc by callers.",
+    "State-specific behaviour lives in one class. Adding a state still means updating every existing state that can move into it.",
   ],
   cons: [
     "Overkill for objects with only two or three simple states.",
-    "Spreads the overall state machine across several files, making the big picture harder to see at a glance.",
-    "States must know which state(s) they can hand off to, coupling them to one another.",
+    "The overall state machine is spread across several classes, so the big picture is harder to see at a glance.",
+    "Each state must know which states it can hand off to, so the states are coupled to one another.",
   ],
   realWorld: [
     "TCP connection states (Listen, SynReceived, Established, Closed, …)",

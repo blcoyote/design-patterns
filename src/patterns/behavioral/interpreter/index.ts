@@ -12,26 +12,26 @@ export const pattern: PatternDefinition = {
   summary:
     "Represent a grammar as a class hierarchy, and interpret sentences in that language by walking the resulting tree.",
   intent:
-    "Given a language, define a representation for its grammar along with an interpreter that uses the representation to interpret sentences in the language.",
+    'Model a small language as a tree of classes, one per grammar rule, and evaluate a sentence by walking that tree.',
   problem:
-    "An application already has an expression tree for a small, well-defined language — arithmetic formulas, search filters, routing rules — and needs to evaluate it, and the set of rules keeps growing. Hard-coding a giant switch statement over every node type to evaluate it makes the grammar brittle: adding one new rule means hunting down and editing a tangle of nested conditionals.",
+    "Your application has expression trees for a small, well-defined language, such as arithmetic formulas, search filters or routing rules, and it needs to evaluate them. The set of rules keeps growing. If you evaluate the tree with one giant switch statement over every node type, the code gets brittle: adding a single new rule means hunting through nested conditionals to edit them.",
   solution:
-    "Model every rule of the grammar as a class implementing a shared Expression interface with one method, interpret(context). Terminal expressions (literals, variables) implement it directly; non-terminal expressions (Add, Multiply, And, Or…) hold references to their own sub-expressions and implement it by interpreting each child and combining the results. A sentence in the language becomes a tree of these objects, and evaluating it is just calling interpret() once on the root — the recursion that walks the grammar is distributed across the classes instead of centralized in one function. Interpreter only covers that evaluation step: turning source text into the tree in the first place — parsing — is a separate concern the pattern leaves to you; here the client just builds the tree by hand.",
+    "Make every rule of the grammar a class that implements a shared Expression interface with one method, interpret(context). Terminal expressions (literals, variables) implement it directly. Non-terminal expressions (Add, Multiply, And, Or, ...) hold references to their own sub-expressions, interpret each child, and combine the results. A sentence in the language becomes a tree of these objects, and evaluating it means calling interpret() once on the root. The recursion that walks the grammar is spread across the classes instead of sitting in one function. Interpreter only covers this evaluation step. Turning source text into the tree (parsing) is a separate job that the pattern leaves to you. Here the client simply builds the tree by hand.",
   analogy:
-    "A calculator reading “x + (2 × 3)” doesn't swallow the whole formula at once. It breaks it down into an addition of two sub-formulas, each of which is either a literal, a variable, or another sub-formula — and solves the whole thing by solving the smallest pieces first and combining the answers on the way back up.",
+    "Think of a calculator reading “x + (2 × 3)”. It doesn't swallow the whole formula at once. It splits it into an addition of two smaller formulas, each of which is a literal, a variable, or another smaller formula. It solves the smallest pieces first and combines the answers on the way back up.",
   whenToUse: [
-    "The grammar is simple and relatively stable — Interpreter does not scale well to complex languages.",
-    "Raw efficiency is not critical — a tree-walking interpreter is slower than a compiled or table-driven one.",
-    "You would rather represent each grammar rule as a class than hand-write one big evaluator function (parsing source text into the tree in the first place is a separate concern, outside the pattern).",
+    "The grammar is simple and fairly stable. Interpreter does not scale well to complex languages.",
+    "Raw speed isn't critical, because a tree-walking interpreter is slower than a compiled or table-driven one.",
+    "You'd rather represent each grammar rule as a class than hand-write one big evaluator function. (Parsing source text into the tree is a separate concern, outside the pattern.)",
   ],
   pros: [
-    "Each grammar rule lives in its own class, so adding a rule means adding a class, not editing a monolithic evaluator.",
-    "The grammar itself becomes an object structure that can be built, inspected and reused at runtime.",
-    "Non-terminal expressions reuse Composite's recursive structure, so complex rules fall out of simple ones for free.",
+    "Each grammar rule lives in its own class, so adding a rule means adding a class, not editing one big evaluator.",
+    "The grammar becomes an object structure that you can build, inspect and reuse at runtime.",
+    "Non-terminal expressions reuse Composite's recursive structure, so complex rules are built from simple ones for free.",
   ],
   cons: [
     "One class per grammar rule becomes unwieldy for anything beyond a small language.",
-    "Deeply nested expressions mean a deep call stack — large sentences can be slow and stack-hungry.",
+    "Deeply nested expressions mean a deep call stack, so large sentences can be slow and use a lot of stack.",
     "A tree of many tiny classes is harder to read and debug than one linear parsing function.",
   ],
   realWorld: [

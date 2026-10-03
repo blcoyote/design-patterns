@@ -12,32 +12,32 @@ export const pattern: PatternDefinition = {
   summary:
     "Construct complex objects step by step, so the same construction process can yield different representations.",
   intent:
-    "Separate the construction of a complex object from its representation, so the same construction process can create different representations.",
+    'Build a complex object step by step, so the same process can produce different results and the constructor stays readable.',
   problem:
-    'An HTTP request can have a method, headers, query params, a body, a timeout, retries… A single constructor with a dozen optional parameters becomes unreadable, and most combinations are never used together — a "telescoping constructor" nobody wants to call. Worse, sometimes you need the same recipe to produce more than one kind of output — say, both a real request object and the equivalent curl command for debugging.',
+    'An HTTP request can have a method, headers, query params, a body, a timeout, retries and more. One constructor with a dozen optional parameters is hard to read, and most combinations are never used together. This is the "telescoping constructor" nobody wants to call. Sometimes you also need the same recipe to produce more than one kind of output, for example a real request object and the equivalent curl command for debugging.',
   solution:
-    'A Builder interface declares the construction steps — one per optional piece. Each ConcreteBuilder implements those steps for its own product: one assembles a real object, another renders a string. A Director knows reusable recipes (e.g. "a JSON POST") and drives any builder it is handed through the same fixed sequence of steps, without knowing which concrete product comes out. The client picks a concrete builder, optionally hands it to the director, and retrieves the finished product with getResult(). The popular "fluent builder" you see in most codebases (Joshua Bloch\'s version) is a simplified variant: one concrete builder, no separate interface and no Director — fine when you only ever need one representation.',
+    'A Builder interface declares the construction steps, one per optional piece. Each ConcreteBuilder implements those steps for its own product: one assembles a real object, another renders a string. A Director holds reusable recipes (e.g. "a JSON POST") and runs any builder it is handed through the same fixed steps, without knowing which product comes out. The client picks a concrete builder, optionally hands it to the director, and collects the finished product with getResult(). The popular "fluent builder" you see in most codebases (Joshua Bloch\'s version) is a simplified variant: one concrete builder, no Builder interface and no Director. That is fine when you only ever need one kind of output.',
   analogy:
-    'A recipe card (the Director) lists the same steps — "knead, top, bake" — regardless of which kitchen follows it. Hand it to a pizzeria (one builder) and you get a pizza; hand the exact same card to a meal-kit packer (another builder) and you get a boxed kit instead. Same process, different finished product.',
+    'A recipe card (the Director) lists the same steps, "knead, top, bake", no matter which kitchen follows it. Hand it to a pizzeria (one builder) and you get a pizza. Hand the exact same card to a meal-kit packer (another builder) and you get a boxed kit. Same process, different finished product.',
   whenToUse: [
-    "An object needs many optional fields and a giant constructor would be unreadable.",
+    "An object has many optional fields and one giant constructor would be unreadable.",
     "You want the same step-by-step process to produce several different representations.",
-    "You want construction code to read like a clear, fluent recipe instead of a flat parameter list.",
+    "You want construction code to read like a clear, fluent recipe instead of a flat list of parameters.",
   ],
   pros: [
-    "Construct objects step by step, deferring steps or running them recursively.",
-    "Reuse the same construction code to build different representations of a product.",
-    "Isolates complex construction logic from the product’s own business logic.",
+    "You build objects step by step, and can postpone steps or run them recursively.",
+    "The same construction code can build different representations of a product.",
+    "Complex construction logic stays out of the product's own business logic.",
   ],
   cons: [
-    "Adds extra classes and indirection, which is overkill for simple objects.",
-    "Required parts can only be validated at getResult() time, not at compile time (unless you reach for staged/typestate builders).",
+    "It adds extra classes and indirection, which is overkill for simple objects.",
+    "Required parts can only be checked when you call getResult(), not at compile time (unless you use staged or typestate builders).",
   ],
   realWorld: [
-    "java.net.http.HttpRequest.newBuilder() and OkHttp’s Request.Builder — a Builder interface-ish API built into HTTP clients",
-    ".NET’s UriBuilder and ASP.NET Core’s WebApplicationBuilder — distinct builder objects with their own Build()",
+    "java.net.http.HttpRequest.newBuilder() and OkHttp's Request.Builder, builders built into HTTP clients",
+    "ASP.NET Core's WebApplicationBuilder, a separate builder object with its own Build() method",
     "SQL query builders (Knex, TypeORM QueryBuilder)",
-    'Lombok’s @Builder annotation — generates the popular single-class "fluent builder" variant, without a separate Director or Builder interface',
+    'Lombok\'s @Builder annotation, which generates the popular single-class "fluent builder" variant without a separate Director or Builder interface',
   ],
   related: ["abstract-factory", "factory-method", "composite"],
   participants: [

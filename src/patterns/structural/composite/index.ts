@@ -11,32 +11,32 @@ export const pattern: PatternDefinition = {
   order: 5,
   summary: 'Compose objects into trees, then treat a single leaf and an entire subtree the same way.',
   intent:
-    'Compose objects into tree structures to represent part-whole hierarchies. Composite lets clients treat individual objects and compositions of objects uniformly.',
+    'Arrange objects in a tree so that a single item and a whole group of items can be used through the same interface.',
   problem:
-    'A file system (or a UI menu, or an org chart) mixes single items with groups of items, and a group can itself contain more groups, nested to any depth. Code that has to ask "is this one file, or a whole folder?" at every call site fills up with type checks and breaks the moment another level of nesting appears.',
+    'A file system (or a UI menu, or an org chart) mixes single items with groups of items, and a group can contain more groups, nested to any depth. Code that has to ask "is this one file or a whole folder?" at every call site fills up with type checks. It breaks as soon as another level of nesting appears.',
   solution:
-    'Give leaves and containers the same interface — one operation, like getSize(). A Leaf implements it directly, returning its own value. A Composite implements the exact same method by looping over its children and delegating to each one, combining their results. The client only ever calls the one method on the one interface, whether it is holding a single file or an entire directory tree — the recursion is hidden inside the composites themselves.',
+    'Give leaves and containers the same interface, with one operation such as getSize(). A Leaf implements it directly and returns its own value. A Composite implements the same method by looping over its children, asking each one, and combining the answers. The client calls that one method on that one interface, whether it holds a single file or a whole directory tree. The recursion is hidden inside the composites.',
   analogy:
-    'An org chart: asking "what is this team\'s headcount?" works the same way whether you ask an individual contributor (the answer is 1) or a manager, who asks each of their direct reports the same question and adds up the answers — some of whom are themselves managers asking further down the chain.',
+    'Picture an org chart. Ask "what is this team\'s headcount?" and it works the same for everyone. An individual contributor answers 1. A manager asks each direct report the same question and adds up the answers, and some of those reports are managers who ask the people below them.',
   whenToUse: [
     'You need to represent part-whole hierarchies of objects as a tree.',
-    'You want client code to treat individual objects and compositions of them identically.',
-    'The structure can be nested to an arbitrary, unknown depth.',
+    'You want client code to treat single objects and groups of them the same way.',
+    'The structure can nest to an arbitrary, unknown depth.',
   ],
   pros: [
-    'Client code stays simple: one interface, no `if (isLeaf) … else …` branching.',
-    'Open/Closed: new kinds of leaves or composites slot in without touching existing code.',
-    'Makes building and traversing arbitrarily deep, recursive structures easy.',
+    'Client code stays simple: one interface and no `if (isLeaf) … else …` branching.',
+    'Open/Closed: new kinds of leaves or composites fit in without touching existing code.',
+    'Building and walking arbitrarily deep, recursive structures becomes easy.',
   ],
   cons: [
-    'Can make the design overly general — hard to restrict what a composite may legally contain.',
-    'Operations that only make sense on containers (add/remove a child) are awkward or unsafe on leaves.',
+    'The design can become too general, and it is hard to restrict what a composite may contain.',
+    'Operations that only make sense on containers (add or remove a child) are awkward or unsafe on leaves if you put them on the shared interface.',
     'Very deep trees mean a recursive call chain all the way down, which costs stack frames and time.',
   ],
   realWorld: [
-    'File systems: directories and files share one interface (size, delete, search…)',
-    'The DOM tree: every Node, element or text, shares the same interface for appendChild and traversal',
-    'GUI menus: a menu holds menu items and other (sub)menus behind the same interface',
+    'File systems, where directories and files share one interface (size, delete, search and so on)',
+    'The DOM tree, where every Node (element or text) shares the same interface for appendChild and traversal',
+    'GUI menus, where a menu holds menu items and other submenus behind the same interface',
     'Bill-of-materials and org-chart trees that total cost or headcount recursively',
   ],
   related: ['decorator', 'iterator', 'visitor', 'interpreter', 'flyweight'],

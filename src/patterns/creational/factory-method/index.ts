@@ -10,32 +10,31 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: 'Let subclasses decide which concrete class to instantiate.',
   intent:
-    'Define an interface for creating an object, but let subclasses decide which class to instantiate. Factory Method lets a class defer instantiation to subclasses.',
+    'Let subclasses decide which concrete class to create, so the code that needs an object only depends on its interface.',
   problem:
-    'A LogisticsCo base class plans deliveries, but the concrete vehicle used — truck, ship, plane — depends on which kind of logistics company you are. If the base class hard-codes `new Truck()`, you cannot extend it to sea or air logistics without rewriting its planning logic.',
+    'A Logistics base class plans deliveries, but the vehicle it needs (truck, ship, plane) depends on the kind of logistics company. If the base class hard-codes `new Truck()`, you cannot add sea or air delivery without rewriting its planning logic.',
   solution:
-    'Pull the object-creation step out into its own method — createTransport() — and make it abstract. Each subclass (RoadLogistics, SeaLogistics) overrides createTransport() to return the Transport it needs. The shared planning logic in the base class calls createTransport() without knowing which concrete class comes back.',
+    'Move the "create the vehicle" step into its own method, createTransport(), and make it abstract. Each subclass (RoadLogistics, SeaLogistics) overrides it to return the Transport it needs. The shared planning code in the base class calls createTransport() and never learns which concrete class came back.',
   analogy:
-    'A logistics company always has a planDelivery() process — pack, route, dispatch — but a road branch dispatches a truck and a sea branch dispatches a ship. The dispatching step is a "factory method" each branch implements its own way.',
+    'A logistics company always follows the same planDelivery() routine: pack, route, dispatch. But a road branch dispatches a truck and a sea branch dispatches a ship. The "which vehicle?" step is the factory method, and each branch fills it in its own way.',
   whenToUse: [
-    'A class cannot anticipate the exact class of objects it must create ahead of time.',
-    'You want to let subclasses specify the objects they create, without changing shared code.',
-    'You want subclasses — not the base class — to decide which concrete product to instantiate, by overriding a single creation method.',
+    'A class cannot know ahead of time which concrete class of object it will need to create.',
+    'You want subclasses to choose the objects they create, without changing the shared code.',
+    'You want subclasses, not the base class, to pick the concrete product by overriding a single creation method.',
   ],
   pros: [
-    'Avoids tight coupling between the creator class and concrete product classes.',
-    'Single Responsibility: product-creation code lives in one place.',
-    'Open/Closed: introduce new product types by adding a new creator subclass, with no changes to existing code.',
+    'The creator is not tightly coupled to concrete product classes.',
+    'Single Responsibility: the code that creates products lives in one place.',
+    'Open/Closed: add a new product type by adding a new creator subclass, without changing existing code.',
   ],
   cons: [
-    'Can require a new subclass per product variant, growing the class hierarchy.',
-    'Adds a layer of indirection that is overkill if there is only ever one product type.',
+    'You may need a new subclass for every product variant, so the class hierarchy grows.',
+    'It adds a layer of indirection, which is overkill if there will only ever be one product type.',
   ],
   realWorld: [
-    'Document.createPage() in editors that support multiple page/document types',
-    'java.util.Collection.iterator() — each concrete collection overrides it to return its own Iterator implementation',
+    "The GoF book's own example: an Application base class whose subclasses override CreateDocument() to return their own kind of Document",
+    'java.util.Collection.iterator(): each concrete collection overrides it to return its own Iterator',
     'A Dialog base class whose subclasses override createButton() to return a platform-specific button',
-    'Framework "create" hooks that let app code supply its own object type (e.g. a custom HttpClient)',
   ],
   related: ['abstract-factory', 'prototype', 'builder', 'template-method'],
   participants: [

@@ -11,33 +11,33 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: "Attach new behaviour to an object by wrapping it, layer by layer.",
   intent:
-    "Attach additional responsibilities to an object dynamically. Decorators provide a flexible alternative to subclassing for extending functionality.",
+    'Add behaviour to an object by wrapping it in another object with the same interface, instead of subclassing.',
   problem:
-    "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any combination, in any order. Subclassing every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee…) explodes combinatorially and has to be fixed at compile time.",
+    "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any mix of them, in any order. If you subclass every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee and so on), the number of classes explodes, and each combination is fixed at compile time.",
   solution:
-    "Give every add-on the same interface as the thing it decorates, and have each decorator hold a reference to the object it wraps. Calling a method on the outermost decorator runs its own logic and then delegates to the wrapped object — forming a chain that can be built at runtime, in any order, to any depth. This is different from Proxy, which controls access to or the lifecycle of a single subject it is usually responsible for creating; a decorator is simply handed a wrappee and only ever adds behaviour around it.",
+    "Give every add-on the same interface as the thing it decorates, and let each decorator hold a reference to the object it wraps. Calling a method on the outermost decorator runs its own logic and then passes the call on to the wrapped object. This forms a chain you can build at runtime, in any order, to any depth. Decorator is different from Proxy. A proxy controls access to a single subject, and it is usually responsible for creating that subject. A decorator is simply handed the object to wrap and only adds behaviour around it.",
   analogy:
-    "Dressing for cold weather: a shirt, then a sweater over it, then a coat over that. Each layer adds warmth without changing the layers underneath, and you can put on (or take off) exactly the layers you need.",
+    "Think of dressing for cold weather: a shirt, then a sweater over it, then a coat over that. Each layer adds warmth without changing the layers underneath, and you can put on or take off exactly the layers you need.",
   whenToUse: [
     "You need to add responsibilities to individual objects, not to every instance of a class.",
-    "Subclassing would produce an explosion of classes for every combination of features.",
-    "You want to add or remove behaviour at runtime instead of compile time.",
+    "Subclassing would create a class for every combination of features.",
+    "You want to add or remove behaviour at runtime instead of at compile time.",
   ],
   pros: [
-    "More flexible than static inheritance — combine behaviours at runtime.",
-    "Avoids a class-per-combination explosion.",
+    "It is more flexible than static inheritance, because you combine behaviours at runtime.",
+    "You avoid a class for every combination.",
     "Single Responsibility: each decorator handles one concern.",
   ],
   cons: [
-    "Many small objects that look similar can be hard to debug.",
-    "Order of wrapping matters and can be easy to get wrong.",
-    "Removing a specific decorator from the middle of a stack is awkward.",
+    "Many small objects that look alike can be hard to debug.",
+    "The order of wrapping matters and is easy to get wrong.",
+    "Removing one specific decorator from the middle of a stack is awkward.",
   ],
   realWorld: [
     "Java I/O: BufferedInputStream wrapping a FileInputStream to add buffering",
     ".NET streams: GZipStream or BufferedStream wrapping any Stream to add compression or buffering",
-    "UI component libraries wrapping a component with tooltip/draggable/resizable behaviour",
-    "HTTP middleware chains wrapping a request handler",
+    "UI component libraries that wrap a component to add tooltip, draggable or resizable behaviour",
+    "HTTP middleware chains that wrap a request handler",
   ],
   related: ["adapter", "composite", "facade", "proxy", "strategy"],
   participants: [

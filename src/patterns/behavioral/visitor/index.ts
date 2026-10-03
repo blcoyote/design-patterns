@@ -11,30 +11,30 @@ export const pattern: PatternDefinition = {
   order: 10,
   summary: 'Separate an operation from the object structure it works on, so new operations never touch the elements.',
   intent:
-    'Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements it operates on.',
+    'Add new operations to a set of classes without changing them, by moving each operation into a separate visitor object.',
   problem:
-    'A shape hierarchy — Circle, Rectangle, Group — needs several unrelated operations: total area, a JSON export, an SVG renderer, and more keep arriving. Putting each one as a method on every shape class bloats those classes with logic that has nothing to do with being a shape, and every new operation means editing every single element class all over again.',
+    'A shape hierarchy (Circle, Rectangle, Group) needs several unrelated operations: total area, a JSON export, an SVG renderer, and more keep arriving. If each operation is a method on every shape class, those classes fill up with logic that has nothing to do with being a shape. Every new operation then means editing every element class again.',
   solution:
-    'Give every element exactly one method, accept(visitor), that does nothing but call back into the visitor with its own concrete type: circle.accept(v) calls v.visitCircle(this). This is double dispatch — once on the element’s class via accept(), once on the visitor’s class via the matching visitX() method — and it is what lets the right operation/element pairing get picked without either side writing a single type check. New operations become new Visitor classes; the element classes never change again.',
+    'Give every element exactly one method, accept(visitor), which does nothing except call back into the visitor with its own concrete type: circle.accept(v) calls v.visitCircle(this). This is called double dispatch. The first choice is made on the element’s class (through accept), and the second on the visitor’s class (through the matching visitX method). Together they pick the right operation for the right element, and nobody writes a type check. A new operation is just a new Visitor class, and the element classes never change.',
   analogy:
-    'A museum tour guide (the visitor) walks through rooms (the elements) that were built long before the guide existed. Each room only knows how to announce itself when the guide arrives (accept), and the guide reacts differently depending on which room it hears from — a painting gallery gets one commentary, a sculpture hall another — without any room needing to know anything about tours.',
+    'A museum tour guide (the visitor) walks through rooms (the elements) that were built long before the guide existed. Each room only knows how to announce itself when the guide arrives (accept). The guide then reacts according to which room announced itself: one commentary for a painting gallery, another for a sculpture hall. No room needs to know anything about tours.',
   whenToUse: [
-    'An object structure contains many unrelated classes, and you need several distinct operations across all of them.',
+    'An object structure contains many different classes, and you need several distinct operations across all of them.',
     'The classes in the structure rarely change, but you expect to add new operations often.',
-    'The logic for an operation would otherwise be scattered across every element class, duplicating traversal code each time.',
+    'An operation would otherwise be scattered across every element class, repeating the traversal code each time.',
   ],
   pros: [
-    'Adding a new operation is just a new Visitor class — the element classes are never touched (Open/Closed).',
+    'Adding an operation is just a new Visitor class. The element classes stay untouched (Open/Closed).',
     'All the logic for one operation lives together in a single class instead of being spread across every element.',
-    'Double dispatch resolves the right element/operation pairing without a single instanceof or switch statement.',
+    'Double dispatch finds the right element/operation pairing without any instanceof or switch statement.',
   ],
   cons: [
-    'Adding a new element class means adding a visitXxx method to every existing visitor — the exact opposite trade-off from adding operations.',
+    'Adding a new element class means adding a visitXxx method to every existing visitor. This is the opposite trade-off from adding operations.',
     'Visitors often need access to an element’s internals, which can pressure you into weakening its encapsulation.',
     'The extra accept()/visit() indirection makes the call flow harder to follow than a plain virtual method call.',
   ],
   realWorld: [
-    'Compiler ASTs: Roslyn\'s CSharpSyntaxVisitor and javac\'s TreeVisitor use true double dispatch (an accept() method per node type) to type-check, optimize, or generate code.',
+    'Compiler ASTs (abstract syntax trees, the in-memory tree a compiler builds from source code): Roslyn\'s CSharpSyntaxVisitor and javac\'s TreeVisitor use true double dispatch (an accept() method per node type) to type-check, optimize, or generate code.',
     'ESLint and Babel plugins do visitor-style AST traversal, but dispatch by looking up node.type as a string key rather than by double dispatch.',
     'Serialization frameworks that add a new output format as a new visitor instead of new methods on every model class.',
   ],

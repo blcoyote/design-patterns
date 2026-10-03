@@ -10,33 +10,33 @@ export const pattern: PatternDefinition = {
   order: 8,
   summary: 'Centralize how a set of objects communicate so they never reference each other directly.',
   intent:
-    'Define an object that encapsulates how a set of objects interact, keeping them from referring to each other explicitly, so their interactions can be varied independently.',
+    'Put one object in the middle to coordinate a group of colleagues, so they talk to the mediator instead of to each other.',
   problem:
-    'A login dialog has a username field, a password field, a "remember me" checkbox and a submit button, and the widgets need to react to one another — enable the submit button once a username is typed, jump focus to the password field once remember-me is checked. Wiring every widget directly to every other widget produces a tangle of references where nothing can change without touching several classes, and none of the widgets can be reused in a different dialog.',
+    "A login dialog has a username field, a password field, a \"remember me\" checkbox and a submit button, and the widgets need to react to each other. Typing a username should enable the submit button, and checking remember-me should move focus to the password field. If you wire every widget directly to every other widget, you get a tangle of references. Nothing can change without touching several classes, and no widget can be reused in a different dialog.",
   solution:
-    'Give every widget a reference to a single Mediator instead of to each other. Each widget only tells the mediator when something happens to it (notify(sender, event)); the mediator holds all the cross-widget logic and decides which other widgets to update and how. The widgets themselves stay simple and reusable — the dialog-specific behavior lives in exactly one place.',
+    "Give every widget a reference to a single Mediator instead of to each other. A widget only tells the mediator when something happens to it, by calling notify(sender, event). The mediator holds all the cross-widget logic and decides which other widgets to update and how. The widgets stay simple and reusable, and the dialog-specific behavior lives in exactly one place.",
   analogy:
-    'An air traffic control tower: pilots never coordinate directly with each other mid-air. Each plane radios the tower, and the tower — which alone sees the whole picture — decides who climbs, holds, or lands.',
+    "Think of an air traffic control tower. Pilots don't coordinate directly with each other in the air. Each plane radios the tower, and the tower, which alone sees the whole picture, decides who climbs, holds, or lands.",
   whenToUse: [
-    'A group of objects communicate in complex, unstructured ways and the web of interdependencies is hard to follow.',
-    'Reusing an object is difficult because it refers to, and communicates with, many other objects.',
-    'Behavior distributed across several classes should be tunable without a lot of subclassing.',
+    "A group of objects talk to each other in complex, unstructured ways, and the web of dependencies is hard to follow.",
+    "An object is hard to reuse because it refers to, and talks to, many other objects.",
+    "You want to adjust behavior spread across several classes without lots of subclassing.",
   ],
   pros: [
-    'Removes direct references between colleagues — each one only ever knows the mediator.',
-    'Centralizes control logic in one place instead of scattering it across every participant.',
-    'Colleagues become easier to reuse in isolation or to wire into a different mediator.',
+    "Removes direct references between the colleagues: each one only knows the mediator.",
+    "Puts the control logic in one place instead of scattering it across every participant.",
+    "Colleagues are easier to reuse on their own or to plug into a different mediator.",
   ],
   cons: [
-    'The mediator itself can grow into a god object that is hard to maintain.',
-    'A single point of coordination can become a bottleneck or a single point of failure.',
-    'Interaction logic is centralized but less explicit than following direct calls between objects.',
+    "The mediator itself can grow into a \"god object\" that is hard to maintain.",
+    "One central point of coordination can become a bottleneck or a single point of failure.",
+    "The interaction logic is easy to find but less explicit than following direct calls between objects.",
   ],
   realWorld: [
-    'UI dialogs and forms coordinating field validation and enabling/disabling buttons (the classic GoF example)',
-    'Chat room servers: clients only ever talk to the room, never directly to each other',
-    'Air traffic control towers coordinating planes that never communicate with each other directly',
-    'Frontend "controller" components orchestrating several otherwise-dumb child components',
+    "UI dialogs and forms that coordinate field validation and enabling/disabling buttons (the classic GoF example)",
+    "Chat room servers: clients only talk to the room, never directly to each other",
+    "Air traffic control towers coordinating planes that never communicate with each other directly",
+    "Frontend \"controller\" components that orchestrate several otherwise simple child components",
   ],
   related: ['observer', 'facade', 'command', 'chain-of-responsibility'],
 

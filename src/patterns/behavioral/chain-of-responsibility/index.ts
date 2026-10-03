@@ -11,32 +11,32 @@ export const pattern: PatternDefinition = {
   order: 7,
   summary: 'Pass a request along a chain of handlers until one of them deals with it.',
   intent:
-    'Avoid coupling the sender of a request to its receiver by giving more than one object a chance to handle it — chain the receiving objects and pass the request along the chain until something handles it.',
+    "Pass a request along a line of handlers until one of them deals with it, so the sender doesn't need to know who will.",
   problem:
-    'An incoming API request has to survive several unrelated checks — authentication, rate limiting, payload validation — before it reaches the code that actually answers it. Wiring all of that into one big handleRequest() method means every new check edits the same tangled function, and the caller has no way to reorder, skip, or reuse just one of the checks elsewhere.',
+    "An API request has to pass several unrelated checks before the real code answers it: is the caller logged in, are they sending too many requests, is the payload valid? If you put all of that in one big handleRequest() method, every new check means editing the same tangled function. The caller also can't reorder the checks, skip one, or reuse a single check somewhere else.",
   solution:
-    'Each check becomes its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either resolves the request itself — rejecting it, say — or, when it has nothing to say about it, forwards it on by calling next.handle(request). The caller only ever talks to the first handler and never needs to know how many links the chain actually has, or in what order. This middleware-style example is the pipeline/filter variant, where several links may run and each one decides whether to reject or pass the request on; the classic GoF form instead stops at exactly one handler that fully handles the request. Either way, Chain of Responsibility differs from Decorator in intent: a decorator always runs and always forwards to wrap behavior around the call, while a chain link may stop the request outright.',
+    "Turn each check into its own Handler with one method, handle(request), and a reference to the next handler in the chain. A handler either deals with the request itself (for example by rejecting it) or, if it has nothing to say, passes it on by calling next.handle(request). The caller only talks to the first handler. It doesn't need to know how many links there are or in what order. This middleware-style example is the pipeline/filter variant: several links may run, and each one decides whether to reject the request or pass it on. The classic GoF form instead stops at exactly one handler that fully handles the request. Either way, this differs from Decorator in intent: a decorator always runs and always forwards, to add behavior around the call, while a chain link may stop the request outright.",
   analogy:
-    'A support call that keeps getting escalated: the first-line agent handles what they can, and anything they cannot resolve gets passed to the next tier, then the next, until someone with the right authority deals with it — or everyone in the chain has had a turn and it is finally turned away.',
+    "Think of a support call that keeps getting escalated. The first-line agent handles what they can and passes the rest to the next tier, and then the next, until someone with the right authority deals with it. If everyone has had a turn and nobody can help, the request is finally turned away.",
   whenToUse: [
-    'More than one object may handle a request, and the right one is not known in advance.',
-    'You want to issue a request without hard-wiring it to a specific receiver.',
-    'The set of handlers, and their order, should be configurable independently of the sender.',
+    "More than one object might handle a request, and you don't know in advance which one should.",
+    "You want to send a request without hard-wiring which object receives it.",
+    "The set of handlers, and their order, should be configurable separately from the sender.",
   ],
   pros: [
-    'Decouples the sender from its receivers — the client only ever knows the first handler.',
-    'Handlers can be added, removed, or reordered without touching the sender or each other.',
-    'Each handler stays small and focused on exactly one check or responsibility.',
+    "Decouples the sender from the receivers: the client only ever knows the first handler.",
+    "You can add, remove or reorder handlers without touching the sender or the other handlers.",
+    "Each handler stays small and focused on one check or responsibility.",
   ],
   cons: [
-    'A request can fall through the entire chain unhandled if it is mis-configured.',
-    'Tracing which handler actually produced a result means stepping through the whole chain.',
-    'Long chains add call-stack depth and latency to every single request.',
+    "A request can fall through the whole chain unhandled if the chain is misconfigured.",
+    "To find out which handler produced a result, you have to step through the chain.",
+    "Long chains add call-stack depth and latency to every request.",
   ],
   realWorld: [
-    'Express/Koa/Connect middleware pipelines (app.use(...))',
-    'Java Servlet Filters and the ASP.NET Core middleware pipeline',
-    'DOM event bubbling — a click walks up the ancestor chain until something calls stopPropagation()',
+    "Express/Koa/Connect middleware pipelines (app.use(...))",
+    "Java Servlet Filters and the ASP.NET Core middleware pipeline",
+    "DOM event bubbling: a click walks up the ancestor chain until something calls stopPropagation()",
     "Java's ClassLoader delegation model, where each loader asks its parent to resolve a class before trying to load it itself",
   ],
   related: ['decorator', 'command', 'observer', 'mediator'],

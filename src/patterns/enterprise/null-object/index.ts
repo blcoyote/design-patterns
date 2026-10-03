@@ -12,28 +12,28 @@ export const pattern: PatternDefinition = {
   summary:
     "Replace null checks with a do-nothing object that implements the same interface.",
   intent:
-    'Provide an object with neutral, "do nothing" behavior that implements the same interface as a real collaborator, so client code can call it unconditionally instead of checking for null everywhere.',
+    "Use a harmless do-nothing object in place of null, so callers never have to check for a missing collaborator.",
   problem:
-    'A ReportGenerator accepts an optional Logger. Every caller that legitimately has "no logger" passes null, and every line in generate() that wants to log first has to ask if (this.logger != null). One forgotten check anywhere in the codebase is a null-pointer crash waiting to happen — and it eventually happens, in production, the one time a report has warnings.',
+    "A ReportGenerator accepts an optional Logger. Every caller that has no logger passes null, and every line in generate() that wants to log must first ask if (this.logger != null). One forgotten check anywhere is a null-pointer crash waiting to happen, and it eventually happens in production, the one time a report has warnings.",
   solution:
-    'Introduce a NullLogger that implements the same Logger interface as any real logger, but whose methods quietly do nothing. ReportGenerator defaults to a NullLogger instead of accepting null, so the logger field is always a real object. Every call site can call logger.info()/warn()/error() unconditionally — the Null Object absorbs the "nothing to do" case so client code never has to.',
+    'Introduce a NullLogger that implements the same Logger interface as any real logger, but whose methods quietly do nothing. ReportGenerator defaults to a NullLogger instead of accepting null, so its logger field always holds a real object. Every call site can call logger.info()/warn()/error() without checking. The Null Object absorbs the "nothing to do" case so client code never has to.',
   analogy:
-    "/dev/null accepts anything written to it and discards it. Nothing that writes there needs to check whether a real destination exists first — /dev/null is a real, well-behaved destination that simply does nothing with its input.",
+    "/dev/null accepts anything written to it and throws it away. Nothing that writes there needs to check whether a real destination exists, because /dev/null is a real, well-behaved destination that simply does nothing with its input.",
   whenToUse: [
     'A dependency is often "absent" (no logger, no cache, no handler) and callers keep checking for null before using it.',
-    "You want to eliminate repeated if (x != null) guards scattered across a codebase.",
-    'The "do nothing" behavior is a legitimate, intentional default — not a bug waiting to be reported.',
+    "You want to get rid of repeated if (x != null) guards scattered across the codebase.",
+    '"Do nothing" is a legitimate, intentional default, not a bug waiting to be reported.',
   ],
   pros: [
-    "Removes null checks from client code — every call site can use the collaborator unconditionally.",
-    'The "do nothing" behavior lives in one place (the Null Object) instead of being reimplemented at every guard.',
-    "Satisfies the interface fully, so a real implementation can be swapped in later with no changes anywhere else.",
+    "Removes null checks from client code: every call site can use the collaborator without checking.",
+    'The "do nothing" behavior lives in one place (the Null Object) instead of being repeated at every guard.',
+    "It satisfies the interface fully, so a real implementation can be swapped in later with no changes anywhere else.",
   ],
   cons: [
-    "Can hide real bugs: a missing dependency sometimes should be a loud error, not a silent no-op.",
-    "Adds a class that does nothing observable, which can confuse readers unfamiliar with the pattern.",
-    "Does not help when callers need a meaningful return value — a safe default return is a smaller cousin of this, not a true Null Object.",
-    'Only works when "do nothing" is itself a genuinely sensible default; if no neutral behavior exists, forcing one in is the wrong fix.',
+    "Can hide real bugs: sometimes a missing dependency should be a loud error, not a silent no-op.",
+    "Adds a class that does nothing observable, which can confuse readers who do not know the pattern.",
+    "A do-nothing object only fits when a neutral result (nothing happens, or an empty value) is a sensible answer. If callers need a real result, the missing case should still be handled explicitly.",
+    'Only works when "do nothing" is a genuinely sensible default. If no neutral behavior exists, forcing one in is the wrong fix.',
   ],
   realWorld: [
     "NullLogger / NOPLogger implementations in logging frameworks (SLF4J's NOPLogger, many Node logging libs)",

@@ -93,7 +93,7 @@ export const pattern: PatternDefinition = {
       label: "EmailSender",
       role: "Abstraction",
       kind: "interface",
-      x: 630,
+      x: 650,
       y: 300,
       description:
         "Declares send(). OrderService depends only on this interface, never on a concrete mailer.",
@@ -142,7 +142,7 @@ export const pattern: PatternDefinition = {
       description:
         "The container builds Config first — it has no dependencies of its own, so it can be the very first thing constructed.",
       code: "config",
-      bend: -10,
+      bend: -80,
     },
     {
       id: "create-repo",
@@ -153,7 +153,7 @@ export const pattern: PatternDefinition = {
       description:
         "Once Config exists, the container builds SqlOrderRepository and passes the Config instance straight into its constructor.",
       code: "sqlOrderRepository",
-      bend: 20,
+      bend: 60,
     },
     {
       id: "create-email",
@@ -164,7 +164,7 @@ export const pattern: PatternDefinition = {
       description:
         "SmtpEmailSender is also a leaf, so the container can build it independently of the repository branch.",
       code: "smtpEmailSender",
-      bend: -30,
+      bend: -70,
     },
     {
       id: "create-service",
@@ -175,7 +175,7 @@ export const pattern: PatternDefinition = {
       description:
         "With both of its dependencies built, OrderService can now be constructed and wired to them.",
       code: "orderService",
-      bend: 35,
+      bend: 0,
     },
     {
       id: "create-controller",
@@ -223,7 +223,7 @@ export const pattern: PatternDefinition = {
       description:
         "OrderService stores its repository only as OrderRepository — it has no idea SqlOrderRepository (or a fake) is behind it.",
       code: "orderService",
-      bend: 15,
+      bend: -5,
     },
     {
       id: "service-holds-email",

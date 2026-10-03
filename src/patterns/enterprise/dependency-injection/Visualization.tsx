@@ -26,6 +26,7 @@ const MANUAL_RELATIONS: Relation[] = [
     to: "orderController",
     type: "creates",
     label: "new OrderController(...)",
+    bend: -35,
     description:
       "The entry point directly constructs OrderController — and everything it needs — inline.",
   },
@@ -44,6 +45,7 @@ const MANUAL_RELATIONS: Relation[] = [
     to: "sqlOrderRepository",
     type: "creates",
     label: "new SqlOrderRepository(...)",
+    bend: -50,
     description:
       "OrderService constructs its own SqlOrderRepository — it now knows exactly which concrete class that is.",
   },
@@ -53,6 +55,7 @@ const MANUAL_RELATIONS: Relation[] = [
     to: "smtpEmailSender",
     type: "creates",
     label: "new SmtpEmailSender()",
+    bend: 60,
     description:
       "OrderService also constructs its own SmtpEmailSender directly. Swapping it later means editing this line.",
   },

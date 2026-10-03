@@ -42,9 +42,7 @@ export function ComparisonPage() {
     };
   });
   // A quiz answer preselects the ADR export only when it declares which option it stands for.
-  const preselected = comparison.scenario.choices.find(
-    (c) => c.id === picked,
-  )?.option;
+  const preselected = comparison.scenario.choices.find((c) => c.id === picked)?.option;
 
   return (
     <article className="space-y-8">
@@ -56,9 +54,7 @@ export function ComparisonPage() {
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
           {comparison.title}
         </h1>
-        <p className="mt-4 text-lg leading-relaxed text-slate-300">
-          {comparison.summary}
-        </p>
+        <p className="mt-4 text-lg leading-relaxed text-slate-300">{comparison.summary}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           {subjects.map((s) => (
             <Link
@@ -84,10 +80,7 @@ export function ComparisonPage() {
         <table className="w-full min-w-lg border-collapse text-sm">
           <thead>
             <tr>
-              <th
-                className="p-2 text-left font-medium text-slate-500"
-                scope="col"
-              />
+              <th className="p-2 text-left font-medium text-slate-500" scope="col" />
               {subjects.map((s) => (
                 <th
                   key={s.slug}
@@ -103,10 +96,7 @@ export function ComparisonPage() {
           <tbody>
             {comparison.dimensions.map((dim) => (
               <tr key={dim.label} className="border-t border-slate-800">
-                <th
-                  className="p-2 text-left align-top font-medium text-slate-400"
-                  scope="row"
-                >
+                <th className="p-2 text-left align-top font-medium text-slate-400" scope="row">
                   {dim.label}
                 </th>
                 {subjects.map((s) => (
@@ -126,10 +116,7 @@ export function ComparisonPage() {
           if (!subject) return null;
           return (
             <Panel key={option.subject} className="space-y-4 p-6">
-              <h2
-                className="text-xl font-semibold"
-                style={{ color: subject.color }}
-              >
+              <h2 className="text-xl font-semibold" style={{ color: subject.color }}>
                 {subject.name}
               </h2>
               <p className="leading-relaxed text-slate-300">{option.changes}</p>
@@ -138,21 +125,14 @@ export function ComparisonPage() {
                   Choose it when
                 </p>
                 <div className="mt-2">
-                  <BulletList
-                    items={option.chooseWhen}
-                    marker="→"
-                    markerClass="text-slate-500"
-                  />
+                  <BulletList items={option.chooseWhen} marker="→" markerClass="text-slate-500" />
                 </div>
               </div>
 
               {option.code.map((ref) => {
                 const resolved = subjectBySlug.get(ref.slug);
                 if (!resolved) return null;
-                const sources = buildCodeSources(
-                  parseLanguages(resolved.def),
-                  ref.region,
-                );
+                const sources = buildCodeSources(parseLanguages(resolved.def), ref.region);
                 return (
                   <CodeBlock
                     key={`${ref.slug}-${ref.region}`}
@@ -190,28 +170,16 @@ export function ComparisonPage() {
 
       <Section title="When you need no pattern at all">
         <p>
-          <span className="font-semibold text-slate-200">
-            {comparison.noPattern.when}
-          </span>{" "}
+          <span className="font-semibold text-slate-200">{comparison.noPattern.when}</span>{" "}
           {comparison.noPattern.instead}
         </p>
       </Section>
 
-      {comparison.overlap && (
-        <Section title="Where they overlap">{comparison.overlap}</Section>
-      )}
+      {comparison.overlap && <Section title="Where they overlap">{comparison.overlap}</Section>}
 
-      <ScenarioQuiz
-        scenario={comparison.scenario}
-        picked={picked}
-        onPick={setPicked}
-      />
+      <ScenarioQuiz scenario={comparison.scenario} picked={picked} onPick={setPicked} />
 
-      <AdrExport
-        comparison={comparison}
-        subjects={adrSubjects}
-        preselected={preselected}
-      />
+      <AdrExport comparison={comparison} subjects={adrSubjects} preselected={preselected} />
     </article>
   );
 }

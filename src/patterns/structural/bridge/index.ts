@@ -9,14 +9,13 @@ export const pattern: PatternDefinition = {
   name: "Bridge",
   category: "structural",
   order: 6,
-  summary:
-    "Split an abstraction from its implementation so the two can vary independently.",
+  summary: "Split an abstraction from its implementation so the two can vary independently.",
   intent:
     "Separate what something does from how it does it, so the two sides can vary independently instead of multiplying into subclasses.",
   problem:
-    "A remote control has to work with many kinds of devices (TVs, radios, maybe a projector next year), and there are also several kinds of remotes, such as a basic one and an advanced one with extra buttons. In class-based languages, modeling both dimensions with inheritance alone would require BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, AdvancedRadioRemote and so on. With M remote kinds and N device kinds that is M × N combinations; Go avoids the same coupling with interfaces and embedding rather than subclasses.",
+    "Imagine supporting several kinds of remotes and several kinds of devices. With inheritance alone, you would need a class for every pair: BasicTVRemote, AdvancedTVRemote, BasicRadioRemote, and so on. With M remote types and N device types, that can mean M × N classes. Go avoids the same coupling with interfaces and embedding instead of subclasses.",
   solution:
-    "Split the two dimensions into separate abstractions. RemoteControl holds a Device reference instead of depending on a concrete device. Class-based tabs extend RemoteControl for refined remotes, while Go embeds RemoteControl to promote its behavior; devices implement Device in every tab. Either way, each side grows independently and any remote can be paired with any device at runtime through the bridge reference. Bridge is a structural split planned up front at design time. That differs from Strategy, where one class swaps a single interchangeable algorithm.",
+    "Give the remote and the device separate interfaces. RemoteControl holds a Device, so it can work with any device that implements that interface. Add new remote types and devices independently, then pair them at runtime. TypeScript, C#, and Python use subclasses for specialized remotes; Go embeds RemoteControl instead. This split is planned up front. Strategy has a similar shape, but swaps one algorithm rather than separating two kinds of variation.",
   analogy:
     'Think of a universal remote and the appliances it points at. The remote does not care whether it faces a TV or a radio. It sends "power" and "volume" signals through the same bridge, and the appliance on the other end decides what to do with them.',
   whenToUse: [
@@ -60,8 +59,7 @@ export const pattern: PatternDefinition = {
       x: 560,
       y: 230,
       width: 120,
-      description:
-        'Implements Device for a television, logging "tv: …" for each operation.',
+      description: 'Implements Device for a television, logging "tv: …" for each operation.',
     },
     {
       id: "radio",
@@ -71,8 +69,7 @@ export const pattern: PatternDefinition = {
       x: 700,
       y: 350,
       width: 120,
-      description:
-        'Implements Device for a radio, logging "radio: …" for each operation.',
+      description: 'Implements Device for a radio, logging "radio: …" for each operation.',
     },
     {
       id: "remoteControl",
@@ -236,9 +233,7 @@ export const pattern: PatternDefinition = {
         "tv",
         "tv-impl",
       ],
-      packets: [
-        { relation: "client-creates-remote", label: "new RemoteControl(tv)" },
-      ],
+      packets: [{ relation: "client-creates-remote", label: "new RemoteControl(tv)" }],
       notes: { remoteControl: "device: TV" },
       code: "usage",
     },
@@ -246,13 +241,7 @@ export const pattern: PatternDefinition = {
       title: "Client toggles power",
       description:
         "The client calls togglePower(). RemoteControl does not know it is holding a TV — it just calls turnOn() through the Device reference, and the TV switches on.",
-      highlight: [
-        "client",
-        "client-remote",
-        "remoteControl",
-        "toggle-device",
-        "tv",
-      ],
+      highlight: ["client", "client-remote", "remoteControl", "toggle-device", "tv"],
       packets: [
         { relation: "client-remote", label: "togglePower()" },
         { relation: "toggle-device", label: "turnOn()", after: 0 },
@@ -264,14 +253,7 @@ export const pattern: PatternDefinition = {
       title: "Swap the implementor",
       description:
         "Without changing a single line of RemoteControl, the client calls setDevice() on the very same remote to point its bridge reference at a Radio instead. The abstraction hierarchy never had to know Radio existed, and no new RemoteControl had to be built.",
-      highlight: [
-        "client",
-        "client-sets-device",
-        "remoteControl",
-        "bridge",
-        "radio",
-        "radio-impl",
-      ],
+      highlight: ["client", "client-sets-device", "remoteControl", "bridge", "radio", "radio-impl"],
       packets: [{ relation: "client-sets-device", label: "setDevice(radio)" }],
       notes: { remoteControl: "device: Radio" },
       code: "setDevice",
@@ -280,13 +262,7 @@ export const pattern: PatternDefinition = {
       title: "Same call, different device",
       description:
         "The client calls togglePower() again — the exact same call as before. This time it is the Radio that receives turnOn(), proving the two hierarchies really do vary independently.",
-      highlight: [
-        "client",
-        "client-remote",
-        "remoteControl",
-        "toggle-device",
-        "radio",
-      ],
+      highlight: ["client", "client-remote", "remoteControl", "toggle-device", "radio"],
       packets: [
         { relation: "client-remote", label: "togglePower()" },
         { relation: "toggle-device", label: "turnOn()", after: 0 },
@@ -320,13 +296,7 @@ export const pattern: PatternDefinition = {
       title: "Shared behavior still works",
       description:
         "The client calls togglePower() on the advanced remote. It reuses RemoteControl's delegation logic through the same Device reference, inherited in class-based tabs and promoted from the embedded value in Go.",
-      highlight: [
-        "client",
-        "client-advanced",
-        "advancedRemote",
-        "toggle-device",
-        "tv",
-      ],
+      highlight: ["client", "client-advanced", "advancedRemote", "toggle-device", "tv"],
       packets: [
         { relation: "client-advanced", label: "togglePower()" },
         { relation: "toggle-device", label: "turnOn()", after: 0 },
@@ -338,13 +308,7 @@ export const pattern: PatternDefinition = {
       title: "A new operation, the same bridge",
       description:
         "The client calls mute(), an operation only the refined abstraction has. It still goes straight through the Device reference, calling setVolume(0) on whatever device is attached.",
-      highlight: [
-        "client",
-        "client-advanced",
-        "advancedRemote",
-        "mute-device",
-        "tv",
-      ],
+      highlight: ["client", "client-advanced", "advancedRemote", "mute-device", "tv"],
       packets: [
         { relation: "client-advanced", label: "mute()" },
         { relation: "mute-device", label: "setVolume(0)", after: 0 },

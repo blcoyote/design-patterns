@@ -1,13 +1,13 @@
 // [transport]
 interface Transport {
-  deliver(): string
+  deliver(): string;
 }
 // [/transport]
 
 // [truck]
 class Truck implements Transport {
   deliver(): string {
-    return 'Delivering by road in a truck'
+    return "Delivering by road in a truck";
   }
 }
 // [/truck]
@@ -15,7 +15,7 @@ class Truck implements Transport {
 // [ship]
 class Ship implements Transport {
   deliver(): string {
-    return 'Delivering by sea in a ship'
+    return "Delivering by sea in a ship";
   }
 }
 // [/ship]
@@ -23,12 +23,12 @@ class Ship implements Transport {
 // [logistics]
 abstract class Logistics {
   // The factory method — subclasses decide what this returns.
-  abstract createTransport(): Transport
+  abstract createTransport(): Transport;
 
   // Shared logic that relies on createTransport() without knowing the concrete type.
   planDelivery(): string {
-    const transport = this.createTransport()
-    return `Planned. ${transport.deliver()}`
+    const transport = this.createTransport();
+    return `Planned. ${transport.deliver()}`;
   }
 }
 // [/logistics]
@@ -36,7 +36,7 @@ abstract class Logistics {
 // [roadLogistics]
 class RoadLogistics extends Logistics {
   createTransport(): Transport {
-    return new Truck()
+    return new Truck();
   }
 }
 // [/roadLogistics]
@@ -44,7 +44,7 @@ class RoadLogistics extends Logistics {
 // [seaLogistics]
 class SeaLogistics extends Logistics {
   createTransport(): Transport {
-    return new Ship()
+    return new Ship();
   }
 }
 // [/seaLogistics]
@@ -52,9 +52,9 @@ class SeaLogistics extends Logistics {
 // Usage
 // [usage]
 function runDelivery(logistics: Logistics) {
-  console.log(logistics.planDelivery())
+  console.log(logistics.planDelivery());
 }
 
-runDelivery(new RoadLogistics()) // "Planned. Delivering by road in a truck"
-runDelivery(new SeaLogistics()) // "Planned. Delivering by sea in a ship"
+runDelivery(new RoadLogistics()); // "Planned. Delivering by road in a truck"
+runDelivery(new SeaLogistics()); // "Planned. Delivering by sea in a ship"
 // [/usage]

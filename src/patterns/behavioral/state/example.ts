@@ -1,109 +1,109 @@
 // [documentState]
 interface DocumentState {
-  readonly name: string
-  submit(): DocumentState
-  approve(): DocumentState
-  reject(): DocumentState
-  revise(): DocumentState
+  readonly name: string;
+  submit(): DocumentState;
+  approve(): DocumentState;
+  reject(): DocumentState;
+  revise(): DocumentState;
 }
 // [/documentState]
 
 // [draft]
 class DraftState implements DocumentState {
-  readonly name = 'Draft'
+  readonly name = "Draft";
 
   // [submit]
   submit(): DocumentState {
-    console.log('Draft submitted for review')
-    return new InReviewState()
+    console.log("Draft submitted for review");
+    return new InReviewState();
   }
   // [/submit]
 
   approve(): DocumentState {
-    return this // not a valid transition from Draft
+    return this; // not a valid transition from Draft
   }
 
   reject(): DocumentState {
-    return this
+    return this;
   }
 
   revise(): DocumentState {
-    return this
+    return this;
   }
 }
 // [/draft]
 
 // [review]
 class InReviewState implements DocumentState {
-  readonly name = 'InReview'
+  readonly name = "InReview";
 
   submit(): DocumentState {
-    return this
+    return this;
   }
 
   // [approve]
   approve(): DocumentState {
-    console.log('Review approved — publishing')
-    return new PublishedState()
+    console.log("Review approved — publishing");
+    return new PublishedState();
   }
   // [/approve]
 
   // [reject]
   reject(): DocumentState {
-    console.log('Review rejected — back for changes')
-    return new RejectedState()
+    console.log("Review rejected — back for changes");
+    return new RejectedState();
   }
   // [/reject]
 
   revise(): DocumentState {
-    return this
+    return this;
   }
 }
 // [/review]
 
 // [published]
 class PublishedState implements DocumentState {
-  readonly name = 'Published'
+  readonly name = "Published";
 
   // Published is terminal: every action is a no-op.
   submit(): DocumentState {
-    return this
+    return this;
   }
 
   approve(): DocumentState {
-    return this
+    return this;
   }
 
   reject(): DocumentState {
-    return this
+    return this;
   }
 
   revise(): DocumentState {
-    return this
+    return this;
   }
 }
 // [/published]
 
 // [rejected]
 class RejectedState implements DocumentState {
-  readonly name = 'Rejected'
+  readonly name = "Rejected";
 
   submit(): DocumentState {
-    return this
+    return this;
   }
 
   approve(): DocumentState {
-    return this
+    return this;
   }
 
   reject(): DocumentState {
-    return this
+    return this;
   }
 
   // [revise]
   revise(): DocumentState {
-    console.log('Revised — back to Draft')
-    return new DraftState()
+    console.log("Revised — back to Draft");
+    return new DraftState();
   }
   // [/revise]
 }
@@ -112,28 +112,28 @@ class RejectedState implements DocumentState {
 // [document]
 class Document {
   // [holds]
-  private state: DocumentState = new DraftState()
+  private state: DocumentState = new DraftState();
   // [/holds]
 
   get status(): string {
-    return this.state.name
+    return this.state.name;
   }
 
   // [delegate]
   submit() {
-    this.state = this.state.submit()
+    this.state = this.state.submit();
   }
 
   approve() {
-    this.state = this.state.approve()
+    this.state = this.state.approve();
   }
 
   reject() {
-    this.state = this.state.reject()
+    this.state = this.state.reject();
   }
 
   revise() {
-    this.state = this.state.revise()
+    this.state = this.state.revise();
   }
   // [/delegate]
 }
@@ -141,24 +141,24 @@ class Document {
 
 // [client]
 // Usage
-const doc = new Document()
-console.log(doc.status) // "Draft"
+const doc = new Document();
+console.log(doc.status); // "Draft"
 
-doc.submit()
-console.log(doc.status) // "InReview"
+doc.submit();
+console.log(doc.status); // "InReview"
 
-doc.reject()
-console.log(doc.status) // "Rejected"
+doc.reject();
+console.log(doc.status); // "Rejected"
 
-doc.revise()
-console.log(doc.status) // "Draft"
+doc.revise();
+console.log(doc.status); // "Draft"
 
-doc.submit()
-console.log(doc.status) // "InReview"
+doc.submit();
+console.log(doc.status); // "InReview"
 
-doc.approve()
-console.log(doc.status) // "Published"
+doc.approve();
+console.log(doc.status); // "Published"
 
-doc.submit() // ignored — Published is terminal
-console.log(doc.status) // "Published"
+doc.submit(); // ignored — Published is terminal
+console.log(doc.status); // "Published"
 // [/client]

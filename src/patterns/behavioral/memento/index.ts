@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Memento",
   category: "behavioral",
   order: 9,
-  summary:
-    "Capture and restore an object’s private state without ever exposing it.",
+  summary: "Capture and restore an object’s private state without ever exposing it.",
   intent:
     "Save a snapshot of an object's state so you can restore it later, without breaking its encapsulation.",
   problem:
@@ -73,7 +72,7 @@ export const pattern: PatternDefinition = {
       x: 620,
       y: 110,
       description:
-        "A sealed snapshot of the editor’s content at one moment in time. It exposes no accessors at all — its content is sealed where only TextEditor is expected to read it (a module-private WeakMap in TypeScript, a private nested class in C#, a module-private-by-convention WeakKeyDictionary in Python, and an unexported field convention in Go), so HistoryShelf has no accessor to peek through.",
+        "An opaque snapshot of the editor’s text. HistoryShelf can store it but cannot read its contents. Each language hides the text differently: TypeScript uses a module-private WeakMap, C# a private nested class, Python a private-by-convention WeakKeyDictionary, and Go an unexported field.",
     },
     {
       id: "history",
@@ -137,7 +136,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "unseal()",
       description:
-        "Inside restore(), TextEditor is the only code that can unseal the memento (via the module-private WeakMap in TS, by casting to its private nested ConcreteMemento in C#, via the module-private-by-convention WeakKeyDictionary in Python, or by reading the package-scoped field in Go), recovering the content it sealed away earlier.",
+        "Only TextEditor can read the saved text during restore(). TypeScript retrieves it from the module-private WeakMap; C# casts it to the private nested ConcreteMemento; Python looks it up in the WeakKeyDictionary; and Go reads the unexported field.",
       bend: 24,
       code: "getState",
     },
@@ -198,13 +197,7 @@ export const pattern: PatternDefinition = {
       title: "A checkpoint is captured",
       description:
         "editor.save() packages the current content into a brand-new EditorMemento. Only TextEditor knows how to construct or read one — to everyone else it is opaque.",
-      highlight: [
-        "client",
-        "client-save",
-        "editor",
-        "editor-create",
-        "memento",
-      ],
+      highlight: ["client", "client-save", "editor", "editor-create", "memento"],
       packets: [
         { relation: "client-save", label: "save()" },
         { relation: "editor-create", label: "⇒ Memento", after: 0 },
@@ -216,13 +209,7 @@ export const pattern: PatternDefinition = {
       title: "The caretaker files it away",
       description:
         "The client hands the memento to shelf.push(). The shelf stores the object on its stack without ever calling a method that would reveal what is inside it.",
-      highlight: [
-        "client",
-        "client-push",
-        "history",
-        "history-holds",
-        "memento",
-      ],
+      highlight: ["client", "client-push", "history", "history-holds", "memento"],
       packets: [{ relation: "client-push", label: "push(memento)" }],
       notes: { history: "shelf: 1" },
       code: "push",
@@ -240,13 +227,7 @@ export const pattern: PatternDefinition = {
       title: "Undo: the shelf hands back the last checkpoint",
       description:
         "The client calls shelf.pop(). The most recently saved memento comes back off the stack — still sealed, still unread by the caretaker.",
-      highlight: [
-        "client",
-        "client-pop",
-        "history",
-        "history-holds",
-        "memento",
-      ],
+      highlight: ["client", "client-pop", "history", "history-holds", "memento"],
       packets: [{ relation: "client-pop", label: "⇒ memento", reverse: true }],
       notes: { history: "shelf: 0" },
       code: "pop",
@@ -255,13 +236,7 @@ export const pattern: PatternDefinition = {
       title: "The editor restores itself",
       description:
         "The client calls editor.restore(memento). Only now, inside restore(), does TextEditor unseal the memento — something only it can do — and overwrite its own content with it.",
-      highlight: [
-        "client",
-        "client-restore",
-        "editor",
-        "editor-read",
-        "memento",
-      ],
+      highlight: ["client", "client-restore", "editor", "editor-read", "memento"],
       packets: [
         { relation: "client-restore", label: "restore(memento)" },
         { relation: "editor-read", label: "unseal()", after: 0 },

@@ -59,10 +59,7 @@ function stateFromStep(step: Step | SyntheticStep | null): StateId {
 }
 
 /** Builds the highlight/packets/notes for firing `event` while `active` is current. */
-function fireEvent(
-  active: StateId,
-  event: EventId,
-): { data: SyntheticStep; nextId: StateId } {
+function fireEvent(active: StateId, event: EventId): { data: SyntheticStep; nextId: StateId } {
   const target = TRANSITIONS[active][event];
   if (target) {
     const transitionId = `${active}-to-${target}`;
@@ -126,9 +123,7 @@ export function StateVisualization({
   );
 
   const baseActiveId = stateFromStep(step);
-  const effectiveStep: Step | SyntheticStep | null = liveOverride
-    ? liveOverride.data
-    : step;
+  const effectiveStep: Step | SyntheticStep | null = liveOverride ? liveOverride.data : step;
   const activeId = liveOverride ? liveOverride.activeId : baseActiveId;
   const animationKey = liveOverride
     ? `override-${liveOverride.activeId}-${replayToken}`
@@ -231,11 +226,7 @@ export function StateVisualization({
                   ? "text-slate-100 ring-slate-700 hover:bg-slate-800"
                   : "text-slate-500 ring-slate-800 ring-dashed hover:bg-slate-900"
               }`}
-              style={
-                isValid
-                  ? { boxShadow: `inset 0 0 0 1px ${color}55` }
-                  : undefined
-              }
+              style={isValid ? { boxShadow: `inset 0 0 0 1px ${color}55` } : undefined}
             >
               {EVENT_LABELS[event]}
             </button>

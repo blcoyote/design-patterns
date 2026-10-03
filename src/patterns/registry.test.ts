@@ -1,22 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { findMarkerErrors, parseCode } from "@/lib/codeRegions";
-import {
-  packetAnimationDuration,
-  packetTimeline,
-  stepDuration,
-} from "@/lib/packetTiming";
+import { packetAnimationDuration, packetTimeline, stepDuration } from "@/lib/packetTiming";
 import type { PatternDefinition } from "@/types/pattern";
 import { patterns } from "./registry";
 import { validatePattern } from "./validate";
 
 const slugs = patterns.map((p) => p.slug);
 
-const modules = import.meta.glob<{ pattern: PatternDefinition }>(
-  ["./**/index.ts", "!./_*/**"],
-  {
-    eager: true,
-  },
-);
+const modules = import.meta.glob<{ pattern: PatternDefinition }>(["./**/index.ts", "!./_*/**"], {
+  eager: true,
+});
 
 describe("pattern registry", () => {
   it("has unique slugs", () => {
@@ -36,14 +29,11 @@ describe("pattern registry", () => {
     for (const slug of slugs) expect(slug).toMatch(/^[a-z0-9-]+$/);
   });
 
-  it.each(patterns.map((p) => [p.slug, p] as const))(
-    "%s is internally consistent",
-    (_slug, p) => {
-      expect(validatePattern(p, slugs)).toEqual([]);
-      expect(p.steps.length).toBeGreaterThan(0);
-      expect(p.participants.length).toBeGreaterThan(0);
-    },
-  );
+  it.each(patterns.map((p) => [p.slug, p] as const))("%s is internally consistent", (_slug, p) => {
+    expect(validatePattern(p, slugs)).toEqual([]);
+    expect(p.steps.length).toBeGreaterThan(0);
+    expect(p.participants.length).toBeGreaterThan(0);
+  });
 
   it.each(patterns.map((p) => [p.slug, p] as const))(
     "%s code has no unclosed or stray markers",
@@ -64,11 +54,7 @@ describe("pattern registry", () => {
     "%s csharp has no JavaScript template strings",
     (_slug, p) => {
       // backticks outside comments are invalid C#; they usually mean a TS line was copied over unconverted
-      expect(
-        p
-          .csharp!.split("\n")
-          .filter((line) => line.split("//")[0].includes("`")),
-      ).toEqual([]);
+      expect(p.csharp!.split("\n").filter((line) => line.split("//")[0].includes("`"))).toEqual([]);
     },
   );
 
@@ -93,9 +79,7 @@ describe("pattern registry", () => {
     "%s python uses # markers, not //",
     (_slug, p) => {
       // a `// [id]` line in Python is a syntax error; it usually means a marker was copied over unconverted
-      expect(
-        p.python!.split("\n").filter((line) => /^\s*\/\/ \[/.test(line)),
-      ).toEqual([]);
+      expect(p.python!.split("\n").filter((line) => /^\s*\/\/ \[/.test(line))).toEqual([]);
     },
   );
 
@@ -163,15 +147,10 @@ describe("packet dependencies", () => {
     ["pub-sub", 7, [undefined, 0, 0]],
     ["builder", 2, [undefined, 0]],
     ["flyweight", 5, [undefined, 0]],
-  ] as const)(
-    "%s step %s preserves its causal dependencies",
-    (slug, number, expected) => {
-      const pattern = patterns.find((item) => item.slug === slug)!;
-      expect(
-        pattern.steps[number - 1].packets?.map((packet) => packet.after),
-      ).toEqual(expected);
-    },
-  );
+  ] as const)("%s step %s preserves its causal dependencies", (slug, number, expected) => {
+    const pattern = patterns.find((item) => item.slug === slug)!;
+    expect(pattern.steps[number - 1].packets?.map((packet) => packet.after)).toEqual(expected);
+  });
 
   it("Singleton returns wait for their requests", () => {
     for (const step of singleton.steps.slice(1, 3)) {
@@ -198,9 +177,7 @@ describe("packet dependencies", () => {
         },
       ],
     };
-    expect(validatePattern(invalid)).toContain(
-      "step 1: packet 1 must depend on an earlier packet",
-    );
+    expect(validatePattern(invalid)).toContain("step 1: packet 1 must depend on an earlier packet");
   });
 
   it("rejects an unsequenced chain", () => {
@@ -209,10 +186,7 @@ describe("packet dependencies", () => {
       steps: [
         {
           ...singleton.steps[1],
-          packets: [
-            { relation: "user-get" },
-            { relation: "user-get", reverse: true },
-          ],
+          packets: [{ relation: "user-get" }, { relation: "user-get", reverse: true }],
         },
       ],
     };
@@ -231,20 +205,15 @@ describe("packet dependencies", () => {
         },
       ],
     };
-    expect(validatePattern(invalid)).toContain(
-      "step 1: packet 0 must depend on an earlier packet",
-    );
+    expect(validatePattern(invalid)).toContain("step 1: packet 0 must depend on an earlier packet");
   });
 });
 
 describe("packet sequence timing", () => {
   it("keeps the existing request/response duration", () => {
-    expect(
-      packetAnimationDuration([
-        { relation: "call" },
-        { relation: "call", after: 0 },
-      ]),
-    ).toBe(1.4);
+    expect(packetAnimationDuration([{ relation: "call" }, { relation: "call", after: 0 }])).toBe(
+      1.4,
+    );
   });
 
   it("does not count parallel branches as sequential hops", () => {
@@ -271,14 +240,11 @@ describe("packet sequence timing", () => {
     expect(packetAnimationDuration(chain)).toBe(1.4);
   });
 
-  it.each([0.5, 1, 2])(
-    "holds a step until its whole chain has run at speed %s",
-    (speed) => {
-      const duration = stepDuration({ ...baseStep, packets: chain }, speed);
-      expect(duration).toBeGreaterThan(packetTimeline(chain, speed) * 1000);
-      expect(duration).toBeCloseTo((5 * 1400 + 800) / speed);
-    },
-  );
+  it.each([0.5, 1, 2])("holds a step until its whole chain has run at speed %s", (speed) => {
+    const duration = stepDuration({ ...baseStep, packets: chain }, speed);
+    expect(duration).toBeGreaterThan(packetTimeline(chain, speed) * 1000);
+    expect(duration).toBeCloseTo((5 * 1400 + 800) / speed);
+  });
 
   it("keeps the base interval for short steps", () => {
     expect(stepDuration({ ...baseStep, packets: [] }, 2)).toBe(1600);
@@ -294,38 +260,26 @@ describe("packet sequence timing", () => {
 describe("findMarkerErrors", () => {
   it("reports unmatched, unclosed, duplicate and inline markers", () => {
     expect(findMarkerErrors("// [a]\nx\n// [/a]")).toEqual([]);
-    expect(findMarkerErrors("// [/a]")).toEqual([
-      'line 1: "[/a]" has no matching opening marker',
-    ]);
-    expect(findMarkerErrors("// [a]\nx")).toEqual([
-      'region "a" is never closed',
-    ]);
+    expect(findMarkerErrors("// [/a]")).toEqual(['line 1: "[/a]" has no matching opening marker']);
+    expect(findMarkerErrors("// [a]\nx")).toEqual(['region "a" is never closed']);
     expect(findMarkerErrors("// [a]\n// [/a]\n// [a]\n// [/a]")).toEqual([
       'line 3: region "a" opened twice',
     ]);
-    expect(findMarkerErrors("foo() // [a]")).toEqual([
-      "line 1: marker must be on its own line",
-    ]);
+    expect(findMarkerErrors("foo() // [a]")).toEqual(["line 1: marker must be on its own line"]);
     expect(findMarkerErrors("# [a]\nx\n# [/a]")).toEqual([]);
-    expect(findMarkerErrors("foo()  # [a]")).toEqual([
-      "line 1: marker must be on its own line",
-    ]);
+    expect(findMarkerErrors("foo()  # [a]")).toEqual(["line 1: marker must be on its own line"]);
   });
 });
 
 describe("parseCode", () => {
   it("strips markers and records nested regions", () => {
-    const { text, regions } = parseCode(
-      "// [a]\nline1\n// [b]\nline2\n// [/b]\n// [/a]\nline3",
-    );
+    const { text, regions } = parseCode("// [a]\nline1\n// [b]\nline2\n// [/b]\n// [/a]\nline3");
     expect(text).toBe("line1\nline2\nline3");
     expect(regions).toEqual({ a: [1, 2], b: [2, 2] });
   });
 
   it("accepts Python # markers", () => {
-    const { text, regions } = parseCode(
-      "# [a]\nx = 1\n    # [b]\n    y = 2\n    # [/b]\n# [/a]",
-    );
+    const { text, regions } = parseCode("# [a]\nx = 1\n    # [b]\n    y = 2\n    # [/b]\n# [/a]");
     expect(text).toBe("x = 1\n    y = 2");
     expect(regions).toEqual({ a: [1, 2], b: [2, 2] });
   });

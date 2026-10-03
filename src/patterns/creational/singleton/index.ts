@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Singleton",
   category: "creational",
   order: 1,
-  summary:
-    "Guarantee a class has exactly one instance, with one global point of access to it.",
+  summary: "Guarantee a class has exactly one instance, with one global point of access to it.",
   intent:
     "Make sure a class has exactly one instance, and give everyone a single, well-known way to reach it.",
   problem:

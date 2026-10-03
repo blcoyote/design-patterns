@@ -2,17 +2,15 @@ import type { PatternDefinition } from "@/types/pattern";
 import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
-import goExample from './example.go?raw'
+import goExample from "./example.go?raw";
 
 export const pattern: PatternDefinition = {
   slug: "prototype",
   name: "Prototype",
   category: "creational",
   order: 5,
-  summary:
-    "Copy existing objects to create new ones, instead of building them from scratch.",
-  intent:
-    'Create new objects by copying an existing one instead of building each from scratch.',
+  summary: "Copy existing objects to create new ones, instead of building them from scratch.",
+  intent: "Create new objects by copying an existing one instead of building each from scratch.",
   problem:
     "Sometimes creating an object means repeating an expensive or elaborate setup, like a Circle with a long list of style settings or a Document whose layout is already computed. Running that setup through a constructor every time is wasteful. It also forces the caller to know the exact concrete class and every constructor argument, which ties it to a class hierarchy it should not have to care about.",
   solution:
@@ -112,8 +110,7 @@ export const pattern: PatternDefinition = {
       from: "rectangle",
       to: "prototype",
       type: "implements",
-      description:
-        "Rectangle implements Shape too — the registry never needs to special-case it.",
+      description: "Rectangle implements Shape too — the registry never needs to special-case it.",
       bend: -20,
     },
     {
@@ -181,9 +178,7 @@ export const pattern: PatternDefinition = {
       description:
         "Inside clone(), the registry looks up the prototype by key and calls prototype.clone() on it — it never calls `new Circle()` itself.",
       highlight: ["registry", "registry-clone-circle", "circle"],
-      packets: [
-        { relation: "registry-clone-circle", label: "prototype.clone()" },
-      ],
+      packets: [{ relation: "registry-clone-circle", label: "prototype.clone()" }],
       code: "registryClone",
     },
     {
@@ -231,9 +226,7 @@ export const pattern: PatternDefinition = {
       description:
         "The registry delegates to the stored Rectangle exactly as it did for the Circle: look up, then call clone() on whatever is found.",
       highlight: ["registry", "registry-clone-rectangle", "rectangle"],
-      packets: [
-        { relation: "registry-clone-rectangle", label: "prototype.clone()" },
-      ],
+      packets: [{ relation: "registry-clone-rectangle", label: "prototype.clone()" }],
       notes: { rectangle: "clone created" },
       code: "rectangleClone",
     },

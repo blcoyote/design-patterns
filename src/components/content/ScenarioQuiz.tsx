@@ -36,15 +36,9 @@ export function ScenarioQuiz({
   return (
     <Panel className="p-6">
       <PanelHeading>Which should you choose?</PanelHeading>
-      <p className="mt-3 text-lg leading-relaxed text-slate-200">
-        {scenario.prompt}
-      </p>
+      <p className="mt-3 text-lg leading-relaxed text-slate-200">{scenario.prompt}</p>
 
-      <div
-        className="mt-5 grid gap-3 sm:grid-cols-3"
-        role="group"
-        aria-label="Choices"
-      >
+      <div className="mt-5 grid gap-3 sm:grid-cols-3" role="group" aria-label="Choices">
         {scenario.choices.map((choice) => {
           const show = revealAll || choice.id === picked;
           return (
@@ -59,9 +53,7 @@ export function ScenarioQuiz({
                   : "ring-slate-800 hover:bg-slate-900/60 hover:ring-slate-600"
               }`}
             >
-              <span className="block font-semibold text-white">
-                {choice.label}
-              </span>
+              <span className="block font-semibold text-white">{choice.label}</span>
               {show && (
                 <>
                   <span

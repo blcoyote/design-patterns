@@ -14,12 +14,7 @@ import type { Step, VisualizationProps } from "@/types/pattern";
 
 type ScenarioId = "valid" | "badAuth" | "rateLimited" | "badPayload";
 
-const SCENARIO_IDS: ScenarioId[] = [
-  "valid",
-  "badAuth",
-  "rateLimited",
-  "badPayload",
-];
+const SCENARIO_IDS: ScenarioId[] = ["valid", "badAuth", "rateLimited", "badPayload"];
 
 const LABELS: Record<ScenarioId, string> = {
   valid: "Valid request",
@@ -36,13 +31,12 @@ const STOPS_AT: Record<ScenarioId, string> = {
   badPayload: "validationHandler",
 };
 
-const STATUS: Record<ScenarioId, { code: number; text: string; ok: boolean }> =
-  {
-    valid: { code: 200, text: "OK", ok: true },
-    badAuth: { code: 401, text: "Unauthorized", ok: false },
-    rateLimited: { code: 429, text: "Too Many Requests", ok: false },
-    badPayload: { code: 422, text: "Invalid payload", ok: false },
-  };
+const STATUS: Record<ScenarioId, { code: number; text: string; ok: boolean }> = {
+  valid: { code: 200, text: "OK", ok: true },
+  badAuth: { code: 401, text: "Unauthorized", ok: false },
+  rateLimited: { code: 429, text: "Too Many Requests", ok: false },
+  badPayload: { code: 422, text: "Invalid payload", ok: false },
+};
 
 const SKIPPED = "skipped";
 
@@ -165,8 +159,7 @@ export function ChainOfResponsibilityVisualization({
     id: ScenarioId;
   } | null>(null);
   const [replayToken, setReplayToken] = useState(0);
-  const override =
-    pickedOverride?.forStep === stepIndex ? pickedOverride.id : null;
+  const override = pickedOverride?.forStep === stepIndex ? pickedOverride.id : null;
 
   const byId = useMemo(
     () => new Map(pattern.participants.map((p) => [p.id, p])),
@@ -175,9 +168,7 @@ export function ChainOfResponsibilityVisualization({
 
   const effectiveStep = override ? scenarioStep(override) : step;
   const activeScenario = override ?? scenarioFromStep(step);
-  const animationKey = override
-    ? `override-${override}-${replayToken}`
-    : stepIndex;
+  const animationKey = override ? `override-${override}-${replayToken}` : stepIndex;
 
   const client = byId.get("client");
   const status = override ? STATUS[override] : undefined;
@@ -189,10 +180,7 @@ export function ChainOfResponsibilityVisualization({
   }
 
   const overlay = client && status && (
-    <g
-      transform={`translate(${boxOf(client).x} ${boxOf(client).y})`}
-      pointerEvents="none"
-    >
+    <g transform={`translate(${boxOf(client).x} ${boxOf(client).y})`} pointerEvents="none">
       <AnimatePresence>
         <motion.g
           key={`${override}-${status.code}-${replayToken}`}
@@ -200,9 +188,7 @@ export function ChainOfResponsibilityVisualization({
           animate={{ opacity: 1, y: 62, scale: 1 }}
           exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
           transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { type: "spring", stiffness: 300, damping: 22 }
+            reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 300, damping: 22 }
           }
         >
           <rect
@@ -263,11 +249,7 @@ export function ChainOfResponsibilityVisualization({
                   ? "text-slate-950 ring-transparent"
                   : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
               }`}
-              style={
-                isActive
-                  ? { backgroundColor: STATUS[id].ok ? color : "#f87171" }
-                  : undefined
-              }
+              style={isActive ? { backgroundColor: STATUS[id].ok ? color : "#f87171" } : undefined}
             >
               {LABELS[id]}
             </button>

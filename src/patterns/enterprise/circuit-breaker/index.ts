@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Circuit Breaker",
   category: "enterprise",
   order: 5,
-  summary:
-    "Stop hammering a failing dependency — fail fast until it has had a chance to recover.",
+  summary: "Stop hammering a failing dependency — fail fast until it has had a chance to recover.",
   intent:
     "Stop calling a failing dependency for a while so errors fail fast, then carefully try again to see if it has recovered.",
   problem:
@@ -214,14 +213,7 @@ export const pattern: PatternDefinition = {
       title: "Healthy traffic flows through",
       description:
         "The client calls breaker.call(fn). The breaker is Closed, so it simply forwards the call to RemoteService and hands the result straight back.",
-      highlight: [
-        "client",
-        "request",
-        "forward",
-        "service",
-        "closed",
-        "state-closed",
-      ],
+      highlight: ["client", "request", "forward", "service", "closed", "state-closed"],
       packets: [
         { relation: "request", label: "call(fn)" },
         { relation: "forward", label: "fn()", after: 0 },
@@ -292,13 +284,7 @@ export const pattern: PatternDefinition = {
       title: "One trial request gets through",
       description:
         "That call is allowed to reach RemoteService — Half-Open permits exactly one attempt, to test whether the dependency has actually recovered. Any other call arriving while it is in flight still fails fast.",
-      highlight: [
-        "request",
-        "forward",
-        "service",
-        "halfOpen",
-        "state-halfOpen",
-      ],
+      highlight: ["request", "forward", "service", "halfOpen", "state-halfOpen"],
       packets: [
         { relation: "request", label: "call(fn)" },
         { relation: "forward", label: "fn()", after: 0 },

@@ -13,7 +13,7 @@ export const pattern: PatternDefinition = {
   summary:
     "Let an object change its behavior by swapping the internal state object that defines it.",
   intent:
-    'Let an object change its behaviour when its internal state changes, by handing the work to a separate object for each state.',
+    "Let an object change its behaviour when its internal state changes, by handing the work to a separate object for each state.",
   problem:
     'A document behaves differently depending on its workflow stage: submit() should mean something different in Draft, InReview, Published or Rejected. If you handle this in one method full of if (status === "draft") … else if (status === "inReview") … checks, that method grows with every new stage or action. Rules about which transitions are allowed end up scattered across those branches, so they are easy to miss or get wrong.',
   solution:
@@ -173,8 +173,7 @@ export const pattern: PatternDefinition = {
       to: "draft",
       type: "calls",
       label: "submit()",
-      description:
-        "When DraftState is current, Document forwards submit() to it.",
+      description: "When DraftState is current, Document forwards submit() to it.",
       code: "delegate",
     },
     {
@@ -183,8 +182,7 @@ export const pattern: PatternDefinition = {
       to: "review",
       type: "calls",
       label: "approve()/reject()",
-      description:
-        "When InReviewState is current, Document forwards approve() or reject() to it.",
+      description: "When InReviewState is current, Document forwards approve() or reject() to it.",
       code: "delegate",
     },
     {
@@ -193,8 +191,7 @@ export const pattern: PatternDefinition = {
       to: "rejected",
       type: "calls",
       label: "revise()",
-      description:
-        "When RejectedState is current, Document forwards revise() to it.",
+      description: "When RejectedState is current, Document forwards revise() to it.",
       code: "delegate",
       bend: -20,
     },

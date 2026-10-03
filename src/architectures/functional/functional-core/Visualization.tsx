@@ -1,10 +1,10 @@
-import { motion, useReducedMotion } from 'motion/react'
-import { Diagram } from '@/components/viz/Diagram'
-import type { VisualizationProps } from '@/types/pattern'
+import { motion, useReducedMotion } from "motion/react";
+import { Diagram } from "@/components/viz/Diagram";
+import type { VisualizationProps } from "@/types/pattern";
 
-const CENTER = { x: 400, y: 230 }
-const CORE_RADIUS = 92
-const SHELL_RADIUS = 200
+const CENTER = { x: 400, y: 230 };
+const CORE_RADIUS = 92;
+const SHELL_RADIUS = 200;
 
 /**
  * Functional Core / Imperative Shell draws the pure core as an inner circle and the
@@ -14,17 +14,41 @@ const SHELL_RADIUS = 200
  * draws the test harness calling straight into the core, cutting across the ring
  * entirely — the payoff of keeping the core free of side effects.
  */
-export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
-  const reduceMotion = !!useReducedMotion()
+export function FunctionalCoreVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
+  const reduceMotion = !!useReducedMotion();
 
   // Only pulse on the step that is specifically "about" the core deciding — not the
   // wide overview step, and not steps where the shell is interpreting effects.
-  const corePulsing = !!step?.highlight.includes('core') && step.highlight.includes('decide')
+  const corePulsing = !!step?.highlight.includes("core") && step.highlight.includes("decide");
 
   const underlay = (
     <g pointerEvents="none">
-      <circle cx={CENTER.x} cy={CENTER.y} r={SHELL_RADIUS} fill="none" stroke="#1e293b" strokeWidth={2} strokeDasharray="6 6" />
-      <circle cx={CENTER.x} cy={CENTER.y} r={CORE_RADIUS} fill="#0f172a" opacity={0.65} stroke="#1e293b" strokeWidth={2} />
+      <circle
+        cx={CENTER.x}
+        cy={CENTER.y}
+        r={SHELL_RADIUS}
+        fill="none"
+        stroke="#1e293b"
+        strokeWidth={2}
+        strokeDasharray="6 6"
+      />
+      <circle
+        cx={CENTER.x}
+        cy={CENTER.y}
+        r={CORE_RADIUS}
+        fill="#0f172a"
+        opacity={0.65}
+        stroke="#1e293b"
+        strokeWidth={2}
+      />
       <text
         x={CENTER.x}
         y={CENTER.y - SHELL_RADIUS + 20}
@@ -42,7 +66,7 @@ export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, s
         pure core
       </text>
     </g>
-  )
+  );
 
   const overlay = corePulsing ? (
     <motion.circle
@@ -55,10 +79,14 @@ export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, s
       pointerEvents="none"
       style={{ transformOrigin: `${CENTER.x}px ${CENTER.y}px` }}
       initial={{ opacity: 0.7, scale: 1 }}
-      animate={reduceMotion ? { opacity: 0.7, scale: 1 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.2, 1] }}
-      transition={reduceMotion ? { duration: 0 } : { duration: 1.6, repeat: Infinity, ease: 'easeOut' }}
+      animate={
+        reduceMotion ? { opacity: 0.7, scale: 1 } : { opacity: [0.7, 0, 0.7], scale: [1, 1.2, 1] }
+      }
+      transition={
+        reduceMotion ? { duration: 0 } : { duration: 1.6, repeat: Infinity, ease: "easeOut" }
+      }
     />
-  ) : undefined
+  ) : undefined;
 
   return (
     <Diagram
@@ -77,5 +105,5 @@ export function FunctionalCoreVisualization({ pattern, color, step, stepIndex, s
       overlay={overlay}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

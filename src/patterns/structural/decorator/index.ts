@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any mix of them, in any order. If a class-based design subclasses every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee and so on), the number of types explodes, and each combination is fixed at compile time. Go has the same combinatorial problem even though it uses structs and embedding rather than class inheritance.",
   solution:
-    "Give every add-on the same interface as the thing it decorates, and let each decorator hold a reference to the object it wraps. Calling a method on the outermost decorator runs its own logic and then passes the call on to the wrapped object. This forms a chain you can build at runtime, in any order, to any depth. Decorator is different from Proxy. A proxy controls access to a single subject, and it is usually responsible for creating that subject. A decorator is simply handed the object to wrap and only adds behaviour around it.",
+    "Give each decorator the same interface as the object it wraps. A decorator adds its behavior, then passes the call to the wrapped object. You can stack decorators at runtime in any order. Unlike a Proxy, a decorator wraps an object it is given and adds behavior; a Proxy controls access to the object it represents and often creates it itself.",
   analogy:
     "Think of dressing for cold weather: a shirt, then a sweater over it, then a coat over that. Each layer adds warmth without changing the layers underneath, and you can put on or take off exactly the layers you need.",
   whenToUse: [
@@ -69,8 +69,7 @@ export const pattern: PatternDefinition = {
       kind: "class",
       x: 560,
       y: 260,
-      description:
-        'Adds $0.25 to the wrapped cost and "+ sugar" to the description, then returns.',
+      description: 'Adds $0.25 to the wrapped cost and "+ sugar" to the description, then returns.',
     },
     {
       id: "milkDecorator",
@@ -79,8 +78,7 @@ export const pattern: PatternDefinition = {
       kind: "class",
       x: 350,
       y: 260,
-      description:
-        'Adds $0.50 to the wrapped cost and "+ milk" to the description, then returns.',
+      description: 'Adds $0.50 to the wrapped cost and "+ milk" to the description, then returns.',
     },
     {
       id: "simpleCoffee",
@@ -89,8 +87,7 @@ export const pattern: PatternDefinition = {
       kind: "class",
       x: 150,
       y: 260,
-      description:
-        "The base object being decorated: a plain $2.00 coffee with no add-ons.",
+      description: "The base object being decorated: a plain $2.00 coffee with no add-ons.",
     },
     {
       id: "coffeeDecorator",
@@ -121,8 +118,7 @@ export const pattern: PatternDefinition = {
       to: "milkDecorator",
       type: "wraps",
       label: "wraps",
-      description:
-        "SugarDecorator was constructed around the MilkDecorator instance.",
+      description: "SugarDecorator was constructed around the MilkDecorator instance.",
       code: "sugarDecorator",
     },
     {
@@ -131,8 +127,7 @@ export const pattern: PatternDefinition = {
       to: "simpleCoffee",
       type: "wraps",
       label: "wraps",
-      description:
-        "MilkDecorator was constructed around the SimpleCoffee instance.",
+      description: "MilkDecorator was constructed around the SimpleCoffee instance.",
       code: "milkDecorator",
     },
     {
@@ -189,20 +184,13 @@ export const pattern: PatternDefinition = {
       title: "Build the stack",
       description:
         "A SimpleCoffee is wrapped in a MilkDecorator, which is then wrapped in a SugarDecorator. Each layer only knows about the one directly inside it.",
-      highlight: [
-        "simpleCoffee",
-        "wrapsCoffee",
-        "milkDecorator",
-        "wrapsMilk",
-        "sugarDecorator",
-      ],
+      highlight: ["simpleCoffee", "wrapsCoffee", "milkDecorator", "wrapsMilk", "sugarDecorator"],
       notes: { simpleCoffee: "$2.00" },
       code: "usage",
     },
     {
       title: "Client calls cost()",
-      description:
-        "The client calls cost() once, on the outermost decorator — SugarDecorator.",
+      description: "The client calls cost() once, on the outermost decorator — SugarDecorator.",
       highlight: ["client", "call", "sugarDecorator"],
       packets: [{ relation: "call", label: "cost()" }],
       code: "sugarDecorator",
@@ -211,13 +199,7 @@ export const pattern: PatternDefinition = {
       title: "Call travels inward",
       description:
         "SugarDecorator delegates to MilkDecorator before adding its own cost, which delegates to SimpleCoffee in turn.",
-      highlight: [
-        "sugarDecorator",
-        "wrapsMilk",
-        "milkDecorator",
-        "wrapsCoffee",
-        "simpleCoffee",
-      ],
+      highlight: ["sugarDecorator", "wrapsMilk", "milkDecorator", "wrapsCoffee", "simpleCoffee"],
       packets: [
         { relation: "wrapsMilk", label: "cost()" },
         { relation: "wrapsCoffee", label: "cost()", after: 0 },
@@ -237,13 +219,7 @@ export const pattern: PatternDefinition = {
       title: "Price accumulates on the way out",
       description:
         "Each decorator adds its own cost to the value it gets back, so the price builds up as the result unwinds back to the client.",
-      highlight: [
-        "milkDecorator",
-        "wrapsMilk",
-        "sugarDecorator",
-        "call",
-        "client",
-      ],
+      highlight: ["milkDecorator", "wrapsMilk", "sugarDecorator", "call", "client"],
       packets: [
         { relation: "wrapsMilk", label: "$2.50", reverse: true },
         { relation: "call", label: "$2.75", reverse: true, after: 0 },

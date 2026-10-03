@@ -1,10 +1,10 @@
-import { Link } from 'react-router-dom'
-import type { ResolvedRef } from '@/lib/crossRefs'
+import { Link } from "react-router-dom";
+import type { ResolvedRef } from "@/lib/crossRefs";
 
 interface Props {
-  title: string
-  designPatterns?: ResolvedRef[]
-  architectures?: ResolvedRef[]
+  title: string;
+  designPatterns?: ResolvedRef[];
+  architectures?: ResolvedRef[];
 }
 
 /**
@@ -14,7 +14,7 @@ interface Props {
  * `Section` so this reads as a cross-link box, not just another text section.
  */
 export function CrossReferenceBox({ title, designPatterns = [], architectures = [] }: Props) {
-  if (designPatterns.length === 0 && architectures.length === 0) return null
+  if (designPatterns.length === 0 && architectures.length === 0) return null;
 
   return (
     <section className="rounded-2xl bg-slate-900/60 p-6 ring-1 ring-inset ring-sky-500/20">
@@ -29,11 +29,11 @@ export function CrossReferenceBox({ title, designPatterns = [], architectures = 
         <RefGroup label="Architectural patterns" refs={architectures} />
       </div>
     </section>
-  )
+  );
 }
 
 function RefGroup({ label, refs }: { label: string; refs: ResolvedRef[] }) {
-  if (refs.length === 0) return null
+  if (refs.length === 0) return null;
   return (
     <div>
       <p className="text-xs font-medium tracking-wider text-slate-500 uppercase">{label}</p>
@@ -53,5 +53,5 @@ function RefGroup({ label, refs }: { label: string; refs: ResolvedRef[] }) {
         ))}
       </ul>
     </div>
-  )
+  );
 }

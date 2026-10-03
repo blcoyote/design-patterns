@@ -1,8 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import type {
-  MouseEvent as ReactMouseEvent,
-  KeyboardEvent as ReactKeyboardEvent,
-} from "react";
+import type { MouseEvent as ReactMouseEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import { boxOf } from "@/lib/geometry";
@@ -103,11 +100,7 @@ export function SingletonVisualization({
             <g transform={`translate(${config.x} ${config.y + 135})`}>
               <motion.g
                 initial={reduceMotion ? undefined : { opacity: 0 }}
-                animate={
-                  reduceMotion
-                    ? { opacity: 1 }
-                    : { opacity: 1, x: [0, -6, 6, -4, 4, 0] }
-                }
+                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: [0, -6, 6, -4, 4, 0] }}
                 transition={
                   reduceMotion
                     ? { duration: 0.3 }
@@ -154,9 +147,7 @@ export function SingletonVisualization({
                     stroke="#f43f5e"
                     strokeWidth={2.5}
                     strokeLinecap="round"
-                    initial={
-                      reduceMotion ? { pathLength: 1 } : { pathLength: 0 }
-                    }
+                    initial={reduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
                     animate={{ pathLength: 1 }}
                     transition={{
                       duration: 0.3,
@@ -180,9 +171,7 @@ export function SingletonVisualization({
               strokeWidth={1.5}
               strokeDasharray="3 5"
               initial={
-                reduceMotion
-                  ? { pathLength: 1, opacity: 0.8 }
-                  : { pathLength: 0, opacity: 0 }
+                reduceMotion ? { pathLength: 1, opacity: 0.8 } : { pathLength: 0, opacity: 0 }
               }
               animate={{ pathLength: 1, opacity: 0.8 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
@@ -201,15 +190,9 @@ export function SingletonVisualization({
                 className="cursor-pointer outline-none"
                 onClick={select("config")}
                 onKeyDown={onActivate(() => onSelect("config"))}
-                initial={
-                  reduceMotion
-                    ? { opacity: 1, scale: 1 }
-                    : { opacity: 0, scale: 0.3 }
-                }
+                initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.3 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={
-                  reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.3 }
-                }
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.3 }}
                 transition={{ type: "spring", stiffness: 320, damping: 20 }}
               >
                 {showConverge && (

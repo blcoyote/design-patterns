@@ -4,8 +4,8 @@
  * past the last step is clamped instead of ignored, so a stale link still lands somewhere sane.
  */
 export function parseStepParam(value: string | null, stepCount: number): number | undefined {
-  if (value === null) return undefined
-  const n = Number(value)
-  if (!Number.isInteger(n) || n < 0) return undefined
-  return Math.min(n, Math.max(0, stepCount - 1))
+  if (value === null) return undefined;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 0) return undefined;
+  return Math.min(n, Math.max(0, stepCount - 1));
 }

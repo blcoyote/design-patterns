@@ -20,8 +20,7 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
   }
   const checkRegion = (where: string, region?: string) => {
     if (!region) return;
-    if (!regions[region])
-      errors.push(`${where}: unknown code region "${region}"`);
+    if (!regions[region]) errors.push(`${where}: unknown code region "${region}"`);
     if (csRegions && !csRegions[region])
       errors.push(`${where}: unknown csharp code region "${region}"`);
     if (pyRegions && !pyRegions[region])
@@ -30,13 +29,11 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
       errors.push(`${where}: unknown go code region "${region}"`);
   };
 
-  for (const part of p.participants)
-    checkRegion(`participant ${part.id}`, part.code);
+  for (const part of p.participants) checkRegion(`participant ${part.id}`, part.code);
   for (const rel of p.relations) {
     if (!participantIds.has(rel.from))
       errors.push(`relation ${rel.id}: unknown from "${rel.from}"`);
-    if (!participantIds.has(rel.to))
-      errors.push(`relation ${rel.id}: unknown to "${rel.to}"`);
+    if (!participantIds.has(rel.to)) errors.push(`relation ${rel.id}: unknown to "${rel.to}"`);
     checkRegion(`relation ${rel.id}`, rel.code);
   }
   p.steps.forEach((step, i) => {
@@ -45,18 +42,12 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
     }
     for (const [packetIndex, packet] of (step.packets ?? []).entries()) {
       if (!relationIds.has(packet.relation))
-        errors.push(
-          `step ${i + 1}: unknown packet relation "${packet.relation}"`,
-        );
+        errors.push(`step ${i + 1}: unknown packet relation "${packet.relation}"`);
       if (
         packet.after !== undefined &&
-        (!Number.isInteger(packet.after) ||
-          packet.after < 0 ||
-          packet.after >= packetIndex)
+        (!Number.isInteger(packet.after) || packet.after < 0 || packet.after >= packetIndex)
       ) {
-        errors.push(
-          `step ${i + 1}: packet ${packetIndex} must depend on an earlier packet`,
-        );
+        errors.push(`step ${i + 1}: packet ${packetIndex} must depend on an earlier packet`);
       }
     }
     // A packet that departs from where an earlier one arrives is the next hop of a chain,
@@ -65,15 +56,12 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
     const ends = (step.packets ?? []).map((packet) => {
       const rel = relationById.get(packet.relation);
       if (!rel) return null;
-      return packet.reverse
-        ? { from: rel.to, to: rel.from }
-        : { from: rel.from, to: rel.to };
+      return packet.reverse ? { from: rel.to, to: rel.from } : { from: rel.from, to: rel.to };
     });
     ends.forEach((end, packetIndex) => {
       if (!end || step.packets![packetIndex].after !== undefined) return;
       const previous = ends.findIndex(
-        (other, otherIndex) =>
-          otherIndex < packetIndex && other?.to === end.from,
+        (other, otherIndex) => otherIndex < packetIndex && other?.to === end.from,
       );
       if (previous !== -1)
         errors.push(
@@ -81,8 +69,7 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
         );
     });
     for (const id of Object.keys(step.notes ?? {})) {
-      if (!participantIds.has(id))
-        errors.push(`step ${i + 1}: unknown note target "${id}"`);
+      if (!participantIds.has(id)) errors.push(`step ${i + 1}: unknown note target "${id}"`);
     }
     checkRegion(`step ${i + 1}`, step.code);
   });
@@ -90,15 +77,11 @@ export function validateDiagram(p: ExplorableDefinition): string[] {
 }
 
 /** Returns a list of authoring mistakes in a pattern definition (empty if valid). */
-export function validatePattern(
-  p: PatternDefinition,
-  allSlugs: string[] = [],
-): string[] {
+export function validatePattern(p: PatternDefinition, allSlugs: string[] = []): string[] {
   const errors = validateDiagram(p);
   if (allSlugs.length) {
     for (const slug of p.related) {
-      if (!allSlugs.includes(slug))
-        errors.push(`unknown related pattern "${slug}"`);
+      if (!allSlugs.includes(slug)) errors.push(`unknown related pattern "${slug}"`);
     }
   }
   return errors;

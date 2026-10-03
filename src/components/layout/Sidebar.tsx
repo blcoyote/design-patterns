@@ -10,13 +10,7 @@ import { categories } from "@/patterns/categories";
 import { byCategory } from "@/patterns/registry";
 import { GitHubIcon, REPO_URL } from "./GitHubLink";
 
-export function Sidebar({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { pathname } = useLocation();
   const area = areaOf(pathname);
   const [query, setQuery] = useState("");
@@ -27,10 +21,7 @@ export function Sidebar({
     .map((g) => ({
       ...g,
       patterns: g.patterns.filter(
-        (p) =>
-          !q ||
-          p.name.toLowerCase().includes(q) ||
-          p.summary.toLowerCase().includes(q),
+        (p) => !q || p.name.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q),
       ),
     }))
     .filter((g) => g.patterns.length > 0);
@@ -39,19 +30,13 @@ export function Sidebar({
     .map((g) => ({
       ...g,
       architectures: g.architectures.filter(
-        (a) =>
-          !q ||
-          a.name.toLowerCase().includes(q) ||
-          a.summary.toLowerCase().includes(q),
+        (a) => !q || a.name.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q),
       ),
     }))
     .filter((g) => g.architectures.length > 0);
 
   const filteredComparisons = comparisons.filter(
-    (c) =>
-      !q ||
-      c.title.toLowerCase().includes(q) ||
-      c.summary.toLowerCase().includes(q),
+    (c) => !q || c.title.toLowerCase().includes(q) || c.summary.toLowerCase().includes(q),
   );
 
   const empty =
@@ -61,20 +46,12 @@ export function Sidebar({
         ? filteredComparisons.length === 0
         : patternGroups.length === 0;
   const emptyLabel =
-    area === "architecture"
-      ? "architectures"
-      : area === "compare"
-        ? "comparisons"
-        : "patterns";
+    area === "architecture" ? "architectures" : area === "compare" ? "comparisons" : "patterns";
 
   return (
     <>
       {open && (
-        <div
-          className="fixed inset-0 z-20 bg-black/60 lg:hidden"
-          onClick={onClose}
-          aria-hidden
-        />
+        <div className="fixed inset-0 z-20 bg-black/60 lg:hidden" onClick={onClose} aria-hidden />
       )}
       <aside
         className={`fixed top-14 bottom-0 z-20 w-72 shrink-0 overflow-y-auto border-r border-slate-800 bg-slate-950 px-4 py-6 transition-transform lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:translate-x-0 ${
@@ -109,10 +86,7 @@ export function Sidebar({
               >
                 {architectures.map((a) => (
                   <li key={a.slug}>
-                    <SidebarItem
-                      to={`/architecture/${a.slug}`}
-                      onSelect={onClose}
-                    >
+                    <SidebarItem to={`/architecture/${a.slug}`} onSelect={onClose}>
                       {a.name}
                       {used.has(a.slug) && <UsedBadge />}
                     </SidebarItem>
@@ -181,9 +155,7 @@ export function Sidebar({
               onClick={onClose}
               className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
             >
-              {area === "patterns"
-                ? "Zoom out: architecture →"
-                : "Architecture →"}
+              {area === "patterns" ? "Zoom out: architecture →" : "Architecture →"}
             </Link>
           )}
           {area !== "compare" && (

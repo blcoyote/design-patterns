@@ -23,9 +23,7 @@ export const architecture: ArchitectureDefinition = {
   pros: ["…"],
   cons: ["…"],
   realWorld: ["…"],
-  concepts: [
-    { term: "Term", description: "What it means in this architecture." },
-  ],
+  concepts: [{ term: "Term", description: "What it means in this architecture." }],
   // variants: [{ name: 'Variant name', description: 'How it differs.' }],
 
   commonlyUsedWith: {

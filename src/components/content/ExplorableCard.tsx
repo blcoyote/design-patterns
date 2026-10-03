@@ -45,9 +45,7 @@ export function ExplorableCard({
           {used && <UsedBadge />}
         </span>
         <span className="mt-1 text-xl font-semibold text-white">{name}</span>
-        <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">
-          {summary}
-        </span>
+        <span className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">{summary}</span>
         <span className="mt-4 flex items-center gap-3 font-mono text-xs text-slate-500">
           {footer}
           <span className="ml-auto text-slate-400 transition group-hover:translate-x-1 group-hover:text-white">

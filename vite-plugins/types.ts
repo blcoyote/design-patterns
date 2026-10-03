@@ -6,11 +6,11 @@
  */
 export interface PatternUsage {
   /** Design-pattern or architecture slug named in the tag. */
-  slug: string
+  slug: string;
   /** Repo-relative path, forward slashes, e.g. `src/lib/crossRefs.ts`. */
-  file: string
+  file: string;
   /** 1-based line number of the tagged declaration (the line after the tag comment). */
-  line: number
-  explanation: string
-  snippet: string
+  line: number;
+  explanation: string;
+  snippet: string;
 }

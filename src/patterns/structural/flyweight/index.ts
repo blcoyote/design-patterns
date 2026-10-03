@@ -10,10 +10,9 @@ export const pattern: PatternDefinition = {
   name: "Flyweight",
   category: "structural",
   order: 7,
-  summary:
-    "Share common state across many objects to keep large numbers of them cheap.",
+  summary: "Share common state across many objects to keep large numbers of them cheap.",
   intent:
-    'Save memory by sharing the common parts of many similar objects instead of storing a copy in each one.',
+    "Save memory by sharing the common parts of many similar objects instead of storing a copy in each one.",
   problem:
     "A map editor needs to draw a forest of thousands of trees, or a text editor needs an object for every character on the page. If every Tree or Glyph stores its own copy of the species texture or the font outline, memory use explodes. Most of that data is identical across instances, and only the position, age or scale really differs.",
   solution:
@@ -221,9 +220,7 @@ export const pattern: PatternDefinition = {
       description:
         "Forest creates a Tree at (120, 40) with age 3, passing in the shared OakType. The tree keeps its own position and age but no species data of its own.",
       highlight: ["plant-tree", "tree-holds"],
-      packets: [
-        { relation: "plant-tree", label: "new Tree(120,40,3,oakType)" },
-      ],
+      packets: [{ relation: "plant-tree", label: "new Tree(120,40,3,oakType)" }],
       notes: { tree: "x:120 y:40", factory: "pool: 1 type" },
       code: "plant",
     },

@@ -11,7 +11,7 @@ export const pattern: PatternDefinition = {
   order: 4,
   summary: "Provide a stand-in for another object that controls access to it.",
   intent:
-    'Stand in for another object with the same interface, to control access to it, for example by delaying its creation, checking permissions or caching.',
+    "Stand in for another object with the same interface, to control access to it, for example by delaying its creation, checking permissions or caching.",
   problem:
     "Some objects are expensive to create, sit behind a slow network, or need access rules checked before every call. If you create them eagerly, or trust every caller to check permissions itself, you waste resources and scatter the same guard logic across the codebase.",
   solution:
@@ -107,8 +107,7 @@ export const pattern: PatternDefinition = {
       from: "realService",
       to: "videoService",
       type: "implements",
-      description:
-        "RealVideoService implements the same VideoService interface.",
+      description: "RealVideoService implements the same VideoService interface.",
       bend: 30,
     },
     {

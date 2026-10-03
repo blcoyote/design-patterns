@@ -11,13 +11,7 @@ const COUNTS = {
   compare: { count: comparisons.length, unit: "comparisons" },
 } as const;
 
-export function Header({
-  onMenu,
-  menuOpen,
-}: {
-  onMenu: () => void;
-  menuOpen: boolean;
-}) {
+export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boolean }) {
   const { pathname } = useLocation();
   const area = areaOf(pathname);
   const { count, unit } = COUNTS[area];
@@ -36,14 +30,10 @@ export function Header({
             <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" />
           </svg>
         </button>
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 font-semibold text-white"
-        >
+        <Link to="/" className="flex items-center gap-2.5 font-semibold text-white">
           <Logo />
           <span className="hidden sm:inline">
-            Design Patterns{" "}
-            <span className="font-normal text-slate-400">· interactive</span>
+            Design Patterns <span className="font-normal text-slate-400">· interactive</span>
           </span>
         </Link>
         <nav className="flex items-center gap-1 sm:ml-2" aria-label="Areas">
@@ -107,12 +97,7 @@ function Logo() {
       <rect x="2" y="2" width="12" height="12" rx="3" fill="#34d399" />
       <rect x="18" y="2" width="12" height="12" rx="3" fill="#38bdf8" />
       <rect x="10" y="18" width="12" height="12" rx="3" fill="#c084fc" />
-      <path
-        d="M8 14v4h8M24 14v4h-8"
-        stroke="#64748b"
-        strokeWidth="1.5"
-        fill="none"
-      />
+      <path d="M8 14v4h8M24 14v4h-8" stroke="#64748b" strokeWidth="1.5" fill="none" />
     </svg>
   );
 }

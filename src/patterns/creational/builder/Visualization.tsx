@@ -1,8 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import type {
-  KeyboardEvent as ReactKeyboardEvent,
-  MouseEvent as ReactMouseEvent,
-} from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import { boxOf } from "@/lib/geometry";
@@ -52,13 +49,12 @@ const FIELDS_BY_STEP: FieldState[] = [
 ];
 
 const CARD = { x: 400, y: 270, width: 180, height: 164 };
-const ROW_LABELS: Array<{ key: keyof Omit<FieldState, "url">; label: string }> =
-  [
-    { key: "method", label: "method" },
-    { key: "headers", label: "headers" },
-    { key: "query", label: "query" },
-    { key: "body", label: "body" },
-  ];
+const ROW_LABELS: Array<{ key: keyof Omit<FieldState, "url">; label: string }> = [
+  { key: "method", label: "method" },
+  { key: "headers", label: "headers" },
+  { key: "query", label: "query" },
+  { key: "body", label: "body" },
+];
 
 /** Builder: a blueprint card between the two concrete builders fills in
  * field-by-field, then flies into whichever product (HttpRequest or the curl
@@ -81,9 +77,7 @@ export function BuilderVisualization({
   const fields = FIELDS_BY_STEP[Math.min(stepIndex, FIELDS_BY_STEP.length - 1)];
   const filledCount = ROW_LABELS.filter((r) => fields[r.key]).length;
   const isBuildStep = stepIndex === 2 || stepIndex === 4;
-  const blueprintLabel = usingCurl
-    ? "«blueprint» curl command"
-    : "«blueprint» HttpRequest";
+  const blueprintLabel = usingCurl ? "«blueprint» curl command" : "«blueprint» HttpRequest";
 
   const select = (id: string) => (e: ReactMouseEvent | ReactKeyboardEvent) => {
     e.stopPropagation();
@@ -156,11 +150,7 @@ export function BuilderVisualization({
               {isBuildStep && (
                 <AnimatePresence>
                   <motion.g
-                    initial={
-                      reduceMotion
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0, scale: 0.4 }
-                    }
+                    initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.4 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{
                       delay: 0.15,
@@ -216,10 +206,7 @@ export function BuilderVisualization({
                 const value = fields[row.key];
                 const y = -CARD.height / 2 + 68 + i * 24;
                 return (
-                  <g
-                    key={`${row.key}-${stepIndex}`}
-                    transform={`translate(0 ${y})`}
-                  >
+                  <g key={`${row.key}-${stepIndex}`} transform={`translate(0 ${y})`}>
                     <text
                       x={-CARD.width / 2 + 14}
                       textAnchor="start"

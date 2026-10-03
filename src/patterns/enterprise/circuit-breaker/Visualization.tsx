@@ -140,14 +140,10 @@ export function CircuitBreakerVisualization({
 
   const baseActiveId = stateFromStep(step);
   const baseFailureCount =
-    FAILURE_COUNTS_BY_STEP[
-      Math.min(stepIndex, FAILURE_COUNTS_BY_STEP.length - 1)
-    ] ?? 0;
+    FAILURE_COUNTS_BY_STEP[Math.min(stepIndex, FAILURE_COUNTS_BY_STEP.length - 1)] ?? 0;
 
   const activeId = effectiveLive ? effectiveLive.state : baseActiveId;
-  const failureCount = effectiveLive
-    ? effectiveLive.failureCount
-    : baseFailureCount;
+  const failureCount = effectiveLive ? effectiveLive.failureCount : baseFailureCount;
 
   const liveDisplay = effectiveLive
     ? describeEvent(
@@ -160,18 +156,12 @@ export function CircuitBreakerVisualization({
   const displayHighlight = liveDisplay?.highlight ?? step?.highlight;
   const displayPackets = liveDisplay?.packets ?? step?.packets;
   const displayNotes = liveDisplay?.notes ?? step?.notes;
-  const animationKey = effectiveLive
-    ? `live-${effectiveLive.token}`
-    : stepIndex;
+  const animationKey = effectiveLive ? `live-${effectiveLive.token}` : stepIndex;
 
   // Auto-promote Open -> Half-Open once the cooldown elapses, exactly like the
   // real CircuitBreaker checks `Date.now() < nextAttempt` on the next call.
   useEffect(() => {
-    if (
-      !effectiveLive ||
-      effectiveLive.state !== "open" ||
-      effectiveLive.cooldownEndsAt == null
-    )
+    if (!effectiveLive || effectiveLive.state !== "open" || effectiveLive.cooldownEndsAt == null)
       return;
     const endsAt = effectiveLive.cooldownEndsAt;
     const forStep = effectiveLive.forStep;
@@ -233,8 +223,7 @@ export function CircuitBreakerVisualization({
         prevState: "open",
         state: "open",
         failureCount: current.failureCount,
-        cooldownEndsAt:
-          effectiveLive?.cooldownEndsAt ?? Date.now() + COOLDOWN_MS,
+        cooldownEndsAt: effectiveLive?.cooldownEndsAt ?? Date.now() + COOLDOWN_MS,
         event: "failFast",
         token: tokenRef.current,
       });
@@ -298,8 +287,7 @@ export function CircuitBreakerVisualization({
   const springTransition = reduceMotion
     ? { duration: 0 }
     : { type: "spring" as const, stiffness: 220, damping: 24 };
-  const meterPct =
-    Math.min(failureCount, FAILURE_THRESHOLD) / FAILURE_THRESHOLD;
+  const meterPct = Math.min(failureCount, FAILURE_THRESHOLD) / FAILURE_THRESHOLD;
 
   const overlay = (
     <>
@@ -349,9 +337,7 @@ export function CircuitBreakerVisualization({
             initial={false}
             animate={{ width: 140 * meterPct }}
             transition={
-              reduceMotion
-                ? { duration: 0 }
-                : { type: "spring", stiffness: 260, damping: 26 }
+              reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 26 }
             }
           />
           <text
@@ -365,23 +351,18 @@ export function CircuitBreakerVisualization({
         </g>
       )}
 
-      {effectiveLive?.state === "open" &&
-        effectiveLive.cooldownEndsAt != null &&
-        openP && (
-          <g
-            transform={`translate(${openP.x} ${openP.y + NODE_HEIGHT / 2 + 26})`}
-            pointerEvents="none"
-          >
-            <text
-              textAnchor="middle"
-              className="fill-slate-400 text-[10px] font-mono select-none"
-            >
-              {reduceMotion
-                ? "cooling down…"
-                : `cooldown ${(cooldownRemainingMs / 1000).toFixed(1)}s`}
-            </text>
-          </g>
-        )}
+      {effectiveLive?.state === "open" && effectiveLive.cooldownEndsAt != null && openP && (
+        <g
+          transform={`translate(${openP.x} ${openP.y + NODE_HEIGHT / 2 + 26})`}
+          pointerEvents="none"
+        >
+          <text textAnchor="middle" className="fill-slate-400 text-[10px] font-mono select-none">
+            {reduceMotion
+              ? "cooling down…"
+              : `cooldown ${(cooldownRemainingMs / 1000).toFixed(1)}s`}
+          </text>
+        </g>
+      )}
     </>
   );
 

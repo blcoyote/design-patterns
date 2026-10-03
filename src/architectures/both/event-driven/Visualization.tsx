@@ -1,7 +1,7 @@
-import { Diagram } from '@/components/viz/Diagram'
-import type { VisualizationProps } from '@/types/pattern'
+import { Diagram } from "@/components/viz/Diagram";
+import type { VisualizationProps } from "@/types/pattern";
 
-const BROKER_BAND = { x: 330, y: 20, width: 220, height: 520 }
+const BROKER_BAND = { x: 330, y: 20, width: 220, height: 520 };
 
 /**
  * Event-Driven swaps the generic diagram's plain background for a vertical broker band
@@ -10,7 +10,15 @@ const BROKER_BAND = { x: 330, y: 20, width: 220, height: 520 }
  * reads before a single step plays. The band is purely decorative; EventBroker is
  * still a normal participant positioned inside it.
  */
-export function EventDrivenVisualization({ pattern, color, step, stepIndex, selectedId, onSelect, speed }: VisualizationProps) {
+export function EventDrivenVisualization({
+  pattern,
+  color,
+  step,
+  stepIndex,
+  selectedId,
+  onSelect,
+  speed,
+}: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
       <rect
@@ -53,7 +61,7 @@ export function EventDrivenVisualization({ pattern, color, step, stepIndex, sele
         consumers
       </text>
     </g>
-  )
+  );
 
   return (
     <Diagram
@@ -71,5 +79,5 @@ export function EventDrivenVisualization({ pattern, color, step, stepIndex, sele
       underlay={underlay}
       ariaLabel={`${pattern.name} diagram`}
     />
-  )
+  );
 }

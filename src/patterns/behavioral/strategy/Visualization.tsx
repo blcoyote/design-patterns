@@ -29,8 +29,7 @@ const RESULTS: Record<StrategyId, string> = {
 function strategyFromStep(step: Step | null): StrategyId {
   if (step) {
     for (const id of STRATEGY_IDS) {
-      if (step.highlight.includes(id) || step.highlight.includes(`calc-${id}`))
-        return id;
+      if (step.highlight.includes(id) || step.highlight.includes(`calc-${id}`)) return id;
     }
   }
   return "fastest";
@@ -66,8 +65,7 @@ export function StrategyVisualization({
     id: StrategyId;
   } | null>(null);
   const [replayToken, setReplayToken] = useState(0);
-  const override =
-    pickedOverride?.forStep === stepIndex ? pickedOverride.id : null;
+  const override = pickedOverride?.forStep === stepIndex ? pickedOverride.id : null;
 
   const byId = useMemo(
     () => new Map(pattern.participants.map((p) => [p.id, p])),
@@ -81,9 +79,7 @@ export function StrategyVisualization({
   const effectiveStep = override ? syntheticStep(override) : step;
   const activeId = override ?? strategyFromStep(step);
   const result = effectiveStep?.notes?.[activeId];
-  const animationKey = override
-    ? `override-${override}-${replayToken}`
-    : stepIndex;
+  const animationKey = override ? `override-${override}-${replayToken}` : stepIndex;
 
   const navigator = byId.get("navigator");
   const activeParticipant = byId.get(activeId);
@@ -138,10 +134,7 @@ export function StrategyVisualization({
         transition={springTransition}
       />
 
-      <g
-        transform={`translate(${boxOf(navigator).x} ${boxOf(navigator).y})`}
-        pointerEvents="none"
-      >
+      <g transform={`translate(${boxOf(navigator).x} ${boxOf(navigator).y})`} pointerEvents="none">
         <AnimatePresence>
           {result && (
             <motion.g
@@ -150,19 +143,10 @@ export function StrategyVisualization({
               animate={{ opacity: 1, y: -58, scale: 1 }}
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
               transition={
-                reduceMotion
-                  ? { duration: 0 }
-                  : { type: "spring", stiffness: 320, damping: 22 }
+                reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 22 }
               }
             >
-              <rect
-                x={-44}
-                y={-14}
-                width={88}
-                height={28}
-                rx={14}
-                fill={color}
-              />
+              <rect x={-44} y={-14} width={88} height={28} rx={14} fill={color} />
               <text
                 y={5}
                 textAnchor="middle"

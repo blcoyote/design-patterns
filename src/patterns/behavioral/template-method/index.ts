@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   summary:
     "Fix the skeleton of an algorithm in a base class, and let subclasses override individual steps.",
   intent:
-    'Fix the overall steps of an algorithm in a base class and let subclasses fill in the individual steps.',
+    "Fix the overall steps of an algorithm in a base class and let subclasses fill in the individual steps.",
   problem:
     "Two report exporters, CSV and PDF, follow almost the same procedure: fetch the data, format it, then write it out. Without a shared skeleton, every new format copies the same three steps and tweaks a line or two. A bug in the ordering, or a forgotten step, then has to be fixed in every copy separately.",
   solution:
@@ -21,7 +21,7 @@ export const pattern: PatternDefinition = {
     "A recipe card printed once and shared by every cook: preheat, mix, bake, cool. The steps and their order never change. Each cook can use their own mixing technique or skip the optional glaze, but the structure of the recipe stays exactly as printed.",
   whenToUse: [
     "Several classes implement the same algorithm but differ in only a few steps, and you want that shared structure in one place.",
-    "You want subclasses to customise specific steps while the overall algorithm stays fixed. (Truly forbidding overrides needs language support. C# methods are non-virtual by default and Java has `final`. TypeScript has nothing equivalent, and Python's `@typing.final` is only checked by type checkers, so in those two it is a convention. Go has no method overriding at all: the skeleton calls the varying steps through an interface, so a concrete generator supplies steps but cannot replace generate().)",
+    "You want subclasses to customize individual steps while keeping the overall sequence fixed. Languages enforce this differently: C# methods are non-virtual by default, and Java can use `final`. TypeScript cannot prevent overrides; Python's `@typing.final` is only a type-checker hint. Go has no method overriding, so the template calls an interface and concrete generators provide the steps without replacing generate().",
     "You want optional extension points (hooks) that most subclasses can safely ignore.",
   ],
   pros: [
@@ -181,13 +181,7 @@ export const pattern: PatternDefinition = {
       title: "One skeleton, three kinds of steps",
       description:
         "ReportGenerator fixes the order of generate() once and for all: fetch, format, export. fetchData() is concrete and shared by every subclass; formatData() is a hook with a default implementation subclasses may override; exportData() is abstract and every subclass must supply it.",
-      highlight: [
-        "reportGenerator",
-        "csv-extends",
-        "csvReport",
-        "pdf-extends",
-        "pdfReport",
-      ],
+      highlight: ["reportGenerator", "csv-extends", "csvReport", "pdf-extends", "pdfReport"],
       code: "reportGenerator",
     },
     {
@@ -195,9 +189,7 @@ export const pattern: PatternDefinition = {
       description:
         "The client instantiates a CsvReportGenerator, but stores it only as a ReportGenerator.",
       highlight: ["client", "client-creates-csv", "csvReport"],
-      packets: [
-        { relation: "client-creates-csv", label: "new CsvReportGenerator()" },
-      ],
+      packets: [{ relation: "client-creates-csv", label: "new CsvReportGenerator()" }],
       notes: { csvReport: "created" },
       code: "usage",
     },
@@ -240,9 +232,7 @@ export const pattern: PatternDefinition = {
       description:
         "The client builds a different subclass instead. ReportGenerator’s generate() method does not change at all — only the steps it dispatches to do.",
       highlight: ["client", "client-creates-pdf", "pdfReport"],
-      packets: [
-        { relation: "client-creates-pdf", label: "new PdfReportGenerator()" },
-      ],
+      packets: [{ relation: "client-creates-pdf", label: "new PdfReportGenerator()" }],
       notes: { pdfReport: "created" },
       code: "pdfReport",
     },
@@ -250,13 +240,7 @@ export const pattern: PatternDefinition = {
       title: "Hook override: formatData() compresses whitespace",
       description:
         "generate() runs again, identical to before. This time formatData() resolves to PdfReportGenerator’s override, which compresses the deliberately messy whitespace in its raw data before exportData() writes the PDF body.",
-      highlight: [
-        "client",
-        "client-calls",
-        "reportGenerator",
-        "dispatch-pdf-hook",
-        "pdfReport",
-      ],
+      highlight: ["client", "client-calls", "reportGenerator", "dispatch-pdf-hook", "pdfReport"],
       packets: [
         { relation: "client-calls", label: "generate()" },
         {

@@ -13,7 +13,7 @@ export const pattern: PatternDefinition = {
   summary:
     "Represent a grammar as a class hierarchy, and interpret sentences in that language by walking the resulting tree.",
   intent:
-    'Model a small language as a tree of classes, one per grammar rule, and evaluate a sentence by walking that tree.',
+    "Model a small language as a tree of classes, one per grammar rule, and evaluate a sentence by walking that tree.",
   problem:
     "Your application has expression trees for a small, well-defined language, such as arithmetic formulas, search filters or routing rules, and it needs to evaluate them. The set of rules keeps growing. If you evaluate the tree with one giant switch statement over every node type, the code gets brittle: adding a single new rule means hunting through nested conditionals to edit them.",
   solution:
@@ -315,13 +315,7 @@ export const pattern: PatternDefinition = {
       title: "Multiply delegates to its own children",
       description:
         "Multiply is non-terminal too, so it runs the same left-before-right logic as Add: it calls interpret(context) on Number(2), then on Number(3).",
-      highlight: [
-        "multiply",
-        "mulLeft",
-        "numberTwo",
-        "mulRight",
-        "numberThree",
-      ],
+      highlight: ["multiply", "mulLeft", "numberTwo", "mulRight", "numberThree"],
       packets: [
         { relation: "mulLeft", label: "interpret(context)" },
         { relation: "mulRight", label: "interpret(context)", after: 0 },

@@ -1,41 +1,41 @@
 // [button]
 interface Button {
-  render(): string
+  render(): string;
 }
 // [/button]
 
 // [checkbox]
 interface Checkbox {
-  render(): string
+  render(): string;
 }
 // [/checkbox]
 
 // [uiFactory]
 interface UIFactory {
-  createButton(): Button
-  createCheckbox(): Checkbox
+  createButton(): Button;
+  createCheckbox(): Checkbox;
 }
 // [/uiFactory]
 
 // [lightFactory]
 class LightButton implements Button {
   render() {
-    return 'button [light]'
+    return "button [light]";
   }
 }
 
 class LightCheckbox implements Checkbox {
   render() {
-    return 'checkbox [light]'
+    return "checkbox [light]";
   }
 }
 
 class LightFactory implements UIFactory {
   createButton(): Button {
-    return new LightButton()
+    return new LightButton();
   }
   createCheckbox(): Checkbox {
-    return new LightCheckbox()
+    return new LightCheckbox();
   }
 }
 // [/lightFactory]
@@ -43,22 +43,22 @@ class LightFactory implements UIFactory {
 // [darkFactory]
 class DarkButton implements Button {
   render() {
-    return 'button [dark]'
+    return "button [dark]";
   }
 }
 
 class DarkCheckbox implements Checkbox {
   render() {
-    return 'checkbox [dark]'
+    return "checkbox [dark]";
   }
 }
 
 class DarkFactory implements UIFactory {
   createButton(): Button {
-    return new DarkButton()
+    return new DarkButton();
   }
   createCheckbox(): Checkbox {
-    return new DarkCheckbox()
+    return new DarkCheckbox();
   }
 }
 // [/darkFactory]
@@ -67,21 +67,21 @@ class DarkFactory implements UIFactory {
 // [usage]
 // [client]
 function renderDialog(factory: UIFactory) {
-  const button = factory.createButton()
-  const checkbox = factory.createCheckbox()
-  return [button.render(), checkbox.render()]
+  const button = factory.createButton();
+  const checkbox = factory.createCheckbox();
+  return [button.render(), checkbox.render()];
 }
 // [/client]
 
-function getUserTheme(): 'light' | 'dark' {
-  return 'dark' // stand-in for a real preference lookup
+function getUserTheme(): "light" | "dark" {
+  return "dark"; // stand-in for a real preference lookup
 }
 
-const theme: 'light' | 'dark' = getUserTheme()
-const factory: UIFactory = theme === 'dark' ? new DarkFactory() : new LightFactory()
+const theme: "light" | "dark" = getUserTheme();
+const factory: UIFactory = theme === "dark" ? new DarkFactory() : new LightFactory();
 
-renderDialog(factory) // ["button [dark]", "checkbox [dark]"]
+renderDialog(factory); // ["button [dark]", "checkbox [dark]"]
 
 // Switch the whole family just by swapping the factory:
-renderDialog(new LightFactory()) // ["button [light]", "checkbox [light]"]
+renderDialog(new LightFactory()); // ["button [light]", "checkbox [light]"]
 // [/usage]

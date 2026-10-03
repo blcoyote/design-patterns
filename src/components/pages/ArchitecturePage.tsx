@@ -11,10 +11,7 @@ import { Section } from "@/components/content/Section";
 import { UsedInThisSite } from "@/components/content/UsedInThisSite";
 import { PatternExplorer } from "@/components/viz/PatternExplorer";
 import { paradigms } from "@/architectures/paradigms";
-import {
-  architectureNeighbours,
-  getArchitecture,
-} from "@/architectures/registry";
+import { architectureNeighbours, getArchitecture } from "@/architectures/registry";
 import { comparisonsFor } from "@/comparisons/registry";
 import { architecturesUsedBy, designPatternsUsedBy } from "@/lib/crossRefs";
 import { usagesOf } from "@/lib/selfUsage";
@@ -36,10 +33,7 @@ export function ArchitecturePage() {
   const siblingArchitectures = architecturesUsedBy(architecture);
   const usages = usagesOf(architecture.slug);
   const comparisons = comparisonsFor(architecture.slug);
-  const initialStep = parseStepParam(
-    searchParams.get("step"),
-    architecture.steps.length,
-  );
+  const initialStep = parseStepParam(searchParams.get("step"), architecture.steps.length);
 
   return (
     <article className="space-y-8">
@@ -86,9 +80,7 @@ export function ArchitecturePage() {
           {architecture.concepts.map((c) => (
             <div key={c.term}>
               <dt className="font-semibold text-white">{c.term}</dt>
-              <dd className="mt-0.5 text-sm leading-relaxed text-slate-400">
-                {c.description}
-              </dd>
+              <dd className="mt-0.5 text-sm leading-relaxed text-slate-400">{c.description}</dd>
             </div>
           ))}
         </dl>
@@ -100,9 +92,7 @@ export function ArchitecturePage() {
             {architecture.variants.map((v) => (
               <div key={v.name}>
                 <dt className="font-semibold text-white">{v.name}</dt>
-                <dd className="mt-0.5 text-sm leading-relaxed text-slate-400">
-                  {v.description}
-                </dd>
+                <dd className="mt-0.5 text-sm leading-relaxed text-slate-400">{v.description}</dd>
               </div>
             ))}
           </dl>

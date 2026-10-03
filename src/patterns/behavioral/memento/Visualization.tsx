@@ -32,14 +32,7 @@ const STEP_CONTENT = [
 ];
 const STEP_SHELF: string[][] = [[], [], [], ["Hello"], ["Hello"], [], [], []];
 
-const TYPED_WORDS = [
-  " World",
-  "!",
-  " — Memento",
-  " pattern",
-  " rocks",
-  " undo",
-];
+const TYPED_WORDS = [" World", "!", " — Memento", " pattern", " rocks", " undo"];
 
 function truncate(text: string, max = 16): string {
   const quoted = text.length <= max ? text : `${text.slice(0, max)}…`;
@@ -53,10 +46,7 @@ function synthStep(action: Action, after: LiveState) {
       return {
         highlight: ["client", "client-type", "editor"],
         packets: [{ relation: "client-type", label: "type(…)" }] as Packet[],
-        notes: { editor: `content: ${truncate(after.content)}` } as Record<
-          string,
-          string
-        >,
+        notes: { editor: `content: ${truncate(after.content)}` } as Record<string, string>,
       };
     case "save":
       return {
@@ -139,20 +129,14 @@ export function MementoVisualization({
     ? override.state
     : { content: narrativeContent, shelf: narrativeShelf };
 
-  const synthesized = override
-    ? synthStep(override.action, override.state)
-    : null;
+  const synthesized = override ? synthStep(override.action, override.state) : null;
   const effectiveHighlight = synthesized?.highlight ?? step?.highlight;
   const effectivePackets = synthesized?.packets ?? step?.packets;
   const effectiveNotes = synthesized?.notes ?? step?.notes;
-  const animationKey = override
-    ? `override-${override.action}-${replayToken}`
-    : stepIndex;
+  const animationKey = override ? `override-${override.action}-${replayToken}` : stepIndex;
 
   function currentLive(): LiveState {
-    return override
-      ? override.state
-      : { content: narrativeContent, shelf: narrativeShelf };
+    return override ? override.state : { content: narrativeContent, shelf: narrativeShelf };
   }
 
   function fire(action: Action, next: LiveState) {
@@ -188,18 +172,14 @@ export function MementoVisualization({
 
   const editorActive = !!effectiveHighlight?.includes("editor");
   const shelfActive =
-    !!effectiveHighlight?.includes("history") ||
-    !!effectiveHighlight?.includes("memento");
+    !!effectiveHighlight?.includes("history") || !!effectiveHighlight?.includes("memento");
 
   // Panel-local coordinates: editor on the left, shelf ledge on the right.
   const EDITOR_CENTER = { x: 150, y: 95 };
   const SHELF_X = 560;
   const SHELF_BASE_Y = 150;
   // Squeeze the stack together as it grows so every snapshot stays inside the viewBox.
-  const CARD_GAP = Math.min(
-    38,
-    (SHELF_BASE_Y - 56) / Math.max(1, live.shelf.length - 1),
-  );
+  const CARD_GAP = Math.min(38, (SHELF_BASE_Y - 56) / Math.max(1, live.shelf.length - 1));
 
   return (
     <div>
@@ -244,9 +224,7 @@ export function MementoVisualization({
               height={140}
               rx={14}
               fill="#0f172a"
-              stroke={
-                editorActive || selectedId === "editor" ? color : "#334155"
-              }
+              stroke={editorActive || selectedId === "editor" ? color : "#334155"}
               strokeWidth={editorActive || selectedId === "editor" ? 2.5 : 1.5}
             />
             <text
@@ -258,15 +236,11 @@ export function MementoVisualization({
             </text>
             <foreignObject x={32} y={56} width={236} height={96}>
               <div className="wrap-break-word font-mono text-[13px] leading-snug text-slate-100">
-                {live.content || (
-                  <span className="text-slate-600">(empty)</span>
-                )}
+                {live.content || <span className="text-slate-600">(empty)</span>}
                 <motion.span
                   aria-hidden
                   className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 bg-slate-100 align-middle"
-                  animate={
-                    reduceMotion ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }
-                  }
+                  animate={reduceMotion ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }}
                   transition={
                     reduceMotion
                       ? { duration: 0 }
@@ -336,9 +310,7 @@ export function MementoVisualization({
                         }
                   }
                   transition={
-                    reduceMotion
-                      ? { duration: 0 }
-                      : { type: "spring", stiffness: 260, damping: 24 }
+                    reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 24 }
                   }
                 >
                   <rect
@@ -348,11 +320,7 @@ export function MementoVisualization({
                     height={32}
                     rx={8}
                     fill={isTop ? `${color}22` : "#0f172a"}
-                    stroke={
-                      isTop && (shelfActive || selectedId === "memento")
-                        ? color
-                        : "#475569"
-                    }
+                    stroke={isTop && (shelfActive || selectedId === "memento") ? color : "#475569"}
                     strokeWidth={isTop ? 2 : 1.5}
                   />
                   <text

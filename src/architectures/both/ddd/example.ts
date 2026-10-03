@@ -110,23 +110,17 @@ class Order {
     // Invariant: a placed order can never be grown again — no matter who calls this,
     // or from where. The rule lives in the aggregate, not in every caller.
     if (this.status !== "draft") {
-      throw new Error(
-        `cannot add a line to order ${this.id}: already ${this.status}`,
-      );
+      throw new Error(`cannot add a line to order ${this.id}: already ${this.status}`);
     }
     this.lines.push(line);
   }
 
   get total(): Money {
-    return this.lines.reduce(
-      (sum, line) => sum.add(line.lineTotal),
-      Money.of(0),
-    );
+    return this.lines.reduce((sum, line) => sum.add(line.lineTotal), Money.of(0));
   }
 
   place(policy: OrderPolicy): void {
-    if (this.status !== "draft")
-      throw new Error(`order ${this.id} is already ${this.status}`);
+    if (this.status !== "draft") throw new Error(`order ${this.id} is already ${this.status}`);
     if (!policy.isSatisfiedBy(this))
       throw new Error(`cannot place order ${this.id}: ${policy.describe()}`);
     this.status = "placed";

@@ -1,15 +1,6 @@
 import type { ReactNode } from "react";
-import {
-  NODE_HEIGHT,
-  boxOf,
-  edgeBetween,
-  type EdgeGeometry,
-} from "@/lib/geometry";
-import type {
-  Packet as PacketDef,
-  Participant,
-  Relation,
-} from "@/types/pattern";
+import { NODE_HEIGHT, boxOf, edgeBetween, type EdgeGeometry } from "@/lib/geometry";
+import type { Packet as PacketDef, Participant, Relation } from "@/types/pattern";
 import { DiagramEdge, EdgeMarkers } from "./DiagramEdge";
 import { DiagramNode } from "./DiagramNode";
 import { PacketLayer } from "./PacketLayer";

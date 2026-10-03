@@ -10,8 +10,7 @@ export const pattern: PatternDefinition = {
   name: "Chain of Responsibility",
   category: "behavioral",
   order: 7,
-  summary:
-    "Pass a request along a chain of handlers until one of them deals with it.",
+  summary: "Pass a request along a chain of handlers until one of them deals with it.",
   intent:
     "Pass a request along a line of handlers until one of them deals with it, so the sender doesn't need to know who will.",
   problem:
@@ -177,8 +176,7 @@ export const pattern: PatternDefinition = {
       from: "validationHandler",
       to: "controller",
       type: "holds",
-      description:
-        "ValidationHandler forwards to the final handler once the payload checks out.",
+      description: "ValidationHandler forwards to the final handler once the payload checks out.",
       code: "validation",
     },
   ],
@@ -258,9 +256,7 @@ export const pattern: PatternDefinition = {
       description:
         "A second request carries an expired token. AuthHandler rejects it immediately and returns 401 straight to the client — RateLimitHandler, ValidationHandler and Controller never even see it.",
       highlight: ["entry", "authHandler"],
-      packets: [
-        { relation: "entry", label: "401 Unauthorized", reverse: true },
-      ],
+      packets: [{ relation: "entry", label: "401 Unauthorized", reverse: true }],
       notes: { authHandler: "token expired ✗" },
       code: "auth",
     },

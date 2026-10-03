@@ -43,12 +43,14 @@ function PacketCycle({
   const [cycle, setCycle] = useState(0);
 
   useEffect(() => {
-    if (!sequenced || reduceMotion || completed.length !== packets.length)
-      return;
-    const timeout = window.setTimeout(() => {
-      setCompleted([]);
-      setCycle((current) => current + 1);
-    }, (PACKET_REPEAT_DELAY * 1000) / speed);
+    if (!sequenced || reduceMotion || completed.length !== packets.length) return;
+    const timeout = window.setTimeout(
+      () => {
+        setCompleted([]);
+        setCycle((current) => current + 1);
+      },
+      (PACKET_REPEAT_DELAY * 1000) / speed,
+    );
     return () => window.clearTimeout(timeout);
   }, [sequenced, reduceMotion, completed.length, packets.length, speed]);
 
@@ -56,21 +58,10 @@ function PacketCycle({
     <g key={cycle}>
       {packets.map((packet, index) => {
         const edge =
-          geometry instanceof Map
-            ? geometry.get(packet.relation)
-            : geometry[packet.relation];
+          geometry instanceof Map ? geometry.get(packet.relation) : geometry[packet.relation];
         if (!edge) return null;
-        if (
-          reduceMotion &&
-          sequenced &&
-          packets.some((next) => next.after === index)
-        )
-          return null;
-        if (
-          !reduceMotion &&
-          packet.after !== undefined &&
-          !completed.includes(packet.after)
-        )
+        if (reduceMotion && sequenced && packets.some((next) => next.after === index)) return null;
+        if (!reduceMotion && packet.after !== undefined && !completed.includes(packet.after))
           return null;
         return (
           <Packet
@@ -80,11 +71,7 @@ function PacketCycle({
             label={packet.label}
             reverse={packet.reverse}
             delay={sequenced ? 0 : (index * stagger) / speed}
-            duration={
-              sequenced
-                ? packetAnimationDuration(packets, speed)
-                : PACKET_HOP / speed
-            }
+            duration={sequenced ? packetAnimationDuration(packets, speed) : PACKET_HOP / speed}
             repeat={!sequenced}
             repeatDelay={PACKET_REPEAT_DELAY / speed}
             onComplete={

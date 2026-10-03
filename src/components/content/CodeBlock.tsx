@@ -35,17 +35,9 @@ const PRISM_LANGUAGE: Record<CodeLanguage, string> = {
   go: "go",
 };
 
-export function CodeBlock({
-  sources,
-  active,
-  onActiveChange,
-  color,
-  className = "",
-}: Props) {
+export function CodeBlock({ sources, active, onActiveChange, color, className = "" }: Props) {
   const scroller = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<
-    Partial<Record<CodeLanguage, HTMLButtonElement | null>>
-  >({});
+  const tabRefs = useRef<Partial<Record<CodeLanguage, HTMLButtonElement | null>>>({});
   const [copied, setCopied] = useState(false);
   const uid = useId();
 
@@ -76,8 +68,7 @@ export function CodeBlock({
     const i = sources.findIndex((s) => s.lang === current.lang);
     let next = -1;
     if (e.key === "ArrowRight") next = (i + 1) % sources.length;
-    else if (e.key === "ArrowLeft")
-      next = (i - 1 + sources.length) % sources.length;
+    else if (e.key === "ArrowLeft") next = (i - 1 + sources.length) % sources.length;
     else if (e.key === "Home") next = 0;
     else if (e.key === "End") next = sources.length - 1;
     if (next < 0) return;
@@ -117,9 +108,7 @@ export function CodeBlock({
                   className="shrink-0 rounded px-1 pb-1 font-mono transition-colors"
                   style={{
                     color: selected ? color : undefined,
-                    boxShadow: selected
-                      ? `inset 0 -2px 0 0 ${color}`
-                      : undefined,
+                    boxShadow: selected ? `inset 0 -2px 0 0 ${color}` : undefined,
                   }}
                 >
                   {s.fileName ?? FILE_NAME[s.lang]}

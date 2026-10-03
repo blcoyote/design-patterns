@@ -1,17 +1,17 @@
 // [coffee]
 interface Coffee {
-  cost(): number
-  description(): string
+  cost(): number;
+  description(): string;
 }
 // [/coffee]
 
 // [simpleCoffee]
 class SimpleCoffee implements Coffee {
   cost() {
-    return 2.0
+    return 2.0;
   }
   description() {
-    return 'Coffee'
+    return "Coffee";
   }
 }
 // [/simpleCoffee]
@@ -20,10 +20,10 @@ class SimpleCoffee implements Coffee {
 abstract class CoffeeDecorator implements Coffee {
   constructor(protected coffee: Coffee) {}
   cost() {
-    return this.coffee.cost()
+    return this.coffee.cost();
   }
   description() {
-    return this.coffee.description()
+    return this.coffee.description();
   }
 }
 // [/coffeeDecorator]
@@ -31,10 +31,10 @@ abstract class CoffeeDecorator implements Coffee {
 // [milkDecorator]
 class MilkDecorator extends CoffeeDecorator {
   cost() {
-    return super.cost() + 0.5
+    return super.cost() + 0.5;
   }
   description() {
-    return `${super.description()} + milk`
+    return `${super.description()} + milk`;
   }
 }
 // [/milkDecorator]
@@ -42,19 +42,19 @@ class MilkDecorator extends CoffeeDecorator {
 // [sugarDecorator]
 class SugarDecorator extends CoffeeDecorator {
   cost() {
-    return super.cost() + 0.25
+    return super.cost() + 0.25;
   }
   description() {
-    return `${super.description()} + sugar`
+    return `${super.description()} + sugar`;
   }
 }
 // [/sugarDecorator]
 
 // [usage]
 // Usage
-let order: Coffee = new SimpleCoffee()
-order = new MilkDecorator(order)
-order = new SugarDecorator(order)
+let order: Coffee = new SimpleCoffee();
+order = new MilkDecorator(order);
+order = new SugarDecorator(order);
 
-console.log(order.description(), order.cost()) // "Coffee + milk + sugar" 2.75
+console.log(order.description(), order.cost()); // "Coffee + milk + sugar" 2.75
 // [/usage]

@@ -41,8 +41,6 @@ export function packetTimeline(packets: Packet[], speed = 1): number {
  */
 export function stepDuration(step: Step | undefined, speed = 1): number {
   const packets = step?.packets ?? [];
-  const needed = packets.length
-    ? packetTimeline(packets) * 1000 + STEP_SETTLE
-    : 0;
+  const needed = packets.length ? packetTimeline(packets) * 1000 + STEP_SETTLE : 0;
   return Math.max(BASE_STEP_INTERVAL, needed) / speed;
 }

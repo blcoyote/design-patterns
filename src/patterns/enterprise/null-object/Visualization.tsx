@@ -47,14 +47,7 @@ function afterStep(loggerId: LoggerId): Step {
   return {
     title: "After (try it)",
     description: `${label} stands in for null. Every call in generate() runs unconditionally — the logger quietly handles whatever it gets.`,
-    highlight: [
-      "client",
-      "client-call",
-      "reportGenerator",
-      callRelation,
-      loggerId,
-      "holds",
-    ],
+    highlight: ["client", "client-call", "reportGenerator", callRelation, loggerId, "holds"],
     packets: [
       { relation: "client-call", label: "generate()" },
       { relation: callRelation, label: "logger.warn()", after: 0 },
@@ -187,11 +180,7 @@ function PathShape({
   selected: boolean;
   dim: boolean;
 }) {
-  const stroke = selected
-    ? "#ffffff"
-    : node.tone === "neutral"
-      ? color
-      : TONE_STROKE[node.tone];
+  const stroke = selected ? "#ffffff" : node.tone === "neutral" ? color : TONE_STROKE[node.tone];
   const w = WIDTH_BY_KIND[node.kind];
 
   if (node.kind === "diamond") {
@@ -311,8 +300,7 @@ export function NullObjectVisualization({
     mode: Mode;
   } | null>(null);
   const [replayToken, setReplayToken] = useState(0);
-  const override =
-    pickedOverride?.forStep === stepIndex ? pickedOverride.mode : null;
+  const override = pickedOverride?.forStep === stepIndex ? pickedOverride.mode : null;
 
   const byId = useMemo(
     () => new Map(pattern.participants.map((p) => [p.id, p])),
@@ -326,22 +314,18 @@ export function NullObjectVisualization({
   const narrativeMode = modeFromStep(stepIndex);
   const narrativeLogger = loggerFromStep(stepIndex);
   const mode = override ?? narrativeMode;
-  const loggerId: LoggerId =
-    override === "before" ? "nullLogger" : narrativeLogger;
+  const loggerId: LoggerId = override === "before" ? "nullLogger" : narrativeLogger;
 
   const effectiveStep: Step | null = override
     ? override === "before"
       ? BEFORE_STEP
       : afterStep(loggerId)
     : step;
-  const animationKey = override
-    ? `override-${override}-${replayToken}`
-    : stepIndex;
+  const animationKey = override ? `override-${override}-${replayToken}` : stepIndex;
 
   // The connector only has somewhere to point once a real logger is wired in —
   // in "before" mode the field is null, so nothing lights up.
-  const showConnector =
-    mode === "after" && (override !== null || stepIndex >= 5);
+  const showConnector = mode === "after" && (override !== null || stepIndex >= 5);
   const reportGenerator = byId.get("reportGenerator");
   const activeLogger = byId.get(loggerId);
   const connector =
@@ -349,8 +333,7 @@ export function NullObjectVisualization({
       ? edgeBetween(
           boxOf(reportGenerator),
           boxOf(activeLogger),
-          relById.get(`call-${loggerId === "nullLogger" ? "null" : "console"}`)
-            ?.bend ?? 0,
+          relById.get(`call-${loggerId === "nullLogger" ? "null" : "console"}`)?.bend ?? 0,
         )
       : null;
 
@@ -498,9 +481,7 @@ export function NullObjectVisualization({
                   onKeyDown={onActivate(() => onSelect(node.selectId))}
                   initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
                   animate={{ opacity: 1, scale: 1, x: XS[i], y: CENTER_Y }}
-                  exit={
-                    reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7 }
-                  }
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
                   transition={
                     reduceMotion
                       ? { duration: 0.15 }
@@ -536,9 +517,7 @@ export function NullObjectVisualization({
                 type="button"
                 aria-pressed={isActive}
                 aria-label={
-                  m === "before"
-                    ? "Show the null-check version"
-                    : "Show the Null Object version"
+                  m === "before" ? "Show the null-check version" : "Show the Null Object version"
                 }
                 onClick={(e) => {
                   e.stopPropagation();
@@ -550,9 +529,7 @@ export function NullObjectVisualization({
                     : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
                 }`}
                 style={
-                  isActive
-                    ? { backgroundColor: m === "before" ? "#f87171" : color }
-                    : undefined
+                  isActive ? { backgroundColor: m === "before" ? "#f87171" : color } : undefined
                 }
               >
                 {m}

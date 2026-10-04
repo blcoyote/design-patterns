@@ -45,17 +45,18 @@ class Light
 // [onCommand]
 class LightOnCommand(Light light) : ICommand
 {
-    private bool _wasOn;
+    // One saved state per Execute(): the same command object can be pressed again before undo.
+    private readonly Stack<bool> _previous = new();
 
     public void Execute()
     {
-        _wasOn = light.On; // remember what Execute() is about to overwrite
+        _previous.Push(light.On); // remember what Execute() is about to overwrite
         light.TurnOn();
     }
 
     public void Undo()
     {
-        if (!_wasOn) light.TurnOff();
+        if (!_previous.Pop()) light.TurnOff();
     }
 }
 // [/onCommand]
@@ -63,17 +64,18 @@ class LightOnCommand(Light light) : ICommand
 // [offCommand]
 class LightOffCommand(Light light) : ICommand
 {
-    private bool _wasOn;
+    // One saved state per Execute(): the same command object can be pressed again before undo.
+    private readonly Stack<bool> _previous = new();
 
     public void Execute()
     {
-        _wasOn = light.On; // remember what Execute() is about to overwrite
+        _previous.Push(light.On); // remember what Execute() is about to overwrite
         light.TurnOff();
     }
 
     public void Undo()
     {
-        if (_wasOn) light.TurnOn();
+        if (_previous.Pop()) light.TurnOn();
     }
 }
 // [/offCommand]

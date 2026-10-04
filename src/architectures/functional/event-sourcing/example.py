@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, replace
 from functools import reduce
 from typing import Callable
@@ -101,25 +102,33 @@ def fold(events: list[Event]) -> Account:
 # rejected if the stream moved on in the meantime.
 class EventStore:
     def __init__(self) -> None:
+        # One lock makes the version check and the write a single atomic step, so two
+        # concurrent appends at the same expected version cannot both succeed.
+        self._lock = threading.Lock()
         self._streams: dict[str, list[Event]] = {}
         self._subscribers: list[Callable[[str, Event], None]] = []
 
     def load(self, stream_id: str) -> list[Event]:
-        return list(self._streams.get(stream_id, []))
+        with self._lock:
+            return list(self._streams.get(stream_id, []))
 
     def append(self, stream_id: str, expected_version: int, events: list[Event]) -> None:
-        existing = self.load(stream_id)
-        if len(existing) != expected_version:
-            raise ValueError(
-                f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
-            )
-        self._streams[stream_id] = existing + events
+        with self._lock:
+            existing = self._streams.get(stream_id, [])
+            if len(existing) != expected_version:
+                raise ValueError(
+                    f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
+                )
+            self._streams[stream_id] = existing + events
+            subscribers = list(self._subscribers)
+        # Notify outside the lock, so a slow subscriber never blocks other writers.
         for event in events:
-            for subscriber in self._subscribers:
+            for subscriber in subscribers:
                 subscriber(stream_id, event)
 
     def subscribe(self, fn: Callable[[str, Event], None]) -> None:
-        self._subscribers.append(fn)
+        with self._lock:
+            self._subscribers.append(fn)
 # [/append]
 
 

@@ -31,10 +31,17 @@ func (l *Light) TurnOff() {
 
 // [/light]
 
+// popLast removes and returns the most recently saved state.
+func popLast(states *[]bool) bool {
+	last := (*states)[len(*states)-1]
+	*states = (*states)[:len(*states)-1]
+	return last
+}
+
 // [onCommand]
 type LightOnCommand struct {
-	light *Light
-	wasOn bool
+	light    *Light
+	previous []bool // one saved state per Execute(): the same command can be pressed again before undo
 }
 
 func NewLightOnCommand(light *Light) *LightOnCommand {
@@ -42,12 +49,13 @@ func NewLightOnCommand(light *Light) *LightOnCommand {
 }
 
 func (c *LightOnCommand) Execute() {
-	c.wasOn = c.light.On() // remember what Execute() is about to overwrite
+	c.previous = append(c.previous, c.light.On()) // remember what Execute() is about to overwrite
 	c.light.TurnOn()
 }
 
 func (c *LightOnCommand) Undo() {
-	if !c.wasOn {
+	wasOn := popLast(&c.previous)
+	if !wasOn {
 		c.light.TurnOff()
 	}
 }
@@ -56,8 +64,8 @@ func (c *LightOnCommand) Undo() {
 
 // [offCommand]
 type LightOffCommand struct {
-	light *Light
-	wasOn bool
+	light    *Light
+	previous []bool // one saved state per Execute(): the same command can be pressed again before undo
 }
 
 func NewLightOffCommand(light *Light) *LightOffCommand {
@@ -65,12 +73,13 @@ func NewLightOffCommand(light *Light) *LightOffCommand {
 }
 
 func (c *LightOffCommand) Execute() {
-	c.wasOn = c.light.On() // remember what Execute() is about to overwrite
+	c.previous = append(c.previous, c.light.On()) // remember what Execute() is about to overwrite
 	c.light.TurnOff()
 }
 
 func (c *LightOffCommand) Undo() {
-	if c.wasOn {
+	wasOn := popLast(&c.previous)
+	if wasOn {
 		c.light.TurnOn()
 	}
 }

@@ -27,34 +27,36 @@ class Light {
 
 // [onCommand]
 class LightOnCommand implements Command {
-  private wasOn = false;
+  // One saved state per execute(): the same command object can be pressed again before undo.
+  private previous: boolean[] = [];
 
   constructor(private light: Light) {}
 
   execute() {
-    this.wasOn = this.light.on; // remember what execute() is about to overwrite
+    this.previous.push(this.light.on); // remember what execute() is about to overwrite
     this.light.turnOn();
   }
 
   undo() {
-    if (!this.wasOn) this.light.turnOff();
+    if (this.previous.pop() === false) this.light.turnOff();
   }
 }
 // [/onCommand]
 
 // [offCommand]
 class LightOffCommand implements Command {
-  private wasOn = false;
+  // One saved state per execute(): the same command object can be pressed again before undo.
+  private previous: boolean[] = [];
 
   constructor(private light: Light) {}
 
   execute() {
-    this.wasOn = this.light.on; // remember what execute() is about to overwrite
+    this.previous.push(this.light.on); // remember what execute() is about to overwrite
     this.light.turnOff();
   }
 
   undo() {
-    if (this.wasOn) this.light.turnOn();
+    if (this.previous.pop() === true) this.light.turnOn();
   }
 }
 // [/offCommand]

@@ -31,14 +31,15 @@ class Light:
 class LightOnCommand:
     def __init__(self, light: Light) -> None:
         self._light = light
-        self._was_on = False
+        # One saved state per execute(): the same command object can be pressed again before undo.
+        self._previous: list[bool] = []
 
     def execute(self) -> None:
-        self._was_on = self._light.on  # remember what execute() is about to overwrite
+        self._previous.append(self._light.on)  # remember what execute() is about to overwrite
         self._light.turn_on()
 
     def undo(self) -> None:
-        if not self._was_on:
+        if not self._previous.pop():
             self._light.turn_off()
 # [/onCommand]
 
@@ -47,14 +48,15 @@ class LightOnCommand:
 class LightOffCommand:
     def __init__(self, light: Light) -> None:
         self._light = light
-        self._was_on = False
+        # One saved state per execute(): the same command object can be pressed again before undo.
+        self._previous: list[bool] = []
 
     def execute(self) -> None:
-        self._was_on = self._light.on  # remember what execute() is about to overwrite
+        self._previous.append(self._light.on)  # remember what execute() is about to overwrite
         self._light.turn_off()
 
     def undo(self) -> None:
-        if self._was_on:
+        if self._previous.pop():
             self._light.turn_on()
 # [/offCommand]
 

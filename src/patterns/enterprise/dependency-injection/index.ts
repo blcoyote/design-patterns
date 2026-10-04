@@ -33,7 +33,7 @@ export const pattern: PatternDefinition = {
   ],
   cons: [
     "Adds indirection, especially with a container: instead of following a chain of `new` calls, you now follow the container's registrations.",
-    "With a runtime DI container, wiring mistakes (a missing registration, a lifetime mismatch) show up only when something is resolved, not at compile time. Hand-written composition code and compile-time containers such as Dagger catch them when the code compiles.",
+    "With a runtime DI container, wiring mistakes (a missing registration, a lifetime mismatch) show up only when something is resolved, not at compile time. Hand-written composition code turns a missing dependency into a compile error, and compile-time containers such as Dagger also validate scopes at build time; but in hand-written code a lifetime mismatch (a long-lived service holding a request-scoped one) still type-checks, so it needs review.",
     "Overkill for small scripts with only one or two simple dependencies.",
     "Passing the container itself into a class so it can call resolve() whenever it needs something is Service Locator, not Dependency Injection. It hides the dependency instead of declaring it.",
   ],

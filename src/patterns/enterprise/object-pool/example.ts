@@ -74,9 +74,9 @@ class ObjectPool<T extends Poolable> {
       throw new Error("release() called with an item that is not checked out from this pool");
     }
     item.reset(); // scrub borrower state before anyone else sees this object
-    // Not handled in this example: a waiter that gave up (timed out or was
-    // abandoned). A production pool must skip such waiters instead of handing
-    // them the freed item.
+    // Waiters here cannot cancel (this example gives acquire() no timeout), so every
+    // queued waiter is still listening. A pool that adds timeouts must skip waiters
+    // that gave up, as the Python tab does for cancelled futures.
     const next = this.waiting.shift();
     if (next) {
       this.inUse.add(item);

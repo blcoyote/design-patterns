@@ -73,6 +73,8 @@ class EventStore {
     return [...(this.streams.get(streamId) ?? [])];
   }
 
+  // JavaScript runs this method to completion on one thread, so the version check and
+  // the write cannot interleave with another append (the other tabs use a lock).
   append(streamId: string, expectedVersion: number, events: Event[]): void {
     const existing = this.load(streamId);
     if (existing.length !== expectedVersion) {

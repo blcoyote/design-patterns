@@ -109,29 +109,44 @@ static class EventSourcing
 // rejected if the stream moved on in the meantime.
 class EventStore
 {
+    // One lock makes the version check and the write a single atomic step, so two
+    // concurrent appends at the same expected version cannot both succeed.
+    private readonly object _gate = new();
     private readonly Dictionary<string, List<Event>> _streams = new();
     private readonly List<Action<string, Event>> _subscribers = new();
 
     // a copy, so callers cannot mutate the stored history behind Append()'s back
-    public List<Event> Load(string streamId) =>
-        _streams.TryGetValue(streamId, out var events) ? new List<Event>(events) : new List<Event>();
+    public List<Event> Load(string streamId)
+    {
+        lock (_gate)
+            return _streams.TryGetValue(streamId, out var events) ? new List<Event>(events) : new List<Event>();
+    }
 
     public void Append(string streamId, int expectedVersion, IReadOnlyList<Event> events)
     {
-        var existing = Load(streamId);
-        if (existing.Count != expectedVersion)
-            throw new InvalidOperationException($"concurrency conflict: expected version {expectedVersion}, found {existing.Count}");
+        List<Action<string, Event>> subscribers;
+        lock (_gate)
+        {
+            var existing = _streams.TryGetValue(streamId, out var stored) ? stored : new List<Event>();
+            if (existing.Count != expectedVersion)
+                throw new InvalidOperationException($"concurrency conflict: expected version {expectedVersion}, found {existing.Count}");
 
-        var updated = new List<Event>(existing);
-        updated.AddRange(events);
-        _streams[streamId] = updated;
+            var updated = new List<Event>(existing);
+            updated.AddRange(events);
+            _streams[streamId] = updated;
+            subscribers = new List<Action<string, Event>>(_subscribers);
+        }
 
+        // Notify outside the lock, so a slow subscriber never blocks other writers.
         foreach (var @event in events)
-            foreach (var subscriber in _subscribers)
+            foreach (var subscriber in subscribers)
                 subscriber(streamId, @event);
     }
 
-    public void Subscribe(Action<string, Event> fn) => _subscribers.Add(fn);
+    public void Subscribe(Action<string, Event> fn)
+    {
+        lock (_gate) _subscribers.Add(fn);
+    }
 }
 // [/append]
 

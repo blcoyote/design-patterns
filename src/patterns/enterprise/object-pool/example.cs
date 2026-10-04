@@ -114,9 +114,9 @@ class ObjectPool<T>(Func<T> factory, int maxSize) where T : IPoolable
                 throw new InvalidOperationException("Release() called with an item that is not checked out from this pool");
             }
             item.Reset(); // scrub borrower state before anyone else sees this object
-            // Not handled in this example: a waiter that gave up (timed out or was
-            // abandoned). A production pool must skip such waiters instead of handing
-            // them the freed item.
+            // Waiters here cannot cancel (this example gives acquire() no timeout), so every
+            // queued waiter is still listening. A pool that adds timeouts must skip waiters
+            // that gave up, as the Python tab does for cancelled futures.
             if (_waiting.Count > 0)
             {
                 var next = _waiting.Dequeue();

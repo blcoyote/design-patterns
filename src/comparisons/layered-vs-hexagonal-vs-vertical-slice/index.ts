@@ -43,7 +43,7 @@ export const comparison: ComparisonDefinition = {
       label: "Dependency direction",
       values: {
         layered:
-          "Downward: OrderController calls OrderService, which calls Order and OrderRepository. The rule is that a layer may call only layers below it, never above (data access still uses the domain's Order type to map rows), and only the data-access layer talks to the database, but only discipline enforces it, as the controller’s handleDebugLookup shortcut to the database shows.",
+          "Downward: OrderController calls OrderService, which calls Order and OrderRepository. The rule is that a layer may call only layers below it, never above (the one exception: the repository reads the Order it saves, because the domain model is shared with persistence), and only the data-access layer talks to the database, but only discipline enforces it, as the controller’s handleDebugLookup shortcut to the database shows.",
         hexagonal:
           "Inward: adapters (PostgresOrderRepository, HttpOrderController) depend on the core’s ports; the core — PlaceOrderService and Order — depends on nothing outside itself.",
         "vertical-slice":
@@ -99,7 +99,7 @@ export const comparison: ComparisonDefinition = {
     {
       subject: "layered",
       changes:
-        "OrderController passes the request to OrderService, which builds and validates the Order, then saves it through OrderRepository. Each part calls only layers below it, never above; only the repository builds SQL.",
+        "OrderController passes the request to OrderService, which builds and validates the Order, then saves it through OrderRepository. Calls flow downward, except that the repository reads the Order it saves; only the repository builds SQL.",
       chooseWhen: [
         'The team wants a shape every new hire already recognizes, with one simple rule ("only call layers below you, never above") that code review can enforce by eye.',
         "The application is a fairly standard, data-centric service built around one primary store.",

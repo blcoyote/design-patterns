@@ -21,7 +21,9 @@ interface OrderRepository {
 // [database]
 class Database {
   query(sql: string, params: unknown[]): Record<string, unknown>[] {
-    console.log("SQL:", sql, params);
+    // Print params the way the other languages do: strings quoted with '.
+    const shown = params.map((p) => (typeof p === "string" ? `'${p}'` : String(p)));
+    console.log(`SQL: ${sql} [${shown.join(", ")}]`);
     return [{ id: "482", customer_id: "cst-9", total_cents: 4200 }];
   }
 }

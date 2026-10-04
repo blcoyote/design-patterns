@@ -26,7 +26,7 @@ class Context(Dictionary<string, int> bindings)
 {
     public int Lookup(string name)
     {
-        // Fail loudly instead of letting a missing key turn later arithmetic into a crash later on.
+        // Fail with a clear "Unbound variable" message instead of a generic KeyNotFoundException.
         if (!bindings.TryGetValue(name, out var value)) throw new InvalidOperationException($"Unbound variable: {name}");
         return value;
     }

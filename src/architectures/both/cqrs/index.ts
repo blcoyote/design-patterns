@@ -16,7 +16,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     "One model often has to serve two different jobs. It grows extra queries to make screens fast, while its business rules can make simple reads awkward. As dashboards, search, and reports grow, they put more pressure on the same model, even though reads and writes have different shapes and scaling needs.",
   solution:
-    "Use one model to handle changes and another to answer queries. A command such as PlaceOrder goes to the write model, which loads the order, checks its rules, and saves the change. A Projector updates read models shaped for screens and reports. Queries use those read models, so they may briefly lag behind the latest write while the Projector catches up.",
+    "Use one model to handle changes and another to answer queries. A command such as PlaceOrder goes to the write model, which loads the order, checks its rules, and saves the change. A Projector updates read models shaped for screens and reports, and queries use those read models. CQRS does not require separate databases or Event Sourcing; but when the Projector runs asynchronously, as it does here, the read side can briefly lag behind the latest write.",
   analogy:
     "A restaurant kitchen and its printed menu. The kitchen (write side) is organized around how dishes actually get cooked — stations, prep, timing — and enforces its own rules about what can be served. The menu (read side) is a separate, simplified summary printed for diners, updated whenever the kitchen changes what it offers. For a few minutes after a dish sells out, the menu might still list it — the menu is eventually consistent with the kitchen, not instantly.",
   whenToUse: [
@@ -32,14 +32,14 @@ export const architecture: ArchitectureDefinition = {
     "New read models (a new report, a new search index) can be added later by writing a new projector, without touching the write side at all.",
   ],
   cons: [
-    'Introduces eventual consistency: a client can read stale data immediately after a write it just made, which surprises users and complicates UX ("why doesn\'t my order show up yet?").',
+    'If read models are updated asynchronously (common once the read and write stores are separate), a client can read stale data immediately after a write it just made, which surprises users and complicates UX ("why doesn\'t my order show up yet?").',
     "Two models (and often two stores) mean more moving parts to deploy, monitor and keep in sync than a single CRUD model.",
     "Projection logic is extra code that has to be kept correct and re-run if it was ever wrong or the read schema changes.",
-    "Overkill for simple CRUD screens where the same shape genuinely works for both reading and writing.",
+    "Overkill for simple CRUD screens where the same shape genuinely works for both reading and writing. Martin Fowler warns that for most systems CQRS adds risky complexity, so apply it to the specific parts that need it, not a whole system.",
   ],
   realWorld: [
-    "MediatR-based .NET services, where ICommand/IQuery objects are dispatched to separate handler classes",
-    "Materialized views and read replicas kept in sync with a primary write database via change-data-capture or triggers",
+    "MediatR-based .NET services, where command and query request objects (IRequest<T>, often behind project-defined ICommand/IQuery markers) are dispatched to separate handler classes",
+    "Denormalised read tables or materialized views kept in sync with a normalized write schema via change-data-capture or triggers",
     "Search indexes (Elasticsearch) populated from a relational write store by a background indexer",
     "Event-driven microservices where a write service emits events and read-optimized services build their own local views from them",
   ],
@@ -72,7 +72,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Projector",
       description:
-        "The component that queues write-side changes and, once drained, updates a read store to match. The only thing that is allowed to write to the read store.",
+        "The component that turns write-side changes into read-model updates, usually asynchronously. The only thing that is allowed to write to the read store.",
     },
     {
       term: "Eventual consistency",
@@ -277,7 +277,7 @@ export const architecture: ArchitectureDefinition = {
       type: "creates",
       label: "new Order(...)",
       description:
-        "The handler builds the write-model aggregate, which is where any invariant (a positive total, a valid customer) would be enforced.",
+        "The handler builds the write-model aggregate, which is where invariants are enforced — here, an order total must be positive.",
       code: "aggregate",
     },
     {
@@ -292,13 +292,13 @@ export const architecture: ArchitectureDefinition = {
     },
     {
       id: "notifyProjector",
-      from: "writeStore",
+      from: "commandHandler",
       to: "projector",
       type: "notifies",
       label: "enqueue(order)",
       description:
         "Right after saving, the handler hands the order to the projector's queue. Enqueuing is instant, but nothing is projected into the read store yet — that only happens once something calls projector.catchUp(), which is exactly where the read side starts to lag.",
-      bend: -40,
+      bend: -120,
       code: "commandHandler",
     },
     {
@@ -372,7 +372,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "The write model enforces the rules",
       description:
-        'PlaceOrderHandler builds the Order aggregate. This is the only place in the whole system where "is this command even valid?" gets decided.',
+        'PlaceOrderHandler builds the Order aggregate, which rejects a non-positive total. This is the only place in the whole system where "is this command even valid?" gets decided.',
       highlight: ["commandHandler", "applyRule", "aggregate"],
       packets: [{ relation: "applyRule", label: "new Order(...)" }],
       notes: { aggregate: "validated" },

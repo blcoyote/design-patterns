@@ -32,7 +32,7 @@ class Money {
 // [/money]
 
 // [orderLine]
-/** Entity: has identity (sku + its position on the order) even though its fields never change. */
+/** Value object: no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable. */
 class OrderLine {
   constructor(
     readonly sku: string,
@@ -44,6 +44,15 @@ class OrderLine {
     let total = Money.of(0, this.unitPrice.currency);
     for (let i = 0; i < this.quantity; i++) total = total.add(this.unitPrice);
     return total;
+  }
+
+  // Compared by value: `===` would compare object identity, which a value object doesn't have.
+  equals(other: OrderLine): boolean {
+    return (
+      this.sku === other.sku &&
+      this.unitPrice.equals(other.unitPrice) &&
+      this.quantity === other.quantity
+    );
   }
 }
 // [/orderLine]
@@ -97,7 +106,7 @@ class Order {
     this.customerId = customerId;
   }
 
-  // Factory method: callers never build an Order with `new` directly.
+  // Factory (Evans): a static creation method, so callers never build an Order with `new` directly.
   static create(id: string, customerId: string): Order {
     return new Order(id, customerId);
   }
@@ -158,6 +167,8 @@ class InMemoryOrderRepository implements OrderRepository {
 
 // [shipping]
 // Shipping bounded context: its own vocabulary. It has never heard of an "Order".
+// Money and the domain-event interface are the only types it shares with Ordering —
+// a deliberately tiny shared kernel.
 class ShipmentRequested implements DomainEvent {
   readonly name = "ShipmentRequested";
   readonly occurredAt = new Date();
@@ -178,9 +189,10 @@ class ShippingService {
 // [/shipping]
 
 // [acl]
-// Anti-Corruption Layer: translates Ordering's language into Shipping's, so neither
-// bounded context has to know the other's model. OrderPlaced never crosses the
-// boundary as-is — only ShipmentRequested does.
+// Anti-Corruption Layer: conceptually owned by the downstream Shipping context. It
+// translates upstream Ordering's language into Shipping's own, so Ordering's model
+// never leaks into Shipping. OrderPlaced never crosses the boundary as-is — only
+// ShipmentRequested does.
 class OrderingToShippingAcl {
   constructor(private readonly shipping: ShippingService) {}
 

@@ -30,7 +30,7 @@ class StripeAdapter:
 
     # [charge]
     def charge(self, amount: float) -> str:
-        # floor(x + 0.5) matches JS Math.round; Python's round() rounds halves to even.
+        # floor(x + 0.5) rounds halves up like JS Math.round; Python's round() rounds halves to even.
         cents = math.floor(amount * 100 + 0.5)
         result = self._gateway.charge_cents(cents)
         if result['ok']:

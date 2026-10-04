@@ -58,19 +58,11 @@ func (JsonExporter) Export(doc Doc) string {
 }
 
 // [manifest]
-// A plain list of plugin ids and the factory module each one maps to. In a
-// real build, this list itself would usually come from scanning a folder —
-// see the comment on `factories` below — but the manifest *shape* is the
-// same either way: plugin id -> the name of the thing that constructs it.
-type ManifestEntry struct {
-	ID     string
-	Module string
-}
-
-var manifest = []ManifestEntry{
-	{"markdown", "markdown-exporter"},
-	{"html", "html-exporter"},
-}
+// A plain list of the plugin modules to load. In a real build, this list
+// itself would usually come from scanning a folder — see the comment on
+// `factories` below — but the idea is the same either way: the manifest names
+// *what* to load, and each plugin reports its own id once it is constructed.
+var manifest = []string{"markdown-exporter", "html-exporter"}
 
 // [/manifest]
 
@@ -107,7 +99,7 @@ func (r *PluginRegistry) RegisteredIds() []string {
 
 // [pluginLoader]
 // Real discovery mechanisms differ per platform — Vite's `import.meta.glob`
-// (this site uses exactly that, see the registry below), .NET assembly
+// (this site uses exactly that in src/patterns/registry.ts), .NET assembly
 // scanning or MEF, Python's `importlib.metadata` entry points. All of them
 // boil down to the same two steps this loader performs explicitly: read a
 // manifest, then look each entry up in a map of known factories.
@@ -121,11 +113,16 @@ var factories = map[string]ExporterFactory{
 
 type PluginLoader struct{}
 
-func (PluginLoader) Load(registry *PluginRegistry, entries []ManifestEntry) {
-	for _, entry := range entries {
-		factory := factories[entry.Module]
+func (PluginLoader) Load(registry *PluginRegistry, moduleNames []string) error {
+	for _, moduleName := range moduleNames {
+		factory, ok := factories[moduleName]
+		if !ok {
+			return fmt.Errorf("no factory for plugin module %q", moduleName)
+		}
+		// Registered under the id the plugin itself reports.
 		registry.Register(factory())
 	}
+	return nil
 }
 
 // [/pluginLoader]
@@ -151,7 +148,10 @@ func main() {
 
 	// The host starts with an empty registry, and the loader populates it from the manifest.
 	registry := NewPluginRegistry()
-	PluginLoader{}.Load(registry, manifest)
+	if err := (PluginLoader{}).Load(registry, manifest); err != nil {
+		fmt.Println(err)
+		return
+	}
 	host := &Host{registry: registry}
 	fmt.Printf("registered: %s\n", strings.Join(registry.RegisteredIds(), ", "))
 
@@ -159,9 +159,12 @@ func main() {
 	fmt.Println(out)
 
 	// A new plugin is added to the manifest — Host and PluginRegistry are untouched.
-	extendedManifest := append(append([]ManifestEntry(nil), manifest...), ManifestEntry{"json", "json-exporter"})
+	extendedManifest := append(append([]string(nil), manifest...), "json-exporter")
 	registry2 := NewPluginRegistry()
-	PluginLoader{}.Load(registry2, extendedManifest)
+	if err := (PluginLoader{}).Load(registry2, extendedManifest); err != nil {
+		fmt.Println(err)
+		return
+	}
 	host2 := &Host{registry: registry2}
 	fmt.Printf("registered: %s\n", strings.Join(registry2.RegisteredIds(), ", "))
 	out, _ = host2.Export("json", doc)

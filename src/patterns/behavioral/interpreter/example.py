@@ -14,7 +14,7 @@ class Context:
 
     def lookup(self, name: str) -> float:
         value = self._bindings.get(name)
-        # Fail loudly instead of letting an unbound name turn later arithmetic into a silent bug.
+        # Fail with a clear "Unbound variable" error instead of a confusing TypeError later.
         if value is None:
             raise ValueError(f"Unbound variable: {name}")
         return value

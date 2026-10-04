@@ -35,7 +35,7 @@ export const pattern: PatternDefinition = {
     "Classes that wrap resources that cannot be copied, like open sockets or file handles, need special handling.",
   ],
   realWorld: [
-    "structuredClone() in JavaScript for deep copies, or `{ ...obj }` / Object.assign() for a shallow copy",
+    "The DOM's Node.cloneNode(deep): any node copies itself, shallowly or with all its descendants, without the caller naming its concrete element type (unlike structuredClone(), which returns a plain object for class instances, losing their methods)",
     "java.lang.Object.clone() and the Cloneable marker interface",
     'Editor "duplicate" commands that copy a fully configured shape, layer or component',
   ],
@@ -91,7 +91,7 @@ export const pattern: PatternDefinition = {
       x: 660,
       y: 150,
       description:
-        "Asks the registry for a clone by name, then customizes the Style every shape shares through the Shape interface — only a shape-specific tweak needs a cast to the concrete type.",
+        "Asks the registry for a clone by name, then customizes the style property every Shape exposes through the Shape interface — only a shape-specific tweak needs a cast to the concrete type.",
       code: "usage",
     },
   ],
@@ -168,7 +168,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Client asks for a clone",
       description:
-        'The client calls registry.clone("circle"). It names a key, not a class — the registry does the construction, not the caller.',
+        'The client calls registry.clone("circle"). It names a key, not a class — the registry hands back a copy, not the caller.',
       highlight: ["client", "client-request", "registry"],
       packets: [{ relation: "client-request", label: 'clone("circle")' }],
       code: "usage",

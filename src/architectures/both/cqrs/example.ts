@@ -15,7 +15,12 @@ class Order {
     readonly id: string,
     readonly customerId: string,
     readonly totalCents: number,
-  ) {}
+  ) {
+    // Invariant: the write model refuses a command that would create an invalid order.
+    // A plain `<= 0` check would let NaN and Infinity through.
+    if (!Number.isFinite(totalCents) || totalCents <= 0)
+      throw new Error(`order ${id}: total must be positive, got ${totalCents} cents`);
+  }
 }
 // [/aggregate]
 

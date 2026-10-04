@@ -77,8 +77,8 @@ def get_user_theme() -> Literal['light', 'dark']:
 theme: Literal['light', 'dark'] = get_user_theme()
 factory: UIFactory = DarkFactory() if theme == 'dark' else LightFactory()
 
-print(render_dialog(factory))  # ['button [dark]', 'checkbox [dark]']
+print(", ".join(render_dialog(factory)))  # "button [dark], checkbox [dark]"
 
 # Switch the whole family just by swapping the factory:
-print(render_dialog(LightFactory()))  # ['button [light]', 'checkbox [light]']
+print(", ".join(render_dialog(LightFactory())))  # "button [light], checkbox [light]"
 # [/usage]

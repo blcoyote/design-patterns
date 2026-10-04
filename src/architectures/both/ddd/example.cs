@@ -28,7 +28,8 @@ catch (InvalidOperationException ex)
 
 // [money]
 // Immutable value object: no identity, compared by value, every operation returns a new instance.
-class Money
+// As a record, Equals, GetHashCode and == are all generated to compare the fields by value.
+sealed record Money
 {
     private readonly long _cents;
     public string Currency { get; }
@@ -48,8 +49,6 @@ class Money
         return new Money(_cents + other._cents, Currency);
     }
 
-    public bool Equals(Money other) => _cents == other._cents && Currency == other.Currency;
-
     public override string ToString() => $"{(_cents / 100m).ToString("F2", CultureInfo.InvariantCulture)} {Currency}";
 
     private void AssertSameCurrency(Money other)
@@ -60,20 +59,10 @@ class Money
 // [/money]
 
 // [orderLine]
-// Entity: has identity (sku + its position on the order) even though its fields never change.
-class OrderLine
+// Value object: no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.
+// As a record, Equals, GetHashCode and == compare the fields by value.
+sealed record OrderLine(string Sku, Money UnitPrice, int Quantity)
 {
-    public string Sku { get; }
-    public Money UnitPrice { get; }
-    public int Quantity { get; }
-
-    public OrderLine(string sku, Money unitPrice, int quantity)
-    {
-        Sku = sku;
-        UnitPrice = unitPrice;
-        Quantity = quantity;
-    }
-
     public Money LineTotal
     {
         get
@@ -146,7 +135,7 @@ class Order
         CustomerId = customerId;
     }
 
-    // Factory method: callers never build an Order with `new` directly.
+    // Factory (Evans): a static creation method, so callers never build an Order with `new` directly.
     public static Order Create(string id, string customerId) => new(id, customerId);
 
     public int LineCount => _lines.Count;
@@ -200,6 +189,8 @@ class InMemoryOrderRepository : IOrderRepository
 
 // [shipping]
 // Shipping bounded context: its own vocabulary. It has never heard of an "Order".
+// Money and the domain-event interface are the only types it shares with Ordering —
+// a deliberately tiny shared kernel.
 class ShipmentRequested : IDomainEvent
 {
     public string Name => "ShipmentRequested";
@@ -224,9 +215,10 @@ class ShippingService
 // [/shipping]
 
 // [acl]
-// Anti-Corruption Layer: translates Ordering's language into Shipping's, so neither
-// bounded context has to know the other's model. OrderPlaced never crosses the
-// boundary as-is — only ShipmentRequested does.
+// Anti-Corruption Layer: conceptually owned by the downstream Shipping context. It
+// translates upstream Ordering's language into Shipping's own, so Ordering's model
+// never leaks into Shipping. OrderPlaced never crosses the boundary as-is — only
+// ShipmentRequested does.
 class OrderingToShippingAcl
 {
     private readonly ShippingService _shipping;

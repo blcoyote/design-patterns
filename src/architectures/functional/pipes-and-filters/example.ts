@@ -1,5 +1,5 @@
 // [types]
-/** What parse() produces: a raw line split into (at most) its comma-separated fields. */
+/** What parse() produces: a raw line split into all of its comma-separated fields. */
 interface Candidate {
   readonly lineNo: number;
   readonly raw: string;
@@ -166,7 +166,7 @@ const DISCOUNT_MIN_QTY = 5;
 const DISCOUNT_RATE = 0.1;
 
 /**
- * Pure filter, added to the pipeline after the other four already existed — a 10%
+ * Pure filter, added to the pipeline after the other five already existed — a 10%
  * discount for orders of 5 or more units. Nothing about parse, validate, addLineTotal,
  * addTax or formatLines changed to make room for it; only the pipe() call did.
  */

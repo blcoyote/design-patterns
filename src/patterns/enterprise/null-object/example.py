@@ -62,8 +62,8 @@ ReportGeneratorBefore(None).generate(clean_data)
 try:
     ReportGeneratorBefore(None).generate(data_with_warnings)
 except AttributeError:
-    print("crashed: nil logger call")
-# crashed: nil logger call
+    print("crashed: no logger")  # AttributeError: 'NoneType' object has no attribute 'warn'
+
 # [/before]
 
 # ============================================================

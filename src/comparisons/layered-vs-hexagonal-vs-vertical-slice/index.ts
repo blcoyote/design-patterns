@@ -43,7 +43,7 @@ export const comparison: ComparisonDefinition = {
       label: "Dependency direction",
       values: {
         layered:
-          "Downward: OrderController calls OrderService, which calls OrderRepository. The rule is that a layer never skips ahead, but only discipline enforces it, as the controller’s handleDebugLookup shortcut to the database shows.",
+          "Downward: OrderController calls OrderService, which calls Order and OrderRepository. The rule is that a layer may call only layers below it, never above (data access still uses the domain's Order type to map rows), and only the data-access layer talks to the database, but only discipline enforces it, as the controller’s handleDebugLookup shortcut to the database shows.",
         hexagonal:
           "Inward: adapters (PostgresOrderRepository, HttpOrderController) depend on the core’s ports; the core — PlaceOrderService and Order — depends on nothing outside itself.",
         "vertical-slice":
@@ -56,7 +56,7 @@ export const comparison: ComparisonDefinition = {
         layered:
           "Through every layer top to bottom — a new request usually means touching the controller, the service and the repository.",
         hexagonal:
-          "Into the core, plus a new port and adapter only if it needs new infrastructure the existing ports don’t already cover.",
+          "Into the core, plus a new driving port (a use-case interface) and its adapter route; a new driven port and adapter only if it needs infrastructure the existing ones don’t already cover.",
         "vertical-slice":
           "Into one new slice — its own handler and store — registered with the mediator, without editing any other slice.",
       },
@@ -87,7 +87,7 @@ export const comparison: ComparisonDefinition = {
       label: "Cost for a small CRUD app",
       values: {
         layered:
-          "Low — the shape almost every backend developer already recognizes, with no extra interfaces to write.",
+          "Low — the shape almost every backend developer already recognizes, with few or no extra interfaces to write.",
         hexagonal:
           "Higher — ports, driving/driven adapters and wiring are a real tax if infrastructure was never going to change.",
         "vertical-slice":
@@ -99,9 +99,9 @@ export const comparison: ComparisonDefinition = {
     {
       subject: "layered",
       changes:
-        "OrderController passes the request to OrderService, which builds and validates the Order, then saves it through OrderRepository. Each part calls the layer below it; only the repository builds SQL.",
+        "OrderController passes the request to OrderService, which builds and validates the Order, then saves it through OrderRepository. Each part calls only layers below it, never above; only the repository builds SQL.",
       chooseWhen: [
-        'The team wants a shape every new hire already recognizes, with one simple rule ("only call the layer below you") that code review can enforce by eye.',
+        'The team wants a shape every new hire already recognizes, with one simple rule ("only call layers below you, never above") that code review can enforce by eye.',
         "The application is a fairly standard, data-centric service built around one primary store.",
         "Swapping infrastructure or testing the core in full isolation is not a pressing need right now.",
       ],

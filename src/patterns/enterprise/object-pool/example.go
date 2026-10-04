@@ -57,8 +57,8 @@ func (c *PooledConnection) Reset() {
 // ObjectPool stands in for TS's Promise with a channel: Acquire returns a
 // receive-only channel that already holds the item, or that a later Release
 // fills. The mutex guards the pool's own bookkeeping for concurrent callers
-// (TS and Python rely on a single-threaded event loop); it is never held while
-// a caller waits on a channel.
+// (TS and Python rely on a single-threaded event loop; C# locks too); it is
+// never held while a caller waits on a channel.
 type ObjectPool[T interface {
 	Poolable
 	comparable
@@ -115,6 +115,9 @@ func (p *ObjectPool[T]) Release(item T) {
 	}
 	delete(p.inUse, item)
 	item.Reset() // scrub borrower state before anyone else sees this object
+	// Waiters here cannot cancel (this example gives acquire() no timeout), so every
+	// queued waiter is still listening. A pool that adds timeouts must skip waiters
+	// that gave up, as the Python tab does for cancelled futures.
 	if len(p.waiting) > 0 {
 		next := p.waiting[0]
 		p.waiting = p.waiting[1:]

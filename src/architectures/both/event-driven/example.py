@@ -136,7 +136,8 @@ class OrdersProducer:
         return order_id
 
     def redeliver(self, order_id: int, item: str, quantity: int) -> None:
-        """Simulates an at-least-once broker redelivering a message it already delivered once."""
+        """Simulates a duplicate delivery, as an at-least-once broker redelivery or a producer
+        retry after a lost ack would cause, by publishing the same event again."""
         event = OrderPlaced(order_id, item, quantity)
         self.broker.publish("OrderPlaced", event)
 # [/producer]

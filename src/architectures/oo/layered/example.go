@@ -93,7 +93,7 @@ func (c *OrderController) HandlePlaceOrder(customerID string, items []LineItem) 
 }
 
 // [violation]
-// Anti-pattern: reaching straight past Application and Domain into Data access.
+// Anti-pattern: going around the data-access layer and writing SQL here.
 // Nothing in a plain type stops this -- only discipline and code review do.
 func (c *OrderController) HandleDebugLookup(id string) []any {
 	return databaseQuery(fmt.Sprintf("SELECT * FROM orders WHERE id = '%s'", id))
@@ -112,6 +112,6 @@ func main() {
 	controller := NewOrderController(NewOrderService(&SqlOrderRepository{}))
 	controller.HandlePlaceOrder("cust-42", []LineItem{{"WIDGET", 19.99}, {"GADGET", 29.99}})
 
-	// Anti-pattern in action: the controller reaches past three layers directly into the database.
+	// Anti-pattern in action: the controller bypasses the data-access layer and queries the database itself.
 	controller.HandleDebugLookup("42")
 }

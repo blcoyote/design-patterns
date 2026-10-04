@@ -10,13 +10,13 @@ export const pattern: PatternDefinition = {
   category: "enterprise",
   order: 8,
   summary:
-    "Link implementations in at configuration or start-up time, not compile time, so adding one needs no change to the host.",
+    "Choose implementations at configuration or start-up time instead of hard-wiring them into the host, so adding one needs no change to the host.",
   intent:
     "Let a host application pick up new implementations at start-up or configuration time, through a registry, without changing its own code.",
   problem:
     "A host program that calls concrete implementations directly has to be edited, recompiled and redeployed every time a new one shows up: a new export format, a new payment provider, a new notification channel. The host and every implementation are compiled together, so adding one more case means touching code that otherwise has nothing to do with it. A big if/switch keyed on type keeps growing.",
   solution:
-    "Define a narrow interface that the host depends on, plus a registry that looks plugins up by id. A loader reads a manifest, which is a plain list of plugin ids and the factories that build them, and registers one instance per entry before the host runs. The host only ever calls registry.get(id) and never names a concrete plugin class, so enabling an already-available plugin is just a manifest change. (A brand-new implementation also needs its code and a factory entry the loader can find.)",
+    "Define a narrow interface that the host depends on, plus a registry that looks plugins up by id. A loader reads a manifest, which is a plain list of the plugin modules to load, builds each one from a map of known factories, and registers it under the id the plugin itself reports, all before the host runs. The host only ever calls registry.get(id) and never names a concrete plugin class, so enabling an already-available plugin is just a manifest change. (A brand-new implementation also needs its code and a factory entry the loader can find.) In Fowler's original Plugin, the configuration names the implementation class and a factory instantiates it by reflection, often to pick one implementation per environment (an in-memory ID generator in tests, a database sequence in production). This example uses a factory map instead, so which plugins run is configured, but every implementation is still compiled in.",
   analogy:
     "A power strip only knows the shape of a plug, not which appliance is attached. Adding a lamp or a charger never means rewiring the strip. You plug it in and it works, because both sides agreed on the socket shape ahead of time.",
   whenToUse: [
@@ -26,19 +26,19 @@ export const pattern: PatternDefinition = {
     'A growing if/switch over a "type" field is the only thing standing between the host and a new case.',
   ],
   pros: [
-    "New behavior ships by adding a plugin and a manifest entry. The host and registry are never edited.",
+    "Enabling or disabling a plugin is a manifest edit. Adding a new one means adding its code and a factory entry (or letting real discovery find it); the host and registry are never edited.",
     "Keeps the host small: it depends on one interface and one registry, never on concrete implementations.",
     "Plugins can be developed, tested and even distributed independently of the host.",
     "The manifest is one explicit place that lists everything currently wired in.",
   ],
   cons: [
     "It adds indirection. To find out what runs for id X, you follow the manifest and the factory map, not just the host.",
-    "An id that is misspelled or missing from the manifest only fails when something asks the registry for it.",
+    "A misspelled module name fails at load time, but a plugin that is simply missing from the manifest only fails when something asks the registry for its id.",
     'Real discovery mechanisms (classpath or assembly scanning, bundler globs) can make plugins "just appear". That is convenient, but easy to lose track of.',
   ],
   realWorld: [
     "VS Code extensions, discovered and activated from a manifest without the editor knowing about any of them at compile time",
-    "Vite and webpack plugins, each one a plain object implementing a known interface and listed in a config array",
+    "Vite and webpack plugins, each one an object implementing a known hook interface (Vite: named hooks; webpack: an apply(compiler) method) and listed in a config array",
     "Python packaging's entry_points, which let an installed package register itself under a group a host scans for",
     "Eclipse OSGi bundles, discovered and wired together at start-up",
     'This site: src/patterns/registry.ts and src/architectures/registry.ts auto-discover every pattern and architecture folder with import.meta.glob — CLAUDE.md says "Never hand-register a pattern".',
@@ -67,7 +67,7 @@ export const pattern: PatternDefinition = {
       y: 80,
       width: 150,
       description:
-        "A plain list of plugin ids and the factory each one maps to. Editing this list is the entire story for adding or removing a plugin.",
+        "A plain list of the plugin modules to load. Editing this list is all it takes to enable or disable a plugin the loader already has a factory for.",
     },
     {
       id: "pluginLoader",
@@ -78,7 +78,7 @@ export const pattern: PatternDefinition = {
       y: 80,
       width: 160,
       description:
-        "Reads the manifest, looks each module name up in a map of known factories, and registers the resulting exporter with the registry.",
+        "Reads the manifest, looks each module name up in a map of known factories (failing with a clear error for an unknown one), and registers the resulting exporter with the registry.",
     },
     {
       id: "pluginRegistry",
@@ -131,7 +131,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "read manifest",
       description:
-        "The loader reads the manifest before anything is registered — a plain list of {id, module} entries, not code.",
+        "The loader reads the manifest before anything is registered — a plain list of module names, not code.",
       code: "pluginLoader",
     },
     {
@@ -141,7 +141,7 @@ export const pattern: PatternDefinition = {
       type: "calls",
       label: "register(exporter)",
       description:
-        "For each manifest entry, the loader builds the plugin from the factory map and registers it under its id.",
+        "For each manifest entry, the loader builds the plugin from the factory map and registers it under the id the plugin reports.",
       bend: 20,
       code: "pluginLoader",
     },
@@ -209,15 +209,15 @@ export const pattern: PatternDefinition = {
     {
       title: "The loader reads the manifest",
       description:
-        'PluginLoader reads a plain list of {id, module} entries — two entries, for "markdown" and "html".',
+        'PluginLoader reads a plain list of module names — two entries, "markdown-exporter" and "html-exporter".',
       highlight: ["pluginLoader", "manifest", "loaderReadsManifest"],
-      notes: { manifest: "markdown, html" },
+      notes: { manifest: "markdown-exporter, html-exporter" },
       code: "manifest",
     },
     {
       title: "The loader registers each plugin under its id",
       description:
-        "For every manifest entry, the loader builds the plugin from the factory map and registers it. MarkdownExporter and HtmlExporter both implement Exporter, so the registry can hold both the same way.",
+        'For every manifest entry, the loader builds the plugin from the factory map and registers it under the id the plugin reports ("markdown", "html"). MarkdownExporter and HtmlExporter both implement Exporter, so the registry can hold both the same way.',
       highlight: [
         "pluginLoader",
         "pluginRegistry",
@@ -255,7 +255,7 @@ export const pattern: PatternDefinition = {
     {
       title: "A new plugin is added to the manifest — the host is untouched",
       description:
-        'A third entry, {id: "json", module: "json-exporter"}, is appended to the manifest. PluginLoader and PluginRegistry run exactly the same code; Host and its export() method are not edited at all.',
+        'A third module name, "json-exporter", is appended to the manifest. JsonExporter and its factory entry already exist, so PluginLoader and PluginRegistry run unchanged; Host and its export() method are not edited at all.',
       highlight: ["manifest", "pluginLoader", "pluginRegistry"],
       notes: { pluginRegistry: "registered: markdown, html, json" },
       code: "usage",

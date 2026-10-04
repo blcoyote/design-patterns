@@ -32,12 +32,11 @@ export const pattern: PatternDefinition = {
   cons: [
     "Can hide real bugs: sometimes a missing dependency should be a loud error, not a silent no-op.",
     "Adds a class that does nothing observable, which can confuse readers who do not know the pattern.",
-    "A do-nothing object only fits when a neutral result (nothing happens, or an empty value) is a sensible answer. If callers need a real result, the missing case should still be handled explicitly.",
-    'Only works when "do nothing" is a genuinely sensible default. If no neutral behavior exists, forcing one in is the wrong fix.',
+    "Only fits when a neutral result (nothing happens, or an empty value) is a genuinely sensible answer. If callers need a real result, or no neutral behavior exists, handle the missing case explicitly instead of forcing one in.",
   ],
   realWorld: [
     "NullLogger / NOPLogger implementations in logging frameworks (SLF4J's NOPLogger, many Node logging libs)",
-    'Python\'s logging.NullHandler — attached by libraries so "no handler configured" never warns or crashes',
+    "Python's logging.NullHandler: libraries attach it so their log records stay silent (instead of falling through to stderr) until the application configures logging",
     "A never-aborting `new AbortController().signal` used as a safe default instead of undefined",
     ".NET's NullLogger.Instance, Stream.Null, Go's io.Discard, and Java's Collections.emptyList() — do-nothing implementations used as defaults instead of null",
   ],
@@ -184,7 +183,7 @@ export const pattern: PatternDefinition = {
       code: "before",
     },
     {
-      title: "Two guarded calls behave",
+      title: "The two guarded calls are safe",
       description:
         "generate() checks that the logger is not null before its first two log calls. Since logger really is null here, both checks correctly skip the call and the method carries on safely.",
       highlight: ["client", "client-call", "reportGenerator"],
@@ -218,7 +217,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Default to it instead of null",
       description:
-        "ReportGenerator's constructor now defaults logger to new NullLogger() when the caller omits one. The field is always a real Logger — never null — so the type itself rules out the crash.",
+        "ReportGenerator's constructor now defaults logger to new NullLogger() when the caller omits one. The field is always a real Logger: the constructor guarantees it is never null, so the crash cannot happen.",
       highlight: ["client", "client-create", "holds", "reportGenerator"],
       packets: [{ relation: "client-create", label: "new ReportGenerator()" }],
       notes: { reportGenerator: "logger: NullLogger" },

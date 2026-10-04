@@ -113,18 +113,25 @@ func (f *Forest) Render(canvas Canvas) {
 
 // [/render]
 
+func (f *Forest) TreeCount() int { return len(f.trees) }
+func (f *Forest) TypeCount() int { return f.factory.PoolSize() }
+
 // [/forest]
 
 // [usage]
 func main() {
 	forest := NewForest()
-	for i := 0; i < 5_000; i++ {
+	forest.Plant(120, 40, 3, "Oak", "#2f6b3a", "rough-bark.png")   // cache miss: builds the Oak type
+	forest.Plant(340, 95, 7, "Oak", "#2f6b3a", "rough-bark.png")   // cache hit: same Oak instance
+	forest.Plant(560, 70, 5, "Pine", "#1f4d2e", "needle-bark.png") // cache miss: builds the Pine type
+	for i := 0; i < 4_998; i++ {
 		forest.Plant(rand.Float64()*1000, rand.Float64()*1000, rand.Float64()*50, "Oak", "#2f6b3a", "rough-bark.png")
 	}
-	for i := 0; i < 5_000; i++ {
+	for i := 0; i < 4_999; i++ {
 		forest.Plant(rand.Float64()*1000, rand.Float64()*1000, rand.Float64()*50, "Pine", "#1f4d2e", "needle-bark.png")
 	}
-	// 10,000 Tree objects on the heap, backed by just two shared ConcreteTreeType instances
+	// 10,000 Tree objects on the heap (5,000 per species), backed by just two shared ConcreteTreeType instances
+	fmt.Printf("%d trees, %d tree types\n", forest.TreeCount(), forest.TypeCount()) // 10000 trees, 2 tree types
 }
 
 // [/usage]

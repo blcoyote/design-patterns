@@ -87,12 +87,23 @@ class Forest {
     for (const tree of this.trees) tree.render(canvas);
   }
   // [/render]
+
+  get treeCount(): number {
+    return this.trees.length;
+  }
+
+  get typeCount(): number {
+    return this.factory.poolSize;
+  }
 }
 // [/forest]
 
 // [usage]
 const forest = new Forest();
-for (let i = 0; i < 5_000; i++) {
+forest.plant(120, 40, 3, "Oak", "#2f6b3a", "rough-bark.png"); // cache miss: builds the Oak type
+forest.plant(340, 95, 7, "Oak", "#2f6b3a", "rough-bark.png"); // cache hit: same Oak instance
+forest.plant(560, 70, 5, "Pine", "#1f4d2e", "needle-bark.png"); // cache miss: builds the Pine type
+for (let i = 0; i < 4_998; i++) {
   forest.plant(
     Math.random() * 1000,
     Math.random() * 1000,
@@ -102,7 +113,7 @@ for (let i = 0; i < 5_000; i++) {
     "rough-bark.png",
   );
 }
-for (let i = 0; i < 5_000; i++) {
+for (let i = 0; i < 4_999; i++) {
   forest.plant(
     Math.random() * 1000,
     Math.random() * 1000,
@@ -112,5 +123,6 @@ for (let i = 0; i < 5_000; i++) {
     "needle-bark.png",
   );
 }
-// 10,000 Tree objects on the heap, backed by just two shared ConcreteTreeType instances
+// 10,000 Tree objects on the heap (5,000 per species), backed by just two shared ConcreteTreeType instances
+console.log(`${forest.treeCount} trees, ${forest.typeCount} tree types`); // 10000 trees, 2 tree types
 // [/usage]

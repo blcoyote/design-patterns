@@ -10,12 +10,18 @@ store.Subscribe((streamId, @event) => projection.Handle(streamId, @event));
 
 const string streamId = "account-42";
 
+// [handle]
+// The command handler is the imperative shell around the pure core: load the stream,
+// fold it, decide, then append at the version that was loaded. If another writer
+// appended in between, the store sees a different length and rejects the append.
 void Handle(Command command)
 {
-    var state = Fold(store.Load(streamId));
+    var history = store.Load(streamId);
+    var state = Fold(history);
     var events = Decide(command, state);
-    store.Append(streamId, store.Load(streamId).Count, events);
+    store.Append(streamId, history.Count, events);
 }
+// [/handle]
 
 // [decide]
 // Decide(command, state) -> IReadOnlyList<Event>: the only place business rules live. It looks
@@ -84,7 +90,9 @@ record Account(string? Owner, decimal Balance)
 static class EventSourcing
 {
     // [evolve]
-    // Evolve(state, event) -> state: a pure, total function with no branch that can fail.
+    // Evolve(state, event) -> state: a pure function that handles every Event declared in
+    // this file. C# records can't declare a closed hierarchy, so the compiler still demands
+    // the `_` arm; it is reachable only if someone adds a new Event subtype elsewhere.
     // It only ever applies an event that already happened — it never judges whether it should have.
     public static Account Evolve(Account state, Event @event) => @event switch
     {
@@ -102,29 +110,50 @@ static class EventSourcing
 // rejected if the stream moved on in the meantime.
 class EventStore
 {
+    // _appendGate serializes whole appends (check, write and notify): two appends at the
+    // same expected version cannot both succeed, and subscribers see events in commit
+    // order. _gate guards only the data, so a subscriber may still Load the stream.
+    private readonly object _appendGate = new();
+    private readonly object _gate = new();
     private readonly Dictionary<string, List<Event>> _streams = new();
     private readonly List<Action<string, Event>> _subscribers = new();
 
     // a copy, so callers cannot mutate the stored history behind Append()'s back
-    public List<Event> Load(string streamId) =>
-        _streams.TryGetValue(streamId, out var events) ? new List<Event>(events) : new List<Event>();
+    public List<Event> Load(string streamId)
+    {
+        lock (_gate)
+            return _streams.TryGetValue(streamId, out var events) ? new List<Event>(events) : new List<Event>();
+    }
 
     public void Append(string streamId, int expectedVersion, IReadOnlyList<Event> events)
     {
-        var existing = Load(streamId);
-        if (existing.Count != expectedVersion)
-            throw new InvalidOperationException($"concurrency conflict: expected version {expectedVersion}, found {existing.Count}");
+        lock (_appendGate)
+        {
+            List<Action<string, Event>> subscribers;
+            lock (_gate)
+            {
+                var existing = _streams.TryGetValue(streamId, out var stored) ? stored : new List<Event>();
+                if (existing.Count != expectedVersion)
+                    throw new InvalidOperationException($"concurrency conflict: expected version {expectedVersion}, found {existing.Count}");
 
-        var updated = new List<Event>(existing);
-        updated.AddRange(events);
-        _streams[streamId] = updated;
+                var updated = new List<Event>(existing);
+                updated.AddRange(events);
+                _streams[streamId] = updated;
+                subscribers = new List<Action<string, Event>>(_subscribers);
+            }
 
-        foreach (var @event in events)
-            foreach (var subscriber in _subscribers)
-                subscriber(streamId, @event);
+            // Still inside _appendGate, so no later append can notify first. A subscriber
+            // may Load, but must never Append back to this store.
+            foreach (var @event in events)
+                foreach (var subscriber in subscribers)
+                    subscriber(streamId, @event);
+        }
     }
 
-    public void Subscribe(Action<string, Event> fn) => _subscribers.Add(fn);
+    public void Subscribe(Action<string, Event> fn)
+    {
+        lock (_gate) _subscribers.Add(fn);
+    }
 }
 // [/append]
 

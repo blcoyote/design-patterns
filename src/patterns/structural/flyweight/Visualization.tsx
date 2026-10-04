@@ -23,7 +23,7 @@ const SPECIES_LABEL: Record<Species, string> = { oak: "Oak", pine: "Pine" };
 const DOT_COUNTS = [0, 0, 0, 1, 2, 2, 60, 60];
 const TYPE_COUNTS = [0, 0, 1, 1, 1, 2, 2, 2];
 /** The narrative instance count used for the memory readout (the dots above are capped for rendering). */
-const NARRATIVE_COUNTS = [0, 0, 0, 1, 2, 2, 5000, 5000];
+const NARRATIVE_COUNTS = [0, 0, 0, 1, 2, 2, 10000, 10000];
 
 const INTRINSIC_BYTES = 2458; // a plausible size for one cached texture + mesh
 const EXTRINSIC_BYTES = 24; // x, y, age — three numbers

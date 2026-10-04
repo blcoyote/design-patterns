@@ -17,13 +17,13 @@ export const architecture: ArchitectureDefinition = {
   problem:
     "A reminder job may read the clock, load a database record, decide whether to act, send an email, and save a change, all in one method. Testing the decision then requires a database, a fake clock, and a way to catch outgoing email, even though the rule itself is just a few conditions.",
   solution:
-    'Split the code into a pure core and an outer shell. The core takes an account and the current time, then returns a decision and a list of effects, such as an email to send. It does not access the database, clock, or network. The shell loads the account, reads the clock, calls the core, and performs the returned effects. Gary Bernhardt\'s "Boundaries" talk popularized this approach: keep decisions separate from I/O and connect them with plain values.',
+    'Split the code into a pure core and an outer shell. The core takes an account and the current time, then returns a decision and a list of effects, such as an email to send. It does not access the database, clock, or network. The shell loads the account, reads the clock, calls the core, and performs the returned effects. Gary Bernhardt named this approach in his 2012 Destroy All Software screencast "Functional Core, Imperative Shell" and expanded on it in his "Boundaries" talk: keep decisions separate from I/O and connect them with plain values.',
   analogy:
     "A judge and a bailiff. The judge (the core) only ever looks at the facts of the case and hands down a ruling — 'enforce this fine' — without personally going to collect the money. The bailiff (the shell) carries out whatever the ruling says: visiting addresses, making phone calls, filing paperwork. You can replay the same facts past the judge a thousand times in a quiet room and always get the same ruling; only the bailiff ever has to leave the building.",
   whenToUse: [
     "The valuable, change-prone part of the system is a decision or calculation, and the I/O around it is comparatively simple and stable.",
     "You want to unit-test business rules with plain values and assertions, with no test doubles, in-memory databases, or time-travel tricks for the clock.",
-    "The codebase is in a language with easy immutable data and pattern matching (TypeScript, C#, Python, F#, Clojure, Elixir…).",
+    "Any language works (Bernhardt's original screencast used Ruby); it is easiest where immutable values and sum types or pattern matching are cheap (F#, Elm, Elixir, modern C# and TypeScript).",
     "Multiple different shells need to reuse the same rule — an HTTP handler, a scheduled job, and a CLI command all calling the same pure core.",
   ],
   pros: [
@@ -36,12 +36,12 @@ export const architecture: ArchitectureDefinition = {
     "The core can't just call `sendEmail()` when it decides to — it has to hand back a description of that email and trust the shell to actually send it, which means the shell's interpreter has to stay in lockstep with every effect type the core can produce.",
     'Pushing all I/O to the edges can mean the shell ends up repeating the same "gather inputs, call core, interpret effects" shape over and over across every entry point.',
     "Representing complex, branching side effects purely as data can become its own small interpreter language, which is extra ceremony for simple cases.",
-    "Existing OO codebases built around stateful services and mutation do not refactor into this shape incrementally — pulling the pure parts out usually means a real rewrite of that slice.",
+    "Getting there can take real effort in OO codebases built around stateful services and mutation: each slice has to be untangled from its I/O before its decisions can be extracted into a pure function.",
   ],
   realWorld: [
-    'Gary Bernhardt\'s "Boundaries" (2012) is the talk most engineers point to for naming this split',
+    'Gary Bernhardt named this split in his 2012 Destroy All Software screencast "Functional Core, Imperative Shell" and expanded on it in the "Boundaries" talk (SCNA 2012)',
     "Redux reducers are a pure core (`(state, action) => state`) with all I/O pushed into middleware and effects at the edges",
-    'Elm and re-frame enforce this split at the language/framework level: your "update" function is pure, effects are returned as data',
+    "Elm enforces this split at the language level, and re-frame (ClojureScript) encourages it: Elm's \"update\" function is pure, re-frame's event handlers return effects as data",
     "Event-sourced systems' `decide`/`evolve` functions are themselves a pure core, with the event store and projections forming the shell",
   ],
   concepts: [
@@ -73,7 +73,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Interpreter (the shell)",
       description:
-        "The part of the shell that walks the list of effects the core returned and performs each one — conceptually the same role as the Interpreter design pattern's tree-walker, but over effect descriptions instead of a grammar.",
+        "The part of the shell that walks the list of effects the core returned and performs each one — similar in spirit to the Interpreter design pattern: the effect types form a tiny language that the shell interprets.",
     },
     {
       term: "Immutability",
@@ -95,11 +95,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "interpreter",
-        why: "The imperative shell walks the list of effects the core returned and performs each one, exactly like an Interpreter walking a small grammar of effect descriptions instead of a parse tree.",
-      },
-      {
-        slug: "strategy",
-        why: "Passing `now` or a formatter in as a plain function argument, instead of reading a global or injecting a stateful service, is Strategy reduced to its simplest form: a swappable function passed where it is needed.",
+        why: "The imperative shell walks the list of effects the core returned and performs each one — similar in spirit to Interpreter: the effect types form a tiny language that the shell interprets.",
       },
       {
         slug: "dependency-injection",
@@ -125,7 +121,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "pipes-and-filters",
-        why: "A pipes-and-filters pipeline is a functional core taken to its logical extreme: every stage (parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines) is a pure function with no I/O, and the only impure code is the final loop that drives the pipeline and prints its output — the imperative shell.",
+        why: "A pipes-and-filters pipeline is a functional core taken to its logical extreme: every stage (parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines) is a pure function with no I/O, and the only impure code is the trace logging wrapped around the stages and the final loop that drives the pipeline and prints its output — the imperative shell.",
       },
     ],
   },
@@ -153,7 +149,7 @@ export const architecture: ArchitectureDefinition = {
       width: 190,
       description:
         "Gathers plain inputs (the account, the current time), calls the pure core, and then interprets whatever effects it returns by performing the matching I/O.",
-      patterns: ["interpreter", "dependency-injection", "strategy"],
+      patterns: ["interpreter", "dependency-injection"],
     },
     {
       id: "clock",
@@ -217,19 +213,9 @@ export const architecture: ArchitectureDefinition = {
       from: "client",
       to: "handler",
       type: "calls",
-      label: "GET /reminders/run",
+      label: "POST /reminders/run",
       description:
         "A request (or a scheduled trigger) asks the shell to run the reminder check for one account.",
-      code: "shell",
-    },
-    {
-      id: "readClock",
-      from: "handler",
-      to: "clock",
-      type: "calls",
-      label: "clock.now()",
-      description:
-        "The shell reads the current time once, up front, and treats it from then on as a plain value rather than reaching for the clock again later.",
       code: "shell",
     },
     {
@@ -239,7 +225,17 @@ export const architecture: ArchitectureDefinition = {
       type: "calls",
       label: "accounts.load(id)",
       description:
-        "The shell loads the account it needs before calling the core — another plain value gathered up front.",
+        "The shell loads the account it needs before calling the core — a plain value gathered up front.",
+      code: "shell",
+    },
+    {
+      id: "readClock",
+      from: "handler",
+      to: "clock",
+      type: "calls",
+      label: "clock.now()",
+      description:
+        "The shell reads the current time once, before calling the core, and treats it from then on as a plain value rather than reaching for the clock again later.",
       code: "shell",
     },
     {
@@ -296,24 +292,24 @@ export const architecture: ArchitectureDefinition = {
       highlight: ["client", "handler", "clock", "core", "mailer", "accounts"],
     },
     {
-      title: "The shell gathers plain inputs",
+      title: "The shell loads the account",
       description:
-        "A request reaches ReminderHandler. Before it does anything else, it reads the current time from the Clock — once, up front — and turns it into a plain value.",
-      highlight: ["client", "request", "handler", "readClock", "clock"],
+        "A request reaches ReminderHandler. The first thing it does is load the Account it needs from the store — a plain value, gathered before the core is ever called.",
+      highlight: ["client", "request", "handler", "loadAccount", "accounts"],
       packets: [
-        { relation: "request", label: "GET /reminders/run" },
-        { relation: "readClock", label: "now()", after: 0 },
+        { relation: "request", label: "POST /reminders/run" },
+        { relation: "loadAccount", label: "load(id)", after: 0 },
       ],
-      notes: { clock: "now: plain Date" },
+      notes: { accounts: "Account loaded" },
       code: "shell",
     },
     {
-      title: "The shell loads the account",
+      title: "The shell reads the clock",
       description:
-        "The handler also loads the Account it needs from the store — another plain value, gathered before the core is ever called.",
-      highlight: ["handler", "loadAccount", "accounts"],
-      packets: [{ relation: "loadAccount", label: "load(id)" }],
-      notes: { accounts: "Account loaded" },
+        "Next, the handler reads the current time from the Clock — once, before the core is called — and turns it into another plain value.",
+      highlight: ["handler", "readClock", "clock"],
+      packets: [{ relation: "readClock", label: "now()" }],
+      notes: { clock: "now: plain Date" },
       code: "shell",
     },
     {

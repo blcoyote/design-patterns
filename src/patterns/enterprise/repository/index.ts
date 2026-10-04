@@ -15,7 +15,7 @@ export const pattern: PatternDefinition = {
   problem:
     "Without a boundary, SQL strings, ORM query builders and connection handling creep into services and controllers. Every piece of code that needs an Order ends up knowing the shape of the orders table. The same query gets copy-pasted in three places, unit tests need a real database just to exercise business logic, and swapping or upgrading the data store means hunting down every call site that touches it.",
   solution:
-    "Define a Repository interface shaped like a collection of domain objects. Put exactly one concrete class behind it that knows how to talk to the real store: it builds the SQL, runs it, and maps rows back into fully formed domain objects. Application code is written against the interface only, so a SqlOrderRepository can be swapped for an InMemoryOrderRepository in tests, or for a different store later, without changing a single caller.",
+    "Define a Repository interface shaped like a collection of domain objects. Behind it, a concrete class (here SqlOrderRepository) knows how to talk to the real store: it builds the SQL, runs it, and maps rows back into fully formed domain objects. Application code is written against the interface only, so a SqlOrderRepository can be swapped for an InMemoryOrderRepository in tests, or for a different store later, without changing a single caller.",
   analogy:
     'A library catalogue desk. You ask for "the 2023 edition of this title" and get a book back. You never learn whether it came off the open shelves, a back-room archive or an inter-library loan. The request looks the same either way, because the desk hides where the books actually live.',
   whenToUse: [

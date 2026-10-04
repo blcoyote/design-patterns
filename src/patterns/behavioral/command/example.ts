@@ -1,6 +1,7 @@
 // [command]
 interface Command {
-  execute(): () => void;
+  execute(): void;
+  undo(): void;
 }
 // [/command]
 
@@ -26,28 +27,36 @@ class Light {
 
 // [onCommand]
 class LightOnCommand implements Command {
+  // One saved state per execute(): the same command object can be pressed again before undo.
+  private previous: boolean[] = [];
+
   constructor(private light: Light) {}
 
-  execute(): () => void {
-    const wasOn = this.light.on;
+  execute() {
+    this.previous.push(this.light.on); // remember what execute() is about to overwrite
     this.light.turnOn();
-    return () => {
-      if (!wasOn) this.light.turnOff();
-    };
+  }
+
+  undo() {
+    if (this.previous.pop() === false) this.light.turnOff();
   }
 }
 // [/onCommand]
 
 // [offCommand]
 class LightOffCommand implements Command {
+  // One saved state per execute(): the same command object can be pressed again before undo.
+  private previous: boolean[] = [];
+
   constructor(private light: Light) {}
 
-  execute(): () => void {
-    const wasOn = this.light.on;
+  execute() {
+    this.previous.push(this.light.on); // remember what execute() is about to overwrite
     this.light.turnOff();
-    return () => {
-      if (wasOn) this.light.turnOn();
-    };
+  }
+
+  undo() {
+    if (this.previous.pop() === true) this.light.turnOn();
   }
 }
 // [/offCommand]
@@ -55,7 +64,7 @@ class LightOffCommand implements Command {
 // [remote]
 class RemoteButton {
   private current: Command | null = null;
-  private history: Array<() => void> = [];
+  private history: Command[] = [];
 
   // [setCommand]
   setCommand(command: Command) {
@@ -66,14 +75,15 @@ class RemoteButton {
   // [execute]
   press() {
     if (!this.current) return;
-    this.history.push(this.current.execute());
+    this.current.execute();
+    this.history.push(this.current);
   }
   // [/execute]
 
   // [undo]
   undoLast() {
-    const undo = this.history.pop();
-    undo?.();
+    const command = this.history.pop();
+    command?.undo();
   }
   // [/undo]
 }

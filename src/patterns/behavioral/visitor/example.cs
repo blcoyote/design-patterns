@@ -136,8 +136,8 @@ class JsonExporter : IShapeVisitor
         _parts.Add($"{{\"type\":\"group\",\"children\":[{string.Join(",", children)}]}}");
     }
 
-    // Named Result(), not ToString() — keeps parity with the explicit,
-    // non-overload-driven TypeScript original.
+    // Named Result(), not an override of ToString(), so the name matches the
+    // other languages.
     public string Result() => _parts.Count > 0 ? _parts[0] : "{}";
 }
 // [/jsonExporter]

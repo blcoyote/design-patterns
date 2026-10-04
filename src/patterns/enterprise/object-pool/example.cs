@@ -22,7 +22,7 @@ c3.Query("SELECT 3");
 
 var pending = pool.AcquireAsync(); // queued: every slot is already checked out
 pool.Release(c1); // handed straight to the queued caller instead of going idle
-var c4 = await pending; // c4 === c1, reused rather than freshly constructed
+var c4 = await pending; // c4 is c1, reused rather than freshly constructed
 // [/clientB]
 // [/usage]
 
@@ -65,8 +65,11 @@ class PooledConnection(RawDatabaseSocket socket) : IPoolable
 // [/connection]
 
 // [pool]
+// The lock guards the pool's own bookkeeping, because async callers can run on
+// different thread-pool threads. It is never held while a caller awaits.
 class ObjectPool<T>(Func<T> factory, int maxSize) where T : IPoolable
 {
+    private readonly object _gate = new();
     private readonly List<T> _idle = new();
     private readonly HashSet<T> _inUse = new();
     private readonly Queue<TaskCompletionSource<T>> _waiting = new();
@@ -75,48 +78,62 @@ class ObjectPool<T>(Func<T> factory, int maxSize) where T : IPoolable
     // [acquire]
     public Task<T> AcquireAsync()
     {
-        if (_idle.Count > 0)
+        lock (_gate)
         {
-            var reused = _idle[^1];
-            _idle.RemoveAt(_idle.Count - 1);
-            _inUse.Add(reused);
-            return Task.FromResult(reused);
+            if (_idle.Count > 0)
+            {
+                var reused = _idle[^1];
+                _idle.RemoveAt(_idle.Count - 1);
+                _inUse.Add(reused);
+                return Task.FromResult(reused);
+            }
+            if (_created < maxSize)
+            {
+                var item = factory(); // lazy creation — if this throws, no slot is used up
+                _created++; // only count it once the object actually exists
+                _inUse.Add(item);
+                return Task.FromResult(item);
+            }
+            // Every slot is taken: queue this request until a Release() frees one up.
+            // RunContinuationsAsynchronously keeps the waiter's code from running
+            // inside Release() while it still holds the lock.
+            var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _waiting.Enqueue(tcs);
+            return tcs.Task;
         }
-        if (_created < maxSize)
-        {
-            var item = factory(); // lazy creation — if this throws, no slot is used up
-            _created++; // only count it once the object actually exists
-            _inUse.Add(item);
-            return Task.FromResult(item);
-        }
-        // Every slot is taken: queue this request until a Release() frees one up.
-        var tcs = new TaskCompletionSource<T>();
-        _waiting.Enqueue(tcs);
-        return tcs.Task;
     }
     // [/acquire]
 
     // [release]
     public void Release(T item)
     {
-        if (!_inUse.Remove(item))
+        lock (_gate)
         {
-            throw new InvalidOperationException("Release() called with an item that is not checked out from this pool");
-        }
-        item.Reset(); // scrub borrower state before anyone else sees this object
-        if (_waiting.Count > 0)
-        {
-            var next = _waiting.Dequeue();
-            _inUse.Add(item);
-            next.SetResult(item); // hand it straight to the waiting caller — it never goes idle
-        }
-        else
-        {
-            _idle.Add(item);
+            if (!_inUse.Remove(item))
+            {
+                throw new InvalidOperationException("Release() called with an item that is not checked out from this pool");
+            }
+            item.Reset(); // scrub borrower state before anyone else sees this object
+            // Waiters here cannot cancel (this example gives acquire() no timeout), so every
+            // queued waiter is still listening. A pool that adds timeouts must skip waiters
+            // that gave up, as the Python tab does for cancelled futures.
+            if (_waiting.Count > 0)
+            {
+                var next = _waiting.Dequeue();
+                _inUse.Add(item);
+                next.SetResult(item); // hand it straight to the waiting caller — it never goes idle
+            }
+            else
+            {
+                _idle.Add(item);
+            }
         }
     }
     // [/release]
 
-    public (int Idle, int InUse, int Waiting) Stats => (_idle.Count, _inUse.Count, _waiting.Count);
+    public (int Idle, int InUse, int Waiting) Stats
+    {
+        get { lock (_gate) return (_idle.Count, _inUse.Count, _waiting.Count); }
+    }
 }
 // [/pool]

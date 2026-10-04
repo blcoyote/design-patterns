@@ -10,6 +10,11 @@ interface HttpResponse {
   body: string;
 }
 
+// Prints a response the same way on every tab: HttpResponse(status=200, body='...')
+function show(res: HttpResponse): string {
+  return `HttpResponse(status=${res.status}, body='${res.body}')`;
+}
+
 // [handler]
 abstract class Handler {
   private next: Handler | null = null;
@@ -92,6 +97,6 @@ class Controller extends Handler {
 const chain = new AuthHandler();
 chain.setNext(new RateLimitHandler()).setNext(new ValidationHandler()).setNext(new Controller());
 
-chain.handle({ path: "/orders/42", clientId: "client-1", token: "abc123" }); // { status: 200, body: 'handled /orders/42' }
-chain.handle({ path: "/orders/42", clientId: "client-1", token: "expired" }); // { status: 401, ... } — stops at AuthHandler
+console.log(show(chain.handle({ path: "/orders/42", clientId: "client-1", token: "abc123" }))); // status=200, body='handled /orders/42'
+console.log(show(chain.handle({ path: "/orders/42", clientId: "client-1", token: "expired" }))); // status=401, ... — stops at AuthHandler
 // [/entry]

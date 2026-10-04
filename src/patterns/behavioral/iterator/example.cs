@@ -22,7 +22,7 @@ record Song(string Title);
 // [iterable]
 // IEnumerable<T> and IEnumerator<T> are built into .NET (System.Collections.Generic)
 // — the same interfaces that make foreach and LINQ work on arrays, List<T>
-// and Dictionary<T>. Playlist only has to implement them:
+// and Dictionary<TKey, TValue>. Playlist only has to implement them:
 //   interface IEnumerable<T> { IEnumerator<T> GetEnumerator(); }
 // [/iterable]
 

@@ -36,7 +36,7 @@ export const architecture: ArchitectureDefinition = {
     "Small CRUD services pay a real tax in interfaces, wiring and indirection for a benefit they may never cash in.",
     'Naming is genuinely confusing at first — "port", "driving", "driven" and "adapter" do not map onto words most teams already use.',
     "It is still easy to accidentally leak a framework type (an HTTP request object, an ORM entity) into the core through a driving port's method signature if nobody is watching.",
-    "Without the discipline enforced by Hexagonal, a team can still get most of the architecture's benefit from the simpler, less ceremonial Layered style.",
+    "A team that only needs testable services can often get much of the benefit from Layered plus a repository interface, with less ceremony.",
   ],
   realWorld: [
     'Any Spring Boot / NestJS service built around "service interface + repository interface" with adapters wired up by the DI container',

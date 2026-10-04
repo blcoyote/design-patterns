@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 // [config]
 type AppConfig struct {
@@ -16,7 +19,8 @@ var (
 // Go has no constructors. The lower-case newAppConfig is the only intended way
 // to build one, but in package main nothing stops code from writing an
 // AppConfig{} literal, so this is a convention, not enforcement (a separate
-// package with unexported fields would be needed for that).
+// package with an unexported type, reached only through GetInstance(), would
+// be needed for that).
 func newAppConfig() *AppConfig {
 	return &AppConfig{settings: map[string]string{"apiUrl": "https://api.example.com"}}
 }
@@ -85,11 +89,14 @@ func main() {
 	users := NewUserService()
 	payments := NewPaymentService()
 
-	users.ApiUrl()    // "https://api.example.com"
-	payments.ApiUrl() // the exact same value, from the exact same object
+	// ApiUrl returns (value, found); print just the value, like the other tabs.
+	printURL := func(url string, _ bool) { fmt.Println(url) }
+
+	printURL(users.ApiUrl())    // "https://api.example.com"
+	printURL(payments.ApiUrl()) // the exact same value, from the exact same object
 
 	payments.UpdateApiUrl("https://updated.example.com")
-	users.ApiUrl() // "https://updated.example.com" — set via PaymentService, seen through UserService
+	printURL(users.ApiUrl()) // "https://updated.example.com" — set via PaymentService, seen through UserService
 
 	// newAppConfig() is the lower-case, intended-private constructor; callers use GetInstance().
 }

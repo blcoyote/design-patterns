@@ -37,7 +37,7 @@ class Order {
 
 // [repoPort]
 // Driven port: the core declares the capability it needs, in its own
-// vocabulary. It has no idea Postgres or an in-memory map will answer it.
+// vocabulary. It has no idea Postgres or an in-memory list will answer it.
 interface OrderRepository {
   save(order: Order): void;
 }

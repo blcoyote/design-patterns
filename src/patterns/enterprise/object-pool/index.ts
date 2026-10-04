@@ -204,7 +204,7 @@ export const pattern: PatternDefinition = {
     {
       title: "An empty pool",
       description:
-        "ConnectionPool starts with nothing built: idle, inUse and waiting are all zero. No PooledConnection exists yet — the pool only creates one the first time somebody actually asks for it.",
+        "ObjectPool starts with nothing built: idle, inUse and waiting are all zero. No PooledConnection exists yet — the pool only creates one the first time somebody actually asks for it.",
       highlight: ["pool"],
       notes: { pool: "idle:0 inUse:0 waiting:0" },
       code: "pool",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import threading
 from dataclasses import dataclass, replace
 from functools import reduce
 from typing import Callable
@@ -101,25 +102,37 @@ def fold(events: list[Event]) -> Account:
 # rejected if the stream moved on in the meantime.
 class EventStore:
     def __init__(self) -> None:
+        # _append_lock serializes whole appends (check, write and notify): two appends at the
+        # same expected version cannot both succeed, and subscribers see events in commit
+        # order. _lock guards only the data, so a subscriber may still load() the stream.
+        self._append_lock = threading.Lock()
+        self._lock = threading.Lock()
         self._streams: dict[str, list[Event]] = {}
         self._subscribers: list[Callable[[str, Event], None]] = []
 
     def load(self, stream_id: str) -> list[Event]:
-        return list(self._streams.get(stream_id, []))
+        with self._lock:
+            return list(self._streams.get(stream_id, []))
 
     def append(self, stream_id: str, expected_version: int, events: list[Event]) -> None:
-        existing = self.load(stream_id)
-        if len(existing) != expected_version:
-            raise ValueError(
-                f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
-            )
-        self._streams[stream_id] = existing + events
-        for event in events:
-            for subscriber in self._subscribers:
-                subscriber(stream_id, event)
+        with self._append_lock:
+            with self._lock:
+                existing = self._streams.get(stream_id, [])
+                if len(existing) != expected_version:
+                    raise ValueError(
+                        f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
+                    )
+                self._streams[stream_id] = existing + events
+                subscribers = list(self._subscribers)
+            # Still inside _append_lock, so no later append can notify first. A subscriber
+            # may load(), but must never append() back to this store.
+            for event in events:
+                for subscriber in subscribers:
+                    subscriber(stream_id, event)
 
     def subscribe(self, fn: Callable[[str, Event], None]) -> None:
-        self._subscribers.append(fn)
+        with self._lock:
+            self._subscribers.append(fn)
 # [/append]
 
 
@@ -160,10 +173,16 @@ store.subscribe(projection.handle)
 STREAM_ID = "account-42"
 
 
+# [handle]
+# The command handler is the imperative shell around the pure core: load the stream,
+# fold it, decide, then append at the version that was loaded. If another writer
+# appended in between, the store sees a different length and rejects the append.
 def handle(command: Command) -> None:
-    state = fold(store.load(STREAM_ID))
+    history = store.load(STREAM_ID)
+    state = fold(history)
     events = decide(command, state)
-    store.append(STREAM_ID, len(store.load(STREAM_ID)), events)
+    store.append(STREAM_ID, len(history), events)
+# [/handle]
 
 
 handle(OpenAccount("Ada"))

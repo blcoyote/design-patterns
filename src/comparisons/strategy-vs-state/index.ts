@@ -39,7 +39,7 @@ export const comparison: ComparisonDefinition = {
         strategy:
           "The client: it calls setStrategy() with a different implementation whenever it chooses to.",
         state:
-          "The current state object: its method returns the next state, and the context just stores whatever comes back.",
+          "From inside the object. In this example the current state object's method returns the next state, and the context just stores whatever comes back (GoF also allows the Context to own the transitions).",
       },
     },
     {
@@ -118,7 +118,7 @@ export const comparison: ComparisonDefinition = {
       "For Strategy, use a switch or a map of functions while there are only a few stateless options. For State, use an enum and a switch or transition table while each stage has little behavior. Use the patterns when the options need their own state or the stage-specific behavior grows.",
   },
   overlap:
-    "A State can use a Strategy internally, and both patterns use a context that holds an interface. The difference is who changes the behavior: an outside caller chooses a Strategy, while a State chooses and returns its own successor.",
+    "A State can use a Strategy internally, and both patterns use a context that holds an interface. The difference is who changes the behavior: an outside caller chooses a Strategy, while State changes the behavior from inside the object — usually, as in this example, by each state choosing its successor (GoF also allows the Context to own the transitions).",
   scenario: {
     prompt:
       "A checkout page needs to let the shopper pay by card, PayPal or invoice. Which fits best?",

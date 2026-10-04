@@ -17,7 +17,7 @@ export const pattern: PatternDefinition = {
   problem:
     "OrderService needs a database repository and a way to send email. If it calls new SqlOrderRepository() and new SmtpEmailSender() itself, it is hard-wired to those concrete classes, and to whatever they need in turn. Testing OrderService then means testing the real repository and the real mailer too. Swapping either one means editing OrderService's source.",
   solution:
-    "Each class lists what it needs as constructor parameters, typed as interfaces where it matters, and never creates those dependencies itself. A container (or just a few lines of composition code) builds the dependency graph from the bottom up, leaves first, and passes each finished instance to the constructor of whatever needs it, until the object the application actually wants is fully wired.",
+    "Each class lists what it needs as constructor parameters (constructor injection, the most common form; setter and interface/method injection also exist), typed as interfaces where it matters, and never creates those dependencies itself. A container (or just a few lines of composition code) builds the dependency graph from the bottom up, leaves first, and passes each finished instance to the constructor of whatever needs it, until the object the application actually wants is fully wired.",
   analogy:
     "A car factory does not make the engine build its own pistons. Pistons, engine and chassis are built separately and assembled in order, and each station is handed exactly the finished parts it needs.",
   whenToUse: [
@@ -27,13 +27,13 @@ export const pattern: PatternDefinition = {
     "You want construction logic in one place instead of scattered across every class that happens to need an object.",
   ],
   pros: [
-    "Classes depend on abstractions, not concrete classes, so implementations are easy to swap.",
+    "Classes can depend on abstractions rather than concrete classes, so implementations are easy to swap.",
     "Testing is easy: give the class under test a fake or mock instead of the real dependency.",
     "Construction logic lives in one place instead of being repeated in every consumer.",
   ],
   cons: [
-    "Adds indirection: instead of following a chain of `new` calls, you now follow a container.",
-    "Wiring mistakes (a missing registration, a lifetime mismatch) show up when something is resolved, not at compile time.",
+    "Adds indirection, especially with a container: instead of following a chain of `new` calls, you now follow the container's registrations.",
+    "With a runtime DI container, wiring mistakes (a missing registration, a lifetime mismatch) show up only when something is resolved, not at compile time. Hand-written composition code turns a missing dependency into a compile error, and compile-time containers such as Dagger also validate scopes at build time; but in hand-written code a lifetime mismatch (a long-lived service holding a request-scoped one) still type-checks, so it needs review.",
     "Overkill for small scripts with only one or two simple dependencies.",
     "Passing the container itself into a class so it can call resolve() whenever it needs something is Service Locator, not Dependency Injection. It hides the dependency instead of declaring it.",
   ],

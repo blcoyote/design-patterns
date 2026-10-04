@@ -5,15 +5,9 @@ import (
 	"slices"
 )
 
-// Payloads are plain structs. Their String methods only make the analytics
-// line print the same text in every language.
 type OrderPlaced struct {
 	OrderID string
 	Total   int
-}
-
-func (e OrderPlaced) String() string {
-	return fmt.Sprintf("OrderPlaced(order_id='%s', total=%d)", e.OrderID, e.Total)
 }
 
 type UserSignedUp struct {
@@ -21,21 +15,18 @@ type UserSignedUp struct {
 	Email  string
 }
 
-func (e UserSignedUp) String() string {
-	return fmt.Sprintf("UserSignedUp(user_id='%s', email='%s')", e.UserID, e.Email)
-}
-
 type Unsubscribe func()
 
-// subscription is a pointer-identified entry, because Go funcs are not
-// comparable and so cannot be found in a slice by value.
+// One entry per Subscribe call, identified by pointer — Go funcs are not
+// comparable, so they cannot be found in a slice by value.
 type subscription struct {
 	handler func(any)
 }
 
 // [eventBus]
-// Go methods cannot have type parameters, so the typed Subscribe is a
-// package-level generic function. A slice per topic keeps delivery in
+// Before Go 1.27, methods could not have type parameters, so the typed
+// Subscribe is a package-level generic function (this also works on older
+// toolchains). A slice of subscriptions per topic keeps delivery in
 // subscription order (map iteration order would be random).
 type EventBus struct {
 	topics map[string][]*subscription
@@ -47,6 +38,8 @@ func NewEventBus() *EventBus {
 
 // [subscribe]
 func Subscribe[T any](bus *EventBus, topic string, handler func(T)) Unsubscribe {
+	// Each call gets its own subscription, so subscribing the same handler
+	// twice delivers twice, and each unsubscribe removes only its own entry.
 	sub := &subscription{handler: func(payload any) { handler(payload.(T)) }}
 	bus.topics[topic] = append(bus.topics[topic], sub)
 	return func() {
@@ -121,13 +114,17 @@ type AnalyticsService struct{}
 
 func NewAnalyticsService(bus *EventBus) *AnalyticsService {
 	s := &AnalyticsService{}
-	Subscribe(bus, "order.placed", func(e OrderPlaced) { s.track("order.placed", e) })
-	Subscribe(bus, "user.signedUp", func(e UserSignedUp) { s.track("user.signedUp", e) })
+	Subscribe(bus, "order.placed", func(e OrderPlaced) {
+		s.track("order.placed", fmt.Sprintf("orderId=%s total=%d", e.OrderID, e.Total))
+	})
+	Subscribe(bus, "user.signedUp", func(e UserSignedUp) {
+		s.track("user.signedUp", fmt.Sprintf("userId=%s email=%s", e.UserID, e.Email))
+	})
 	return s
 }
 
-func (s *AnalyticsService) track(topic string, payload any) {
-	fmt.Printf("analytics: %s %v\n", topic, payload)
+func (s *AnalyticsService) track(topic, details string) {
+	fmt.Printf("analytics: %s %s\n", topic, details)
 }
 
 // [/analyticsService]

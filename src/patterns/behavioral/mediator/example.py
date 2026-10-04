@@ -91,6 +91,6 @@ class SubmitButton:
 # Usage — widgets are only ever handed the mediator, never each other
 dialog = LoginDialog()
 
-dialog.username.type("ada")  # submit: enabled = True
+dialog.username.type("ada")  # submit: enabled = true
 dialog.checkbox.toggle()  # password: focused
 # [/usage]

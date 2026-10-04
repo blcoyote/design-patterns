@@ -4,7 +4,8 @@ import "fmt"
 
 // [command]
 type Command interface {
-	Execute() func()
+	Execute()
+	Undo()
 }
 
 // [/command]
@@ -30,22 +31,32 @@ func (l *Light) TurnOff() {
 
 // [/light]
 
+// popLast removes and returns the most recently saved state.
+func popLast(states *[]bool) bool {
+	last := (*states)[len(*states)-1]
+	*states = (*states)[:len(*states)-1]
+	return last
+}
+
 // [onCommand]
 type LightOnCommand struct {
-	light *Light
+	light    *Light
+	previous []bool // one saved state per Execute(): the same command can be pressed again before undo
 }
 
 func NewLightOnCommand(light *Light) *LightOnCommand {
 	return &LightOnCommand{light: light}
 }
 
-func (c *LightOnCommand) Execute() func() {
-	wasOn := c.light.On()
+func (c *LightOnCommand) Execute() {
+	c.previous = append(c.previous, c.light.On()) // remember what Execute() is about to overwrite
 	c.light.TurnOn()
-	return func() {
-		if !wasOn {
-			c.light.TurnOff()
-		}
+}
+
+func (c *LightOnCommand) Undo() {
+	wasOn := popLast(&c.previous)
+	if !wasOn {
+		c.light.TurnOff()
 	}
 }
 
@@ -53,20 +64,23 @@ func (c *LightOnCommand) Execute() func() {
 
 // [offCommand]
 type LightOffCommand struct {
-	light *Light
+	light    *Light
+	previous []bool // one saved state per Execute(): the same command can be pressed again before undo
 }
 
 func NewLightOffCommand(light *Light) *LightOffCommand {
 	return &LightOffCommand{light: light}
 }
 
-func (c *LightOffCommand) Execute() func() {
-	wasOn := c.light.On()
+func (c *LightOffCommand) Execute() {
+	c.previous = append(c.previous, c.light.On()) // remember what Execute() is about to overwrite
 	c.light.TurnOff()
-	return func() {
-		if wasOn {
-			c.light.TurnOn()
-		}
+}
+
+func (c *LightOffCommand) Undo() {
+	wasOn := popLast(&c.previous)
+	if wasOn {
+		c.light.TurnOn()
 	}
 }
 
@@ -75,7 +89,7 @@ func (c *LightOffCommand) Execute() func() {
 // [remote]
 type RemoteButton struct {
 	current Command
-	history []func()
+	history []Command
 }
 
 // [setCommand]
@@ -90,7 +104,8 @@ func (r *RemoteButton) Press() {
 	if r.current == nil {
 		return
 	}
-	r.history = append(r.history, r.current.Execute())
+	r.current.Execute()
+	r.history = append(r.history, r.current)
 }
 
 // [/execute]
@@ -100,9 +115,9 @@ func (r *RemoteButton) UndoLast() {
 	if len(r.history) == 0 {
 		return
 	}
-	undo := r.history[len(r.history)-1]
+	command := r.history[len(r.history)-1]
 	r.history = r.history[:len(r.history)-1]
-	undo()
+	command.Undo()
 }
 
 // [/undo]

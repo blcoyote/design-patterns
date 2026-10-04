@@ -18,7 +18,8 @@ remote.UndoLast(); // pops LightOffCommand, calls Undo() -> light turns back on
 // [command]
 interface ICommand
 {
-    Action Execute();
+    void Execute();
+    void Undo();
 }
 // [/command]
 
@@ -44,14 +45,18 @@ class Light
 // [onCommand]
 class LightOnCommand(Light light) : ICommand
 {
-    public Action Execute()
+    // One saved state per Execute(): the same command object can be pressed again before undo.
+    private readonly Stack<bool> _previous = new();
+
+    public void Execute()
     {
-        var wasOn = light.On;
+        _previous.Push(light.On); // remember what Execute() is about to overwrite
         light.TurnOn();
-        return () =>
-        {
-            if (!wasOn) light.TurnOff();
-        };
+    }
+
+    public void Undo()
+    {
+        if (!_previous.Pop()) light.TurnOff();
     }
 }
 // [/onCommand]
@@ -59,14 +64,18 @@ class LightOnCommand(Light light) : ICommand
 // [offCommand]
 class LightOffCommand(Light light) : ICommand
 {
-    public Action Execute()
+    // One saved state per Execute(): the same command object can be pressed again before undo.
+    private readonly Stack<bool> _previous = new();
+
+    public void Execute()
     {
-        var wasOn = light.On;
+        _previous.Push(light.On); // remember what Execute() is about to overwrite
         light.TurnOff();
-        return () =>
-        {
-            if (wasOn) light.TurnOn();
-        };
+    }
+
+    public void Undo()
+    {
+        if (_previous.Pop()) light.TurnOn();
     }
 }
 // [/offCommand]
@@ -75,7 +84,7 @@ class LightOffCommand(Light light) : ICommand
 class RemoteButton
 {
     private ICommand? _current;
-    private readonly List<Action> _history = new();
+    private readonly List<ICommand> _history = new();
 
     // [setCommand]
     public void SetCommand(ICommand command)
@@ -88,7 +97,8 @@ class RemoteButton
     public void Press()
     {
         if (_current is null) return;
-        _history.Add(_current.Execute());
+        _current.Execute();
+        _history.Add(_current);
     }
     // [/execute]
 
@@ -96,9 +106,9 @@ class RemoteButton
     public void UndoLast()
     {
         if (_history.Count == 0) return;
-        var undo = _history[^1];
+        var command = _history[^1];
         _history.RemoveAt(_history.Count - 1);
-        undo();
+        command.Undo();
     }
     // [/undo]
 }

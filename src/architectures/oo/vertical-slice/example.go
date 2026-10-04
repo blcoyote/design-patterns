@@ -187,9 +187,9 @@ func ValidatePlaceOrder(command PlaceOrderCommand) error {
 // [/placeOrderHandler]
 
 // --- GetOrder slice ---------------------------------------------------------
-// A completely separate request type, handler, data access and validator -- it
-// shares no code with the PlaceOrder slice above except the Mediator and the
-// pipeline.
+// A completely separate request type, handler, data access and validator --
+// it shares no code with the PlaceOrder slice above except the Mediator, the
+// pipeline and the shared OrdersTable.
 
 // [getOrderStore]
 type GetOrderStore struct {

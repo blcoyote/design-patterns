@@ -105,8 +105,9 @@ func main() {
 	// [usage]
 	playlist := NewPlaylist([]Song{{"Intro"}, {"Verse"}, {"Chorus"}, {"Outro"}})
 
-	// Go has no for...in over a custom Iterable, so the loop is written out:
-	// GetIterator() once, then Next() until it reports there is nothing left.
+	// range doesn't understand this hand-written Iterator interface, so the loop
+	// is written out: GetIterator() once, then Next() until it reports there is
+	// nothing left. (GeneratorPlaylist.All() above is what range consumes directly.)
 	it := playlist.GetIterator()
 	for song, ok := it.Next(); ok; song, ok = it.Next() {
 		fmt.Println(song.Title) // "Intro", "Verse", "Chorus", "Outro"

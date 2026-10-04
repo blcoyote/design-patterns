@@ -5,7 +5,7 @@ registry.Register("circle", new Circle(5, new Style("black", 1)));
 registry.Register("rectangle", new Rectangle(10, 20, new Style("blue", 2)));
 
 var myCircle = registry.Clone("circle");
-myCircle.Style.Color = "red"; // safe through the Shape interface alone: style is its own deep copy
+myCircle.Style.Color = "red"; // safe through the IShape interface alone: style is its own deep copy
 ((Circle)myCircle).Radius = 50; // a shape-specific tweak still needs the concrete type
 
 var myRect = (Rectangle)registry.Clone("rectangle");
@@ -13,10 +13,10 @@ myRect.Width = 100;
 // [/usage]
 
 // [style]
-class Style(string color, int lineWidth)
+class Style(string color, double lineWidth)
 {
     public string Color { get; set; } = color;
-    public int LineWidth { get; set; } = lineWidth;
+    public double LineWidth { get; set; } = lineWidth;
 
     public Style Clone() => new(Color, LineWidth);
 }

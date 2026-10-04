@@ -116,7 +116,8 @@ class Runtime
     {
         var (next, cmds) = Update.Apply(CurrentModel, msg);
         // A dispatch after time-travel discards any history past the current
-        // cursor, the same way Redux DevTools / Elm's debugger fork a new timeline.
+        // cursor - an undo-stack policy chosen for this demo (Redux DevTools keeps
+        // the later actions).
         _history = _history.Take(_cursor + 1).Append(next).ToList();
         _cursor = _history.Count - 1;
         Notify();

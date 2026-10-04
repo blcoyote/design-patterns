@@ -60,7 +60,7 @@ record PlaceOrderResult(string OrderId, decimal Total, string Status, string Rea
 /// Inventory's own wire shape. Orders never sees this directly -- only through the client below.
 record ProductDto(string Sku, string DisplayName, int UnitPriceCents);
 
-/// The Inventory microservice: its own process, its own private store.
+/// The Inventory microservice: stands in for a separate process with its own private store.
 class InventoryService
 {
     public int Calls { get; private set; }
@@ -83,8 +83,8 @@ class InventoryService
 // [inventoryClient]
 /// <summary>
 /// Orders' client proxy for Inventory: same interface shape Orders would use for a local
-/// call, so Orders never deals with Inventory's transport directly (Proxy). It also reads
-/// through a cache before calling out (Cache-Aside), and converts Inventory's ProductDto
+/// call, so Orders never deals with Inventory's transport directly (Proxy). It also checks
+/// its own cache before calling out (Cache-Aside), and converts Inventory's ProductDto
 /// into Orders' own Product model (Adapter) so Inventory's wire shape never leaks in.
 /// </summary>
 class InventoryServiceClient
@@ -157,7 +157,7 @@ class CircuitBreaker
 // [/breaker]
 
 // [payments]
-/// The Payments microservice: its own process, its own private store.
+/// The Payments microservice: stands in for a separate process with its own private store.
 class PaymentsService
 {
     private bool _down;
@@ -211,10 +211,11 @@ class ShippingService
 // [/shipping]
 
 // [orders]
-/// The Orders microservice: its own process, with its own private store of the orders it has recorded.
+/// The Orders microservice: stands in for a separate process, with its own private store of the orders it has recorded.
 class OrderService
 {
     private readonly Dictionary<string, OrderRecord> _orders = new();
+    private int _nextOrderId = 1; // Orders owns its own ids: counter-based, never timestamps
     private readonly InventoryServiceClient _inventoryClient;
     private readonly CircuitBreaker _paymentsBreaker;
     private readonly PaymentsService _payments;
@@ -230,8 +231,9 @@ class OrderService
 
     public List<OrderRecord> RecordedOrders => _orders.Values.ToList();
 
-    public PlaceOrderResult PlaceOrder(string orderId, List<OrderLine> lines)
+    public PlaceOrderResult PlaceOrder(List<OrderLine> lines)
     {
+        var orderId = $"order-{_nextOrderId++}";
         decimal total = 0m;
         foreach (var line in lines)
         {
@@ -264,10 +266,9 @@ class OrderService
 // [/orders]
 
 // [gateway]
-/// The API Gateway: the one entry point clients see, hiding three separate services behind it (Facade).
+/// The API Gateway: the one entry point clients see, hiding the services behind it (Facade). It only forwards -- no business logic, not even order ids.
 class ApiGateway
 {
-    private int _nextOrderId = 1; // counter-based ids, never timestamps
     private readonly OrderService _orders;
 
     public ApiGateway(OrderService orders)
@@ -275,10 +276,6 @@ class ApiGateway
         _orders = orders;
     }
 
-    public PlaceOrderResult PlaceOrder(List<OrderLine> lines)
-    {
-        var orderId = $"order-{_nextOrderId++}";
-        return _orders.PlaceOrder(orderId, lines);
-    }
+    public PlaceOrderResult PlaceOrder(List<OrderLine> lines) => _orders.PlaceOrder(lines);
 }
 // [/gateway]

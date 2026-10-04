@@ -99,7 +99,10 @@ func fold(events []Event) Account {
 // concurrency -- the caller must say which version it last read, and the append is
 // rejected if the stream moved on in the meantime.
 type EventStore struct {
-	mu         sync.Mutex
+	// appendMu serializes whole appends (check, write and notify), so subscribers see
+	// events in commit order; mu guards only the data, so a subscriber may still Load.
+	appendMu    sync.Mutex
+	mu          sync.Mutex
 	streams     map[string][]Event
 	subscribers []func(streamID string, event Event)
 }
@@ -116,6 +119,9 @@ func (s *EventStore) Load(streamID string) []Event {
 }
 
 func (s *EventStore) Append(streamID string, expectedVersion int, events []Event) error {
+	s.appendMu.Lock()
+	defer s.appendMu.Unlock()
+
 	s.mu.Lock()
 	existing := append([]Event(nil), s.streams[streamID]...)
 	if len(existing) != expectedVersion {
@@ -125,6 +131,9 @@ func (s *EventStore) Append(streamID string, expectedVersion int, events []Event
 	s.streams[streamID] = append(existing, events...)
 	subscribers := append([]func(streamID string, event Event){}, s.subscribers...)
 	s.mu.Unlock()
+
+	// Still inside appendMu, so no later append can notify first. A subscriber may Load,
+	// but must never Append back to this store.
 	for _, event := range events {
 		for _, subscriber := range subscribers {
 			subscriber(streamID, event)
@@ -188,16 +197,22 @@ func main() {
 	projection := &WithdrawalCountProjection{}
 	store.Subscribe(projection.Handle)
 
+	// [handle]
+	// The command handler is the imperative shell around the pure core: load the stream,
+	// fold it, decide, then append at the version that was loaded. If another writer
+	// appended in between, the store sees a different length and rejects the append.
 	handle := func(command Command) {
-		state := fold(store.Load(streamID))
+		history := store.Load(streamID)
+		state := fold(history)
 		events, err := decide(command, state)
 		if err != nil {
 			panic(err)
 		}
-		if err := store.Append(streamID, len(store.Load(streamID)), events); err != nil {
+		if err := store.Append(streamID, len(history), events); err != nil {
 			panic(err)
 		}
 	}
+	// [/handle]
 
 	handle(OpenAccount{"Ada"})
 	handle(Deposit{100})

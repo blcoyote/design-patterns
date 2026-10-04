@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A coffee shop sells a base coffee, but customers can add milk, sugar, whipped cream, or any mix of them, in any order. If a class-based design subclasses every combination (MilkCoffee, MilkSugarCoffee, SugarWhipCoffee and so on), the number of types explodes, and each combination is fixed at compile time. Go has the same combinatorial problem even though it uses structs and embedding rather than class inheritance.",
   solution:
-    "Give each decorator the same interface as the object it wraps. A decorator adds its behavior, then passes the call to the wrapped object. You can stack decorators at runtime in any order. Unlike a Proxy, a decorator wraps an object it is given and adds behavior; a Proxy controls access to the object it represents and often creates it itself.",
+    "Give each decorator the same interface as the object it wraps. A decorator passes the call to the wrapped object and adds its own behavior before or after it (here: after, adding its price to the returned total). You can stack decorators at runtime in any order. Unlike a Proxy, a decorator wraps an object it is given and adds behavior; a Proxy controls access to the object it represents and often creates it itself.",
   analogy:
     "Think of dressing for cold weather: a shirt, then a sweater over it, then a coat over that. Each layer adds warmth without changing the layers underneath, and you can put on or take off exactly the layers you need.",
   whenToUse: [

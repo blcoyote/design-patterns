@@ -44,7 +44,7 @@ type ProductDto struct {
 	UnitPriceCents int
 }
 
-// InventoryService is the Inventory microservice: its own process, its own private store.
+// InventoryService is the Inventory microservice: it stands in for a separate process with its own private store.
 type InventoryService struct {
 	Calls    int
 	products map[string]ProductDto
@@ -71,7 +71,7 @@ func (s *InventoryService) FindProduct(sku string) (ProductDto, error) {
 // [inventoryClient]
 // InventoryServiceClient is Orders' client proxy for Inventory: same interface
 // shape Orders would use for a local call, so Orders never deals with
-// Inventory's transport directly (Proxy). It also reads through a cache before
+// Inventory's transport directly (Proxy). It also checks its own cache before
 // calling out (Cache-Aside), and converts Inventory's ProductDto into Orders'
 // own Product model (Adapter) so Inventory's wire shape never leaks in.
 type InventoryServiceClient struct {
@@ -135,7 +135,7 @@ func (b *CircuitBreaker) Call(fn func() (string, error)) (string, error) {
 // [/breaker]
 
 // [payments]
-// PaymentsService is the Payments microservice: its own process, its own private store.
+// PaymentsService is the Payments microservice: it stands in for a separate process with its own private store.
 type PaymentsService struct {
 	Calls int
 	down  bool
@@ -189,8 +189,8 @@ func (s *ShippingService) OnOrderPlaced(event OrderPlacedEvent) {
 // [/shipping]
 
 // [orders]
-// OrderService is the Orders microservice: its own process, with its own
-// private store of the orders it has recorded.
+// OrderService is the Orders microservice: it stands in for a separate process,
+// with its own private store of the orders it has recorded.
 type OrderService struct {
 	inventoryClient *InventoryServiceClient
 	paymentsBreaker *CircuitBreaker
@@ -198,6 +198,7 @@ type OrderService struct {
 	broker          *MessageBroker
 	orders          map[string]OrderRecord
 	orderIDs        []string // insertion order, since Go map iteration order is random
+	nextOrderID     int      // Orders owns its own ids: counter-based, never timestamps
 }
 
 func NewOrderService(inventoryClient *InventoryServiceClient, paymentsBreaker *CircuitBreaker, payments *PaymentsService, broker *MessageBroker) *OrderService {
@@ -207,6 +208,7 @@ func NewOrderService(inventoryClient *InventoryServiceClient, paymentsBreaker *C
 		payments:        payments,
 		broker:          broker,
 		orders:          map[string]OrderRecord{},
+		nextOrderID:     1,
 	}
 }
 
@@ -218,7 +220,9 @@ func (s *OrderService) RecordedOrders() []OrderRecord {
 	return records
 }
 
-func (s *OrderService) PlaceOrder(orderID string, lines []OrderLine) (PlaceOrderResult, error) {
+func (s *OrderService) PlaceOrder(lines []OrderLine) (PlaceOrderResult, error) {
+	orderID := fmt.Sprintf("order-%d", s.nextOrderID)
+	s.nextOrderID++
 	total := 0.0
 	for _, line := range lines {
 		product, err := s.inventoryClient.GetProduct(line.Sku)
@@ -252,20 +256,18 @@ func (s *OrderService) PlaceOrder(orderID string, lines []OrderLine) (PlaceOrder
 // [/orders]
 
 // [gateway]
-// ApiGateway is the one entry point clients see, hiding three separate services behind it (Facade).
+// ApiGateway is the one entry point clients see, hiding the services behind it (Facade).
+// It only forwards -- no business logic, not even order ids.
 type ApiGateway struct {
-	nextOrderID int // counter-based ids, never timestamps
-	orders      *OrderService
+	orders *OrderService
 }
 
 func NewApiGateway(orders *OrderService) *ApiGateway {
-	return &ApiGateway{nextOrderID: 1, orders: orders}
+	return &ApiGateway{orders: orders}
 }
 
 func (g *ApiGateway) PlaceOrder(lines []OrderLine) (PlaceOrderResult, error) {
-	orderID := fmt.Sprintf("order-%d", g.nextOrderID)
-	g.nextOrderID++
-	return g.orders.PlaceOrder(orderID, lines)
+	return g.orders.PlaceOrder(lines)
 }
 
 // [/gateway]

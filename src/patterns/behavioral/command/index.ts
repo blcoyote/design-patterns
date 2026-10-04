@@ -15,7 +15,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A remote-control button should turn a light on without knowing anything about Light. The same button widget is reused for lights, fans and locks. You also want every press to be undoable and recorded in a history.",
   solution:
-    "Wrap each request in a Command object with execute() and undo() methods. The Invoker (the button) only calls execute() on whichever Command it currently holds, and pushes that command onto a history stack. undo() pops the stack and reverses the effect. The invoker never needs to know what the command actually does.",
+    "Wrap each request in a Command object with execute() and undo() methods. The Invoker (the button) only calls execute() on whichever Command it currently holds, and pushes that command onto a history stack. undoLast() pops the most recent command and calls its undo() to reverse the effect. The invoker never needs to know what the command actually does.",
   analogy:
     "Think of a restaurant order slip. The waiter (invoker) doesn't cook. They hand the slip (command) to the kitchen (receiver). The slip can be queued, given to any cook, or crossed out and remade, and the waiter never needs to understand how any dish is prepared.",
   whenToUse: [

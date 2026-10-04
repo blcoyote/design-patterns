@@ -52,19 +52,25 @@ func (m Money) assertSameCurrency(other Money) error {
 // [/money]
 
 // [orderLine]
-// OrderLine is an entity: it has identity (sku + its position on the order)
-// even though its fields never change.
+// OrderLine is a value object: no identity of its own and never changes after
+// creation — two lines with the same sku, price and quantity are interchangeable.
+// Go has no read-only fields, so they are unexported (as in Money): other packages can
+// only build one with NewOrderLine and never modify it. It is compared with ==.
 type OrderLine struct {
-	Sku       string
-	UnitPrice Money
-	Quantity  int
+	sku       string
+	unitPrice Money
+	quantity  int
+}
+
+func NewOrderLine(sku string, unitPrice Money, quantity int) OrderLine {
+	return OrderLine{sku: sku, unitPrice: unitPrice, quantity: quantity}
 }
 
 func (l OrderLine) LineTotal() (Money, error) {
-	total := MoneyOf(0, l.UnitPrice.currency)
-	for i := 0; i < l.Quantity; i++ {
+	total := MoneyOf(0, l.unitPrice.currency)
+	for i := 0; i < l.quantity; i++ {
 		var err error
-		total, err = total.Add(l.UnitPrice) // same currency by construction
+		total, err = total.Add(l.unitPrice) // same currency by construction
 		if err != nil {
 			return Money{}, err
 		}
@@ -130,7 +136,7 @@ type Order struct {
 	events     []DomainEvent
 }
 
-// CreateOrder is a factory function: callers never build an Order directly.
+// CreateOrder is a factory (Evans) — a plain creation function: callers never build an Order directly.
 func CreateOrder(id, customerID string) *Order {
 	return &Order{ID: id, CustomerID: customerID, status: StatusDraft}
 }
@@ -214,6 +220,8 @@ func (r *InMemoryOrderRepository) Save(order *Order) {
 
 // [shipping]
 // Shipping bounded context: its own vocabulary. It has never heard of an "Order".
+// Money and the domain-event interface are the only types it shares with Ordering —
+// a deliberately tiny shared kernel.
 type ShipmentRequested struct {
 	ShipmentID  string
 	RecipientID string
@@ -237,9 +245,10 @@ func (ShippingService) RequestShipment(event ShipmentRequested) {
 // [/shipping]
 
 // [acl]
-// OrderingToShippingAcl is an Anti-Corruption Layer: it translates Ordering's
-// language into Shipping's, so neither bounded context has to know the other's
-// model. OrderPlaced never crosses the boundary as-is — only ShipmentRequested does.
+// OrderingToShippingAcl is an Anti-Corruption Layer, conceptually owned by the
+// downstream Shipping context: it translates upstream Ordering's language into
+// Shipping's own, so Ordering's model never leaks into Shipping. OrderPlaced never
+// crosses the boundary as-is — only ShipmentRequested does.
 type OrderingToShippingAcl struct {
 	shipping *ShippingService
 }
@@ -309,8 +318,8 @@ func main() {
 
 	draft := appService.StartOrder("order-1", "cust-42")
 	placed, err := appService.PlaceOrder(draft.ID, []OrderLine{
-		{"WIDGET", MoneyOf(19.99, "USD"), 2},
-		{"GADGET", MoneyOf(29.99, "USD"), 1},
+		NewOrderLine("WIDGET", MoneyOf(19.99, "USD"), 2),
+		NewOrderLine("GADGET", MoneyOf(29.99, "USD"), 1),
 	})
 	if err != nil {
 		panic(err)
@@ -322,7 +331,7 @@ func main() {
 	fmt.Printf("order %s placed, total: %s\n", placed.ID, total)
 
 	// Invariant in action: the aggregate refuses to grow once it has been placed.
-	if err := placed.AddLine(OrderLine{"LATE-ITEM", MoneyOf(5, "USD"), 1}); err != nil {
+	if err := placed.AddLine(NewOrderLine("LATE-ITEM", MoneyOf(5, "USD"), 1)); err != nil {
 		fmt.Printf("rejected: %s\n", err)
 	}
 }

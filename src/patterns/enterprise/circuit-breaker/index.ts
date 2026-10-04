@@ -16,7 +16,7 @@ export const pattern: PatternDefinition = {
   problem:
     "A service you depend on starts timing out. Every caller still waits out the full timeout before giving up, so threads, connections and queues fill up with requests that will almost certainly fail. One failing dependency slows its caller, then the caller's callers, until the whole system is slow or down, even the parts that have nothing to do with the original problem.",
   solution:
-    "Put a CircuitBreaker in front of every call to the dependency. While things are healthy it is Closed and simply passes calls through. Once failures reach a threshold, it trips to Open: every call is rejected immediately, and the dependency is not contacted at all. After a cooldown period it moves to Half-Open and lets exactly one trial call through. If that call succeeds, the breaker closes again. If it fails, the breaker goes straight back to Open for another cooldown.",
+    "Put a CircuitBreaker in front of every call to the dependency. While things are healthy it is Closed and simply passes calls through. Once failures reach a threshold, it trips to Open: every call is rejected immediately, and the dependency is not contacted at all. After a cooldown period it moves to Half-Open and lets a trial call through (this example allows exactly one; some libraries allow a small, configurable number). If the trial succeeds, the breaker closes again. If it fails, the breaker goes straight back to Open for another cooldown.",
   analogy:
     "Think of the circuit breaker in a house. A short circuit could keep drawing current and burn the wiring, so the breaker trips and cuts the power. A real breaker waits for a person to flip it back once the fault is fixed. The software version resets itself: after a cooldown it lets one trial call through to check whether the problem is gone.",
   whenToUse: [
@@ -27,7 +27,7 @@ export const pattern: PatternDefinition = {
   pros: [
     "Fails fast once a dependency is known to be unhealthy, instead of making every caller wait out a full timeout.",
     "Stops one dependency's failure from cascading and exhausting resources in everything upstream of it.",
-    "Recovers by itself: a single Half-Open trial call is enough to notice that the dependency is healthy again.",
+    "Recovers by itself: one or a few successful Half-Open trial calls are enough to notice that the dependency is healthy again.",
   ],
   cons: [
     "Adds another layer of state and settings (threshold, cooldown) that must be tuned for each dependency.",
@@ -35,7 +35,7 @@ export const pattern: PatternDefinition = {
     "Callers need a sensible fallback for the Open state. Failing fast is still failing, and something has to handle it.",
   ],
   realWorld: [
-    "Netflix Hystrix — the library that popularized the pattern for service-to-service calls",
+    "Netflix Hystrix: popularized the pattern for service-to-service calls; in maintenance mode since 2018 (Netflix points new work to Resilience4j)",
     "Resilience4j's CircuitBreaker module for the JVM",
     "Polly for .NET (v8 resilience pipelines via AddCircuitBreaker; v7 CircuitBreakerPolicy)",
     "Envoy and Istio outlier detection, which ejects unhealthy upstream hosts from the load-balancing pool",

@@ -90,8 +90,9 @@ record Account(string? Owner, decimal Balance)
 static class EventSourcing
 {
     // [evolve]
-    // Evolve(state, event) -> state: a pure, total function with no branch that can fail
-    // (the `_` arm only exists to satisfy the compiler; every Event subtype is handled).
+    // Evolve(state, event) -> state: a pure function that handles every Event declared in
+    // this file. C# records can't declare a closed hierarchy, so the compiler still demands
+    // the `_` arm; it is reachable only if someone adds a new Event subtype elsewhere.
     // It only ever applies an event that already happened — it never judges whether it should have.
     public static Account Evolve(Account state, Event @event) => @event switch
     {

@@ -45,6 +45,15 @@ class OrderLine {
     for (let i = 0; i < this.quantity; i++) total = total.add(this.unitPrice);
     return total;
   }
+
+  // Compared by value: `===` would compare object identity, which a value object doesn't have.
+  equals(other: OrderLine): boolean {
+    return (
+      this.sku === other.sku &&
+      this.unitPrice.equals(other.unitPrice) &&
+      this.quantity === other.quantity
+    );
+  }
 }
 // [/orderLine]
 

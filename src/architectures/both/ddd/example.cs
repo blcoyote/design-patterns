@@ -60,19 +60,9 @@ sealed record Money
 
 // [orderLine]
 // Value object: no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.
-class OrderLine
+// As a record, Equals, GetHashCode and == compare the fields by value.
+sealed record OrderLine(string Sku, Money UnitPrice, int Quantity)
 {
-    public string Sku { get; }
-    public Money UnitPrice { get; }
-    public int Quantity { get; }
-
-    public OrderLine(string sku, Money unitPrice, int quantity)
-    {
-        Sku = sku;
-        UnitPrice = unitPrice;
-        Quantity = quantity;
-    }
-
     public Money LineTotal
     {
         get

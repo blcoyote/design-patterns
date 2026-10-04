@@ -82,16 +82,17 @@ class PluginRegistry {
 // manifest, then look each entry up in a map of known factories.
 type ExporterFactory = () => Exporter;
 
-const factories: Partial<Record<string, ExporterFactory>> = {
-  "markdown-exporter": () => new MarkdownExporter(),
-  "html-exporter": () => new HtmlExporter(),
-  "json-exporter": () => new JsonExporter(),
-};
+// A Map, not a plain object: an unknown name like "toString" must not find an inherited property.
+const factories = new Map<string, ExporterFactory>([
+  ["markdown-exporter", () => new MarkdownExporter()],
+  ["html-exporter", () => new HtmlExporter()],
+  ["json-exporter", () => new JsonExporter()],
+]);
 
 class PluginLoader {
   static load(registry: PluginRegistry, moduleNames: string[]): void {
     for (const moduleName of moduleNames) {
-      const factory = factories[moduleName];
+      const factory = factories.get(moduleName);
       if (!factory) {
         throw new Error(`no factory for plugin module "${moduleName}"`);
       }

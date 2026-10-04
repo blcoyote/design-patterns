@@ -54,17 +54,23 @@ func (m Money) assertSameCurrency(other Money) error {
 // [orderLine]
 // OrderLine is a value object: no identity of its own and never changes after
 // creation — two lines with the same sku, price and quantity are interchangeable.
+// Go has no read-only fields, so they are unexported (as in Money): other packages can
+// only build one with NewOrderLine and never modify it. It is compared with ==.
 type OrderLine struct {
-	Sku       string
-	UnitPrice Money
-	Quantity  int
+	sku       string
+	unitPrice Money
+	quantity  int
+}
+
+func NewOrderLine(sku string, unitPrice Money, quantity int) OrderLine {
+	return OrderLine{sku: sku, unitPrice: unitPrice, quantity: quantity}
 }
 
 func (l OrderLine) LineTotal() (Money, error) {
-	total := MoneyOf(0, l.UnitPrice.currency)
-	for i := 0; i < l.Quantity; i++ {
+	total := MoneyOf(0, l.unitPrice.currency)
+	for i := 0; i < l.quantity; i++ {
 		var err error
-		total, err = total.Add(l.UnitPrice) // same currency by construction
+		total, err = total.Add(l.unitPrice) // same currency by construction
 		if err != nil {
 			return Money{}, err
 		}
@@ -312,8 +318,8 @@ func main() {
 
 	draft := appService.StartOrder("order-1", "cust-42")
 	placed, err := appService.PlaceOrder(draft.ID, []OrderLine{
-		{"WIDGET", MoneyOf(19.99, "USD"), 2},
-		{"GADGET", MoneyOf(29.99, "USD"), 1},
+		NewOrderLine("WIDGET", MoneyOf(19.99, "USD"), 2),
+		NewOrderLine("GADGET", MoneyOf(29.99, "USD"), 1),
 	})
 	if err != nil {
 		panic(err)
@@ -325,7 +331,7 @@ func main() {
 	fmt.Printf("order %s placed, total: %s\n", placed.ID, total)
 
 	// Invariant in action: the aggregate refuses to grow once it has been placed.
-	if err := placed.AddLine(OrderLine{"LATE-ITEM", MoneyOf(5, "USD"), 1}); err != nil {
+	if err := placed.AddLine(NewOrderLine("LATE-ITEM", MoneyOf(5, "USD"), 1)); err != nil {
 		fmt.Printf("rejected: %s\n", err)
 	}
 }

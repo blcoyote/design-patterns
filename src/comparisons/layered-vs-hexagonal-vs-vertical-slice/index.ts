@@ -43,7 +43,7 @@ export const comparison: ComparisonDefinition = {
       label: "Dependency direction",
       values: {
         layered:
-          "Downward: OrderController calls OrderService, which calls Order and OrderRepository. The rule is that a layer may call only layers below it, never above, and only the data-access layer talks to the database, but only discipline enforces it, as the controller’s handleDebugLookup shortcut to the database shows.",
+          "Downward: OrderController calls OrderService, which calls Order and OrderRepository. The rule is that a layer may call only layers below it, never above (data access still uses the domain's Order type to map rows), and only the data-access layer talks to the database, but only discipline enforces it, as the controller’s handleDebugLookup shortcut to the database shows.",
         hexagonal:
           "Inward: adapters (PostgresOrderRepository, HttpOrderController) depend on the core’s ports; the core — PlaceOrderService and Order — depends on nothing outside itself.",
         "vertical-slice":

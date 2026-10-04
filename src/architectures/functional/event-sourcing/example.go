@@ -117,16 +117,16 @@ func (s *EventStore) Load(streamID string) []Event {
 
 func (s *EventStore) Append(streamID string, expectedVersion int, events []Event) error {
 	s.mu.Lock()
+	defer s.mu.Unlock()
 	existing := append([]Event(nil), s.streams[streamID]...)
 	if len(existing) != expectedVersion {
-		s.mu.Unlock()
 		return fmt.Errorf("concurrency conflict: expected version %d, found %d", expectedVersion, len(existing))
 	}
 	s.streams[streamID] = append(existing, events...)
-	subscribers := append([]func(streamID string, event Event){}, s.subscribers...)
-	s.mu.Unlock()
+	// Notify while still holding the lock, so subscribers see events in commit order
+	// (a subscriber must therefore never append back to this store).
 	for _, event := range events {
-		for _, subscriber := range subscribers {
+		for _, subscriber := range s.subscribers {
 			subscriber(streamID, event)
 		}
 	}

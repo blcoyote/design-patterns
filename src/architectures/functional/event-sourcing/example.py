@@ -120,11 +120,11 @@ class EventStore:
                     f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
                 )
             self._streams[stream_id] = existing + events
-            subscribers = list(self._subscribers)
-        # Notify outside the lock, so a slow subscriber never blocks other writers.
-        for event in events:
-            for subscriber in subscribers:
-                subscriber(stream_id, event)
+            # Notify while still holding the lock, so subscribers see events in commit order
+            # (a subscriber must therefore never append back to this store).
+            for event in events:
+                for subscriber in self._subscribers:
+                    subscriber(stream_id, event)
 
     def subscribe(self, fn: Callable[[str, Event], None]) -> None:
         with self._lock:

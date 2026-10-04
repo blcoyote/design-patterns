@@ -124,7 +124,6 @@ class EventStore
 
     public void Append(string streamId, int expectedVersion, IReadOnlyList<Event> events)
     {
-        List<Action<string, Event>> subscribers;
         lock (_gate)
         {
             var existing = _streams.TryGetValue(streamId, out var stored) ? stored : new List<Event>();
@@ -134,13 +133,13 @@ class EventStore
             var updated = new List<Event>(existing);
             updated.AddRange(events);
             _streams[streamId] = updated;
-            subscribers = new List<Action<string, Event>>(_subscribers);
-        }
 
-        // Notify outside the lock, so a slow subscriber never blocks other writers.
-        foreach (var @event in events)
-            foreach (var subscriber in subscribers)
-                subscriber(streamId, @event);
+            // Notify while still holding the lock, so subscribers see events in commit order
+            // (a subscriber must therefore never append back to this store).
+            foreach (var @event in events)
+                foreach (var subscriber in _subscribers)
+                    subscriber(streamId, @event);
+        }
     }
 
     public void Subscribe(Action<string, Event> fn)

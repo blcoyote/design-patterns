@@ -102,8 +102,10 @@ def fold(events: list[Event]) -> Account:
 # rejected if the stream moved on in the meantime.
 class EventStore:
     def __init__(self) -> None:
-        # One lock makes the version check and the write a single atomic step, so two
-        # concurrent appends at the same expected version cannot both succeed.
+        # _append_lock serializes whole appends (check, write and notify): two appends at the
+        # same expected version cannot both succeed, and subscribers see events in commit
+        # order. _lock guards only the data, so a subscriber may still load() the stream.
+        self._append_lock = threading.Lock()
         self._lock = threading.Lock()
         self._streams: dict[str, list[Event]] = {}
         self._subscribers: list[Callable[[str, Event], None]] = []
@@ -113,17 +115,19 @@ class EventStore:
             return list(self._streams.get(stream_id, []))
 
     def append(self, stream_id: str, expected_version: int, events: list[Event]) -> None:
-        with self._lock:
-            existing = self._streams.get(stream_id, [])
-            if len(existing) != expected_version:
-                raise ValueError(
-                    f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
-                )
-            self._streams[stream_id] = existing + events
-            # Notify while still holding the lock, so subscribers see events in commit order
-            # (a subscriber must therefore never append back to this store).
+        with self._append_lock:
+            with self._lock:
+                existing = self._streams.get(stream_id, [])
+                if len(existing) != expected_version:
+                    raise ValueError(
+                        f"concurrency conflict: expected version {expected_version}, found {len(existing)}"
+                    )
+                self._streams[stream_id] = existing + events
+                subscribers = list(self._subscribers)
+            # Still inside _append_lock, so no later append can notify first. A subscriber
+            # may load(), but must never append() back to this store.
             for event in events:
-                for subscriber in self._subscribers:
+                for subscriber in subscribers:
                     subscriber(stream_id, event)
 
     def subscribe(self, fn: Callable[[str, Event], None]) -> None:

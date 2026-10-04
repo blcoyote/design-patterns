@@ -99,6 +99,9 @@ func fold(events []Event) Account {
 // concurrency -- the caller must say which version it last read, and the append is
 // rejected if the stream moved on in the meantime.
 type EventStore struct {
+	// appendMu serializes whole appends (check, write and notify), so subscribers see
+	// events in commit order; mu guards only the data, so a subscriber may still Load.
+	appendMu    sync.Mutex
 	mu          sync.Mutex
 	streams     map[string][]Event
 	subscribers []func(streamID string, event Event)
@@ -116,17 +119,23 @@ func (s *EventStore) Load(streamID string) []Event {
 }
 
 func (s *EventStore) Append(streamID string, expectedVersion int, events []Event) error {
+	s.appendMu.Lock()
+	defer s.appendMu.Unlock()
+
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	existing := append([]Event(nil), s.streams[streamID]...)
 	if len(existing) != expectedVersion {
+		s.mu.Unlock()
 		return fmt.Errorf("concurrency conflict: expected version %d, found %d", expectedVersion, len(existing))
 	}
 	s.streams[streamID] = append(existing, events...)
-	// Notify while still holding the lock, so subscribers see events in commit order
-	// (a subscriber must therefore never append back to this store).
+	subscribers := append([]func(streamID string, event Event){}, s.subscribers...)
+	s.mu.Unlock()
+
+	// Still inside appendMu, so no later append can notify first. A subscriber may Load,
+	// but must never Append back to this store.
 	for _, event := range events {
-		for _, subscriber := range s.subscribers {
+		for _, subscriber := range subscribers {
 			subscriber(streamID, event)
 		}
 	}

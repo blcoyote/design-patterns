@@ -17,8 +17,8 @@ class Order {
     readonly totalCents: number,
   ) {
     // Invariant: the write model refuses a command that would create an invalid order.
-    // `!(x > 0)` also rejects NaN, which `x <= 0` would let through.
-    if (!(totalCents > 0))
+    // A plain `<= 0` check would let NaN and Infinity through.
+    if (!Number.isFinite(totalCents) || totalCents <= 0)
       throw new Error(`order ${id}: total must be positive, got ${totalCents} cents`);
   }
 }

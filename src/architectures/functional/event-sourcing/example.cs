@@ -109,8 +109,10 @@ static class EventSourcing
 // rejected if the stream moved on in the meantime.
 class EventStore
 {
-    // One lock makes the version check and the write a single atomic step, so two
-    // concurrent appends at the same expected version cannot both succeed.
+    // _appendGate serializes whole appends (check, write and notify): two appends at the
+    // same expected version cannot both succeed, and subscribers see events in commit
+    // order. _gate guards only the data, so a subscriber may still Load the stream.
+    private readonly object _appendGate = new();
     private readonly object _gate = new();
     private readonly Dictionary<string, List<Event>> _streams = new();
     private readonly List<Action<string, Event>> _subscribers = new();
@@ -124,20 +126,25 @@ class EventStore
 
     public void Append(string streamId, int expectedVersion, IReadOnlyList<Event> events)
     {
-        lock (_gate)
+        lock (_appendGate)
         {
-            var existing = _streams.TryGetValue(streamId, out var stored) ? stored : new List<Event>();
-            if (existing.Count != expectedVersion)
-                throw new InvalidOperationException($"concurrency conflict: expected version {expectedVersion}, found {existing.Count}");
+            List<Action<string, Event>> subscribers;
+            lock (_gate)
+            {
+                var existing = _streams.TryGetValue(streamId, out var stored) ? stored : new List<Event>();
+                if (existing.Count != expectedVersion)
+                    throw new InvalidOperationException($"concurrency conflict: expected version {expectedVersion}, found {existing.Count}");
 
-            var updated = new List<Event>(existing);
-            updated.AddRange(events);
-            _streams[streamId] = updated;
+                var updated = new List<Event>(existing);
+                updated.AddRange(events);
+                _streams[streamId] = updated;
+                subscribers = new List<Action<string, Event>>(_subscribers);
+            }
 
-            // Notify while still holding the lock, so subscribers see events in commit order
-            // (a subscriber must therefore never append back to this store).
+            // Still inside _appendGate, so no later append can notify first. A subscriber
+            // may Load, but must never Append back to this store.
             foreach (var @event in events)
-                foreach (var subscriber in _subscribers)
+                foreach (var subscriber in subscribers)
                     subscriber(streamId, @event);
         }
     }

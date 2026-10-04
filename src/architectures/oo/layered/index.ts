@@ -17,7 +17,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     "Without an agreed layering, a web handler ends up calling the database directly, business rules get duplicated between the controller and a service class, and nobody can say with confidence where a given piece of logic is supposed to live. Every change risks touching everything, because there is no rule about what is allowed to call what.",
   solution:
-    "Draw a stack — Presentation → Application → Domain → Data access — and enforce a single rule: a layer may call only layers below it, never above. This is relaxed layering: the application layer uses both the domain and data access. The rule is about calls: data access never calls up into the domain, but it does use the domain's types, because it maps rows to and from Order objects (Hexagonal makes that direction of dependency the whole point). A strict variant allows calls only to the layer directly beneath. A request flows down the stack, gets handled, and the result flows back up. Swapping the database, adding caching, or reworking the UI only ever touches one layer at a time.",
+    "Draw a stack — Presentation → Application → Domain → Data access — and enforce a single rule: a layer may call only layers below it, never above. This is relaxed layering: the application layer uses both the domain and data access. One dependency doesn't fit the stack picture: to save an order, data access reads the domain's Order (its fields and its total), so in practice the domain model is shared by the application layer and persistence rather than sitting strictly between them. Hexagonal makes that direction explicit: the domain sits at the centre and persistence depends on it by design. A strict variant allows calls only to the layer directly beneath. A request flows down the stack, gets handled, and the result flows back up. Swapping the database, adding caching, or reworking the UI only ever touches one layer at a time.",
   analogy:
     "A company's reporting chain: a customer talks to the front desk, the front desk escalates to a case manager, the case manager consults a specialist, and the specialist pulls a file from records. The customer never phones records directly — every request goes down one level at a time, and the answer travels back the same way.",
   whenToUse: [
@@ -265,7 +265,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "A stack of layers, each depending on the one below",
       description:
-        "Presentation, Application, Domain and Data access are stacked top to bottom. The rule is simple: a layer may call only layers below it, never above. This example uses relaxed layering — OrderService calls both Order and OrderRepository — rather than the strict variant, where each layer may call only the one directly beneath it.",
+        "Presentation, Application, Domain and Data access are stacked top to bottom. The rule is simple: a layer may call only layers below it, never above. This example uses relaxed layering — OrderService calls both Order and OrderRepository — rather than the strict variant, where each layer may call only the one directly beneath it. The one exception is that OrderRepository reads the Order it saves, because the domain model is shared with persistence.",
       highlight: ["client", "controller", "service", "order", "repository", "database"],
     },
     {

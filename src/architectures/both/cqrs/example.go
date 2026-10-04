@@ -28,6 +28,9 @@ type Order struct {
 	Status     string
 }
 
+// NewOrder is the only constructor that checks the invariant. Go can't stop code in this
+// package from writing an Order{...} literal directly; enforcing it across packages would
+// mean unexported fields, as the DDD example does for its value objects.
 func NewOrder(id, customerID string, totalCents int) (*Order, error) {
 	// Invariant: the write model refuses a command that would create an invalid order.
 	if totalCents <= 0 {

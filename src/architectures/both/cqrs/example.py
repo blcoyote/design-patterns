@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Callable, Optional
 
@@ -16,7 +17,8 @@ class PlaceOrderCommand:
 class Order:
     def __init__(self, order_id: str, customer_id: str, total_cents: int) -> None:
         # Invariant: the write model refuses a command that would create an invalid order.
-        if total_cents <= 0:
+        # isfinite also rejects a float NaN or infinity, which `<= 0` would let through.
+        if not math.isfinite(total_cents) or total_cents <= 0:
             raise ValueError(f"order {order_id}: total must be positive, got {total_cents} cents")
         self.id = order_id
         self.customer_id = customer_id

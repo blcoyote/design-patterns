@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`min-w-0 rounded-2xl bg-slate-900/40 ring-1 ring-slate-800 ${className}`}>
+    <section className={`min-w-0 rounded-2xl bg-surface/40 ring-1 ring-line ${className}`}>
       {children}
     </section>
   );
@@ -10,7 +10,7 @@ export function Panel({ children, className = "" }: { children: ReactNode; class
 
 export function PanelHeading({ children }: { children: ReactNode }) {
   return (
-    <h2 className="text-xs font-semibold tracking-wider text-slate-400 uppercase">{children}</h2>
+    <h2 className="text-xs font-semibold tracking-wider text-fg-muted uppercase">{children}</h2>
   );
 }
 
@@ -26,7 +26,7 @@ export function Section({
   return (
     <Panel className={`p-4 sm:p-6 ${className}`}>
       <PanelHeading>{title}</PanelHeading>
-      <div className="mt-3 leading-relaxed wrap-anywhere text-slate-300">{children}</div>
+      <div className="mt-3 leading-relaxed wrap-anywhere text-fg-soft">{children}</div>
     </Panel>
   );
 }
@@ -34,7 +34,7 @@ export function Section({
 export function BulletList({
   items,
   marker = "•",
-  markerClass = "text-slate-500",
+  markerClass = "text-fg-subtle",
 }: {
   items: string[];
   marker?: string;
@@ -58,10 +58,10 @@ export function ProsCons({ pros, cons }: { pros: string[]; cons: string[] }) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <Section title="Pros">
-        <BulletList items={pros} marker="+" markerClass="text-emerald-400" />
+        <BulletList items={pros} marker="+" markerClass="text-ok" />
       </Section>
       <Section title="Cons">
-        <BulletList items={cons} marker="−" markerClass="text-rose-400" />
+        <BulletList items={cons} marker="−" markerClass="text-negative" />
       </Section>
     </div>
   );

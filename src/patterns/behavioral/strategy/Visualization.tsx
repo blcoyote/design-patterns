@@ -119,7 +119,7 @@ export function StrategyVisualization({
       />
       <motion.circle
         r={5}
-        fill="#ffffff"
+        fill="var(--color-diagram-packet)"
         pointerEvents="none"
         initial={false}
         animate={{ cx: connector.start.x, cy: connector.start.y }}
@@ -150,7 +150,7 @@ export function StrategyVisualization({
               <text
                 y={5}
                 textAnchor="middle"
-                className="fill-slate-950 text-[13px] font-bold font-mono select-none"
+                className="fill-fg-on-accent text-[13px] font-bold font-mono select-none"
               >
                 {result}
               </text>
@@ -178,8 +178,8 @@ export function StrategyVisualization({
         overlay={overlay}
         ariaLabel={`${pattern.name} diagram`}
       />
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         {STRATEGY_IDS.map((id) => {
@@ -194,10 +194,10 @@ export function StrategyVisualization({
                 e.stopPropagation();
                 pick(id);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isActive
-                  ? "text-slate-950 ring-transparent"
-                  : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                  ? "text-fg-on-accent ring-transparent"
+                  : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
               }`}
               style={isActive ? { backgroundColor: color } : undefined}
             >

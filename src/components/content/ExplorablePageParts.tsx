@@ -24,8 +24,8 @@ export function ExplorableHeader({
         <span className={`size-1.5 rounded-full ${dotClass}`} />
         {label} {kind}
       </span>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">{name}</h1>
-      <p className="mt-4 text-lg leading-relaxed text-slate-300">{intent}</p>
+      <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-5xl">{name}</h1>
+      <p className="mt-4 text-lg leading-relaxed text-fg-soft">{intent}</p>
     </header>
   );
 }
@@ -82,13 +82,13 @@ export function ExplorableNavigation({
 }) {
   return (
     <nav
-      className="flex justify-between gap-4 border-t border-slate-800 pt-6"
+      className="flex justify-between gap-4 border-t border-line pt-6"
       aria-label={`${area === "patterns" ? "Pattern" : "Architecture"} navigation`}
     >
       {previous ? (
         <Link to={`/${area}/${previous.slug}`} className="group text-left">
-          <span className="text-xs text-slate-500">← Previous</span>
-          <span className="block font-semibold text-slate-200 group-hover:text-white">
+          <span className="text-xs text-fg-subtle">← Previous</span>
+          <span className="block font-semibold text-fg-body group-hover:text-fg">
             {previous.name}
           </span>
         </Link>
@@ -97,10 +97,8 @@ export function ExplorableNavigation({
       )}
       {next && (
         <Link to={`/${area}/${next.slug}`} className="group text-right">
-          <span className="text-xs text-slate-500">Next →</span>
-          <span className="block font-semibold text-slate-200 group-hover:text-white">
-            {next.name}
-          </span>
+          <span className="text-xs text-fg-subtle">Next →</span>
+          <span className="block font-semibold text-fg-body group-hover:text-fg">{next.name}</span>
         </Link>
       )}
     </nav>

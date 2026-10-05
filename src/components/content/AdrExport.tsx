@@ -66,23 +66,23 @@ export function AdrExport({
   return (
     <Panel className="p-6">
       <PanelHeading>Export as an ADR</PanelHeading>
-      <p className="mt-3 leading-relaxed text-slate-300">
+      <p className="mt-3 leading-relaxed text-fg-soft">
         Turn this comparison into an architecture decision record (MADR format, with YAML
-        frontmatter) for your own project's <code className="text-slate-400">docs/decisions/</code>.
+        frontmatter) for your own project's <code className="text-fg-muted">docs/decisions/</code>.
       </p>
 
       <fieldset className="mt-4">
-        <legend className="text-xs font-medium tracking-wider text-slate-500 uppercase">
+        <legend className="text-xs font-medium tracking-wider text-fg-subtle uppercase">
           Chosen option
         </legend>
         <div className="mt-2 flex flex-wrap gap-2" role="radiogroup" aria-label="Chosen option">
           {subjects.map((s) => (
             <label
               key={s.slug}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-white ${
+              className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-focus ${
                 chosen === s.slug
-                  ? "bg-slate-800 text-white ring-slate-600"
-                  : "text-slate-400 ring-slate-800 hover:text-white"
+                  ? "bg-surface-raised text-fg ring-line-bold"
+                  : "text-fg-muted ring-line hover:text-fg"
               }`}
             >
               <input
@@ -97,10 +97,10 @@ export function AdrExport({
             </label>
           ))}
           <label
-            className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-white ${
+            className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-focus ${
               chosen === NO_PATTERN
-                ? "bg-slate-800 text-white ring-slate-600"
-                : "text-slate-400 ring-slate-800 hover:text-white"
+                ? "bg-surface-raised text-fg ring-line-bold"
+                : "text-fg-muted ring-line hover:text-fg"
             }`}
           >
             <input
@@ -121,28 +121,28 @@ export function AdrExport({
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-200 ring-1 ring-slate-700 hover:bg-slate-900"
+          className="rounded-lg px-3 py-1.5 text-sm font-medium text-fg-body ring-1 ring-line-strong hover:bg-surface"
         >
           {open ? "Hide preview" : "Show preview"}
         </button>
         <button
           type="button"
           onClick={copy}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-200 ring-1 ring-slate-700 hover:bg-slate-900"
+          className="rounded-lg px-3 py-1.5 text-sm font-medium text-fg-body ring-1 ring-line-strong hover:bg-surface"
         >
           {copied ? "Copied ✓" : "Copy"}
         </button>
         <button
           type="button"
           onClick={download}
-          className="rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-slate-950 hover:bg-slate-200"
+          className="rounded-lg bg-inverse px-3 py-1.5 text-sm font-semibold text-on-inverse hover:bg-inverse-hover"
         >
           Download {filename}
         </button>
       </div>
 
       {open && (
-        <pre className="mt-4 max-h-128 overflow-auto rounded-xl bg-[#011627] p-4 text-xs leading-relaxed whitespace-pre-wrap text-slate-300 ring-1 ring-slate-800">
+        <pre className="mt-4 max-h-128 overflow-auto rounded-xl bg-code-bg p-4 text-xs leading-relaxed whitespace-pre-wrap text-fg-soft ring-1 ring-line">
           {adr}
         </pre>
       )}

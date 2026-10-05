@@ -67,7 +67,7 @@ export function Diagram({
       <defs>
         <EdgeMarkers color={color} />
         <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" fill="#1e293b" />
+          <circle cx="1" cy="1" r="1" fill="var(--color-diagram-grid)" />
         </pattern>
       </defs>
       <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />

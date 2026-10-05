@@ -34,13 +34,13 @@ export function LayeredVisualization({
             y={layer.y}
             width={800}
             height={LAYER_HEIGHT}
-            fill={i % 2 === 0 ? "#0f172a" : "transparent"}
+            fill={i % 2 === 0 ? "var(--color-diagram-node)" : "transparent"}
             opacity={0.5}
           />
           <text
             x={16}
             y={layer.y + 18}
-            className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+            className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
           >
             {layer.label}
           </text>
@@ -50,12 +50,12 @@ export function LayeredVisualization({
       <text
         x={16}
         y={INFRA_Y + 18}
-        className="fill-slate-700 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-line-strong text-[11px] font-mono tracking-wider uppercase select-none"
       >
         External infrastructure
       </text>
       {[...LAYERS.map((l) => l.y), INFRA_Y].map((y) => (
-        <line key={y} x1={0} y1={y} x2={800} y2={y} stroke="#1e293b" strokeWidth={1} />
+        <line key={y} x1={0} y1={y} x2={800} y2={y} stroke="var(--color-line)" strokeWidth={1} />
       ))}
     </g>
   );

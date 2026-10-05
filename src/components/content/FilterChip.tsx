@@ -16,8 +16,8 @@ export function FilterChip({
       aria-pressed={active}
       className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm ring-1 transition ${
         active
-          ? "bg-slate-800 text-white ring-slate-600"
-          : "text-slate-400 ring-slate-800 hover:text-white"
+          ? "bg-surface-raised text-fg ring-line-bold"
+          : "text-fg-muted ring-line hover:text-fg"
       }`}
     >
       {children}

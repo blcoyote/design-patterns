@@ -7,6 +7,7 @@ import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
 import type { EdgeGeometry } from "@/lib/geometry";
 import type { Participant, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Composite drawn as a literal tree: root/ branches into docs/ and readme.md,
@@ -90,7 +91,7 @@ function TreeNode({
       tabIndex={0}
       aria-label={`${p.label} — ${p.role}`}
       aria-pressed={selected}
-      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-white"
+      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
       onClick={(e) => {
         e.stopPropagation();
         select();
@@ -130,17 +131,19 @@ function TreeNode({
         width={w}
         height={h}
         rx={12}
-        fill={active ? `${color}22` : "#0f172a"}
-        stroke={selected ? "#ffffff" : active ? color : "#334155"}
+        fill={active ? alpha(color, 13) : "var(--color-diagram-node)"}
+        stroke={
+          selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-node-stroke)"
+        }
         strokeWidth={selected ? 2.5 : 1.5}
         strokeDasharray={isAbstract ? "6 4" : undefined}
       />
       {icon && (
         <g transform={`translate(${-w / 2 + 22} ${h / 2 - 18})`}>
           {icon === "folder" ? (
-            <FolderGlyph color={active || selected ? color : "#64748b"} />
+            <FolderGlyph color={active || selected ? color : "var(--color-fg-subtle)"} />
           ) : (
-            <FileGlyph color={active || selected ? color : "#64748b"} />
+            <FileGlyph color={active || selected ? color : "var(--color-fg-subtle)"} />
           )}
         </g>
       )}
@@ -148,7 +151,7 @@ function TreeNode({
         <text
           y={-h / 2 + 15}
           textAnchor="middle"
-          className="fill-slate-400 text-[10px] font-mono select-none"
+          className="fill-fg-muted text-[10px] font-mono select-none"
         >
           {stereotype}
         </text>
@@ -157,14 +160,14 @@ function TreeNode({
         y={stereotype ? 6 : -2}
         textAnchor="middle"
         className={`text-[13px] font-semibold select-none ${isAbstract ? "italic" : ""}`}
-        fill={active || selected ? "#f8fafc" : "#e2e8f0"}
+        fill={active || selected ? "var(--color-diagram-text-active)" : "var(--color-diagram-text)"}
       >
         {p.label}
       </text>
       <text
         y={stereotype ? 22 : 16}
         textAnchor="middle"
-        className="fill-slate-400 text-[10px] select-none"
+        className="fill-fg-muted text-[10px] select-none"
       >
         {p.role}
       </text>
@@ -189,7 +192,7 @@ function TreeNode({
             <text
               y={4}
               textAnchor="middle"
-              className="fill-slate-950 text-[11px] font-semibold font-mono select-none"
+              className="fill-fg-on-accent text-[11px] font-semibold font-mono select-none"
             >
               {note}
             </text>
@@ -249,7 +252,7 @@ export function CompositeVisualization({
       <defs>
         <EdgeMarkers color={color} />
         <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" fill="#1e293b" />
+          <circle cx="1" cy="1" r="1" fill="var(--color-diagram-grid)" />
         </pattern>
       </defs>
       <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />

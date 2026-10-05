@@ -79,8 +79,8 @@ export function ArchitecturePage() {
         <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {architecture.concepts.map((c) => (
             <div key={c.term}>
-              <dt className="font-semibold text-white">{c.term}</dt>
-              <dd className="mt-0.5 text-sm leading-relaxed text-slate-400">{c.description}</dd>
+              <dt className="font-semibold text-fg">{c.term}</dt>
+              <dd className="mt-0.5 text-sm leading-relaxed text-fg-muted">{c.description}</dd>
             </div>
           ))}
         </dl>
@@ -91,8 +91,8 @@ export function ArchitecturePage() {
           <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {architecture.variants.map((v) => (
               <div key={v.name}>
-                <dt className="font-semibold text-white">{v.name}</dt>
-                <dd className="mt-0.5 text-sm leading-relaxed text-slate-400">{v.description}</dd>
+                <dt className="font-semibold text-fg">{v.name}</dt>
+                <dd className="mt-0.5 text-sm leading-relaxed text-fg-muted">{v.description}</dd>
               </div>
             ))}
           </dl>

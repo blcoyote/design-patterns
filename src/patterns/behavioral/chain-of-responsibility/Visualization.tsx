@@ -205,12 +205,12 @@ export function ChainOfResponsibilityVisualization({
             width={108}
             height={28}
             rx={14}
-            fill={status.ok ? color : "#f87171"}
+            fill={status.ok ? color : "var(--color-danger)"}
           />
           <text
             y={5}
             textAnchor="middle"
-            className="fill-slate-950 text-[12px] font-bold font-mono select-none"
+            className="fill-fg-on-accent text-[12px] font-bold font-mono select-none"
           >
             {status.code} {status.text}
           </text>
@@ -236,8 +236,8 @@ export function ChainOfResponsibilityVisualization({
         overlay={overlay}
         ariaLabel={`${pattern.name} diagram`}
       />
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         {SCENARIO_IDS.map((id) => {
@@ -252,12 +252,16 @@ export function ChainOfResponsibilityVisualization({
                 e.stopPropagation();
                 pick(id);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isActive
-                  ? "text-slate-950 ring-transparent"
-                  : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                  ? "text-fg-on-accent ring-transparent"
+                  : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
               }`}
-              style={isActive ? { backgroundColor: STATUS[id].ok ? color : "#f87171" } : undefined}
+              style={
+                isActive
+                  ? { backgroundColor: STATUS[id].ok ? color : "var(--color-danger)" }
+                  : undefined
+              }
             >
               {LABELS[id]}
             </button>

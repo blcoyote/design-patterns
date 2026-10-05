@@ -36,7 +36,7 @@ export function FunctionalCoreVisualization({
         cy={CENTER.y}
         r={SHELL_RADIUS}
         fill="none"
-        stroke="#1e293b"
+        stroke="var(--color-line)"
         strokeWidth={2}
         strokeDasharray="6 6"
       />
@@ -44,16 +44,16 @@ export function FunctionalCoreVisualization({
         cx={CENTER.x}
         cy={CENTER.y}
         r={CORE_RADIUS}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         opacity={0.65}
-        stroke="#1e293b"
+        stroke="var(--color-line)"
         strokeWidth={2}
       />
       <text
         x={CENTER.x}
         y={CENTER.y - SHELL_RADIUS + 20}
         textAnchor="middle"
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         Imperative shell
       </text>
@@ -61,7 +61,7 @@ export function FunctionalCoreVisualization({
         x={CENTER.x}
         y={CENTER.y + CORE_RADIUS - 14}
         textAnchor="middle"
-        className="fill-slate-600 text-[10px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[10px] font-mono tracking-wider uppercase select-none"
       >
         pure core
       </text>

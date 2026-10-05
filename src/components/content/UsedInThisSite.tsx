@@ -15,8 +15,8 @@ export function UsedInThisSite({ usages }: Props) {
   if (usages.length === 0) return null;
 
   return (
-    <section className="rounded-2xl bg-slate-900/60 p-6 ring-1 ring-inset ring-emerald-500/20">
-      <h2 className="flex items-center gap-2 text-xs font-semibold tracking-wider text-emerald-300 uppercase">
+    <section className="rounded-2xl bg-surface/60 p-6 ring-1 ring-inset ring-used/20">
+      <h2 className="flex items-center gap-2 text-xs font-semibold tracking-wider text-used-fg uppercase">
         <UsedIcon className="size-3.5" />
         Used in this site
       </h2>
@@ -27,11 +27,11 @@ export function UsedInThisSite({ usages }: Props) {
               href={usage.githubUrl}
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-sm break-all text-emerald-300 hover:underline"
+              className="font-mono text-sm break-all text-used-fg hover:underline"
             >
               {usage.file}:{usage.line}
             </a>
-            <p className="mt-1 text-sm leading-relaxed text-slate-300">{usage.explanation}</p>
+            <p className="mt-1 text-sm leading-relaxed text-fg-soft">{usage.explanation}</p>
             <CodeBlock
               className="mt-2"
               sources={[
@@ -39,7 +39,7 @@ export function UsedInThisSite({ usages }: Props) {
               ]}
               active="typescript"
               onActiveChange={() => {}}
-              color="#34d399"
+              color="var(--color-used)"
             />
           </li>
         ))}
@@ -66,7 +66,7 @@ export function UsedBadge({ className = "" }: { className?: string }) {
       role="img"
       aria-label="Used in this site"
       title="Used in this site"
-      className={`inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300 ${className}`}
+      className={`inline-flex size-4 shrink-0 items-center justify-center rounded-full bg-used/10 text-used-fg ${className}`}
     >
       <UsedIcon className="size-2.5" />
     </span>

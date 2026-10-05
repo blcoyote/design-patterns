@@ -134,16 +134,16 @@ export function BuilderVisualization({
                 width={CARD.width}
                 height={CARD.height}
                 rx={12}
-                fill="#0f172a"
+                fill="var(--color-diagram-node)"
                 initial={false}
-                animate={{ stroke: isBuildStep ? color : "#334155" }}
+                animate={{ stroke: isBuildStep ? color : "var(--color-diagram-node-stroke)" }}
                 strokeWidth={isBuildStep ? 2.5 : 1.5}
                 strokeDasharray={isBuildStep ? undefined : "5 4"}
               />
               <text
                 y={-CARD.height / 2 + 18}
                 textAnchor="middle"
-                className="fill-slate-400 text-[10px] font-mono select-none"
+                className="fill-fg-muted text-[10px] font-mono select-none"
               >
                 {blueprintLabel}
               </text>
@@ -168,7 +168,7 @@ export function BuilderVisualization({
                     <path
                       d={`M ${CARD.width / 2 - 23} ${-CARD.height / 2 + 16} l 4 4 l 7 -8`}
                       fill="none"
-                      stroke="#020617"
+                      stroke="var(--color-fg-on-accent)"
                       strokeWidth={2}
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -182,14 +182,14 @@ export function BuilderVisualization({
                 <text
                   x={-CARD.width / 2 + 14}
                   textAnchor="start"
-                  className="fill-slate-500 text-[10px] font-mono select-none"
+                  className="fill-fg-subtle text-[10px] font-mono select-none"
                 >
                   url
                 </text>
                 <text
                   x={CARD.width / 2 - 14}
                   textAnchor="end"
-                  className="fill-slate-200 text-[11px] font-mono select-none"
+                  className="fill-fg-body text-[11px] font-mono select-none"
                 >
                   {fields.url}
                 </text>
@@ -199,7 +199,7 @@ export function BuilderVisualization({
                 x2={CARD.width / 2 - 10}
                 y1={-CARD.height / 2 + 50}
                 y2={-CARD.height / 2 + 50}
-                stroke="#1e293b"
+                stroke="var(--color-line)"
               />
 
               {ROW_LABELS.map((row, i) => {
@@ -210,7 +210,7 @@ export function BuilderVisualization({
                     <text
                       x={-CARD.width / 2 + 14}
                       textAnchor="start"
-                      className="fill-slate-500 text-[10px] font-mono select-none"
+                      className="fill-fg-subtle text-[10px] font-mono select-none"
                     >
                       {row.label}
                     </text>
@@ -244,7 +244,7 @@ export function BuilderVisualization({
                           height={14}
                           rx={4}
                           fill="none"
-                          stroke="#334155"
+                          stroke="var(--color-diagram-node-stroke)"
                           strokeDasharray="3 3"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
@@ -259,7 +259,7 @@ export function BuilderVisualization({
               <text
                 y={CARD.height / 2 - 12}
                 textAnchor="middle"
-                className="fill-slate-500 text-[10px] font-mono select-none"
+                className="fill-fg-subtle text-[10px] font-mono select-none"
               >
                 parts: {filledCount}/4
               </text>

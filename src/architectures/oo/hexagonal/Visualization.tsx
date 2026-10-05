@@ -103,9 +103,9 @@ export function HexagonalVisualization({
     <g pointerEvents="none">
       <polygon
         points={hexagonPoints(HEX_CENTER.x, HEX_CENTER.y, HEX_RADIUS)}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#334155"
+        stroke="var(--color-diagram-node-stroke)"
         strokeWidth={1.5}
         strokeDasharray="3 5"
       />
@@ -113,14 +113,14 @@ export function HexagonalVisualization({
         x={HEX_CENTER.x}
         y={HEX_CENTER.y - HEX_RADIUS + 24}
         textAnchor="middle"
-        className="fill-slate-500 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[11px] font-mono tracking-wider uppercase select-none"
       >
         Core (application + domain)
       </text>
       <text
         x={40}
         y={24}
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         ← Driving adapters
       </text>
@@ -128,7 +128,7 @@ export function HexagonalVisualization({
         x={760}
         y={24}
         textAnchor="end"
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         Driven adapters →
       </text>
@@ -151,7 +151,7 @@ export function HexagonalVisualization({
       />
       <motion.circle
         r={5}
-        fill="#ffffff"
+        fill="var(--color-diagram-packet)"
         initial={false}
         animate={{ cx: connector.start.x, cy: connector.start.y }}
         transition={springTransition}
@@ -184,8 +184,8 @@ export function HexagonalVisualization({
         overlay={overlay}
         ariaLabel={`${pattern.name} diagram`}
       />
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Plug into OrderRepository
         </span>
         {[
@@ -203,10 +203,10 @@ export function HexagonalVisualization({
                 e.stopPropagation();
                 pick(id);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isActive
-                  ? "text-slate-950 ring-transparent"
-                  : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                  ? "text-fg-on-accent ring-transparent"
+                  : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
               }`}
               style={isActive ? { backgroundColor: color } : undefined}
             >

@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import type { VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Event Sourcing keeps the generic participant diagram on top (Client / decide / EventStore /
@@ -82,17 +83,17 @@ export function EventSourcingVisualization({
         ariaLabel={`${pattern.name} diagram`}
       />
 
-      <div className="border-t border-slate-800 p-3">
+      <div className="border-t border-line p-3">
         <svg
           viewBox="0 0 760 190"
-          className="h-auto w-full select-none rounded-lg bg-slate-950/40 ring-1 ring-slate-800"
+          className="h-auto w-full select-none rounded-lg bg-canvas/40 ring-1 ring-line"
           role="group"
           aria-label={`Event tape holding ${events.length} event${events.length === 1 ? "" : "s"}, balance ${balance}`}
         >
           <text
             x={TAPE_START_X}
             y={30}
-            className="fill-slate-500 text-[10px] font-mono uppercase tracking-wider select-none"
+            className="fill-fg-subtle text-[10px] font-mono uppercase tracking-wider select-none"
           >
             EventStore stream — append-only
           </text>
@@ -130,21 +131,21 @@ export function EventSourcingVisualization({
                       width={BLOCK_W}
                       height={BLOCK_H}
                       rx={8}
-                      fill={isNew ? `${color}22` : "#0f172a"}
-                      stroke={isNew ? color : "#475569"}
+                      fill={isNew ? alpha(color, 13) : "var(--color-diagram-node)"}
+                      stroke={isNew ? color : "var(--color-line-bold)"}
                       strokeWidth={isNew ? 2.5 : 1.5}
                     />
                     <text
                       y={-4}
                       textAnchor="middle"
-                      className="fill-slate-100 text-[11px] font-mono select-none"
+                      className="fill-fg-strong text-[11px] font-mono select-none"
                     >
                       {label}
                     </text>
                     <text
                       y={13}
                       textAnchor="middle"
-                      className="fill-slate-500 text-[9px] font-mono select-none"
+                      className="fill-fg-subtle text-[9px] font-mono select-none"
                     >
                       v{i + 1}
                     </text>
@@ -162,13 +163,13 @@ export function EventSourcingVisualization({
                 height={BLOCK_H}
                 rx={8}
                 fill="none"
-                stroke="#334155"
+                stroke="var(--color-diagram-node-stroke)"
                 strokeDasharray="4 4"
               />
               <text
                 y={5}
                 textAnchor="middle"
-                className="fill-slate-600 text-[10px] font-mono select-none"
+                className="fill-fg-faint text-[10px] font-mono select-none"
               >
                 next…
               </text>
@@ -188,7 +189,7 @@ export function EventSourcingVisualization({
             <text
               y={-16}
               textAnchor="middle"
-              className="fill-slate-300 text-[9px] font-mono select-none"
+              className="fill-fg-soft text-[9px] font-mono select-none"
             >
               fold →
             </text>
@@ -224,7 +225,7 @@ export function EventSourcingVisualization({
                 <text
                   y={5}
                   textAnchor="middle"
-                  className="fill-slate-300 text-[10px] font-mono select-none"
+                  className="fill-fg-soft text-[10px] font-mono select-none"
                 >
                   {APPENDED_EVENT} (pending)
                 </text>
@@ -253,7 +254,7 @@ export function EventSourcingVisualization({
                   width={116}
                   height={28}
                   rx={14}
-                  fill={selectedId === "snapshot" ? `${color}33` : "#0f172a"}
+                  fill={selectedId === "snapshot" ? alpha(color, 20) : "var(--color-diagram-node)"}
                   stroke={color}
                   strokeWidth={1.5}
                 />
@@ -285,21 +286,23 @@ export function EventSourcingVisualization({
                 width={180}
                 height={34}
                 rx={8}
-                fill="#0f172a"
-                stroke={isReplaying || selectedId === "fold" ? color : "#334155"}
+                fill="var(--color-diagram-node)"
+                stroke={
+                  isReplaying || selectedId === "fold" ? color : "var(--color-diagram-node-stroke)"
+                }
                 strokeWidth={isReplaying || selectedId === "fold" ? 2.5 : 1.5}
               />
               <text
                 y={1}
                 textAnchor="middle"
-                className="fill-slate-500 text-[9px] font-mono uppercase tracking-wider select-none"
+                className="fill-fg-subtle text-[9px] font-mono uppercase tracking-wider select-none"
               >
                 state (folded)
               </text>
               <text
                 y={13}
                 textAnchor="middle"
-                className="fill-slate-100 text-[11px] font-mono select-none"
+                className="fill-fg-strong text-[11px] font-mono select-none"
               >
                 balance: {balance}
               </text>
@@ -320,21 +323,21 @@ export function EventSourcingVisualization({
                 width={180}
                 height={34}
                 rx={8}
-                fill="#0f172a"
-                stroke={selectedId === "projection" ? color : "#334155"}
+                fill="var(--color-diagram-node)"
+                stroke={selectedId === "projection" ? color : "var(--color-diagram-node-stroke)"}
                 strokeWidth={selectedId === "projection" ? 2.5 : 1.5}
               />
               <text
                 y={1}
                 textAnchor="middle"
-                className="fill-slate-500 text-[9px] font-mono uppercase tracking-wider select-none"
+                className="fill-fg-subtle text-[9px] font-mono uppercase tracking-wider select-none"
               >
                 projection
               </text>
               <text
                 y={13}
                 textAnchor="middle"
-                className="fill-slate-100 text-[11px] font-mono select-none"
+                className="fill-fg-strong text-[11px] font-mono select-none"
               >
                 withdrawals: {projectionCount}
               </text>

@@ -4,6 +4,7 @@ import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween } from "@/lib/geometry";
 import type { Step, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Null Object keeps the generic Logger/ReportGenerator/NullLogger/ConsoleLogger
@@ -164,10 +165,10 @@ const CENTER_Y = 86;
 const XS = [76, 234, 380, 526, 682];
 
 const TONE_STROKE: Record<PathNode["tone"], string> = {
-  neutral: "#334155",
-  warn: "#f59e0b",
-  danger: "#f87171",
-  success: "#34d399",
+  neutral: "var(--color-diagram-node-stroke)",
+  warn: "var(--color-warn-strong)",
+  danger: "var(--color-danger)",
+  success: "var(--color-ok)",
 };
 
 function PathShape({
@@ -181,7 +182,11 @@ function PathShape({
   selected: boolean;
   dim: boolean;
 }) {
-  const stroke = selected ? "#ffffff" : node.tone === "neutral" ? color : TONE_STROKE[node.tone];
+  const stroke = selected
+    ? "var(--color-selected)"
+    : node.tone === "neutral"
+      ? color
+      : TONE_STROKE[node.tone];
   const w = WIDTH_BY_KIND[node.kind];
 
   if (node.kind === "diamond") {
@@ -191,7 +196,7 @@ function PathShape({
       <>
         <polygon
           points={points}
-          fill="#0f172a"
+          fill="var(--color-diagram-node)"
           stroke={stroke}
           strokeWidth={selected ? 2.5 : 1.5}
           opacity={dim ? 0.4 : 1}
@@ -199,14 +204,14 @@ function PathShape({
         <text
           y={-4}
           textAnchor="middle"
-          className="fill-slate-100 text-[11px] font-mono font-semibold select-none"
+          className="fill-fg-strong text-[11px] font-mono font-semibold select-none"
         >
           {node.label}
         </text>
         <text
           y={11}
           textAnchor="middle"
-          className="fill-slate-400 text-[10px] font-mono select-none"
+          className="fill-fg-muted text-[10px] font-mono select-none"
         >
           {node.sub}
         </text>
@@ -227,22 +232,22 @@ function PathShape({
       <>
         <polygon
           points={pts}
-          fill="#450a0a"
-          stroke={selected ? "#ffffff" : "#f87171"}
+          fill="var(--color-danger-surface)"
+          stroke={selected ? "var(--color-selected)" : "var(--color-danger)"}
           strokeWidth={selected ? 2.5 : 1.5}
           opacity={dim ? 0.4 : 1}
         />
         <text
           y={-4}
           textAnchor="middle"
-          className="fill-red-200 text-[11px] font-bold font-mono select-none"
+          className="fill-danger-fg-soft text-[11px] font-bold font-mono select-none"
         >
           {node.label}
         </text>
         <text
           y={11}
           textAnchor="middle"
-          className="fill-red-300/80 text-[9px] font-mono select-none"
+          className="fill-danger-fg/80 text-[9px] font-mono select-none"
         >
           {node.sub}
         </text>
@@ -259,7 +264,7 @@ function PathShape({
         width={w}
         height={h}
         rx={10}
-        fill={node.kind === "end" ? `${color}1a` : "#0f172a"}
+        fill={node.kind === "end" ? alpha(color, 10) : "var(--color-diagram-node)"}
         stroke={stroke}
         strokeWidth={selected ? 2.5 : node.kind === "end" ? 2 : 1.5}
         opacity={dim ? 0.4 : 1}
@@ -267,7 +272,7 @@ function PathShape({
       <text
         y={node.sub ? -3 : 4}
         textAnchor="middle"
-        className="fill-slate-100 text-[12px] font-semibold font-mono select-none"
+        className="fill-fg-strong text-[12px] font-semibold font-mono select-none"
       >
         {node.label}
       </text>
@@ -275,7 +280,7 @@ function PathShape({
         <text
           y={13}
           textAnchor="middle"
-          className="fill-slate-400 text-[10px] font-mono select-none"
+          className="fill-fg-muted text-[10px] font-mono select-none"
         >
           {node.sub}
         </text>
@@ -364,7 +369,7 @@ export function NullObjectVisualization({
       />
       <motion.circle
         r={5}
-        fill="#ffffff"
+        fill="var(--color-diagram-packet)"
         initial={false}
         animate={{ cx: connector.start.x, cy: connector.start.y }}
         transition={springTransition}
@@ -399,9 +404,9 @@ export function NullObjectVisualization({
         ariaLabel={`${pattern.name} diagram`}
       />
 
-      <div className="border-t border-slate-800 p-3">
+      <div className="border-t border-line p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
             Call path —{" "}
             {mode === "before"
               ? "logger: null"
@@ -410,7 +415,7 @@ export function NullObjectVisualization({
         </div>
         <svg
           viewBox="0 0 760 170"
-          className="h-auto w-full select-none rounded-lg bg-slate-950/40 ring-1 ring-slate-800"
+          className="h-auto w-full select-none rounded-lg bg-canvas/40 ring-1 ring-line"
         >
           <defs>
             <marker
@@ -422,7 +427,7 @@ export function NullObjectVisualization({
               markerHeight="7"
               orient="auto-start-reverse"
             >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--color-fg-subtle)" />
             </marker>
           </defs>
           {XS.slice(0, -1).map((x, i) => {
@@ -436,7 +441,7 @@ export function NullObjectVisualization({
                 y1={CENTER_Y}
                 x2={endX}
                 y2={CENTER_Y}
-                stroke="#64748b"
+                stroke="var(--color-fg-subtle)"
                 strokeWidth={1.5}
                 markerEnd="url(#nullobj-arrow)"
               />
@@ -448,7 +453,7 @@ export function NullObjectVisualization({
               <g key={`skip-${i}`}>
                 <path
                   d={`M ${XS[i]} ${CENTER_Y + 30} L ${XS[i]} ${CENTER_Y + 50}`}
-                  stroke="#475569"
+                  stroke="var(--color-diagram-edge)"
                   strokeWidth={1.5}
                   strokeDasharray="3 3"
                   markerEnd="url(#nullobj-arrow)"
@@ -457,7 +462,7 @@ export function NullObjectVisualization({
                   x={XS[i]}
                   y={CENTER_Y + 64}
                   textAnchor="middle"
-                  className="fill-slate-500 text-[9px] font-mono select-none"
+                  className="fill-fg-subtle text-[9px] font-mono select-none"
                 >
                   null → skip
                 </text>
@@ -507,7 +512,7 @@ export function NullObjectVisualization({
         </svg>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+          <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
             Try it
           </span>
           {(["before", "after"] as const).map((m) => {
@@ -524,13 +529,15 @@ export function NullObjectVisualization({
                   e.stopPropagation();
                   pick(m);
                 }}
-                className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                   isActive
-                    ? "text-slate-950 ring-transparent"
-                    : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                    ? "text-fg-on-accent ring-transparent"
+                    : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
                 }`}
                 style={
-                  isActive ? { backgroundColor: m === "before" ? "#f87171" : color } : undefined
+                  isActive
+                    ? { backgroundColor: m === "before" ? "var(--color-danger)" : color }
+                    : undefined
                 }
               >
                 {m}

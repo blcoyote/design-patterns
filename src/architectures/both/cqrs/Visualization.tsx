@@ -21,19 +21,26 @@ export function CqrsVisualization({
 }: VisualizationProps) {
   const underlay = (
     <g pointerEvents="none">
-      <rect x={0} y={0} width={800} height={WRITE_HEIGHT} fill="#0f172a" opacity={0.5} />
+      <rect
+        x={0}
+        y={0}
+        width={800}
+        height={WRITE_HEIGHT}
+        fill="var(--color-diagram-node)"
+        opacity={0.5}
+      />
       <rect x={0} y={READ_Y} width={800} height={READ_HEIGHT} fill="transparent" />
       <text
         x={16}
         y={24}
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         Write side
       </text>
       <text
         x={16}
         y={READ_Y + 24}
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         Read side
       </text>
@@ -42,7 +49,7 @@ export function CqrsVisualization({
         y1={READ_Y}
         x2={800}
         y2={READ_Y}
-        stroke="#1e293b"
+        stroke="var(--color-line)"
         strokeWidth={1}
         strokeDasharray="6 4"
       />

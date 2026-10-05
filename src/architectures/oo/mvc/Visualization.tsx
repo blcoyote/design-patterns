@@ -36,16 +36,16 @@ export function MvcVisualization({
             width={band.width}
             height={band.height}
             rx={24}
-            fill="#0f172a"
+            fill="var(--color-diagram-node)"
             fillOpacity={0.35}
-            stroke="#475569"
+            stroke="var(--color-line-bold)"
             strokeWidth={1.5}
             strokeDasharray="8 6"
           />
           <text
             x={band.x + 20}
             y={band.y + 28}
-            className="fill-slate-500 text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
+            className="fill-fg-subtle text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
           >
             {band.label}
           </text>

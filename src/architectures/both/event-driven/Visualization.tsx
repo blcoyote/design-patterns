@@ -27,9 +27,9 @@ export function EventDrivenVisualization({
         width={BROKER_BAND.width}
         height={BROKER_BAND.height}
         rx={24}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#475569"
+        stroke="var(--color-line-bold)"
         strokeWidth={1.5}
         strokeDasharray="8 6"
       />
@@ -37,7 +37,7 @@ export function EventDrivenVisualization({
         x={BROKER_BAND.x + BROKER_BAND.width / 2}
         y={BROKER_BAND.y + 28}
         textAnchor="middle"
-        className="fill-slate-500 text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
       >
         Broker — topics
       </text>
@@ -47,7 +47,7 @@ export function EventDrivenVisualization({
         x={BROKER_BAND.x - 20}
         y={BROKER_BAND.y + 28}
         textAnchor="end"
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         producer
       </text>
@@ -56,7 +56,7 @@ export function EventDrivenVisualization({
       <text
         x={BROKER_BAND.x + BROKER_BAND.width + 20}
         y={BROKER_BAND.y + 28}
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         consumers
       </text>

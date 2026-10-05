@@ -81,12 +81,12 @@ export function PatternPage() {
               <Link
                 key={r.slug}
                 to={`/patterns/${r.slug}`}
-                className="group rounded-xl px-4 py-3 ring-1 ring-slate-800 transition hover:bg-slate-900 hover:ring-slate-600"
+                className="group rounded-xl px-4 py-3 ring-1 ring-line transition hover:bg-surface hover:ring-line-bold"
               >
                 <span className={`text-xs ${categories[r.category].text}`}>
                   {categories[r.category].label}
                 </span>
-                <span className="block font-semibold text-white">{r.name}</span>
+                <span className="block font-semibold text-fg">{r.name}</span>
               </Link>
             ))}
           </div>

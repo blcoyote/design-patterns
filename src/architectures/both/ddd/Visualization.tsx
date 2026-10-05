@@ -28,16 +28,16 @@ export function DddVisualization({
         width={ORDERING_BOX.width}
         height={ORDERING_BOX.height}
         rx={24}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#475569"
+        stroke="var(--color-line-bold)"
         strokeWidth={1.5}
         strokeDasharray="8 6"
       />
       <text
         x={ORDERING_BOX.x + 20}
         y={ORDERING_BOX.y + 28}
-        className="fill-slate-500 text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
       >
         Ordering context
       </text>
@@ -48,16 +48,16 @@ export function DddVisualization({
         width={SHIPPING_BOX.width}
         height={SHIPPING_BOX.height}
         rx={24}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#475569"
+        stroke="var(--color-line-bold)"
         strokeWidth={1.5}
         strokeDasharray="8 6"
       />
       <text
         x={SHIPPING_BOX.x + 20}
         y={SHIPPING_BOX.y + 28}
-        className="fill-slate-500 text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
       >
         Shipping context
       </text>

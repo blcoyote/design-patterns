@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import type { Packet, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Memento keeps the generic Originator/Memento/Caretaker diagram on top, and adds a
@@ -198,10 +199,10 @@ export function MementoVisualization({
         ariaLabel={`${pattern.name} diagram`}
       />
 
-      <div className="border-t border-slate-800 p-3">
+      <div className="border-t border-line p-3">
         <svg
           viewBox="0 0 760 190"
-          className="h-auto w-full select-none rounded-lg bg-slate-950/40 ring-1 ring-slate-800"
+          className="h-auto w-full select-none rounded-lg bg-canvas/40 ring-1 ring-line"
           role="group"
           aria-label={`Editor content ${truncate(live.content)}, history shelf holding ${live.shelf.length} snapshot${live.shelf.length === 1 ? "" : "s"}`}
         >
@@ -223,23 +224,25 @@ export function MementoVisualization({
               width={260}
               height={140}
               rx={14}
-              fill="#0f172a"
-              stroke={editorActive || selectedId === "editor" ? color : "#334155"}
+              fill="var(--color-diagram-node)"
+              stroke={
+                editorActive || selectedId === "editor" ? color : "var(--color-diagram-node-stroke)"
+              }
               strokeWidth={editorActive || selectedId === "editor" ? 2.5 : 1.5}
             />
             <text
               x={36}
               y={46}
-              className="fill-slate-500 text-[10px] font-mono uppercase tracking-wider select-none"
+              className="fill-fg-subtle text-[10px] font-mono uppercase tracking-wider select-none"
             >
               TextEditor
             </text>
             <foreignObject x={32} y={56} width={236} height={96}>
-              <div className="wrap-break-word font-mono text-[13px] leading-snug text-slate-100">
-                {live.content || <span className="text-slate-600">(empty)</span>}
+              <div className="wrap-break-word font-mono text-[13px] leading-snug text-fg-strong">
+                {live.content || <span className="text-fg-faint">(empty)</span>}
                 <motion.span
                   aria-hidden
-                  className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 bg-slate-100 align-middle"
+                  className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 bg-fg-strong align-middle"
                   animate={reduceMotion ? { opacity: 1 } : { opacity: [1, 1, 0, 0] }}
                   transition={
                     reduceMotion
@@ -259,7 +262,7 @@ export function MementoVisualization({
           <text
             x={420}
             y={38}
-            className="fill-slate-500 text-[10px] font-mono uppercase tracking-wider select-none"
+            className="fill-fg-subtle text-[10px] font-mono uppercase tracking-wider select-none"
           >
             HistoryShelf (opaque)
           </text>
@@ -269,7 +272,9 @@ export function MementoVisualization({
             width={300}
             height={6}
             rx={3}
-            fill={shelfActive || selectedId === "history" ? color : "#334155"}
+            fill={
+              shelfActive || selectedId === "history" ? color : "var(--color-diagram-node-stroke)"
+            }
           />
 
           <AnimatePresence>
@@ -319,14 +324,18 @@ export function MementoVisualization({
                     width={210}
                     height={32}
                     rx={8}
-                    fill={isTop ? `${color}22` : "#0f172a"}
-                    stroke={isTop && (shelfActive || selectedId === "memento") ? color : "#475569"}
+                    fill={isTop ? alpha(color, 13) : "var(--color-diagram-node)"}
+                    stroke={
+                      isTop && (shelfActive || selectedId === "memento")
+                        ? color
+                        : "var(--color-diagram-edge)"
+                    }
                     strokeWidth={isTop ? 2 : 1.5}
                   />
                   <text
                     y={5}
                     textAnchor="middle"
-                    className="fill-slate-400 text-[11px] font-mono select-none"
+                    className="fill-fg-muted text-[11px] font-mono select-none"
                   >
                     Memento #{i + 1} — sealed
                   </text>
@@ -337,8 +346,8 @@ export function MementoVisualization({
         </svg>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         <button
@@ -348,7 +357,7 @@ export function MementoVisualization({
             e.stopPropagation();
             doType();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-100 ring-1 ring-slate-700 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-white"
+          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
         >
           type()
         </button>
@@ -359,9 +368,9 @@ export function MementoVisualization({
             e.stopPropagation();
             doSave();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white"
+          className="rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus"
           style={{
-            color: "#0f172a",
+            color: "var(--color-fg-on-accent)",
             backgroundColor: color,
             borderColor: color,
           }}
@@ -376,10 +385,10 @@ export function MementoVisualization({
             e.stopPropagation();
             doUndo();
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             live.shelf.length === 0
-              ? "cursor-not-allowed text-slate-600 ring-slate-800 ring-dashed"
-              : "text-slate-100 ring-slate-700 hover:bg-slate-800"
+              ? "cursor-not-allowed text-fg-faint ring-line ring-dashed"
+              : "text-fg-strong ring-line-strong hover:bg-surface-raised"
           }`}
         >
           undo()

@@ -154,7 +154,7 @@ export function DependencyInjectionVisualization({
           x={400}
           y={26}
           textAnchor="middle"
-          className="fill-slate-300 text-[13px] font-mono select-none"
+          className="fill-fg-soft text-[13px] font-mono select-none"
           pointerEvents="none"
         >
           Before: every class constructs its own dependencies with `new`
@@ -177,7 +177,7 @@ export function DependencyInjectionVisualization({
             width={smtpBox.width}
             height={smtpBox.height}
             rx={12}
-            fill="#0f172a"
+            fill="var(--color-diagram-node)"
             stroke={color}
             strokeWidth={2}
             strokeDasharray="6 4"
@@ -186,11 +186,11 @@ export function DependencyInjectionVisualization({
             y={-2}
             textAnchor="middle"
             className="text-[14px] font-semibold select-none"
-            fill="#f8fafc"
+            fill="var(--color-diagram-text-active)"
           >
             FakeEmailSender
           </text>
-          <text y={16} textAnchor="middle" className="fill-slate-400 text-[11px] select-none">
+          <text y={16} textAnchor="middle" className="fill-fg-muted text-[11px] select-none">
             Test double
           </text>
         </motion.g>
@@ -200,8 +200,8 @@ export function DependencyInjectionVisualization({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">View</span>
+      <div className="flex flex-wrap items-center gap-2 border-b border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">View</span>
         {(
           [
             { id: "di", label: "Dependency Injection", manual: false },
@@ -218,10 +218,10 @@ export function DependencyInjectionVisualization({
                 e.stopPropagation();
                 setMode(opt.manual);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isActive
-                  ? "text-slate-950 ring-transparent"
-                  : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                  ? "text-fg-on-accent ring-transparent"
+                  : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
               }`}
               style={isActive ? { backgroundColor: color } : undefined}
             >
@@ -248,13 +248,13 @@ export function DependencyInjectionVisualization({
       />
 
       {isManual ? (
-        <p className="border-t border-slate-800 p-3 text-xs text-slate-500">
+        <p className="border-t border-line p-3 text-xs text-fg-subtle">
           There is no container here to ask for a different EmailSender — swapping one in means
           editing OrderService's source.
         </p>
       ) : (
-        <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-          <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+        <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+          <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
             Try it
           </span>
           {([false, true] as const).map((isFake) => {
@@ -271,10 +271,10 @@ export function DependencyInjectionVisualization({
                   e.stopPropagation();
                   setSwap(isFake);
                 }}
-                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                   isActive
-                    ? "text-slate-950 ring-transparent"
-                    : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                    ? "text-fg-on-accent ring-transparent"
+                    : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
                 }`}
                 style={isActive ? { backgroundColor: color } : undefined}
               >

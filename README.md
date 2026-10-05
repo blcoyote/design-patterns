@@ -68,6 +68,14 @@ src/
     content/ComparisonTeaser.tsx # "often confused with…" links from a pattern/architecture to a comparison
     content/ScenarioQuiz.tsx # the "which should I choose?" quiz at the end of a comparison
     pages/ layout/ content/
+  theme/
+    tokens.css               # every colour decision: primitives, semantic roles, accents, one block per theme
+    themes.ts                # the list of themes (id + label) and the localStorage key
+    alpha.ts                 # alpha(color, pct) -> color-mix(); replaces `${color}22` hex-suffix tricks
+    codeTheme.ts             # the Prism theme for code blocks, read from --color-code-* / --color-syntax-*
+    applyTheme.ts            # sets data-theme on <html> and syncs <meta name="theme-color">
+  hooks/useTheme.ts          # active theme, persisted; initTheme() runs once at startup
+  lib/preferenceStore.ts     # localStorage-backed preference shared via useSyncExternalStore (code language, theme)
   lib/codeRegions.ts         # `// [id]` … `// [/id]` code region markers
   lib/crossRefs.ts           # the only module importing both registries — see "Architecture" below
 ```
@@ -92,6 +100,8 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 ### Custom visualisations
 
 The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+
+Colour in a scene comes from the theme tokens, never from a hex literal or a Tailwind palette class (see [Theming](#theming); `npm test` fails on a raw colour). In a `className` use the token utilities (`fill-diagram-node`, `stroke-diagram-edge`, `text-fg-muted`); for values computed in code write `"var(--color-ok)"`, and use `alpha(color, 13)` for a tint of the accent rather than appending hex digits.
 
 Every scene must animate packets through the shared timing, never its own `delay`s: pass `packetSpeed={speed}` to `<Diagram>`, or, in a fully custom SVG, render `<PacketLayer>` from `src/components/viz/PacketLayer.tsx` with `packets`, relation-keyed `geometry` (a Map or record), `color`, `speed` and `animationKey={stepIndex}`. Then `after`, the speed control and reduced motion all work, and the step player's timing matches what is on screen.
 
@@ -198,6 +208,39 @@ way `DetailPanel` takes a `resolvePattern` prop — `src/lib/crossRefs.ts` stays
 
 That's it: the sidebar (under `/compare*`), the comparison index, the route (`#/compare/<slug>`) and any "Often
 confused with…" box on the subjects' own pages pick it up automatically.
+
+## Theming
+
+Every colour decision lives in [`src/theme/tokens.css`](src/theme/tokens.css) and nowhere else, so changing how the site looks (or adding a theme) never means touching components. The file has three tiers:
+
+1. **Primitives.** Tailwind's palette (`--color-slate-950`, …) plus a few literal hex values. The diagram, accent and status colours are literals on purpose: the SVG scenes have always used these sRGB hexes, and Tailwind v4's palette is wider-gamut oklch that renders visibly more vivid.
+2. **Semantic roles.** What a colour is _for_: surfaces (`canvas`, `surface`, `surface-raised`), lines (`line`, `line-strong`), text (`fg`, `fg-body`, `fg-muted`, `fg-subtle`, `fg-on-accent`), status (`ok`, `warn`, `danger`), `diagram-*` for the SVG scenes, `code-*` / `syntax-*` for code blocks.
+3. **Accents.** One pair per category and paradigm (`cat-creational` + `cat-creational-fg`, `paradigm-oo` + …). `categories.ts` and `paradigms.ts` carry the matching Tailwind class strings, which name these tokens.
+
+Each `--color-<name>` becomes Tailwind utilities (`bg-surface`, `text-fg-muted`, `fill-diagram-node`, `ring-line`, with `/NN` opacity). In code, read a token as `"var(--color-<name>)"` and make a transparent tint with `alpha(color, percent)` from `src/theme/alpha.ts`; it is `color-mix()` underneath, so it works for hex and `var()` alike. `@theme static` keeps every token in the build even when only JS reads it.
+
+**Adding a token:** declare it in the `@theme static` block of `tokens.css` and give it a role comment. If a scene needs a colour no token covers, add a token for the role rather than a literal in the component.
+
+**Adding a theme** is a block in `tokens.css` plus one entry in `themes.ts`:
+
+```css
+[data-theme="light"] {
+  color-scheme: light;
+  --color-canvas: var(--color-white);
+  /* … every --color-* token the default theme declares … */
+}
+```
+
+```ts
+export const themes = [
+  { id: "dark", label: "Dark" },
+  { id: "light", label: "Light" },
+] as const satisfies readonly ThemeDefinition[];
+```
+
+The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. There is no theme switcher in the UI yet; only the dark theme ships.
+
+`npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color-mix()` or Tailwind palette class outside `src/theme/`, every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the dark value).
 
 ## Used in this site
 

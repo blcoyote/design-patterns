@@ -37,16 +37,16 @@ function ServiceBox({
         width={width}
         height={height}
         rx={24}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#475569"
+        stroke="var(--color-line-bold)"
         strokeWidth={1.5}
         strokeDasharray="8 6"
       />
       <text
         x={x + 18}
         y={y + 28}
-        className="fill-slate-500 text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[12px] font-mono font-semibold tracking-wider uppercase select-none"
       >
         {label}
       </text>
@@ -58,15 +58,15 @@ function ServiceBox({
             width={72}
             height={34}
             rx={6}
-            fill="#1e293b"
-            stroke="#475569"
+            fill="var(--color-surface-raised)"
+            stroke="var(--color-line-bold)"
             strokeWidth={1}
           />
           <text
             x={x + width / 2}
             y={y + height - 43}
             textAnchor="middle"
-            className="fill-slate-400 text-[11px] font-mono select-none"
+            className="fill-fg-muted text-[11px] font-mono select-none"
           >
             DB
           </text>

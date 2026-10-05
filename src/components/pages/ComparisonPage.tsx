@@ -48,19 +48,19 @@ export function ComparisonPage() {
     <article className="space-y-8">
       <Seo page={comparisonSeoPage(comparison)} />
       <header className="max-w-4xl">
-        <span className="inline-flex items-center gap-2 rounded-full bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-300 ring-1 ring-amber-400/30">
+        <span className="inline-flex items-center gap-2 rounded-full bg-compare/10 px-3 py-1 text-xs font-medium text-compare-fg ring-1 ring-compare/30">
           Which should I choose?
         </span>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-5xl">
           {comparison.title}
         </h1>
-        <p className="mt-4 text-lg leading-relaxed text-slate-300">{comparison.summary}</p>
+        <p className="mt-4 text-lg leading-relaxed text-fg-soft">{comparison.summary}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           {subjects.map((s) => (
             <Link
               key={s.slug}
               to={s.href}
-              className="rounded-full px-3 py-1 text-sm font-semibold ring-1 ring-slate-700 transition hover:ring-slate-500"
+              className="rounded-full px-3 py-1 text-sm font-semibold ring-1 ring-line-strong transition hover:ring-line-emphasis"
               style={{ color: s.color }}
             >
               {s.name}
@@ -80,7 +80,7 @@ export function ComparisonPage() {
         <table className="w-full min-w-lg border-collapse text-sm">
           <thead>
             <tr>
-              <th className="p-2 text-left font-medium text-slate-500" scope="col" />
+              <th className="p-2 text-left font-medium text-fg-subtle" scope="col" />
               {subjects.map((s) => (
                 <th
                   key={s.slug}
@@ -95,12 +95,12 @@ export function ComparisonPage() {
           </thead>
           <tbody>
             {comparison.dimensions.map((dim) => (
-              <tr key={dim.label} className="border-t border-slate-800">
-                <th className="p-2 text-left align-top font-medium text-slate-400" scope="row">
+              <tr key={dim.label} className="border-t border-line">
+                <th className="p-2 text-left align-top font-medium text-fg-muted" scope="row">
                   {dim.label}
                 </th>
                 {subjects.map((s) => (
-                  <td key={s.slug} className="p-2 align-top text-slate-300">
+                  <td key={s.slug} className="p-2 align-top text-fg-soft">
                     {dim.values[s.slug]}
                   </td>
                 ))}
@@ -119,13 +119,13 @@ export function ComparisonPage() {
               <h2 className="text-xl font-semibold" style={{ color: subject.color }}>
                 {subject.name}
               </h2>
-              <p className="leading-relaxed text-slate-300">{option.changes}</p>
+              <p className="leading-relaxed text-fg-soft">{option.changes}</p>
               <div>
-                <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
+                <p className="text-xs font-semibold tracking-wider text-fg-subtle uppercase">
                   Choose it when
                 </p>
                 <div className="mt-2">
-                  <BulletList items={option.chooseWhen} marker="→" markerClass="text-slate-500" />
+                  <BulletList items={option.chooseWhen} marker="→" markerClass="text-fg-subtle" />
                 </div>
               </div>
 
@@ -154,7 +154,7 @@ export function ComparisonPage() {
                       <Link
                         key={`${ref.slug}-${ref.step}`}
                         to={`${resolved.href}?step=${ref.step}`}
-                        className="rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-slate-700 transition hover:ring-slate-500"
+                        className="rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-line-strong transition hover:ring-line-emphasis"
                         style={{ color: resolved.color }}
                       >
                         See it animated: {title} →
@@ -170,7 +170,7 @@ export function ComparisonPage() {
 
       <Section title="When you need no pattern at all">
         <p>
-          <span className="font-semibold text-slate-200">{comparison.noPattern.when}</span>{" "}
+          <span className="font-semibold text-fg-body">{comparison.noPattern.when}</span>{" "}
           {comparison.noPattern.instead}
         </p>
       </Section>

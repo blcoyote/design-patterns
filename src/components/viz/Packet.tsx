@@ -34,7 +34,7 @@ export function Packet({
   const body = (
     <>
       <circle r={7} fill={color} filter="url(#glow)" />
-      <circle r={3} fill="#ffffff" />
+      <circle r={3} fill="var(--color-diagram-packet)" />
       {label && (
         <g transform="translate(0 -18)">
           <rect
@@ -48,7 +48,7 @@ export function Packet({
           <text
             y={4}
             textAnchor="middle"
-            className="fill-slate-950 text-[11px] font-mono font-semibold select-none"
+            className="fill-fg-on-accent text-[11px] font-mono font-semibold select-none"
           >
             {label}
           </text>

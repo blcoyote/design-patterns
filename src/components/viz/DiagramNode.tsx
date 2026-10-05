@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { onActivate } from "@/lib/a11y";
 import { NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
 import type { Participant } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 const STEREOTYPE: Partial<Record<NonNullable<Participant["kind"]>, string>> = {
   interface: "«interface»",
@@ -44,7 +45,7 @@ export function DiagramNode({
       tabIndex={0}
       aria-label={`${p.label} — ${p.role}`}
       aria-pressed={selected}
-      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-white"
+      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
       onClick={(e) => {
         e.stopPropagation();
         select();
@@ -78,8 +79,10 @@ export function DiagramNode({
         width={w}
         height={h}
         rx={12}
-        fill={active ? `${color}22` : "#0f172a"}
-        stroke={selected ? "#ffffff" : active ? color : "#334155"}
+        fill={active ? alpha(color, 13) : "var(--color-diagram-node)"}
+        stroke={
+          selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-node-stroke)"
+        }
         strokeWidth={selected ? 2.5 : 1.5}
         strokeDasharray={isAbstract ? "6 4" : undefined}
       />
@@ -87,7 +90,7 @@ export function DiagramNode({
         <text
           y={-h / 2 + 15}
           textAnchor="middle"
-          className="fill-slate-400 text-[10px] font-mono select-none"
+          className="fill-fg-muted text-[10px] font-mono select-none"
         >
           {stereotype}
         </text>
@@ -96,14 +99,14 @@ export function DiagramNode({
         y={stereotype ? 6 : -2}
         textAnchor="middle"
         className={`text-[14px] font-semibold select-none ${isAbstract ? "italic" : ""}`}
-        fill={active || selected ? "#f8fafc" : "#e2e8f0"}
+        fill={active || selected ? "var(--color-diagram-text-active)" : "var(--color-diagram-text)"}
       >
         {p.label}
       </text>
       <text
         y={stereotype ? 22 : 16}
         textAnchor="middle"
-        className="fill-slate-400 text-[11px] select-none"
+        className="fill-fg-muted text-[11px] select-none"
       >
         {p.role}
       </text>
@@ -128,7 +131,7 @@ export function DiagramNode({
             <text
               y={4}
               textAnchor="middle"
-              className="fill-slate-950 text-[11px] font-semibold font-mono select-none"
+              className="fill-fg-on-accent text-[11px] font-semibold font-mono select-none"
             >
               {note}
             </text>

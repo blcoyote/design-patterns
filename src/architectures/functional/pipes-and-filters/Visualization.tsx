@@ -28,7 +28,7 @@ export function PipesAndFiltersVisualization({
         width={720}
         height={BAND_HEIGHT}
         rx={BAND_HEIGHT / 2}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         opacity={0.5}
       />
       <rect
@@ -37,21 +37,28 @@ export function PipesAndFiltersVisualization({
         width={720}
         height={BAND_HEIGHT}
         rx={BAND_HEIGHT / 2}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         opacity={0.5}
       />
-      <rect x={650} y={ROW1_Y} width={30} height={ROW2_Y - ROW1_Y} fill="#0f172a" opacity={0.5} />
+      <rect
+        x={650}
+        y={ROW1_Y}
+        width={30}
+        height={ROW2_Y - ROW1_Y}
+        fill="var(--color-diagram-node)"
+        opacity={0.5}
+      />
       <text
         x={56}
         y={ROW1_Y - BAND_HEIGHT / 2 - 10}
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         parse → validate
       </text>
       <text
         x={56}
         y={ROW2_Y - BAND_HEIGHT / 2 - 10}
-        className="fill-slate-600 text-[11px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[11px] font-mono tracking-wider uppercase select-none"
       >
         enrich → format
       </text>

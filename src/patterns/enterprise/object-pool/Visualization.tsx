@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useRef, useState } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import type { Step, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Object Pool keeps the generic structural diagram up top (Client A/B, the
@@ -274,9 +275,9 @@ export function ObjectPoolVisualization({
         ariaLabel={`${pattern.name} diagram`}
       />
 
-      <div className="flex flex-wrap items-stretch gap-3 border-t border-slate-800 p-3">
-        <div className="min-w-[320px] flex-1 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
-          <div className="mb-2 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-stretch gap-3 border-t border-line p-3">
+        <div className="min-w-[320px] flex-1 rounded-lg bg-canvas/40 p-3 ring-1 ring-line">
+          <div className="mb-2 text-xs font-mono uppercase tracking-wider text-fg-subtle">
             pool · max size {MAX_SIZE}
           </div>
           <div className="flex gap-3">
@@ -290,19 +291,20 @@ export function ObjectPoolVisualization({
                   e.stopPropagation();
                   onSelect("connection");
                 }}
-                className="flex h-20 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-xs font-mono outline-none focus-visible:ring-2 focus-visible:ring-white"
+                className="flex h-20 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-xs font-mono outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 style={{
-                  background: slot.state === "busy" ? `${color}22` : "rgba(15,23,42,0.4)",
+                  background:
+                    slot.state === "busy" ? alpha(color, 13) : alpha("var(--color-surface)", 40),
                   boxShadow:
                     slot.state === "busy"
                       ? `inset 0 0 0 2px ${color}`
                       : slot.state === "idle"
-                        ? "inset 0 0 0 1.5px #475569"
-                        : "inset 0 0 0 1.5px #334155",
+                        ? "inset 0 0 0 1.5px var(--color-line-bold)"
+                        : "inset 0 0 0 1.5px var(--color-line-strong)",
                   borderStyle: slot.state === "empty" ? "dashed" : "solid",
                 }}
               >
-                <span className="text-slate-500">slot {i + 1}</span>
+                <span className="text-fg-subtle">slot {i + 1}</span>
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={`${slot.state}-${slot.owner ?? ""}`}
@@ -315,7 +317,7 @@ export function ObjectPoolVisualization({
                         : { type: "spring", stiffness: 380, damping: 22 }
                     }
                     className="text-base font-bold"
-                    style={{ color: slot.state === "busy" ? color : "#64748b" }}
+                    style={{ color: slot.state === "busy" ? color : "var(--color-fg-subtle)" }}
                   >
                     {slot.state === "busy" ? slot.owner : slot.state === "idle" ? "idle" : "—"}
                   </motion.span>
@@ -325,11 +327,11 @@ export function ObjectPoolVisualization({
           </div>
 
           <div className="mt-3 flex items-center gap-2">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               waiting
             </span>
-            <div className="flex min-h-7 flex-1 flex-wrap items-center gap-1.5 rounded bg-slate-900/60 px-2 py-1">
-              {queue.length === 0 && <span className="text-xs text-slate-600">— none —</span>}
+            <div className="flex min-h-7 flex-1 flex-wrap items-center gap-1.5 rounded bg-surface/60 px-2 py-1">
+              {queue.length === 0 && <span className="text-xs text-fg-faint">— none —</span>}
               <AnimatePresence>
                 {queue.map((owner, i) => (
                   <motion.span
@@ -337,7 +339,7 @@ export function ObjectPoolVisualization({
                     initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 8 }}
-                    className="rounded-full px-2 py-0.5 text-xs font-mono font-bold text-slate-950"
+                    className="rounded-full px-2 py-0.5 text-xs font-mono font-bold text-fg-on-accent"
                     style={{ backgroundColor: color }}
                   >
                     {owner}
@@ -348,9 +350,9 @@ export function ObjectPoolVisualization({
           </div>
         </div>
 
-        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
+        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-canvas/40 p-3 ring-1 ring-line">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               In use
             </span>
             <span className="font-mono text-sm font-bold" style={{ color }}>
@@ -358,17 +360,17 @@ export function ObjectPoolVisualization({
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">Idle</span>
-            <span className="font-mono text-sm font-bold text-slate-200">{stats.idle}</span>
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">Idle</span>
+            <span className="font-mono text-sm font-bold text-fg-body">{stats.idle}</span>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               Waiting
             </span>
-            <span className="font-mono text-sm font-bold text-slate-200">{stats.waiting}</span>
+            <span className="font-mono text-sm font-bold text-fg-body">{stats.waiting}</span>
           </div>
-          <div className="mt-1 flex items-center gap-2 border-t border-slate-800 pt-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-600">
+          <div className="mt-1 flex items-center gap-2 border-t border-line pt-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-fg-faint">
               Try it
             </span>
             <button
@@ -377,7 +379,7 @@ export function ObjectPoolVisualization({
                 e.stopPropagation();
                 acquire();
               }}
-              className="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-950 transition focus-visible:outline-2 focus-visible:outline-white"
+              className="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-on-accent transition focus-visible:outline-2 focus-visible:outline-focus"
               style={{ backgroundColor: color }}
             >
               acquire()
@@ -389,7 +391,7 @@ export function ObjectPoolVisualization({
                 e.stopPropagation();
                 release();
               }}
-              className="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-100 ring-1 ring-slate-700 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-40"
             >
               release()
             </button>

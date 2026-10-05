@@ -51,10 +51,10 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
   return (
     <>
       {open && (
-        <div className="fixed inset-0 z-20 bg-black/60 lg:hidden" onClick={onClose} aria-hidden />
+        <div className="fixed inset-0 z-20 bg-scrim/60 lg:hidden" onClick={onClose} aria-hidden />
       )}
       <aside
-        className={`fixed top-14 bottom-0 z-20 w-72 shrink-0 overflow-y-auto border-r border-slate-800 bg-slate-950 px-4 py-6 transition-transform lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:translate-x-0 ${
+        className={`fixed top-14 bottom-0 z-20 w-72 shrink-0 overflow-y-auto border-r border-line bg-canvas px-4 py-6 transition-transform lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -62,7 +62,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
           <span className="sr-only">Search {emptyLabel}</span>
           <svg
             viewBox="0 0 24 24"
-            className="absolute top-2.5 left-3 size-4 fill-slate-500"
+            className="absolute top-2.5 left-3 size-4 fill-fg-subtle"
             aria-hidden
           >
             <path d="M10 2a8 8 0 0 1 6.3 12.9l5.4 5.4-1.4 1.4-5.4-5.4A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" />
@@ -71,7 +71,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${emptyLabel}…`}
-            className="w-full rounded-lg bg-slate-900 py-2 pr-3 pl-9 text-sm text-slate-200 ring-1 ring-slate-800 placeholder:text-slate-500 focus:ring-slate-600 focus:outline-none"
+            className="w-full rounded-lg bg-surface py-2 pr-3 pl-9 text-sm text-fg-body ring-1 ring-line placeholder:text-fg-subtle focus:ring-line-bold focus:outline-none"
           />
         </label>
 
@@ -134,17 +134,17 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         )}
 
         {empty && (
-          <p className="mt-6 text-sm text-slate-500">
+          <p className="mt-6 text-sm text-fg-subtle">
             No {emptyLabel} match “{query}”.
           </p>
         )}
 
-        <div className="mt-8 space-y-1 border-t border-slate-800 pt-4">
+        <div className="mt-8 space-y-1 border-t border-line pt-4">
           {area !== "patterns" && (
             <Link
               to="/"
               onClick={onClose}
-              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
+              className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
             >
               ← Design patterns
             </Link>
@@ -153,7 +153,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <Link
               to="/architecture"
               onClick={onClose}
-              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
+              className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
             >
               {area === "patterns" ? "Zoom out: architecture →" : "Architecture →"}
             </Link>
@@ -162,7 +162,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             <Link
               to="/compare"
               onClick={onClose}
-              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
+              className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
             >
               Which should I choose? →
             </Link>
@@ -172,7 +172,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white lg:hidden"
+            className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg lg:hidden"
           >
             <GitHubIcon className="size-4 fill-current" />
             View source on GitHub
@@ -199,8 +199,8 @@ function SidebarItem({
       className={({ isActive }) =>
         `flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition ${
           isActive
-            ? "bg-slate-800 font-medium text-white"
-            : "text-slate-400 hover:bg-slate-900 hover:text-slate-100"
+            ? "bg-surface-raised font-medium text-fg"
+            : "text-fg-muted hover:bg-surface hover:text-fg-strong"
         }`
       }
     >

@@ -3,6 +3,7 @@ import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent
 import { Diagram } from "@/components/viz/Diagram";
 import { onActivate } from "@/lib/a11y";
 import type { VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Iterator keeps the class diagram (Iterable/Iterator interfaces, Playlist,
@@ -67,7 +68,7 @@ export function IteratorVisualization({
         x={STRIP_START_X - 10}
         y={STRIP_Y - CELL_H / 2 - 22}
         textAnchor="start"
-        className="fill-slate-500 text-[10px] font-mono uppercase tracking-wider select-none"
+        className="fill-fg-subtle text-[10px] font-mono uppercase tracking-wider select-none"
       >
         playlist.songs
       </text>
@@ -93,10 +94,14 @@ export function IteratorVisualization({
                 width={CELL_W}
                 height={CELL_H}
                 rx={10}
-                fill={isCurrent ? `${color}22` : "#0f172a"}
+                fill={isCurrent ? alpha(color, 13) : "var(--color-diagram-node)"}
                 initial={false}
                 animate={{
-                  stroke: isCurrent ? color : isConsumed ? "#334155" : "#475569",
+                  stroke: isCurrent
+                    ? color
+                    : isConsumed
+                      ? "var(--color-diagram-node-stroke)"
+                      : "var(--color-diagram-edge)",
                   opacity: isConsumed ? 0.5 : 1,
                 }}
                 strokeWidth={isCurrent ? 2.5 : 1.5}
@@ -104,14 +109,14 @@ export function IteratorVisualization({
               <text
                 y={-6}
                 textAnchor="middle"
-                className="fill-slate-100 text-[11px] font-semibold select-none"
+                className="fill-fg-strong text-[11px] font-semibold select-none"
               >
                 {song}
               </text>
               <text
                 y={12}
                 textAnchor="middle"
-                className="fill-slate-500 text-[9px] font-mono select-none"
+                className="fill-fg-subtle text-[9px] font-mono select-none"
               >
                 [{i}]
               </text>
@@ -131,14 +136,14 @@ export function IteratorVisualization({
             strokeDasharray="4 4"
             initial={false}
             animate={{
-              stroke: done ? color : "#334155",
+              stroke: done ? color : "var(--color-diagram-node-stroke)",
               opacity: done ? 1 : 0.6,
             }}
           />
           <text
             y={4}
             textAnchor="middle"
-            className="fill-slate-400 text-[9px] font-mono select-none"
+            className="fill-fg-muted text-[9px] font-mono select-none"
           >
             done
           </text>
@@ -182,7 +187,7 @@ export function IteratorVisualization({
             <text
               y={4}
               textAnchor="middle"
-              className="fill-slate-950 text-[11px] font-bold font-mono select-none"
+              className="fill-fg-on-accent text-[11px] font-bold font-mono select-none"
             >
               "{yieldedValue}"
             </text>

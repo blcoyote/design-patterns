@@ -30,7 +30,7 @@ export function VerticalSliceVisualization({
           y1={y}
           x2={800}
           y2={y}
-          stroke="#1e293b"
+          stroke="var(--color-line)"
           strokeWidth={1}
           strokeDasharray="4 8"
         />
@@ -42,16 +42,16 @@ export function VerticalSliceVisualization({
         width={PLACE_ORDER_BAND.width}
         height={PLACE_ORDER_BAND.height}
         rx={16}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#475569"
+        stroke="var(--color-line-bold)"
         strokeWidth={1.5}
         strokeDasharray="8 6"
       />
       <text
         x={PLACE_ORDER_BAND.x + 16}
         y={PLACE_ORDER_BAND.y + 24}
-        className="fill-slate-500 text-[11px] font-mono font-semibold tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[11px] font-mono font-semibold tracking-wider uppercase select-none"
       >
         PlaceOrder slice
       </text>
@@ -62,16 +62,16 @@ export function VerticalSliceVisualization({
         width={GET_ORDER_BAND.width}
         height={GET_ORDER_BAND.height}
         rx={16}
-        fill="#0f172a"
+        fill="var(--color-diagram-node)"
         fillOpacity={0.35}
-        stroke="#475569"
+        stroke="var(--color-line-bold)"
         strokeWidth={1.5}
         strokeDasharray="8 6"
       />
       <text
         x={GET_ORDER_BAND.x + 16}
         y={GET_ORDER_BAND.y + 24}
-        className="fill-slate-500 text-[11px] font-mono font-semibold tracking-wider uppercase select-none"
+        className="fill-fg-subtle text-[11px] font-mono font-semibold tracking-wider uppercase select-none"
       >
         GetOrder slice
       </text>

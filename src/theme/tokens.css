@@ -1,0 +1,143 @@
+/*
+ * Design tokens: the single place colour is decided.
+ *
+ * Three tiers:
+ *   1. Primitives: Tailwind's own palette (--color-slate-950, --color-emerald-400, …) and a few
+ *      literal hex values. Diagram, accent and status colours are literals on purpose: the SVG
+ *      scenes have always used these sRGB hexes, and Tailwind v4's palette is wider-gamut oklch
+ *      that renders visibly more vivid. Nothing outside this file picks a colour.
+ *   2. Semantic roles: what a colour is *for* (canvas, fg-muted, line, diagram-node, …).
+ *      Components use these as utilities (bg-canvas, text-fg-muted, border-line,
+ *      fill-diagram-node) and never a palette class or a hex literal.
+ *   3. Accents: one pair per category / paradigm (cat-*, paradigm-*).
+ *
+ * The values below are the dark theme and live on :root, so they are the default.
+ * A theme is one more block that re-points tokens and sets its own colour scheme, e.g.
+ *
+ *     [data-theme="light"] { color-scheme: light; --color-canvas: var(--color-white); … }
+ *
+ * plus an entry in themes.ts. `static` keeps every token in the output even when only
+ * JS or an inline style reads it (`var(--color-…)`), which Tailwind would otherwise
+ * drop as unused.
+ */
+/* The default theme's colour scheme: native controls and scrollbars follow it. */
+:root {
+  color-scheme: dark;
+}
+
+@theme static {
+  /* Typography. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Surfaces: backgrounds, lowest to highest. */
+  --color-canvas: var(--color-slate-950);
+  --color-surface: var(--color-slate-900);
+  --color-surface-raised: var(--color-slate-800);
+  --color-surface-strong: var(--color-slate-700);
+  /* Dimming layer behind a modal / drawer. */
+  --color-scrim: var(--color-black);
+
+  /* Lines: borders, rings, outlines, quietest to loudest. */
+  --color-line: var(--color-slate-800);
+  --color-line-strong: var(--color-slate-700);
+  --color-line-bold: var(--color-slate-600);
+  --color-line-emphasis: var(--color-slate-500);
+
+  /* Text and glyph fills, most to least prominent. */
+  --color-fg: var(--color-white);
+  --color-fg-strong: var(--color-slate-100);
+  --color-fg-body: var(--color-slate-200);
+  --color-fg-soft: var(--color-slate-300);
+  --color-fg-muted: var(--color-slate-400);
+  --color-fg-subtle: var(--color-slate-500);
+  --color-fg-faint: var(--color-slate-600);
+  /* Text on a filled accent / status colour. */
+  --color-fg-on-accent: var(--color-slate-950);
+
+  /* Solid call-to-action: the inverse of the page. */
+  --color-inverse: var(--color-white);
+  --color-inverse-hover: var(--color-slate-200);
+  --color-on-inverse: var(--color-slate-950);
+
+  /* Interaction states, shared by HTML and SVG. */
+  --color-focus: var(--color-fg);
+  --color-selected: var(--color-fg);
+
+  /* Status: pattern scenes reuse these for ok / warning / failure. */
+  --color-ok: #34d399;
+  --color-ok-fg: var(--color-emerald-300);
+  --color-warn: #fbbf24;
+  --color-warn-fg: var(--color-amber-300);
+  --color-danger: #f87171;
+  --color-danger-fg: var(--color-red-300);
+  --color-danger-surface: #450a0a;
+  /* A downside / "poor fit" (cons list, quiz): rose, deliberately not the same hue as `danger`. */
+  --color-negative: var(--color-rose-400);
+  --color-negative-fg: var(--color-rose-300);
+  /* Louder variants for scenes that need a second tier (e.g. a runtime-specific failure). */
+  --color-warn-strong: #f59e0b;
+  --color-danger-strong: #f43f5e;
+  --color-danger-fg-soft: var(--color-red-200);
+  /* A neutral second series next to the accent (e.g. a second topic in Pub/Sub). */
+  --color-info: #818cf8;
+
+  /* Pattern-scene illustration colours (not UI chrome): Flyweight's trees. */
+  --color-tree-oak: #4ade80;
+  --color-tree-pine: #0d9488;
+
+  /* Diagram primitives (Diagram, DiagramNode, DiagramEdge, Packet and custom scenes). */
+  --color-diagram-grid: #1e293b;
+  --color-diagram-node: #0f172a;
+  --color-diagram-node-stroke: #334155;
+  --color-diagram-edge: #475569;
+  --color-diagram-label-bg: #020617;
+  --color-diagram-label-stroke: #1e293b;
+  --color-diagram-label-text: #94a3b8;
+  --color-diagram-label-text-active: #f1f5f9;
+  --color-diagram-text: #e2e8f0;
+  --color-diagram-text-active: #f8fafc;
+  --color-diagram-packet: #ffffff;
+
+  /* Feature accents for the boxes that link areas together. */
+  --color-xref: var(--color-sky-400);
+  --color-xref-fg: var(--color-sky-300);
+  --color-used: #34d399;
+  --color-used-fg: var(--color-emerald-300);
+  --color-compare: var(--color-amber-400);
+  --color-compare-fg: var(--color-amber-300);
+
+  /* Code blocks: editor surface plus syntax colours (seeded from Night Owl). A theme that
+     re-points these re-colours every CodeBlock; the Prism theme in codeTheme.ts reads them. */
+  --color-code-bg: #011627;
+  --color-code-fg: #d6deeb;
+  --color-syntax-comment: #637777;
+  --color-syntax-string: #addb67;
+  --color-syntax-number: #f78c6c;
+  --color-syntax-function: #82aaff;
+  --color-syntax-punctuation: #c792ea;
+  --color-syntax-class-name: #ffcb8b;
+  --color-syntax-keyword: #7fdbca;
+  --color-syntax-boolean: #ff5874;
+  --color-syntax-property: #80cbc4;
+  --color-syntax-namespace: #b2ccd6;
+  --color-syntax-changed: #a2bffc;
+  --color-syntax-deleted: rgb(239 83 80 / 0.56);
+
+  /* Accents. `-fg` is the shade used for text and badges on a dark surface. */
+  --color-cat-creational: #34d399;
+  --color-cat-creational-fg: var(--color-emerald-300);
+  --color-cat-structural: #38bdf8;
+  --color-cat-structural-fg: var(--color-sky-300);
+  --color-cat-behavioral: #c084fc;
+  --color-cat-behavioral-fg: var(--color-purple-300);
+  --color-cat-enterprise: #fbbf24;
+  --color-cat-enterprise-fg: var(--color-amber-300);
+
+  --color-paradigm-oo: #fb7185;
+  --color-paradigm-oo-fg: var(--color-rose-300);
+  --color-paradigm-functional: #a3e635;
+  --color-paradigm-functional-fg: var(--color-lime-300);
+  --color-paradigm-both: #818cf8;
+  --color-paradigm-both-fg: var(--color-indigo-300);
+}

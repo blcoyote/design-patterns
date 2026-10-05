@@ -10,9 +10,9 @@ const VERDICT_LABEL: Record<Verdict, string> = {
 };
 
 const VERDICT_STYLE: Record<Verdict, string> = {
-  best: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/30",
-  workable: "bg-amber-400/10 text-amber-300 ring-amber-400/30",
-  poor: "bg-rose-400/10 text-rose-300 ring-rose-400/30",
+  best: "bg-ok/10 text-ok-fg ring-ok/30",
+  workable: "bg-warn/10 text-warn-fg ring-warn/30",
+  poor: "bg-negative/10 text-negative-fg ring-negative/30",
 };
 
 /**
@@ -36,7 +36,7 @@ export function ScenarioQuiz({
   return (
     <Panel className="p-6">
       <PanelHeading>Which should you choose?</PanelHeading>
-      <p className="mt-3 text-lg leading-relaxed text-slate-200">{scenario.prompt}</p>
+      <p className="mt-3 text-lg leading-relaxed text-fg-body">{scenario.prompt}</p>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3" role="group" aria-label="Choices">
         {scenario.choices.map((choice) => {
@@ -49,11 +49,11 @@ export function ScenarioQuiz({
               onClick={() => onPick(choice.id)}
               className={`rounded-xl p-4 text-left ring-1 transition ${
                 choice.id === picked
-                  ? "bg-slate-900 ring-slate-500"
-                  : "ring-slate-800 hover:bg-slate-900/60 hover:ring-slate-600"
+                  ? "bg-surface ring-line-emphasis"
+                  : "ring-line hover:bg-surface/60 hover:ring-line-bold"
               }`}
             >
-              <span className="block font-semibold text-white">{choice.label}</span>
+              <span className="block font-semibold text-fg">{choice.label}</span>
               {show && (
                 <>
                   <span
@@ -61,7 +61,7 @@ export function ScenarioQuiz({
                   >
                     {VERDICT_LABEL[choice.verdict]}
                   </span>
-                  <span className="mt-2 block text-sm leading-relaxed text-slate-400">
+                  <span className="mt-2 block text-sm leading-relaxed text-fg-muted">
                     {choice.explanation}
                   </span>
                 </>

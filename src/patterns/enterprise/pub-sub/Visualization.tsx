@@ -127,7 +127,7 @@ export function PubSubVisualization({
   const animationKey = override ? `override-${override}-${replayToken}` : stepIndex;
 
   const laneColor = useMemo<Record<TopicId, string>>(
-    () => ({ "order.placed": color, "user.signedUp": "#818cf8" }),
+    () => ({ "order.placed": color, "user.signedUp": "var(--color-info)" }),
     [color],
   );
 
@@ -157,7 +157,7 @@ export function PubSubVisualization({
               x={52}
               y={LANE_Y[topic] - 36}
               className="font-mono text-[10px] tracking-wider uppercase select-none"
-              fill={isActive ? laneColor[topic] : "#64748b"}
+              fill={isActive ? laneColor[topic] : "var(--color-fg-subtle)"}
             >
               topic: {topic}
             </text>
@@ -184,8 +184,8 @@ export function PubSubVisualization({
         underlay={underlay}
         ariaLabel={`${pattern.name} diagram`}
       />
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         {TOPICS.map((topic) => {
@@ -200,10 +200,10 @@ export function PubSubVisualization({
                 e.stopPropagation();
                 publish(topic);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isActive
-                  ? "text-slate-950 ring-transparent"
-                  : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+                  ? "text-fg-on-accent ring-transparent"
+                  : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
               }`}
               style={isActive ? { backgroundColor: laneColor[topic] } : undefined}
             >

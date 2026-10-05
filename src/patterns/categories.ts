@@ -4,9 +4,9 @@ export interface CategoryMeta {
   id: Category;
   label: string;
   description: string;
-  /** Hex colour used inside SVG visualisations. */
+  /** CSS colour (a `var(--color-…)` token) used inside SVG visualisations. */
   color: string;
-  /** Tailwind classes (kept as literals so Tailwind can detect them). */
+  /** Tailwind classes naming the same token (kept as literals so Tailwind can detect them). */
   badge: string;
   dot: string;
   text: string;
@@ -17,38 +17,38 @@ export const categories: Record<Category, CategoryMeta> = {
     id: "creational",
     label: "Creational",
     description: "How objects get created — hiding construction details and controlling instances.",
-    color: "#34d399",
-    badge: "bg-emerald-400/10 text-emerald-300 ring-emerald-400/30",
-    dot: "bg-emerald-400",
-    text: "text-emerald-300",
+    color: "var(--color-cat-creational)",
+    badge: "bg-cat-creational/10 text-cat-creational-fg ring-cat-creational/30",
+    dot: "bg-cat-creational",
+    text: "text-cat-creational-fg",
   },
   structural: {
     id: "structural",
     label: "Structural",
     description: "How objects and classes are composed into larger structures.",
-    color: "#38bdf8",
-    badge: "bg-sky-400/10 text-sky-300 ring-sky-400/30",
-    dot: "bg-sky-400",
-    text: "text-sky-300",
+    color: "var(--color-cat-structural)",
+    badge: "bg-cat-structural/10 text-cat-structural-fg ring-cat-structural/30",
+    dot: "bg-cat-structural",
+    text: "text-cat-structural-fg",
   },
   behavioral: {
     id: "behavioral",
     label: "Behavioral",
     description: "How objects communicate and share responsibilities.",
-    color: "#c084fc",
-    badge: "bg-purple-400/10 text-purple-300 ring-purple-400/30",
-    dot: "bg-purple-400",
-    text: "text-purple-300",
+    color: "var(--color-cat-behavioral)",
+    badge: "bg-cat-behavioral/10 text-cat-behavioral-fg ring-cat-behavioral/30",
+    dot: "bg-cat-behavioral",
+    text: "text-cat-behavioral-fg",
   },
   enterprise: {
     id: "enterprise",
     label: "Enterprise",
     description:
       "Patterns beyond the GoF catalogue, drawn from enterprise and cloud architecture literature (Fowler, Nygard, Hohpe & Woolf, …): data access, resilience, wiring, messaging and resource reuse.",
-    color: "#fbbf24",
-    badge: "bg-amber-400/10 text-amber-300 ring-amber-400/30",
-    dot: "bg-amber-400",
-    text: "text-amber-300",
+    color: "var(--color-cat-enterprise)",
+    badge: "bg-cat-enterprise/10 text-cat-enterprise-fg ring-cat-enterprise/30",
+    dot: "bg-cat-enterprise",
+    text: "text-cat-enterprise-fg",
   },
 };
 

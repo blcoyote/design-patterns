@@ -14,8 +14,8 @@ import type { VisualizationProps } from "@/types/pattern";
 type Species = "oak" | "pine";
 
 const SPECIES_COLOR: Record<Species, string> = {
-  oak: "#4ade80",
-  pine: "#0d9488",
+  oak: "var(--color-tree-oak)",
+  pine: "var(--color-tree-pine)",
 };
 const SPECIES_LABEL: Record<Species, string> = { oak: "Oak", pine: "Pine" };
 
@@ -110,10 +110,10 @@ export function FlyweightVisualization({
         ariaLabel={`${pattern.name} diagram`}
       />
 
-      <div className="flex flex-wrap items-stretch gap-3 border-t border-slate-800 p-3">
+      <div className="flex flex-wrap items-stretch gap-3 border-t border-line p-3">
         <svg
           viewBox={`0 0 ${PLOT.width} ${PLOT.height}`}
-          className="h-auto min-w-65 flex-1 cursor-pointer rounded-lg bg-slate-950/40 outline-none ring-1 ring-slate-800"
+          className="h-auto min-w-65 flex-1 cursor-pointer rounded-lg bg-canvas/40 outline-none ring-1 ring-line"
           role="button"
           tabIndex={0}
           aria-label={`Rendered forest — ${instanceCount.toLocaleString()} Tree instances sharing ${typeCount} TreeType objects`}
@@ -134,7 +134,7 @@ export function FlyweightVisualization({
             stroke={treeActive || selectedId === "tree" ? color : "transparent"}
             strokeWidth={2}
           />
-          <text x={12} y={18} className="fill-slate-500 text-[10px] font-mono select-none">
+          <text x={12} y={18} className="fill-fg-subtle text-[10px] font-mono select-none">
             forest render
           </text>
           <AnimatePresence>
@@ -169,49 +169,49 @@ export function FlyweightVisualization({
           </AnimatePresence>
         </svg>
 
-        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-slate-950/40 p-3 ring-1 ring-slate-800">
+        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-canvas/40 p-3 ring-1 ring-line">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               Tree instances
             </span>
             <span
               className="font-mono text-sm font-bold"
-              style={{ color: treeActive ? color : "#e2e8f0" }}
+              style={{ color: treeActive ? color : "var(--color-diagram-text)" }}
             >
               {instanceCount.toLocaleString()}
             </span>
           </div>
           <button
             type="button"
-            className="flex items-center justify-between gap-3 rounded outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="flex items-center justify-between gap-3 rounded outline-none focus-visible:ring-2 focus-visible:ring-focus"
             aria-pressed={selectedId === "factory"}
             onClick={(e) => {
               e.stopPropagation();
               onSelect("factory");
             }}
           >
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               Shared TreeTypes
             </span>
             <span
               className="font-mono text-sm font-bold"
-              style={{ color: factoryActive ? color : "#e2e8f0" }}
+              style={{ color: factoryActive ? color : "var(--color-diagram-text)" }}
             >
               {typeCount}
             </span>
           </button>
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               Memory saved
             </span>
             <span
               className="font-mono text-sm font-bold"
-              style={{ color: instanceCount > 0 ? color : "#64748b" }}
+              style={{ color: instanceCount > 0 ? color : "var(--color-fg-subtle)" }}
             >
               {savedPct}%
             </span>
           </div>
-          <div className="mt-1 flex gap-2 border-t border-slate-800 pt-2">
+          <div className="mt-1 flex gap-2 border-t border-line pt-2">
             {(["oak", "pine"] as const).map((species) => (
               <button
                 key={species}
@@ -222,7 +222,7 @@ export function FlyweightVisualization({
                   e.stopPropagation();
                   onSelect("concreteType");
                 }}
-                className="flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[11px] text-slate-300 outline-none hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-white"
+                className="flex items-center gap-1.5 rounded px-1.5 py-0.5 text-[11px] text-fg-soft outline-none hover:bg-surface-raised focus-visible:ring-2 focus-visible:ring-focus"
                 style={typeActive ? { boxShadow: `inset 0 0 0 1px ${color}` } : undefined}
               >
                 <span

@@ -6,6 +6,7 @@ import { boxOf } from "@/lib/geometry";
 import { boxExit } from "@/lib/geometry";
 import { useCodeLanguage } from "@/hooks/useCodeLanguage";
 import type { VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 const CHIP = { x: 590, y: 185 };
 
@@ -68,14 +69,14 @@ export function SingletonVisualization({
               width={116}
               height={32}
               rx={16}
-              fill="#0f172a"
-              stroke="#334155"
+              fill="var(--color-diagram-node)"
+              stroke="var(--color-diagram-node-stroke)"
               strokeWidth={1.5}
             />
             <text
               y={-2}
               textAnchor="middle"
-              className="fill-slate-400 text-[9px] font-mono select-none"
+              className="fill-fg-muted text-[9px] font-mono select-none"
             >
               instances
             </text>
@@ -85,7 +86,7 @@ export function SingletonVisualization({
                 y={12}
                 textAnchor="middle"
                 className="text-[13px] font-mono font-bold select-none"
-                fill={created ? color : "#64748b"}
+                fill={created ? color : "var(--color-fg-subtle)"}
                 initial={reduceMotion ? undefined : { opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 12 }}
                 transition={{ duration: 0.35 }}
@@ -117,8 +118,10 @@ export function SingletonVisualization({
                   width={156}
                   height={34}
                   rx={8}
-                  fill="#1e293b"
-                  stroke={language === "go" ? "#f59e0b" : "#f43f5e"}
+                  fill="var(--color-surface-raised)"
+                  stroke={
+                    language === "go" ? "var(--color-warn-strong)" : "var(--color-danger-strong)"
+                  }
                   strokeWidth={1.25}
                   strokeDasharray="4 3"
                   opacity={0.9}
@@ -126,7 +129,7 @@ export function SingletonVisualization({
                 <text
                   y={5}
                   textAnchor="middle"
-                  className="fill-slate-300 text-[11px] font-mono select-none"
+                  className="fill-fg-soft text-[11px] font-mono select-none"
                 >
                   {language === "go"
                     ? "AppConfig{}"
@@ -138,7 +141,7 @@ export function SingletonVisualization({
                   <text
                     y={32}
                     textAnchor="middle"
-                    className="fill-amber-300 text-[9px] font-mono select-none"
+                    className="fill-warn-fg text-[9px] font-mono select-none"
                   >
                     constructible in package
                   </text>
@@ -148,7 +151,7 @@ export function SingletonVisualization({
                     y1={-13}
                     x2={74}
                     y2={13}
-                    stroke="#f43f5e"
+                    stroke="var(--color-danger-strong)"
                     strokeWidth={2.5}
                     strokeLinecap="round"
                     initial={reduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
@@ -220,7 +223,7 @@ export function SingletonVisualization({
                 )}
                 <circle
                   r={26}
-                  fill={`${color}22`}
+                  fill={alpha(color, 13)}
                   stroke={color}
                   strokeWidth={2}
                   filter="url(#glow)"
@@ -228,7 +231,7 @@ export function SingletonVisualization({
                 <text
                   y={-3}
                   textAnchor="middle"
-                  className="fill-slate-100 text-[11px] font-bold select-none"
+                  className="fill-fg-strong text-[11px] font-bold select-none"
                 >
                   instance
                 </text>

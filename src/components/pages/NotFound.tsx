@@ -6,14 +6,14 @@ export function NotFound() {
   return (
     <div className="py-24 text-center">
       <Seo page={notFoundSeoPage} />
-      <p className="font-mono text-sm text-slate-500">404</p>
-      <h1 className="mt-2 text-3xl font-bold text-white">Pattern not found</h1>
-      <p className="mt-3 text-slate-400">
+      <p className="font-mono text-sm text-fg-subtle">404</p>
+      <h1 className="mt-2 text-3xl font-bold text-fg">Pattern not found</h1>
+      <p className="mt-3 text-fg-muted">
         That page doesn’t exist — maybe it’s a pattern we haven’t added yet.
       </p>
       <Link
         to="/"
-        className="mt-6 inline-block rounded-lg bg-slate-800 px-4 py-2 text-sm text-white hover:bg-slate-700"
+        className="mt-6 inline-block rounded-lg bg-surface-raised px-4 py-2 text-sm text-fg hover:bg-surface-strong"
       >
         Back to all patterns
       </Link>

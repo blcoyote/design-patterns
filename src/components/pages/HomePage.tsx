@@ -30,15 +30,15 @@ export function HomePage() {
       <Seo page={homeSeoPage} />
       <section className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
         <div>
-          <p className="font-mono text-sm text-slate-500">// learn by watching objects talk</p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight text-white sm:text-6xl">
+          <p className="font-mono text-sm text-fg-subtle">// learn by watching objects talk</p>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-6xl">
             The top design patterns,{" "}
-            <span className="bg-linear-to-r from-emerald-300 via-sky-300 to-purple-300 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-cat-creational-fg via-cat-structural-fg to-cat-behavioral-fg bg-clip-text text-transparent">
               animated
             </span>
             .
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-soft">
             Each pattern comes with an interactive diagram. Press play to watch the messages flow,
             step through the scenario, and click any class or arrow to see its role — and the exact
             lines of code (TypeScript, C#, Python or Go) that implement it.
@@ -46,13 +46,13 @@ export function HomePage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               to={`/patterns/${patterns[0]?.slug ?? ""}`}
-              className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200"
+              className="rounded-lg bg-inverse px-5 py-2.5 text-sm font-semibold text-on-inverse transition hover:bg-inverse-hover"
             >
               Start with {patterns[0]?.name}
             </Link>
             <a
               href="#catalogue"
-              className="rounded-lg px-5 py-2.5 text-sm font-semibold text-slate-200 ring-1 ring-slate-700 hover:bg-slate-900"
+              className="rounded-lg px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-line-strong hover:bg-surface"
             >
               Browse all
             </a>
@@ -90,13 +90,13 @@ export function HomePage() {
           aria-label="Filter by category"
         >
           <FilterChip active={filter === "all"} onClick={() => setFilter("all")}>
-            All <span className="text-slate-500">{patterns.length}</span>
+            All <span className="text-fg-subtle">{patterns.length}</span>
           </FilterChip>
           {categoryOrder.map((c) => (
             <FilterChip key={c} active={filter === c} onClick={() => setFilter(c)}>
               <span className={`size-2 rounded-full ${categories[c].dot}`} />
               {categories[c].label}{" "}
-              <span className="text-slate-500">
+              <span className="text-fg-subtle">
                 {patterns.filter((p) => p.category === c).length}
               </span>
             </FilterChip>
@@ -105,17 +105,17 @@ export function HomePage() {
             <FilterChip active={filter === USED_IN_SITE} onClick={() => setFilter(USED_IN_SITE)}>
               <UsedBadge />
               Used in this site{" "}
-              <span className="text-slate-500">
+              <span className="text-fg-subtle">
                 {patterns.filter((p) => used.has(p.slug)).length}
               </span>
             </FilterChip>
           )}
         </div>
         {filter !== "all" && filter !== USED_IN_SITE && (
-          <p className="mt-3 text-sm text-slate-400">{categories[filter].description}</p>
+          <p className="mt-3 text-sm text-fg-muted">{categories[filter].description}</p>
         )}
         {filter === USED_IN_SITE && (
-          <p className="mt-3 text-sm text-slate-400">
+          <p className="mt-3 text-sm text-fg-muted">
             Patterns this site's own code uses on itself — see each page's "Used in this site" box.
           </p>
         )}
@@ -171,7 +171,14 @@ function HeroGraphic() {
         const B = nodes[b];
         return (
           <g key={i}>
-            <line x1={A.x} y1={A.y} x2={B.x} y2={B.y} stroke="#334155" strokeWidth="1.5" />
+            <line
+              x1={A.x}
+              y1={A.y}
+              x2={B.x}
+              y2={B.y}
+              stroke="var(--color-diagram-node-stroke)"
+              strokeWidth="1.5"
+            />
             <motion.circle
               r="5"
               fill={A.color}
@@ -199,13 +206,18 @@ function HeroGraphic() {
             width="116"
             height="48"
             rx="12"
-            fill="#0f172a"
+            fill="var(--color-diagram-node)"
             stroke={n.color}
             strokeWidth="1.5"
             animate={{ strokeOpacity: [0.4, 1, 0.4] }}
             transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.8 }}
           />
-          <text y="5" textAnchor="middle" className="text-[13px] font-semibold" fill="#e2e8f0">
+          <text
+            y="5"
+            textAnchor="middle"
+            className="text-[13px] font-semibold"
+            fill="var(--color-diagram-text)"
+          >
             {n.label}
           </text>
         </g>

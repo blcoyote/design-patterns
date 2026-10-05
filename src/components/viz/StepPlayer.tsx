@@ -25,7 +25,7 @@ function IconButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="grid size-10 place-items-center sm:size-9 rounded-lg text-slate-300 ring-1 ring-slate-700 transition hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+      className="grid size-10 place-items-center sm:size-9 rounded-lg text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
     >
       {children}
     </button>
@@ -48,7 +48,7 @@ export function StepPlayer({ steps, player, color }: Props) {
           type="button"
           onClick={player.toggle}
           aria-label={player.playing ? "Pause" : "Play"}
-          className="flex h-10 items-center gap-2 sm:h-9 rounded-lg px-4 text-sm font-semibold text-slate-950 transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-white"
+          className="flex h-10 items-center gap-2 sm:h-9 rounded-lg px-4 text-sm font-semibold text-fg-on-accent transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-focus"
           style={{ backgroundColor: color }}
         >
           {player.playing ? (
@@ -74,7 +74,7 @@ export function StepPlayer({ steps, player, color }: Props) {
         </IconButton>
 
         <div
-          className="ml-auto flex items-center gap-1 rounded-lg p-1 ring-1 ring-slate-700"
+          className="ml-auto flex items-center gap-1 rounded-lg p-1 ring-1 ring-line-strong"
           role="group"
           aria-label="Playback speed"
         >
@@ -85,7 +85,7 @@ export function StepPlayer({ steps, player, color }: Props) {
               onClick={() => player.setSpeed(s)}
               aria-pressed={player.speed === s}
               className={`rounded-md px-2.5 py-1.5 text-xs font-mono sm:px-2 sm:py-1 transition ${
-                player.speed === s ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"
+                player.speed === s ? "bg-surface-strong text-fg" : "text-fg-muted hover:text-fg"
               }`}
             >
               {s}×
@@ -108,7 +108,7 @@ export function StepPlayer({ steps, player, color }: Props) {
               aria-current={i === player.index ? "step" : undefined}
               className="group block w-full py-3"
             >
-              <span className="relative block h-1.5 overflow-hidden rounded-full bg-slate-800 group-hover:bg-slate-700">
+              <span className="relative block h-1.5 overflow-hidden rounded-full bg-surface-raised group-hover:bg-surface-strong">
                 {i < player.index && (
                   <span
                     className="absolute inset-0"
@@ -143,11 +143,11 @@ export function StepPlayer({ steps, player, color }: Props) {
           transition={{ duration: 0.25 }}
           aria-live="polite"
         >
-          <p className="text-xs font-mono uppercase tracking-wider text-slate-500">
+          <p className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
             Step {player.index + 1} / {steps.length}
           </p>
-          <h3 className="mt-1 text-lg font-semibold text-white">{step.title}</h3>
-          <p className="mt-1 text-slate-300">{step.description}</p>
+          <h3 className="mt-1 text-lg font-semibold text-fg">{step.title}</h3>
+          <p className="mt-1 text-fg-soft">{step.description}</p>
         </motion.div>
       </AnimatePresence>
     </div>

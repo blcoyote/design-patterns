@@ -4,9 +4,9 @@ export interface ParadigmMeta {
   id: Paradigm;
   label: string;
   description: string;
-  /** Hex colour used inside SVG visualisations. */
+  /** CSS colour (a `var(--color-…)` token) used inside SVG visualisations. */
   color: string;
-  /** Tailwind classes (kept as literals so Tailwind can detect them). */
+  /** Tailwind classes naming the same token (kept as literals so Tailwind can detect them). */
   badge: string;
   dot: string;
   text: string;
@@ -17,29 +17,29 @@ export const paradigms: Record<Paradigm, ParadigmMeta> = {
     id: "oo",
     label: "Object-oriented",
     description: "Architectures built from objects, interfaces and dependency graphs.",
-    color: "#fb7185",
-    badge: "bg-rose-400/10 text-rose-300 ring-rose-400/30",
-    dot: "bg-rose-400",
-    text: "text-rose-300",
+    color: "var(--color-paradigm-oo)",
+    badge: "bg-paradigm-oo/10 text-paradigm-oo-fg ring-paradigm-oo/30",
+    dot: "bg-paradigm-oo",
+    text: "text-paradigm-oo-fg",
   },
   functional: {
     id: "functional",
     label: "Functional",
     description:
       "Architectures most naturally expressed (and presented here) with pure functions, immutable data and explicit effects.",
-    color: "#a3e635",
-    badge: "bg-lime-400/10 text-lime-300 ring-lime-400/30",
-    dot: "bg-lime-400",
-    text: "text-lime-300",
+    color: "var(--color-paradigm-functional)",
+    badge: "bg-paradigm-functional/10 text-paradigm-functional-fg ring-paradigm-functional/30",
+    dot: "bg-paradigm-functional",
+    text: "text-paradigm-functional-fg",
   },
   both: {
     id: "both",
     label: "OO + Functional",
     description: "Architectures that mix objects and functional style, or are agnostic to either.",
-    color: "#818cf8",
-    badge: "bg-indigo-400/10 text-indigo-300 ring-indigo-400/30",
-    dot: "bg-indigo-400",
-    text: "text-indigo-300",
+    color: "var(--color-paradigm-both)",
+    badge: "bg-paradigm-both/10 text-paradigm-both-fg ring-paradigm-both/30",
+    dot: "bg-paradigm-both",
+    text: "text-paradigm-both-fg",
   },
 };
 

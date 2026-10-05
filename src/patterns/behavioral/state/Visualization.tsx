@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import { boxOf, edgeBetween } from "@/lib/geometry";
 import type { Packet, Step, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * State keeps the generic diagram's ring-ish layout (Document in the middle,
@@ -168,7 +169,7 @@ export function StateVisualization({
       />
       <motion.circle
         r={5}
-        fill="#ffffff"
+        fill="var(--color-diagram-packet)"
         initial={false}
         animate={{ cx: connector.start.x, cy: connector.start.y }}
         transition={springTransition}
@@ -200,8 +201,8 @@ export function StateVisualization({
         overlay={overlay}
         ariaLabel={`${pattern.name} diagram`}
       />
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         {EVENT_IDS.map((event) => {
@@ -221,12 +222,12 @@ export function StateVisualization({
                 e.stopPropagation();
                 fire(event);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isValid
-                  ? "text-slate-100 ring-slate-700 hover:bg-slate-800"
-                  : "text-slate-500 ring-slate-800 ring-dashed hover:bg-slate-900"
+                  ? "text-fg-strong ring-line-strong hover:bg-surface-raised"
+                  : "text-fg-subtle ring-line ring-dashed hover:bg-surface"
               }`}
-              style={isValid ? { boxShadow: `inset 0 0 0 1px ${color}55` } : undefined}
+              style={isValid ? { boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` } : undefined}
             >
               {EVENT_LABELS[event]}
             </button>

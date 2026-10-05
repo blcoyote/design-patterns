@@ -58,7 +58,13 @@ export function MvuVisualization({
 
   const underlay = (
     <g pointerEvents="none">
-      <path d={pathD()} fill="none" stroke="#1e293b" strokeWidth={2} strokeDasharray="6 6" />
+      <path
+        d={pathD()}
+        fill="none"
+        stroke="var(--color-line)"
+        strokeWidth={2}
+        strokeDasharray="6 6"
+      />
 
       {/* Pure zone: update() and view() live on the right, free of I/O. */}
       <rect
@@ -68,14 +74,14 @@ export function MvuVisualization({
         height={120}
         rx={10}
         fill="none"
-        stroke="#1e293b"
+        stroke="var(--color-line)"
         strokeDasharray="3 5"
       />
       <text
         x={580}
         y={14}
         textAnchor="middle"
-        className="fill-slate-600 text-[10px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[10px] font-mono tracking-wider uppercase select-none"
       >
         pure
       </text>
@@ -86,14 +92,14 @@ export function MvuVisualization({
         height={110}
         rx={10}
         fill="none"
-        stroke="#1e293b"
+        stroke="var(--color-line)"
         strokeDasharray="3 5"
       />
       <text
         x={580}
         y={460 - 6}
         textAnchor="middle"
-        className="fill-slate-600 text-[10px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[10px] font-mono tracking-wider uppercase select-none"
       >
         pure
       </text>
@@ -106,13 +112,13 @@ export function MvuVisualization({
         height={280}
         rx={10}
         fill="none"
-        stroke="#1e293b"
+        stroke="var(--color-line)"
         strokeDasharray="3 5"
       />
       <text
         x={30}
         y={118}
-        className="fill-slate-600 text-[10px] font-mono tracking-wider uppercase select-none"
+        className="fill-fg-faint text-[10px] font-mono tracking-wider uppercase select-none"
       >
         runtime / effects
       </text>

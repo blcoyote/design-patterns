@@ -6,6 +6,7 @@ import { PacketLayer } from "@/components/viz/PacketLayer";
 import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH, type EdgeGeometry } from "@/lib/geometry";
 import type { Packet as PacketDef, Participant, Step, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Visitor is drawn as the Shape/ShapeVisitor diagram, but every element gets a
@@ -167,7 +168,7 @@ function ShapeNode({
       tabIndex={0}
       aria-label={`${p.label} — ${p.role}`}
       aria-pressed={selected}
-      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-white"
+      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
       onClick={(e) => {
         e.stopPropagation();
         select();
@@ -205,8 +206,10 @@ function ShapeNode({
         width={w}
         height={h}
         rx={12}
-        fill={active ? `${color}22` : "#0f172a"}
-        stroke={selected ? "#ffffff" : active ? color : "#334155"}
+        fill={active ? alpha(color, 13) : "var(--color-diagram-node)"}
+        stroke={
+          selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-node-stroke)"
+        }
         strokeWidth={selected ? 2.5 : 1.5}
         strokeDasharray={isInterface ? "6 4" : undefined}
       />
@@ -214,28 +217,28 @@ function ShapeNode({
         <text
           y={-h / 2 + 15}
           textAnchor="middle"
-          className="fill-slate-400 text-[10px] font-mono select-none"
+          className="fill-fg-muted text-[10px] font-mono select-none"
         >
           «interface»
         </text>
       )}
       {Icon && (
         <g transform={`translate(${-w / 2 + 20} ${h / 2 - 17})`}>
-          <Icon color={active || selected ? color : "#64748b"} />
+          <Icon color={active || selected ? color : "var(--color-fg-subtle)"} />
         </g>
       )}
       <text
         y={isInterface ? 6 : -2}
         textAnchor="middle"
         className={`text-[13px] font-semibold select-none ${isInterface ? "italic" : ""}`}
-        fill={active || selected ? "#f8fafc" : "#e2e8f0"}
+        fill={active || selected ? "var(--color-diagram-text-active)" : "var(--color-diagram-text)"}
       >
         {p.label}
       </text>
       <text
         y={isInterface ? 22 : 16}
         textAnchor="middle"
-        className="fill-slate-400 text-[10px] select-none"
+        className="fill-fg-muted text-[10px] select-none"
       >
         {p.role}
       </text>
@@ -260,7 +263,7 @@ function ShapeNode({
           <text
             y={4}
             textAnchor="middle"
-            className="fill-slate-950 text-[11px] font-semibold font-mono select-none"
+            className="fill-fg-on-accent text-[11px] font-semibold font-mono select-none"
           >
             {note}
           </text>
@@ -355,7 +358,7 @@ export function VisitorVisualization({
         <defs>
           <EdgeMarkers color={color} />
           <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" fill="#1e293b" />
+            <circle cx="1" cy="1" r="1" fill="var(--color-diagram-grid)" />
           </pattern>
         </defs>
         <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />
@@ -422,8 +425,8 @@ export function VisitorVisualization({
         />
       </svg>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         <button
@@ -433,10 +436,10 @@ export function VisitorVisualization({
             e.stopPropagation();
             run("area");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             activeVisitor === "area"
-              ? "text-slate-950 ring-transparent"
-              : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+              ? "text-fg-on-accent ring-transparent"
+              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
           }`}
           style={activeVisitor === "area" ? { backgroundColor: color } : undefined}
         >
@@ -449,10 +452,10 @@ export function VisitorVisualization({
             e.stopPropagation();
             run("json");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             activeVisitor === "json"
-              ? "text-slate-950 ring-transparent"
-              : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+              ? "text-fg-on-accent ring-transparent"
+              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
           }`}
           style={activeVisitor === "json" ? { backgroundColor: color } : undefined}
         >
@@ -465,20 +468,20 @@ export function VisitorVisualization({
               e.stopPropagation();
               setLog([]);
             }}
-            className="ml-auto rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-500 ring-1 ring-slate-800 transition hover:bg-slate-900 hover:text-slate-300"
+            className="ml-auto rounded-lg px-2.5 py-1.5 text-xs font-semibold text-fg-subtle ring-1 ring-line transition hover:bg-surface hover:text-fg-soft"
           >
             Clear log
           </button>
         )}
       </div>
 
-      <div className="border-t border-slate-800 p-3">
-        <div className="mb-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-500">
+      <div className="border-t border-line p-3">
+        <div className="mb-1.5 text-[11px] font-mono uppercase tracking-wider text-fg-subtle">
           Output (accumulates across runs)
         </div>
-        <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg bg-slate-900/60 p-2 font-mono text-xs text-slate-300">
+        <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg bg-surface/60 p-2 font-mono text-xs text-fg-soft">
           {log.length === 0 ? (
-            <div className="text-slate-600">
+            <div className="text-fg-faint">
               Run a visitor above to see the same Circle + Rectangle produce a different result.
             </div>
           ) : (
@@ -487,7 +490,7 @@ export function VisitorVisualization({
                 <span style={{ color }}>
                   {entry.visitor === "area" ? "AreaCalculator" : "JsonExporter"}
                 </span>
-                <span className="text-slate-500"> → </span>
+                <span className="text-fg-subtle"> → </span>
                 {entry.result}
               </div>
             ))

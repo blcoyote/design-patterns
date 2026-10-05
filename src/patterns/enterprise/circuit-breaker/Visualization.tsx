@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import { boxOf, edgeBetween, NODE_HEIGHT } from "@/lib/geometry";
 import type { Packet, Step, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Circuit Breaker keeps the generic diagram's layout (Client / CircuitBreaker /
@@ -313,7 +314,7 @@ export function CircuitBreakerVisualization({
           />
           <motion.circle
             r={5}
-            fill="#ffffff"
+            fill="var(--color-diagram-packet)"
             initial={false}
             animate={{ cx: connector.start.x, cy: connector.start.y }}
             transition={springTransition}
@@ -333,13 +334,13 @@ export function CircuitBreakerVisualization({
           transform={`translate(${breakerP.x - 70} ${breakerP.y + NODE_HEIGHT / 2 + 30})`}
           pointerEvents="none"
         >
-          <rect x={0} y={0} width={140} height={8} rx={4} fill="#1e293b" />
+          <rect x={0} y={0} width={140} height={8} rx={4} fill="var(--color-line)" />
           <motion.rect
             x={0}
             y={0}
             height={8}
             rx={4}
-            fill={failureCount >= FAILURE_THRESHOLD ? "#f87171" : color}
+            fill={failureCount >= FAILURE_THRESHOLD ? "var(--color-danger)" : color}
             initial={false}
             animate={{ width: 140 * meterPct }}
             transition={
@@ -350,7 +351,7 @@ export function CircuitBreakerVisualization({
             x={70}
             y={22}
             textAnchor="middle"
-            className="fill-slate-400 text-[10px] font-mono select-none"
+            className="fill-fg-muted text-[10px] font-mono select-none"
           >
             {`failures ${Math.min(failureCount, FAILURE_THRESHOLD)}/${FAILURE_THRESHOLD}`}
           </text>
@@ -362,7 +363,7 @@ export function CircuitBreakerVisualization({
           transform={`translate(${openP.x} ${openP.y + NODE_HEIGHT / 2 + 26})`}
           pointerEvents="none"
         >
-          <text textAnchor="middle" className="fill-slate-400 text-[10px] font-mono select-none">
+          <text textAnchor="middle" className="fill-fg-muted text-[10px] font-mono select-none">
             {cooldownRemainingMs <= 0
               ? "cooldown over: next request is the trial"
               : reduceMotion
@@ -391,8 +392,8 @@ export function CircuitBreakerVisualization({
         overlay={overlay}
         ariaLabel={`${pattern.name} diagram`}
       />
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         <button
@@ -404,10 +405,10 @@ export function CircuitBreakerVisualization({
             setHealthy(true);
             onSelect("service");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             healthy
-              ? "text-slate-950 ring-transparent"
-              : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+              ? "text-fg-on-accent ring-transparent"
+              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
           }`}
           style={healthy ? { backgroundColor: color } : undefined}
         >
@@ -422,16 +423,16 @@ export function CircuitBreakerVisualization({
             setHealthy(false);
             onSelect("service");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-white ${
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             !healthy
-              ? "text-slate-950 ring-transparent"
-              : "text-slate-300 ring-slate-700 hover:bg-slate-800 hover:text-white"
+              ? "text-fg-on-accent ring-transparent"
+              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
           }`}
-          style={!healthy ? { backgroundColor: "#f87171" } : undefined}
+          style={!healthy ? { backgroundColor: "var(--color-danger)" } : undefined}
         >
           Service failing
         </button>
-        <span className="mx-1 h-5 w-px bg-slate-800" />
+        <span className="mx-1 h-5 w-px bg-line" />
         <button
           type="button"
           aria-label="Send a request through the breaker"
@@ -439,8 +440,8 @@ export function CircuitBreakerVisualization({
             e.stopPropagation();
             sendRequest();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-100 ring-1 ring-slate-700 transition hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-white"
-          style={{ boxShadow: `inset 0 0 0 1px ${color}55` }}
+          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+          style={{ boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` }}
         >
           Send request →
         </button>

@@ -1,7 +1,9 @@
-import { Highlight, themes } from "prism-react-renderer";
+import { Highlight } from "prism-react-renderer";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import "@/lib/prism";
 import type { CodeLanguage } from "@/hooks/useCodeLanguage";
+import { codeTheme } from "@/theme/codeTheme";
+import { alpha } from "@/theme/alpha";
 
 export interface CodeSource {
   lang: CodeLanguage;
@@ -79,10 +81,8 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
   };
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-xl bg-[#011627] ring-1 ring-slate-800 ${className}`}
-    >
-      <div className="flex items-center justify-between gap-2 border-b border-slate-800 px-3 py-2 text-xs text-slate-400 sm:px-4">
+    <div className={`relative overflow-hidden rounded-xl bg-code-bg ring-1 ring-line ${className}`}>
+      <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2 text-xs text-fg-muted sm:px-4">
         {sources.length > 1 ? (
           <div
             role="tablist"
@@ -124,7 +124,7 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
         <button
           type="button"
           onClick={copy}
-          className="shrink-0 rounded px-2 py-1 hover:bg-slate-800 hover:text-white"
+          className="shrink-0 rounded px-2 py-1 hover:bg-surface-raised hover:text-fg"
         >
           {copied ? "Copied ✓" : "Copy"}
         </button>
@@ -136,11 +136,7 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
         aria-labelledby={tabId(current.lang)}
         className="relative max-h-120 overflow-auto py-3"
       >
-        <Highlight
-          code={current.text}
-          language={PRISM_LANGUAGE[current.lang]}
-          theme={themes.nightOwl}
-        >
+        <Highlight code={current.text} language={PRISM_LANGUAGE[current.lang]} theme={codeTheme}>
           {({ tokens, getLineProps, getTokenProps }) => (
             <pre className="min-w-max text-[13px] leading-6">
               {tokens.map((line, i) => {
@@ -159,10 +155,10 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
                     }`}
                     style={{
                       borderColor: on ? color : "transparent",
-                      backgroundColor: on ? `${color}1f` : undefined,
+                      backgroundColor: on ? alpha(color, 12) : undefined,
                     }}
                   >
-                    <span className="w-10 shrink-0 pr-4 text-right text-slate-600 select-none">
+                    <span className="w-10 shrink-0 pr-4 text-right text-fg-faint select-none">
                       {n}
                     </span>
                     <span>

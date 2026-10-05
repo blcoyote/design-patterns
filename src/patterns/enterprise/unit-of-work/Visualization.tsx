@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Diagram } from "@/components/viz/Diagram";
 import type { VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * Unit of Work keeps the generic class diagram up top (UnitOfWork holding its
@@ -23,9 +24,13 @@ interface Card {
 }
 
 const KIND_LABEL: Record<Kind, string> = { new: "NEW", dirty: "DIRTY", removed: "REMOVED" };
-const KIND_COLOR: Record<Kind, string> = { new: "#34d399", dirty: "#fbbf24", removed: "#f87171" };
-const FAIL_COLOR = "#f87171";
-const IDLE_COLOR = "#475569";
+const KIND_COLOR: Record<Kind, string> = {
+  new: "var(--color-ok)",
+  dirty: "var(--color-warn)",
+  removed: "var(--color-danger)",
+};
+const FAIL_COLOR = "var(--color-danger)";
+const IDLE_COLOR = "var(--color-line-bold)";
 
 const ORDER: Card = { id: "order-104", label: "Order #104", kind: "new" };
 const CUSTOMER: Card = { id: "customer-58", label: "Customer #58", kind: "dirty" };
@@ -147,7 +152,7 @@ export function UnitOfWorkVisualization({
         ? FAIL_COLOR
         : scene.phase === "idle"
           ? IDLE_COLOR
-          : "#fbbf24";
+          : "var(--color-warn)";
 
   return (
     <div>
@@ -166,10 +171,10 @@ export function UnitOfWorkVisualization({
         ariaLabel={`${pattern.name} diagram`}
       />
 
-      <div className="grid gap-3 border-t border-slate-800 p-3 sm:grid-cols-[2fr_1fr_1.4fr]">
+      <div className="grid gap-3 border-t border-line p-3 sm:grid-cols-[2fr_1fr_1.4fr]">
         <button
           type="button"
-          className="flex min-h-28 flex-col gap-2 rounded-lg bg-slate-950/40 p-3 text-left ring-1 ring-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-white"
+          className="flex min-h-28 flex-col gap-2 rounded-lg bg-canvas/40 p-3 text-left ring-1 ring-line outline-none focus-visible:ring-2 focus-visible:ring-focus"
           aria-pressed={selectedId === "unitOfWork"}
           aria-label="UnitOfWork pending changes"
           onClick={(e) => {
@@ -177,7 +182,7 @@ export function UnitOfWorkVisualization({
             onSelect("unitOfWork");
           }}
         >
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
             UnitOfWork — pending changes
           </span>
           <div className="flex min-h-8 flex-wrap items-start gap-1.5">
@@ -200,7 +205,7 @@ export function UnitOfWorkVisualization({
                     style={{
                       color: chipColor,
                       borderColor: chipColor,
-                      boxShadow: `inset 0 0 0 1px ${chipColor}55`,
+                      boxShadow: `inset 0 0 0 1px ${alpha(chipColor, 33)}`,
                     }}
                   >
                     <span className="font-bold">{KIND_LABEL[card.kind]}</span>
@@ -210,14 +215,14 @@ export function UnitOfWorkVisualization({
               })}
             </AnimatePresence>
             {scene.cards.length === 0 && (
-              <span className="text-xs text-slate-600">— nothing pending —</span>
+              <span className="text-xs text-fg-faint">— nothing pending —</span>
             )}
           </div>
         </button>
 
         <button
           type="button"
-          className="flex min-h-28 flex-col items-center justify-center gap-1 rounded-lg bg-slate-950/40 p-3 text-center ring-1 ring-slate-800 outline-none transition-shadow duration-300 focus-visible:ring-2 focus-visible:ring-white"
+          className="flex min-h-28 flex-col items-center justify-center gap-1 rounded-lg bg-canvas/40 p-3 text-center ring-1 ring-line outline-none transition-shadow duration-300 focus-visible:ring-2 focus-visible:ring-focus"
           aria-pressed={selectedId === "unitOfWork"}
           aria-label="Current transaction phase"
           style={{ boxShadow: `inset 0 0 0 1.5px ${bandColor}` }}
@@ -226,7 +231,7 @@ export function UnitOfWorkVisualization({
             onSelect("unitOfWork");
           }}
         >
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
             Transaction
           </span>
           <span className="font-mono text-sm font-bold" style={{ color: bandColor }}>
@@ -236,7 +241,7 @@ export function UnitOfWorkVisualization({
 
         <button
           type="button"
-          className="flex min-h-28 flex-col gap-2 rounded-lg bg-slate-950/40 p-3 text-left ring-1 ring-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-white"
+          className="flex min-h-28 flex-col gap-2 rounded-lg bg-canvas/40 p-3 text-left ring-1 ring-line outline-none focus-visible:ring-2 focus-visible:ring-focus"
           aria-pressed={selectedId === "database"}
           aria-label="Database state"
           onClick={(e) => {
@@ -244,15 +249,15 @@ export function UnitOfWorkVisualization({
             onSelect("database");
           }}
         >
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
             Database
           </span>
-          <span className="text-sm text-slate-300">{DATABASE_CAPTION[scene.phase]}</span>
+          <span className="text-sm text-fg-soft">{DATABASE_CAPTION[scene.phase]}</span>
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-800 p-3">
-        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-slate-500">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line p-3">
+        <span className="mr-1 text-xs font-mono uppercase tracking-wider text-fg-subtle">
           Try it
         </span>
         <button
@@ -261,7 +266,7 @@ export function UnitOfWorkVisualization({
             e.stopPropagation();
             runTry("success");
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-950 ring-1 ring-transparent transition focus-visible:outline-2 focus-visible:outline-white"
+          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-on-accent ring-1 ring-transparent transition focus-visible:outline-2 focus-visible:outline-focus"
           style={{ backgroundColor: color }}
         >
           Commit succeeds
@@ -272,7 +277,7 @@ export function UnitOfWorkVisualization({
             e.stopPropagation();
             runTry("failure");
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-300 ring-1 ring-slate-700 transition hover:bg-slate-800 hover:text-white focus-visible:outline-2 focus-visible:outline-white"
+          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
         >
           Commit fails → rollback
         </button>

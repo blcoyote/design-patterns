@@ -8,6 +8,7 @@ import { PacketLayer } from "@/components/viz/PacketLayer";
 import { boxExit, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
 import type { Box, EdgeGeometry, Point } from "@/lib/geometry";
 import type { Participant, Relation, VisualizationProps } from "@/types/pattern";
+import { alpha } from "@/theme/alpha";
 
 /**
  * The decorator stack drawn as literal, concentric rounded rectangles:
@@ -136,7 +137,7 @@ function Layer({
       tabIndex={0}
       aria-label={`${p.label} — ${p.role}`}
       aria-pressed={selected}
-      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-white"
+      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
       onClick={(e) => {
         e.stopPropagation();
         select();
@@ -175,19 +176,21 @@ function Layer({
         width={w}
         height={h}
         rx={22}
-        fill={active ? `${color}1f` : "#0f172a"}
-        stroke={selected ? "#ffffff" : active ? color : "#334155"}
+        fill={active ? alpha(color, 12) : "var(--color-diagram-node)"}
+        stroke={
+          selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-node-stroke)"
+        }
         strokeWidth={selected ? 2.5 : 1.5}
       />
       <text
         y={-h / 2 + 22}
         textAnchor="middle"
         className="text-[13px] font-semibold select-none"
-        fill={active || selected ? "#f8fafc" : "#e2e8f0"}
+        fill={active || selected ? "var(--color-diagram-text-active)" : "var(--color-diagram-text)"}
       >
         {p.label}
       </text>
-      <text y={-h / 2 + 38} textAnchor="middle" className="fill-slate-400 text-[11px] select-none">
+      <text y={-h / 2 + 38} textAnchor="middle" className="fill-fg-muted text-[11px] select-none">
         {p.role}
       </text>
       {note && (
@@ -203,7 +206,7 @@ function Layer({
           <text
             y={4}
             textAnchor="middle"
-            className="fill-slate-950 text-[11px] font-semibold font-mono select-none"
+            className="fill-fg-on-accent text-[11px] font-semibold font-mono select-none"
           >
             {note}
           </text>
@@ -274,7 +277,7 @@ export function DecoratorVisualization({
       <defs>
         <EdgeMarkers color={color} />
         <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="1" fill="#1e293b" />
+          <circle cx="1" cy="1" r="1" fill="var(--color-diagram-grid)" />
         </pattern>
       </defs>
       <rect x="-1000" y="-1000" width="3000" height="3000" fill="url(#grid)" />

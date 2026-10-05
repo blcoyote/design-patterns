@@ -34,7 +34,7 @@ export function DiagramEdge({
   onSelect,
 }: DiagramEdgeProps) {
   const state: EdgeState = selected ? "selected" : active ? "active" : "idle";
-  const stroke = selected ? "#ffffff" : active ? color : "#475569";
+  const stroke = selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-edge)";
   const marker = r.type === "implements" ? "triangle" : "arrow";
   const label = r.label ?? (r.type === "creates" ? "«create»" : undefined);
   const select = () => onSelect(r.id);
@@ -65,7 +65,7 @@ export function DiagramEdge({
         strokeDasharray={DASH[r.type]}
         markerEnd={`url(#${marker}-${state})`}
         markerStart={r.type === "holds" ? `url(#diamond-${state})` : undefined}
-        className="transition-[stroke] duration-300 group-hover:stroke-slate-200 group-focus-visible:stroke-white"
+        className="transition-[stroke] duration-300 group-hover:stroke-fg-body group-focus-visible:stroke-focus"
       />
       {active && (
         <path
@@ -88,14 +88,18 @@ export function DiagramEdge({
             width={label.length * 6.8 + 14}
             height={18}
             rx={5}
-            fill="#020617"
-            stroke={active || selected ? stroke : "#1e293b"}
+            fill="var(--color-diagram-label-bg)"
+            stroke={active || selected ? stroke : "var(--color-diagram-label-stroke)"}
           />
           <text
             y={4}
             textAnchor="middle"
             className="text-[11px] font-mono select-none"
-            fill={active || selected ? "#f1f5f9" : "#94a3b8"}
+            fill={
+              active || selected
+                ? "var(--color-diagram-label-text-active)"
+                : "var(--color-diagram-label-text)"
+            }
           >
             {label}
           </text>
@@ -107,7 +111,11 @@ export function DiagramEdge({
 
 /** Marker definitions shared by all edges, one per visual state. */
 export function EdgeMarkers({ color }: { color: string }) {
-  const colors: Record<EdgeState, string> = { idle: "#475569", active: color, selected: "#ffffff" };
+  const colors: Record<EdgeState, string> = {
+    idle: "var(--color-diagram-edge)",
+    active: color,
+    selected: "var(--color-selected)",
+  };
   return (
     <>
       {(Object.keys(colors) as EdgeState[]).map((s) => (
@@ -132,7 +140,12 @@ export function EdgeMarkers({ color }: { color: string }) {
             markerHeight="10"
             orient="auto"
           >
-            <path d="M 1 1 L 11 6 L 1 11 z" fill="#020617" stroke={colors[s]} strokeWidth="1.5" />
+            <path
+              d="M 1 1 L 11 6 L 1 11 z"
+              fill="var(--color-canvas)"
+              stroke={colors[s]}
+              strokeWidth="1.5"
+            />
           </marker>
           <marker
             id={`diamond-${s}`}

@@ -24,6 +24,16 @@ const rel = (path: string) => relative(ROOT, path).split(sep).join("/");
 // 1. Colour is decided in src/theme and nowhere else.
 // ---------------------------------------------------------------------------------------
 
+/**
+ * Standalone assets that legitimately keep their own colours. An image loaded through
+ * `<link rel="icon">` or `<img>` is a separate document: it cannot read the page's CSS
+ * custom properties, so it cannot use tokens. Each entry needs a reason, and a stale one
+ * (file gone, or no longer holding a raw colour) fails below.
+ */
+const STANDALONE_ASSETS: Record<string, string> = {
+  "public/favicon.svg": "loaded via <link rel=icon>, so it cannot read the page's CSS variables",
+};
+
 /** Files whose colour literals are fine: the theme itself, tests, and the teaching content. */
 function isExempt(file: string): boolean {
   return (
@@ -46,24 +56,45 @@ const RAW_COLOUR_RULES: { what: string; pattern: RegExp }[] = [
   { what: "3/4-digit hex string", pattern: /["'`]#[0-9a-fA-F]{3,4}["'`]/ },
   { what: "rgb()/hsl()/oklch()/… literal", pattern: /\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(/ },
   { what: "color-mix() (use alpha() from src/theme)", pattern: /\bcolor-mix\(/ },
+  {
+    what: "color(<space> …) literal",
+    pattern: /\bcolor\((?:srgb|srgb-linear|display-p3|a98-rgb|prophoto-rgb|rec2020|xyz)/,
+  },
   { what: "Tailwind palette class", pattern: new RegExp(`\\b(?:${UTILITIES})-(?:${PALETTE})\\b`) },
   { what: "arbitrary-value colour class", pattern: /\b[a-z]+-\[#[0-9a-fA-F]+\]/ },
 ];
 
-const sourceFiles = walk(SRC)
-  .map(rel)
-  .filter((file) => /\.(tsx?|css)$/.test(file) && !isExempt(file));
+const sourceFiles = [
+  ...walk(SRC)
+    .map(rel)
+    .filter((file) => /\.(tsx?|css)$/.test(file) && !isExempt(file)),
+  // Outside src: the HTML shell and everything shipped from public/.
+  "index.html",
+  ...walk(join(ROOT, "public"))
+    .map(rel)
+    .filter(
+      (file) => /\.(svg|html|css|json|webmanifest)$/.test(file) && !(file in STANDALONE_ASSETS),
+    ),
+];
 
 describe("colour lives in src/theme", () => {
   it("scans a meaningful number of files", () => {
     expect(sourceFiles.length).toBeGreaterThan(50);
+    expect(sourceFiles).toContain("index.html");
+  });
+
+  it.each(Object.keys(STANDALONE_ASSETS))("exemption %s is still needed", (file) => {
+    const text = readFileSync(join(ROOT, file), "utf8");
+    expect(RAW_COLOUR_RULES.some(({ pattern }) => pattern.test(text))).toBe(true);
   });
 
   it.each(RAW_COLOUR_RULES)("no $what outside src/theme", ({ pattern }) => {
     const offenders = sourceFiles.flatMap((file) =>
       readFileSync(join(ROOT, file), "utf8")
         .split("\n")
-        .flatMap((line, i) => (pattern.test(line) ? [`${file}:${i + 1}  ${line.trim()}`] : [])),
+        .flatMap((line, i) =>
+          pattern.test(line) ? [`${file}:${i + 1}  ${line.trim().slice(0, 120)}`] : [],
+        ),
     );
     expect(offenders).toEqual([]);
   });
@@ -94,6 +125,18 @@ describe("tokens.css", () => {
   it("declares the default theme's colour tokens", () => {
     expect(defaultTokens.length).toBeGreaterThan(40);
     expect(new Set(defaultTokens).size).toBe(defaultTokens.length); // no token declared twice
+  });
+
+  it("every var(--color-…) inside tokens.css is a declared token or a Tailwind palette colour", () => {
+    const known = new Set(defaultTokens);
+    const shade = "(?:-(?:50|100|200|300|400|500|600|700|800|900|950))?";
+    const palette = new RegExp(
+      `^--color-(?:(?:${PALETTE.replace("|white|black", "")})${shade}|white|black)$`,
+    );
+    const unresolved = [...tokensCss.matchAll(/var\((--color-[a-z0-9-]+)\)/g)]
+      .map((m) => m[1])
+      .filter((name) => !known.has(name) && !palette.test(name));
+    expect(unresolved).toEqual([]);
   });
 
   it("every var(--color-…) used in source is a declared token", () => {

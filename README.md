@@ -211,7 +211,7 @@ confused with…" box on the subjects' own pages pick it up automatically.
 
 ## Theming
 
-Every colour decision lives in [`src/theme/tokens.css`](src/theme/tokens.css) and nowhere else, so changing how the site looks (or adding a theme) never means touching components. The file has three tiers:
+Every colour decision lives in [`src/theme/tokens.css`](src/theme/tokens.css) and nowhere else (the one exemption is standalone image assets such as `public/favicon.svg`, which are separate documents that cannot read CSS variables; the guardrail test lists them), so changing how the site looks (or adding a theme) never means touching components. The file has three tiers:
 
 1. **Primitives.** Tailwind's palette (`--color-slate-950`, …) plus a few literal hex values. The diagram, accent and status colours are literals on purpose: the SVG scenes have always used these sRGB hexes, and Tailwind v4's palette is wider-gamut oklch that renders visibly more vivid.
 2. **Semantic roles.** What a colour is _for_: surfaces (`canvas`, `surface`, `surface-raised`), lines (`line`, `line-strong`), text (`fg`, `fg-body`, `fg-muted`, `fg-subtle`, `fg-on-accent`), status (`ok`, `warn`, `danger`), `diagram-*` for the SVG scenes, `code-*` / `syntax-*` for code blocks.
@@ -240,7 +240,7 @@ export const themes = [
 
 The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. There is no theme switcher in the UI yet; only the dark theme ships.
 
-`npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color-mix()` or Tailwind palette class outside `src/theme/`, every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the dark value).
+`npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color()`, `color-mix()` or Tailwind palette class outside `src/theme/` (scanning `src/`, `index.html` and `public/`), every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the dark value).
 
 ## Used in this site
 

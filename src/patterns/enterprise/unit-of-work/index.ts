@@ -39,7 +39,7 @@ export const pattern: PatternDefinition = {
     "Hibernate / NHibernate's Session, which tracks the changes you make and flushes them together to the database.",
     "SQLAlchemy's Session object, which tracks new and changed objects, flushes them inside one transaction (automatically before queries, and at commit), and makes them permanent on session.commit().",
   ],
-  related: ["repository", "command", "memento"],
+  related: ["repository", "command", "memento", "outbox"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

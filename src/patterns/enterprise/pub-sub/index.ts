@@ -41,7 +41,7 @@ export const pattern: PatternDefinition = {
     "Google Cloud Pub/Sub and AWS SNS",
     "In-browser event buses built on EventTarget/CustomEvent, or Node.js EventEmitter used as a shared bus",
   ],
-  related: ["observer", "mediator", "command"],
+  related: ["observer", "mediator", "command", "outbox"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

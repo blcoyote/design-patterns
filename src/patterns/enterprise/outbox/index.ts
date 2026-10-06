@@ -107,7 +107,7 @@ export const pattern: PatternDefinition = {
       from: "orderService",
       to: "database",
       type: "calls",
-      label: "order + outbox row",
+      label: "order + event",
       description:
         "One transaction inserts the order row and the outbox row for the OrderPlaced event. They commit together or not at all.",
       code: "placeOrder",
@@ -121,7 +121,7 @@ export const pattern: PatternDefinition = {
       description:
         "The relay asks the database for outbox rows that are not yet published, oldest first, and gets back a snapshot list.",
       code: "relayPoll",
-      bend: 30,
+      bend: 50,
     },
     {
       id: "mark",
@@ -132,7 +132,7 @@ export const pattern: PatternDefinition = {
       description:
         "After a successful publish the relay marks the row published so later polls skip it. If this call fails, the row stays pending and will be published again.",
       code: "relayMark",
-      bend: -30,
+      bend: -50,
     },
     {
       id: "publish",
@@ -164,7 +164,7 @@ export const pattern: PatternDefinition = {
         "OrderService runs one transaction that inserts the order A1 row and an outbox row for the order.placed event. There is no broker call at all, so there is nothing that can half-succeed.",
       highlight: ["orderService", "save", "database"],
       packets: [{ relation: "save", label: "order A1 + event" }],
-      notes: { database: "order A1 · outbox #1 pending" },
+      notes: { database: "#1 pending" },
       code: "placeOrder",
     },
     {
@@ -205,7 +205,7 @@ export const pattern: PatternDefinition = {
         "The relay loses its database connection before it can mark row #1 published. It logs the failure and stops, and row #1 stays pending. The message was delivered but the outbox does not know that yet.",
       highlight: ["outboxRelay", "mark", "database"],
       packets: [{ relation: "mark", label: "mark #1 ✗" }],
-      notes: { database: "#1 still pending", outboxRelay: "mark failed" },
+      notes: { database: "#1 pending", outboxRelay: "mark failed" },
       code: "relayMark",
     },
     {

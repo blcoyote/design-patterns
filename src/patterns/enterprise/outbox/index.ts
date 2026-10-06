@@ -12,7 +12,7 @@ export const pattern: PatternDefinition = {
   summary:
     "Save the event in the same transaction as the data, then let a separate relay publish it to the broker.",
   intent:
-    "Make 'update the database' and 'publish a message' succeed or fail together, without a distributed transaction, by writing the message to an outbox table in the same local transaction as the business data and publishing it from there afterwards.",
+    "Make 'update the database' and 'record that a message must be published' succeed or fail together, without a distributed transaction, by writing the message to an outbox table in the same local transaction as the business data. A relay publishes it from there afterwards, retrying until the broker accepts it.",
   problem:
     "OrderService must save an order and tell ShippingConsumer about it. Writing the row and then calling the broker are two separate systems, so there is no transaction around both. If the process crashes between them, the order exists but nobody is ever told. Publish first and save second, and a failed save leaves a message about an order that does not exist.",
   solution:

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-An interactive, animated teaching site for the 23 Gang of Four patterns plus 9 enterprise patterns, and a separate Architecture area with 12 architectural patterns (DDD, Hexagonal, CQRS, …) cross-linked to them (React 19 + TypeScript + Tailwind v4, Vite, hash routing, static deploy to GitHub Pages).
+An interactive, animated teaching site for the 23 Gang of Four patterns plus 10 enterprise patterns, and a separate Architecture area with 12 architectural patterns (DDD, Hexagonal, CQRS, …) cross-linked to them (React 19 + TypeScript + Tailwind v4, Vite, hash routing, static deploy to GitHub Pages).
 
 The product is **correct teaching material**. A diagram, a step note or a code comment that disagrees with the code is a bug, just as much as a crash. Every pattern must be:
 

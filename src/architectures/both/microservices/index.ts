@@ -125,6 +125,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "pub-sub",
         why: "OrderService publishes OrderPlaced to MessageBroker only once a payment succeeds; ShippingService subscribes to it without OrderService ever knowing Shipping exists.",
       },
+      {
+        slug: "outbox",
+        why: "Each service owns its database and must also tell other services what changed. Outbox stores the event in that database in the same transaction as the change and publishes it afterwards, so a service never commits state without its event or the reverse.",
+      },
     ],
     architectures: [
       {

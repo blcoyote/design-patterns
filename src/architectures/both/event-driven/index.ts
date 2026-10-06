@@ -111,6 +111,10 @@ export const architecture: ArchitectureDefinition = {
         why: "EventBroker is a Pub/Sub broker: producers publish to a topic name, consumers subscribe to a topic name, and neither ever references the other directly.",
       },
       {
+        slug: "outbox",
+        why: "A producer that saves its own data and then publishes an event has two writes with no shared transaction. Outbox writes the event to a table in the same database transaction and lets a relay publish it, so OrderPlaced is never lost when the broker or the process fails (consumers then see it at-least-once).",
+      },
+      {
         slug: "observer",
         why: "Observer is the in-process, synchronous ancestor of this: a subject calls its observers directly and waits, where EventBroker's consumers are reached through a topic and a queue instead.",
       },

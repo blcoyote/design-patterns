@@ -145,6 +145,9 @@ describe("packet dependencies", () => {
     ["null-object", 7, [undefined, 0]],
     ["object-pool", 2, [undefined, 0, 1]],
     ["pub-sub", 7, [undefined, 0, 0]],
+    ["outbox", 3, [undefined, 0]],
+    ["outbox", 4, [undefined, 0]],
+    ["outbox", 6, [undefined, 0, 1, 2]],
     ["builder", 2, [undefined, 0]],
     ["flyweight", 5, [undefined, 0]],
   ] as const)("%s step %s preserves its causal dependencies", (slug, number, expected) => {

@@ -45,3 +45,7 @@ Description text in `index.ts` must hold for every tab: name all four mechanisms
 ## Review style
 
 Prefer a few comments that point at a concrete wrong claim, a mismatch between tabs, or a behaviour the code does not have. Skip nitpicks on wording that is correct.
+
+## Issue tracking
+
+This repo uses **bd (beads)** for issue tracking — see `CLAUDE.md` → "Beads issue tracking" / "Beads Issue Tracker" for the full workflow. Run `bd prime` for command reference. Use `bd ready`, `bd show <id>`, `bd update <id> --claim`, and `bd close <id>` instead of markdown TODO lists.

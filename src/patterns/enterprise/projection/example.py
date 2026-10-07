@@ -41,7 +41,7 @@ class EventLog:
 
 
 # [readModel]
-@dataclass
+@dataclass(frozen=True)
 class CustomerRow:
     orders: int
     spent: int

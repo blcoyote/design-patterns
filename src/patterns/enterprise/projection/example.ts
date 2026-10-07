@@ -1,15 +1,15 @@
 // One kind of fact per event. A real system would use one type per event; a
 // single shape keeps this example short.
 interface OrderEvent {
-  type: "OrderPlaced" | "OrderCancelled";
-  orderId: string;
-  customerId: string;
-  total: number;
+  readonly type: "OrderPlaced" | "OrderCancelled";
+  readonly orderId: string;
+  readonly customerId: string;
+  readonly total: number;
 }
 
 interface LoggedEvent {
-  position: number;
-  event: OrderEvent;
+  readonly position: number;
+  readonly event: OrderEvent;
 }
 
 // [eventLog]
@@ -21,16 +21,20 @@ class EventLog {
   // [logAppend]
   append(event: OrderEvent): number {
     const position = this.entries.length + 1;
-    this.entries.push({ position, event });
+    // Stores a copy, so changing the caller's object later cannot rewrite history.
+    this.entries.push({ position, event: { ...event } });
     console.log(`log: #${position} ${event.type} ${event.orderId}`);
     return position;
   }
   // [/logAppend]
 
   // [logRead]
-  // filter() returns a new array, so callers iterate a snapshot.
+  // Returns a new list of copied entries, so callers iterate a snapshot and
+  // cannot reach the stored history.
   readAfter(position: number): LoggedEvent[] {
-    return this.entries.filter((entry) => entry.position > position);
+    return this.entries
+      .filter((entry) => entry.position > position)
+      .map((entry) => ({ position: entry.position, event: { ...entry.event } }));
   }
   // [/logRead]
 }
@@ -38,8 +42,8 @@ class EventLog {
 
 // [readModel]
 interface CustomerRow {
-  orders: number;
-  spent: number;
+  readonly orders: number;
+  readonly spent: number;
 }
 
 // A disposable read model shaped for one question: how much has each customer
@@ -69,8 +73,10 @@ class CustomerSummaryView {
   // [/viewApply]
 
   // [viewGet]
+  // Returns a copy, so a caller cannot change the stored row behind the checkpoint's back.
   get(customerId: string): CustomerRow | undefined {
-    return this.rows.get(customerId);
+    const row = this.rows.get(customerId);
+    return row && { ...row };
   }
   // [/viewGet]
 

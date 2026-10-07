@@ -116,7 +116,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "saga",
-        why: "InventoryConsumer publishing StockReserved after reacting to OrderPlaced is choreography: each consumer decides its own next event, with no central script. Saga is the opposite end of the spectrum — an orchestrator calls each step directly and runs explicit compensations itself when one fails, instead of every service publishing its own compensating event.",
+        why: "InventoryConsumer publishing StockReserved after reacting to OrderPlaced is choreography: each consumer decides its own next event, with no central script. The Saga example shows the opposite coordination style: its orchestrator calls each step directly and runs explicit compensations when one fails. A saga can use either orchestration or choreography; a choreographed saga would coordinate recovery through compensating events.",
       },
       {
         slug: "observer",

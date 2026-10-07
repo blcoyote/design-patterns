@@ -10,7 +10,7 @@ export const pattern: PatternDefinition = {
   category: "enterprise",
   order: 13,
   summary:
-    "Collect the keys requested while one request is being resolved, then fetch them all in a single batched query.",
+    "Collect the keys requested within one scheduling window (one tick), then fetch them all in a single batched query.",
   intent:
     "Avoid the N+1 query problem by letting each caller ask for one item by key while the loader quietly gathers those keys, removes duplicates, and fetches them together in one round trip. Results are cached per request, so asking for the same key again costs nothing.",
   problem:
@@ -25,12 +25,12 @@ export const pattern: PatternDefinition = {
     "The data source offers a batch lookup, such as WHERE id IN (…) or a bulk API call.",
   ],
   pros: [
-    "Replaces N+1 round trips with one, without making resolvers aware of each other.",
+    "Replaces N+1 round trips with one query per batch, without making resolvers aware of each other.",
     "Duplicate keys are fetched once, and later loads of a known key are free.",
     "Callers keep a simple one-key-at-a-time interface; the batching is hidden inside the loader.",
   ],
   cons: [
-    "Every caller has to wait until the batch is dispatched, so results are never available immediately.",
+    "A key that is not cached yet is only available after the batch is dispatched, so callers have to wait for it. A cached key is answered at once.",
     "The loader needs a reliable moment to dispatch: real implementations use the end of the event-loop tick, and in other runtimes this takes a scheduler or explicit flush.",
     "The cache must not outlive the request, or it serves stale data and can leak one user's data to another, so a new loader is needed per request.",
     "The batch lookup must return a result for every key in a form that can be matched back, and one missing row has to be handled deliberately.",
@@ -190,7 +190,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Three queries became one",
       description:
-        "The naive resolver made 3 queries for 3 posts. The loader made 1, however many posts there are and however often an author repeats. Create a new loader for the next request so its cache starts empty.",
+        "The naive resolver made 3 queries for 3 posts. The loader made 1 for this batch, however many posts it holds and however often an author repeats. Keys requested in a later tick form a new batch. Create a new loader for the next request so its cache starts empty.",
       highlight: ["postResolver", "userLoader", "database"],
       code: "userLoader",
     },

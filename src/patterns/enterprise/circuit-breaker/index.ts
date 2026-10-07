@@ -9,7 +9,7 @@ export const pattern: PatternDefinition = {
   slug: "circuit-breaker",
   name: "Circuit Breaker",
   category: "enterprise",
-  order: 5,
+  order: 15,
   summary: "Stop hammering a failing dependency — fail fast until it has had a chance to recover.",
   intent:
     "Stop calling a failing dependency for a while so errors fail fast, then carefully try again to see if it has recovered.",

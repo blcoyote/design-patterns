@@ -9,7 +9,7 @@ export const pattern: PatternDefinition = {
   slug: "unit-of-work",
   name: "Unit of Work",
   category: "enterprise",
-  order: 3,
+  order: 6,
   summary:
     "Collect every insert, update and delete from a business operation, then commit them as a single transaction — or not at all.",
   intent:

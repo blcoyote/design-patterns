@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "projection",
   name: "Projection (Materialized View)",
   category: "enterprise",
-  order: 16,
+  order: 9,
   summary:
     "Fold a log of events into a query-shaped table that can be thrown away and rebuilt whenever you like.",
   intent:

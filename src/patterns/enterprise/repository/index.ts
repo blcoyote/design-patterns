@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "repository",
   name: "Repository",
   category: "enterprise",
-  order: 2,
+  order: 5,
   summary: "Hide persistence behind a collection-like interface so domain code never sees SQL.",
   intent:
     "Give the domain code a collection-like interface for loading and saving objects, so it never deals with the storage details.",

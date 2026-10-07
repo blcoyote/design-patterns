@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "outbox",
   name: "Transactional Outbox",
   category: "enterprise",
-  order: 10,
+  order: 11,
   summary:
     "Save the event in the same transaction as the data, then let a separate relay publish it to the broker.",
   intent:

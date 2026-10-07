@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "plugin",
   name: "Plugin",
   category: "enterprise",
-  order: 8,
+  order: 2,
   summary:
     "Choose implementations at configuration or start-up time instead of hard-wiring them into the host, so adding one needs no change to the host.",
   intent:

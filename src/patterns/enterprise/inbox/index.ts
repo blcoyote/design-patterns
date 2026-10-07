@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "inbox",
   name: "Idempotent Consumer (Inbox)",
   category: "enterprise",
-  order: 11,
+  order: 12,
   summary:
     "Record each processed message id in the same transaction as its effect, so a redelivered message is recognised and skipped.",
   intent:

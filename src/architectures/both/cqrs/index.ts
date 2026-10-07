@@ -105,6 +105,10 @@ export const architecture: ArchitectureDefinition = {
         why: "A Projector observes write-side changes and reacts by rebuilding its own denormalised view, the same relationship as Subject and Observer.",
       },
       {
+        slug: "projection",
+        why: "The Projector keeps the denormalised read store in step with the write side. The Projection pattern shows the same job fed by an event log: folding events into a query-shaped view, tracking a checkpoint so a redelivered event is harmless, and rebuilding the view from scratch.",
+      },
+      {
         slug: "repository",
         why: "Both the write store and the read store are exposed behind collection-like Repository interfaces, so handlers never write raw SQL or query DSLs directly.",
       },
@@ -223,7 +227,7 @@ export const architecture: ArchitectureDefinition = {
       width: 190,
       description:
         "Queues a write-side change and rebuilds a denormalised view for the read store only once something drains that queue — a deterministic stand-in for the lag a real asynchronous projector would have.",
-      patterns: ["pub-sub", "observer"],
+      patterns: ["pub-sub", "observer", "projection"],
     },
     {
       id: "readStore",

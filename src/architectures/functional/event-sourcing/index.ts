@@ -105,6 +105,10 @@ export const architecture: ArchitectureDefinition = {
         why: "A projection is an Observer: it reacts to events as they are appended and updates its own state, without the store needing to know what any particular projection does with them.",
       },
       {
+        slug: "projection",
+        why: "The withdrawal-count read model is a projection: a view built by handling each event from the stream. This one keeps no position, so unlike the standalone Projection pattern it cannot skip a redelivered event, but it could be rebuilt by replaying the stream from the start.",
+      },
+      {
         slug: "iterator",
         why: "Replaying a stream to rebuild state walks it one event at a time through a uniform interface, exactly what Iterator abstracts over any collection.",
       },
@@ -220,7 +224,7 @@ export const architecture: ArchitectureDefinition = {
       description:
         "Subscribes to appended events and evolves its own, independently-shaped read model — here, a running count of withdrawals — without ever calling back into the store.",
       code: "projection",
-      patterns: ["observer"],
+      patterns: ["observer", "projection"],
     },
   ],
   relations: [

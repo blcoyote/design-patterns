@@ -38,7 +38,7 @@ export const pattern: PatternDefinition = {
     "An SDK’s top-level client class that hides networking, auth and retry logic",
     "The C standard library (e.g. fopen/fread), which wraps lower-level OS calls",
   ],
-  related: ["adapter", "mediator", "repository", "proxy"],
+  related: ["adapter", "mediator", "repository", "proxy", "anti-corruption-layer"],
   participants: [
     {
       id: "client",

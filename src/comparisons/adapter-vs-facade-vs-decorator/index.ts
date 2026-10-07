@@ -149,7 +149,7 @@ export const comparison: ComparisonDefinition = {
       "Adapter: a wrapper function is enough until more than one client needs the translation. Facade: call the subsystem directly until a second caller needs the same sequence. Decorator: use a flag or if-statement for one optional behavior; use decorators when behaviors combine or need to be added and removed at runtime.",
   },
   overlap:
-    "These patterns can be combined. A Facade may use Adapters if some subsystem interfaces do not match; the HomeTheaterFacade example does not need them because its objects already work together. Adapter and Decorator both wrap an object and forward calls, but their interfaces differ: an Adapter changes the interface, while a Decorator keeps it and adds behavior.",
+    "These patterns can be combined. A Facade may use Adapters if some subsystem interfaces do not match; the HomeTheaterFacade example does not need them because its objects already work together. Adapter and Decorator both wrap an object and forward calls, but their interfaces differ: an Adapter changes the interface, while a Decorator keeps it and adds behavior. At a bounded-context boundary, an Anti-Corruption Layer typically combines Adapter (and sometimes Facade) with active translation and normalization, so an upstream system's model — and its corrupt or unmapped data — cannot leak into the domain; a plain Adapter only promises an interface match, not that protection.",
   scenario: {
     prompt:
       "A codebase needs to call a third-party shipping library whose API is a single confusingly-named method that does not match the ShippingProvider interface the rest of the code uses. What fits best?",

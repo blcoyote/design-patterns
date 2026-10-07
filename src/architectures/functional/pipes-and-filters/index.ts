@@ -101,6 +101,10 @@ export const architecture: ArchitectureDefinition = {
         why: "Each filter hands its output on to the next stage in a fixed order, the same shape as a chain of handlers — but unlike classic Chain of Responsibility, no stage decides whether to pass a request on unhandled: every stage actually transforms (or explicitly tags as rejected) every record before forwarding it.",
       },
       {
+        slug: "middleware",
+        why: "Middleware is the request-handling cousin of this: a pipeline of steps composed around a handler, where each step can act before and after the rest of the pipeline or stop the request, instead of transforming a stream of data.",
+      },
+      {
         slug: "decorator",
         why: "withTrace() wraps each stage in the logged() tracer, which takes an iterable and returns a new iterable of exactly the same element type, adding a trace line per element without the wrapped stage — or the stages around it — ever knowing it is there: Decorator applied to iterators.",
       },

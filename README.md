@@ -45,7 +45,7 @@ bd dolt pull         # start of a session: fetch issues changed elsewhere
 bd dolt push         # after creating, updating or closing issues
 ```
 
-`scripts/beads-setup.sh` does all of this idempotently (installs `bd` if missing, bootstraps, pulls). The Claude `SessionStart` hook runs it, and Claude cloud environments should call it from their setup script: `bash scripts/beads-setup.sh`.
+`scripts/beads-setup.sh` does all of this idempotently (installs `bd` if missing, bootstraps, pulls). The Claude `SessionStart` hook (`.claude/hooks/session-start.sh`) runs it in local and cloud sessions; a cloud environment setup script can also call `bash scripts/beads-setup.sh`.
 
 Never run `bd init` in a clone that has no database yet. It creates a history unrelated to the remote's, and `bd dolt pull` / `push` will then refuse to sync.
 
@@ -113,7 +113,7 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 ### Custom visualisations
 
-The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object` and `object-pool` have custom scenes too).
+The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `composite`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `decorator`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `visitor`, `interpreter`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object`, `object-pool` and `middleware` have custom scenes too).
 
 Colour in a scene comes from the theme tokens, never from a hex literal or a Tailwind palette class (see [Theming](#theming); `npm test` fails on a raw colour). In a `className` use the token utilities (`fill-diagram-node`, `stroke-diagram-edge`, `text-fg-muted`); for values computed in code write `"var(--color-ok)"`, and use `alpha(color, 13)` for a tint of the accent rather than appending hex digits.
 

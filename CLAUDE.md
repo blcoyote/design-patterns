@@ -81,9 +81,10 @@ for f in src/patterns/*/*/example.go src/architectures/*/*/example.go; do go run
 - Create issues for meaningful follow-up work discovered during a task, rather than silently expanding scope. Use `bd create` with a clear title and relevant description, and link it with `bd dep add` when appropriate.
 - Close an issue with `bd close <id>` only after its work and applicable verification are complete. Do not close unrelated issues.
 - Beads uses Dolt for storage and team sync. Pull or push with `bd dolt pull` / `bd dolt push` when collaboration requires it; do not treat JSONL export as sync.
-
+- The Dolt remote is `origin` → `git+https://github.com/blcoyote/design-patterns.git` (data lives in `refs/dolt/data`; the `__dolt_remote_info__` branch is Dolt's own marker, leave it alone). On a fresh clone or new workstation run `bd bootstrap --yes`, which clones that data. Never run `bd init` in a clone that has no database yet: it creates an unrelated history that cannot be pulled or pushed. `scripts/beads-setup.sh` (installs `bd` if needed, bootstraps, pulls) runs from the SessionStart hook and should be the Claude cloud environment's setup script command. Run `bd dolt pull` at the start of a session and `bd dolt push` after closing or creating issues, so beads survive across sessions and machines.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:1105d646 -->
+
 ## Beads Issue Tracker
 
 This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
@@ -134,7 +135,9 @@ This protocol applies when ending a Beads implementation workflow. It is subordi
 5. **Hand off** - Summarize changes, validation, issue status, and any blocked sync/commit/push step
 
 **Critical rules:**
+
 - Explicit user or orchestrator instructions override this Beads block.
 - Do not commit or push without clear authority from the active profile or the current user request.
 - If a required sync or push is blocked, stop and report the exact command and error.
+
 <!-- END BEADS INTEGRATION -->

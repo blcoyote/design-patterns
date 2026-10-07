@@ -35,6 +35,20 @@ The build uses relative paths and hash routing, so `dist/` can be served from an
 
 One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
+### Issue tracking (beads)
+
+Issues are tracked with [beads](https://github.com/steveyegge/beads) (`bd`), stored in a local Dolt database under `.beads/embeddeddolt/` (git-ignored) and synced through this repository's GitHub remote, in the `refs/dolt/data` ref. The `__dolt_remote_info__` branch is Dolt's own marker, so leave it alone.
+
+```bash
+bd bootstrap --yes   # new clone or workstation: clone the issue database from GitHub
+bd dolt pull         # start of a session: fetch issues changed elsewhere
+bd dolt push         # after creating, updating or closing issues
+```
+
+`scripts/beads-setup.sh` does all of this idempotently (installs `bd` if missing, bootstraps, pulls). The Claude `SessionStart` hook runs it, and Claude cloud environments should call it from their setup script: `bash scripts/beads-setup.sh`.
+
+Never run `bd init` in a clone that has no database yet. It creates a history unrelated to the remote's, and `bd dolt pull` / `push` will then refuse to sync.
+
 ## Project structure
 
 ```

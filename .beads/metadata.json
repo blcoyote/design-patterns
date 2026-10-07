@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "blcoyote_ideal_train",
+  "project_id": "0f888118-c808-4b4d-8b4b-ffefe5b7cc51"
+}

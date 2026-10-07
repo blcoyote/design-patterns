@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "anti-corruption-layer",
   name: "Anti-Corruption Layer",
   category: "enterprise",
-  order: 12,
+  order: 14,
   summary:
     "Translate an external or legacy system's model into your own domain model at the boundary, so its quirks and corruption never spread inward.",
   intent:

@@ -6,6 +6,9 @@ interface OrderPlaced {
 }
 
 // [database]
+// Thrown when an inbox id already exists, like a primary-key violation.
+class DuplicateKeyError extends Error {}
+
 // An in-memory stand-in for ONE relational database that holds both the
 // business table (shipments) and the inbox table (ids already processed).
 class Transaction {
@@ -28,8 +31,8 @@ class Database {
   failNextCommit = false;
 
   // [dbSeen]
-  // In a real database the inbox id is a primary key, so even two concurrent
-  // deliveries of the same message cannot both insert it.
+  // A cheap pre-check. It is not the guard: two concurrent deliveries can both
+  // pass it, so transaction() enforces the unique inbox id at commit.
   alreadyProcessed(id: number): boolean {
     return this.inbox.has(id);
   }
@@ -38,7 +41,8 @@ class Database {
   // [transaction]
   // Stands in for BEGIN … COMMIT: the writes are staged and applied together
   // only if work() returns and the commit succeeds, so a failure leaves both
-  // tables untouched.
+  // tables untouched. An inbox id that already exists violates the primary key
+  // and rolls the whole transaction back, shipment included.
   transaction(work: (tx: Transaction) => void): void {
     const tx = new Transaction();
     work(tx);
@@ -46,6 +50,8 @@ class Database {
       this.failNextCommit = false;
       throw new Error("database connection lost");
     }
+    if (tx.inboxIds.some((id) => this.inbox.has(id)))
+      throw new DuplicateKeyError("duplicate inbox id");
     for (const id of tx.inboxIds) this.inbox.add(id);
     for (const orderId of tx.shipments) this.shipments.push(orderId);
     console.log(`db: inbox #${tx.inboxIds[0]} + shipment ${tx.shipments[0]} saved`);
@@ -114,10 +120,17 @@ class ShippingConsumer {
     // [inboxCommit]
     // The inbox row and the shipment are written in ONE transaction. A crash
     // can never leave "shipped but not recorded" or "recorded but not shipped".
-    this.db.transaction((tx) => {
-      tx.insertInbox(message.id);
-      tx.insertShipment(message.orderId);
-    });
+    try {
+      this.db.transaction((tx) => {
+        tx.insertInbox(message.id);
+        tx.insertShipment(message.orderId);
+      });
+    } catch (e) {
+      // Lost a race with a concurrent delivery of the same message: its
+      // transaction won, ours rolled back, so this one is just a duplicate.
+      if (!(e instanceof DuplicateKeyError)) throw e;
+      console.log(`shipping: message ${message.id} already in inbox, ignored`);
+    }
     // [/inboxCommit]
   }
 }

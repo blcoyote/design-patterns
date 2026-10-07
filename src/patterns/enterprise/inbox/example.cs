@@ -26,6 +26,12 @@ Console.WriteLine($"shipments: {db.Shipments.Count}");
 record OrderPlaced(int Id, string OrderId);
 
 // [database]
+// Thrown when an inbox id already exists, like a primary-key violation.
+class DuplicateKeyException : Exception
+{
+    public DuplicateKeyException(string message) : base(message) { }
+}
+
 // An in-memory stand-in for ONE relational database that holds both the
 // business table (shipments) and the inbox table (ids already processed).
 class Transaction
@@ -46,15 +52,16 @@ class Database
     public bool FailNextCommit;
 
     // [dbSeen]
-    // In a real database the inbox id is a primary key, so even two concurrent
-    // deliveries of the same message cannot both insert it.
+    // A cheap pre-check. It is not the guard: two concurrent deliveries can both
+    // pass it, so Transaction() enforces the unique inbox id at commit.
     public bool AlreadyProcessed(int id) => inbox.Contains(id);
     // [/dbSeen]
 
     // [transaction]
     // Stands in for BEGIN … COMMIT: the writes are staged and applied together
     // only if work() returns and the commit succeeds, so a failure leaves both
-    // tables untouched.
+    // tables untouched. An inbox id that already exists violates the primary key
+    // and rolls the whole transaction back, shipment included.
     public void Transaction(Action<Transaction> work)
     {
         var tx = new Transaction();
@@ -64,6 +71,7 @@ class Database
             FailNextCommit = false;
             throw new InvalidOperationException("database connection lost");
         }
+        if (tx.InboxIds.Any(inbox.Contains)) throw new DuplicateKeyException("duplicate inbox id");
         foreach (var id in tx.InboxIds) inbox.Add(id);
         Shipments.AddRange(tx.Shipments);
         Console.WriteLine($"db: inbox #{tx.InboxIds[0]} + shipment {tx.Shipments[0]} saved");
@@ -137,11 +145,20 @@ class ShippingConsumer
         // [inboxCommit]
         // The inbox row and the shipment are written in ONE transaction. A crash
         // can never leave "shipped but not recorded" or "recorded but not shipped".
-        db.Transaction(tx =>
+        try
         {
-            tx.InsertInbox(message.Id);
-            tx.InsertShipment(message.OrderId);
-        });
+            db.Transaction(tx =>
+            {
+                tx.InsertInbox(message.Id);
+                tx.InsertShipment(message.OrderId);
+            });
+        }
+        catch (DuplicateKeyException)
+        {
+            // Lost a race with a concurrent delivery of the same message: its
+            // transaction won, ours rolled back, so this one is just a duplicate.
+            Console.WriteLine($"shipping: message {message.Id} already in inbox, ignored");
+        }
         // [/inboxCommit]
     }
 }

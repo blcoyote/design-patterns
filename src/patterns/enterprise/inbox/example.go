@@ -13,6 +13,9 @@ type OrderPlaced struct {
 }
 
 // [database]
+// Returned when an inbox id already exists, like a primary-key violation.
+var ErrDuplicateKey = errors.New("duplicate inbox id")
+
 // An in-memory stand-in for ONE relational database that holds both the
 // business table (shipments) and the inbox table (ids already processed).
 type Tx struct {
@@ -41,8 +44,8 @@ func NewDatabase() *Database {
 }
 
 // [dbSeen]
-// In a real database the inbox id is a primary key, so even two concurrent
-// deliveries of the same message cannot both insert it.
+// A cheap pre-check. It is not the guard: two concurrent deliveries can both
+// pass it, so Transaction enforces the unique inbox id at commit.
 func (db *Database) AlreadyProcessed(id int) bool {
 	return db.inbox[id]
 }
@@ -52,13 +55,20 @@ func (db *Database) AlreadyProcessed(id int) bool {
 // [transaction]
 // Stands in for BEGIN … COMMIT: the writes are staged and applied together
 // only if work returns and the commit succeeds, so a failure leaves both
-// tables untouched.
+// tables untouched. An inbox id that already exists violates the primary key
+// and rolls the whole transaction back, shipment included. (This stand-in is
+// single-threaded; a real database makes the check-and-insert atomic.)
 func (db *Database) Transaction(work func(tx *Tx)) error {
 	tx := &Tx{}
 	work(tx)
 	if db.FailNextCommit {
 		db.FailNextCommit = false
 		return errors.New("database connection lost")
+	}
+	for _, id := range tx.inboxIDs {
+		if db.inbox[id] {
+			return ErrDuplicateKey
+		}
 	}
 	for _, id := range tx.inboxIDs {
 		db.inbox[id] = true
@@ -136,10 +146,17 @@ func (c *ShippingConsumer) onOrderPlaced(message OrderPlaced) error {
 	// [inboxCommit]
 	// The inbox row and the shipment are written in ONE transaction. A crash
 	// can never leave "shipped but not recorded" or "recorded but not shipped".
-	return c.db.Transaction(func(tx *Tx) {
+	err := c.db.Transaction(func(tx *Tx) {
 		tx.InsertInbox(message.ID)
 		tx.InsertShipment(message.OrderID)
 	})
+	if errors.Is(err, ErrDuplicateKey) {
+		// Lost a race with a concurrent delivery of the same message: its
+		// transaction won, ours rolled back, so this one is just a duplicate.
+		fmt.Printf("shipping: message %d already in inbox, ignored\n", message.ID)
+		return nil
+	}
+	return err
 	// [/inboxCommit]
 }
 

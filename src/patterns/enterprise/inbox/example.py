@@ -11,6 +11,11 @@ class OrderPlaced:
 
 
 # [database]
+# Raised when an inbox id already exists, like a primary-key violation.
+class DuplicateKeyError(Exception):
+    pass
+
+
 # An in-memory stand-in for ONE relational database that holds both the
 # business table (shipments) and the inbox table (ids already processed).
 class Transaction:
@@ -34,8 +39,8 @@ class Database:
         self.fail_next_commit = False
 
     # [dbSeen]
-    # In a real database the inbox id is a primary key, so even two concurrent
-    # deliveries of the same message cannot both insert it.
+    # A cheap pre-check. It is not the guard: two concurrent deliveries can both
+    # pass it, so transaction() enforces the unique inbox id at commit.
     def already_processed(self, id: int) -> bool:
         return id in self._inbox
     # [/dbSeen]
@@ -43,13 +48,16 @@ class Database:
     # [transaction]
     # Stands in for BEGIN … COMMIT: the writes are staged and applied together
     # only if work() returns and the commit succeeds, so a failure leaves both
-    # tables untouched.
+    # tables untouched. An inbox id that already exists violates the primary key
+    # and rolls the whole transaction back, shipment included.
     def transaction(self, work: Callable[[Transaction], None]) -> None:
         tx = Transaction()
         work(tx)
         if self.fail_next_commit:
             self.fail_next_commit = False
             raise RuntimeError("database connection lost")
+        if any(id in self._inbox for id in tx.inbox_ids):
+            raise DuplicateKeyError("duplicate inbox id")
         self._inbox.update(tx.inbox_ids)
         self.shipments.extend(tx.shipments)
         print(f"db: inbox #{tx.inbox_ids[0]} + shipment {tx.shipments[0]} saved")
@@ -113,7 +121,12 @@ class ShippingConsumer:
             tx.insert_inbox(message.id)
             tx.insert_shipment(message.order_id)
 
-        self._db.transaction(work)
+        try:
+            self._db.transaction(work)
+        except DuplicateKeyError:
+            # Lost a race with a concurrent delivery of the same message: its
+            # transaction won, ours rolled back, so this one is just a duplicate.
+            print(f"shipping: message {message.id} already in inbox, ignored")
         # [/inboxCommit]
 # [/shippingConsumer]
 

@@ -3,6 +3,7 @@ import tsExample from "./example.ts?raw";
 import csExample from "./example.cs?raw";
 import pyExample from "./example.py?raw";
 import goExample from "./example.go?raw";
+import { MiddlewareVisualization } from "./Visualization";
 
 export const pattern: PatternDefinition = {
   slug: "middleware",
@@ -14,7 +15,7 @@ export const pattern: PatternDefinition = {
   intent:
     "Build a request-handling pipeline out of small, reusable steps. Each step receives the request and a way to call the rest of the pipeline. It can do work before the call, work after it returns, or decline to call it at all and answer on its own. The steps are composed once, in an order you choose, around the real handler.",
   problem:
-    "Every request to a report endpoint needs logging, an authentication check and a cache, and the real work is a few lines. Putting all of that inside the handler buries the work under cross-cutting code, and every other endpoint has to copy it. Chain-of-responsibility style handlers pass a request along, but they cannot easily wrap the work: a logger cannot report the response status, because it has already handed the request on by the time the response exists.",
+    "Every request to a report endpoint needs logging, an authentication check and a cache, and the real work is a few lines. Putting all of that inside the handler buries the work under cross-cutting code, and every other endpoint has to copy it. A chain of handlers can do this too, but it leaves the shape of each link up to the author. Middleware makes one around-the-call contract standard: every step is given the rest of the pipeline as something it may call, and decides whether, when and what to do with the response.",
   solution:
     "Give each concern its own middleware with the same shape: it takes the request and the rest of the pipeline. A pipeline function wraps the handler in the middlewares from last to first, so the first one in the list is outermost. A request passes inward through each middleware, reaches the handler, and the response travels back out through the same middlewares in reverse. The logging step prints a line before passing the request on and another when the response comes back. The authentication step answers 401 itself when there is no token and never passes the request on. The cache step answers from memory when it has the path and otherwise lets the request through and stores the result.",
   analogy:
@@ -68,7 +69,7 @@ export const pattern: PatternDefinition = {
       y: 110,
       width: 170,
       description:
-        "Logs the request, passes it on, and when the response comes back logs its status. It needs both sides of the call, which is what separates a middleware from a simple chain handler.",
+        "Logs the request, passes it on, and when the response comes back logs its status. It needs both sides of the call, so it is written around the call to the rest of the pipeline.",
     },
     {
       id: "auth",
@@ -237,7 +238,7 @@ export const pattern: PatternDefinition = {
       description:
         "Build the pipeline with the cache before auth. A signed-in request now warms the cache, and an anonymous request for the same path is answered from the cache with a 200, because auth never runs. The same three steps in a different order is a security hole.",
       highlight: ["cache", "auth"],
-      notes: { logging: "1st in", cache: "2nd in" },
+      notes: { logging: "1st in", auth: "3rd in" },
       code: "reorder",
     },
     {
@@ -254,4 +255,7 @@ export const pattern: PatternDefinition = {
   csharp: csExample,
   python: pyExample,
   go: goExample,
+
+  // Swaps the Auth and Cache boxes for the "Order changes behaviour" step.
+  Visualization: MiddlewareVisualization,
 };

@@ -129,6 +129,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "outbox",
         why: "Each service owns its database and must also tell other services what changed. Outbox stores the event in that database in the same transaction as the change and publishes it afterwards, so a service never commits state without its event or the reverse.",
       },
+      {
+        slug: "saga",
+        why: "OrderService.placeOrder here only guards the one call to PaymentsService with a circuit breaker; nothing undoes an earlier step if a later one fails. Saga formalizes that: an orchestrator pairs each cross-service step with a compensating action, so if charging fails after stock was reserved, the reservation is explicitly released instead of left dangling.",
+      },
     ],
     architectures: [
       {

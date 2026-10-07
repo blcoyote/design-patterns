@@ -115,6 +115,10 @@ export const architecture: ArchitectureDefinition = {
         why: "A producer that saves its own data and then publishes an event has two writes with no shared transaction. Outbox writes the event to a table in the same database transaction and lets a relay publish it, so OrderPlaced is never lost when the broker or the process fails (consumers then see it at-least-once).",
       },
       {
+        slug: "saga",
+        why: "InventoryConsumer publishing StockReserved after reacting to OrderPlaced is choreography: each consumer decides its own next event, with no central script. The Saga example shows the opposite coordination style: its orchestrator calls each step directly and runs explicit compensations when one fails. A saga can use either orchestration or choreography; a choreographed saga would coordinate recovery through compensating events.",
+      },
+      {
         slug: "observer",
         why: "Observer is the in-process, synchronous ancestor of this: a subject calls its observers directly and waits, where EventBroker's consumers are reached through a topic and a queue instead.",
       },

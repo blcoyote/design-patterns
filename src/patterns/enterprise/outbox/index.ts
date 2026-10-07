@@ -41,7 +41,7 @@ export const pattern: PatternDefinition = {
     "Axon, Wolverine and Spring Modulith's event publication registry",
     "Order, payment and inventory services in microservice systems that must emit events reliably",
   ],
-  related: ["pub-sub", "unit-of-work", "repository", "command"],
+  related: ["inbox", "pub-sub", "unit-of-work", "repository", "command"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "dataloader",
   name: "DataLoader (Batching)",
   category: "enterprise",
-  order: 13,
+  order: 8,
   summary:
     "Collect the keys requested within one scheduling window (one tick), then fetch them all in a single batched query.",
   intent:

@@ -131,6 +131,10 @@ export const architecture: ArchitectureDefinition = {
         why: 'ReserveStock would be a command — a one-handler "do this" — while OrderPlaced is an event: a many-handler "this happened" that the producer broadcasts without expecting any particular consumer to act on it.',
       },
       {
+        slug: "inbox",
+        why: "dedupe() here remembers order ids in memory, so a restart forgets them and a crash between handling and remembering can still process a message twice. Inbox is the durable version: the processed message id is saved in the same transaction as the consumer's own effect.",
+      },
+      {
         slug: "chain-of-responsibility",
         why: "Inventory's subscribed handler is wrapped by dedupe(), a tiny consumer-side pipeline that decides whether to pass a message on to the real handler or drop it — the same shape as a Chain of Responsibility link.",
       },
@@ -206,7 +210,7 @@ export const architecture: ArchitectureDefinition = {
       width: 190,
       description:
         "Subscribes to OrderPlaced behind a dedupe() pipeline, reserves stock, and — choreography in action — publishes StockReserved itself. No orchestrator told it to; it decided on its own.",
-      patterns: ["chain-of-responsibility"],
+      patterns: ["chain-of-responsibility", "inbox"],
     },
     {
       id: "analytics",

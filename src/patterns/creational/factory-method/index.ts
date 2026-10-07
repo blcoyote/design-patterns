@@ -11,7 +11,7 @@ export const pattern: PatternDefinition = {
   order: 2,
   summary: "Delegate product creation through a creator abstraction.",
   intent:
-    "Let a specialized creator decide which concrete product to create, so client code only depends on the product interface. Class-based versions use a subclass override; Go uses a creator interface and shared function.",
+    "Let a specialized creator decide which concrete product to create, so client code only depends on the product interface. Class-based versions use a subclass override; Go uses a creator interface and shared function. Not to be confused with a static factory method: a named creation function such as New, From or Create that builds one valid object (as in Value Object). That has no creator abstraction and no subclass choosing the product.",
   problem:
     "A delivery planner needs a vehicle that depends on the kind of logistics company. If the shared planning code hard-codes `new Truck()`, adding sea or air delivery means rewriting that logic instead of supplying a different creator.",
   solution:

@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "saga",
   name: "Saga",
   category: "enterprise",
-  order: 12,
+  order: 13,
   summary:
     "Coordinate a multi-step transaction across services as a sequence of local steps, undoing completed steps with compensating actions if a later one fails.",
   intent:

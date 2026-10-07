@@ -9,7 +9,7 @@ export const pattern: PatternDefinition = {
   slug: "object-pool",
   name: "Object Pool",
   category: "enterprise",
-  order: 7,
+  order: 16,
   summary:
     "Reuse a fixed set of expensive-to-create objects instead of constructing and destroying them for every request.",
   intent:

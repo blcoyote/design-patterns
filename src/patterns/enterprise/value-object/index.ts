@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "value-object",
   name: "Value Object",
   category: "enterprise",
-  order: 15,
+  order: 4,
   summary:
     "Model a concept by its values, not an identity: immutable, validated when created, and equal when its fields are equal.",
   intent:

@@ -141,6 +141,10 @@ export const architecture: ArchitectureDefinition = {
         why: 'Domain policies like "an order needs at least one line to be placed" are passed into the aggregate as interchangeable strategy objects instead of being hardcoded inside it. With an isSatisfiedBy() signature, such a policy is also Evans and Fowler\'s Specification pattern.',
       },
       {
+        slug: "value-object",
+        why: "Money and OrderLine are value objects: no identity, compared by their fields and never changed after creation. The Value Object pattern covers how to make one valid by construction, plus strongly typed ids for the aggregate and its references.",
+      },
+      {
         slug: "state",
         why: "An aggregate's lifecycle — Draft, then Placed — is exactly the kind of state machine the State pattern formalizes; here it is guarded by a simple status field instead of a full class hierarchy.",
       },
@@ -224,6 +228,7 @@ export const architecture: ArchitectureDefinition = {
       width: 150,
       description:
         "Immutable and compared by value, not identity: two Money instances with the same amount and currency are equal, and every operation returns a new instance.",
+      patterns: ["value-object"],
     },
     {
       id: "order",
@@ -247,6 +252,7 @@ export const architecture: ArchitectureDefinition = {
       width: 160,
       description:
         "Part of the Order aggregate, reachable only through it. A value object: it has no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.",
+      patterns: ["value-object"],
     },
     {
       id: "orderPlaced",

@@ -8,7 +8,7 @@ export const pattern: PatternDefinition = {
   slug: "cache-aside",
   name: "Cache-Aside",
   category: "enterprise",
-  order: 9,
+  order: 7,
   summary:
     "The application checks the cache first, loads from the source on a miss, and invalidates on writes.",
   intent:

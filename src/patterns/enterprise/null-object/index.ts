@@ -9,7 +9,7 @@ export const pattern: PatternDefinition = {
   slug: "null-object",
   name: "Null Object",
   category: "enterprise",
-  order: 6,
+  order: 3,
   summary: "Replace null checks with a do-nothing object that implements the same interface.",
   intent:
     "Use a harmless do-nothing object in place of null, so callers never have to check for a missing collaborator.",

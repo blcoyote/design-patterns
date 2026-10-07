@@ -32,8 +32,8 @@ class LegacyShippingSystem
         {
             return new LegacyShipmentRecord(orderId, 1, "04/02/2025");
         }
-        // O-2002: a corrupt record from the legacy system — an unmapped status code and a blank date
-        return new LegacyShipmentRecord(orderId, 9, "");
+        // O-2002: a corrupt record from the legacy system — an unmapped status code and an impossible date
+        return new LegacyShipmentRecord(orderId, 9, "02/30/2025");
     }
     // [/lookup]
 }
@@ -70,7 +70,16 @@ class ShippingAntiCorruptionLayer(LegacyShippingSystem legacy)
             // A malformed legacy date never reaches the domain either.
             return null;
         }
-        return new DateOnly(year, month, day);
+        try
+        {
+            return new DateOnly(year, month, day);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            // The DateOnly constructor throws for an impossible calendar date (Feb 30, month 13, ...)
+            // instead of rolling it over; catch that here so it never reaches the domain as a crash.
+            return null;
+        }
     }
     // [/translate]
 }

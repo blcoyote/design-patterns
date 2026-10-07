@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // [domainModel]
@@ -38,8 +39,8 @@ func (l *LegacyShippingSystem) Lookup(orderID string) LegacyShipmentRecord {
 	if orderID == "O-1001" {
 		return LegacyShipmentRecord{Trk: orderID, Stat: 1, Eta: "04/02/2025"}
 	}
-	// O-2002: a corrupt record from the legacy system — an unmapped status code and a blank date
-	return LegacyShipmentRecord{Trk: orderID, Stat: 9, Eta: ""}
+	// O-2002: a corrupt record from the legacy system — an unmapped status code and an impossible date
+	return LegacyShipmentRecord{Trk: orderID, Stat: 9, Eta: "02/30/2025"}
 }
 
 // [/lookup]
@@ -85,7 +86,14 @@ func parseEta(eta string) *string {
 	if errM != nil || errD != nil || errY != nil {
 		return nil
 	}
-	iso := fmt.Sprintf("%04d-%02d-%02d", year, month, day)
+	t := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+	// time.Date silently normalizes an invalid day/month into the next one (Feb 30 becomes Mar 2)
+	// instead of rejecting it, so round-trip the components to catch that instead of returning
+	// a shifted date.
+	if int(t.Month()) != month || t.Day() != day || t.Year() != year {
+		return nil
+	}
+	iso := t.Format("2006-01-02")
 	return &iso
 }
 

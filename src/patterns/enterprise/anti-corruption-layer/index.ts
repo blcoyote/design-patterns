@@ -179,16 +179,16 @@ export const pattern: PatternDefinition = {
     {
       title: "Legacy system returns corrupt data",
       description:
-        "This time the legacy record is corrupt: an unmapped status code (9) that matches nothing in the domain, and a blank date string.",
+        "This time the legacy record is corrupt: an unmapped status code (9) that matches nothing in the domain, and February 30th — a date that does not exist on any calendar.",
       highlight: ["legacySystem", "queries"],
-      packets: [{ relation: "queries", label: 'stat 9, eta ""', reverse: true }],
-      notes: { legacySystem: 'stat 9, eta ""' },
+      packets: [{ relation: "queries", label: "stat 9, eta 02/30/2025", reverse: true }],
+      notes: { legacySystem: "stat 9, eta 02/30/2025" },
       code: "lookup",
     },
     {
       title: "ACL normalizes the corruption to a safe default",
       description:
-        "translateStatus() has no case for 9, so it falls through to Unknown instead of passing the raw code on. parseEta() cannot parse an empty string, so it returns no date instead of throwing or guessing.",
+        "translateStatus() has no case for 9, so it falls through to Unknown instead of passing the raw code on. parseEta() rejects 02/30/2025 as an impossible calendar date — catching the error or rollover each language's date type would otherwise produce — and returns no date instead of a wrong one.",
       highlight: ["acl", "translates-to", "domainModel"],
       packets: [{ relation: "translates-to", label: "Shipment{Unknown}" }],
       notes: { domainModel: "Unknown (safe default)" },
@@ -197,7 +197,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Domain sees a safe value — never the raw corruption",
       description:
-        'OrderTrackingService reports "Unknown, ETA unknown" for O-2002. It never saw the code 9 or the blank date string — the corruption stopped at the Anti-Corruption Layer, exactly as intended.',
+        'OrderTrackingService reports "Unknown, ETA unknown" for O-2002. It never saw the code 9 or the impossible date — the corruption stopped at the Anti-Corruption Layer, exactly as intended.',
       highlight: ["acl", "client-call", "trackingService"],
       packets: [{ relation: "client-call", label: "Unknown, ETA unknown", reverse: true }],
       notes: { trackingService: "Unknown, ETA unknown" },

@@ -21,8 +21,8 @@ class LegacyShippingSystem {
     if (orderId === "O-1001") {
       return { trk: orderId, stat: 1, eta: "04/02/2025" };
     }
-    // O-2002: a corrupt record from the legacy system — an unmapped status code and a blank date
-    return { trk: orderId, stat: 9, eta: "" };
+    // O-2002: a corrupt record from the legacy system — an unmapped status code and an impossible date
+    return { trk: orderId, stat: 9, eta: "02/30/2025" };
   }
   // [/lookup]
 }
@@ -57,9 +57,18 @@ class ShippingAntiCorruptionLayer {
   }
 
   private parseEta(eta: string): Date | null {
-    const [month, day, year] = eta.split("/").map(Number);
-    if (!month || !day || !year) return null; // a malformed legacy date never reaches the domain either
-    return new Date(Date.UTC(year, month - 1, day)); // UTC keeps the ISO string timezone-independent
+    const parts = eta.split("/");
+    if (parts.length !== 3 || !parts.every((p) => /^\d+$/.test(p))) return null;
+    const [month, day, year] = parts.map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    // Date.UTC silently rolls an invalid day/month over into the next one (Feb 30 becomes Mar 2)
+    // instead of rejecting it, so round-trip the components to catch that instead of returning
+    // a shifted date. A malformed legacy date never reaches the domain either way.
+    const isValidCalendarDate =
+      date.getUTCFullYear() === year &&
+      date.getUTCMonth() === month - 1 &&
+      date.getUTCDate() === day;
+    return isValidCalendarDate ? date : null;
   }
   // [/translate]
 }

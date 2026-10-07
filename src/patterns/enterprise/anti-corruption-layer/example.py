@@ -32,8 +32,8 @@ class LegacyShippingSystem:
     def lookup(self, order_id: str) -> LegacyShipmentRecord:
         if order_id == 'O-1001':
             return LegacyShipmentRecord(trk=order_id, stat=1, eta='04/02/2025')
-        # O-2002: a corrupt record from the legacy system — an unmapped status code and a blank date
-        return LegacyShipmentRecord(trk=order_id, stat=9, eta='')
+        # O-2002: a corrupt record from the legacy system — an unmapped status code and an impossible date
+        return LegacyShipmentRecord(trk=order_id, stat=9, eta='02/30/2025')
     # [/lookup]
 # [/legacySystem]
 
@@ -66,7 +66,12 @@ class ShippingAntiCorruptionLayer:
         if len(parts) != 3 or not all(p.isdigit() for p in parts):
             return None  # a malformed legacy date never reaches the domain either
         month, day, year = (int(p) for p in parts)
-        return date(year, month, day)
+        try:
+            return date(year, month, day)
+        except ValueError:
+            # date() rejects an impossible calendar date (Feb 30, month 13, ...) by raising;
+            # catch it here so it never reaches the domain as a crash.
+            return None
     # [/translate]
 # [/acl]
 

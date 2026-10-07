@@ -41,7 +41,7 @@ export const pattern: PatternDefinition = {
     "TypeORM and Doctrine repository classes, one per entity",
     "Hand-rolled repository classes in Rails or Django apps that keep ActiveRecord/ORM calls out of controllers",
   ],
-  related: ["unit-of-work", "facade", "adapter", "dependency-injection"],
+  related: ["unit-of-work", "facade", "adapter", "dependency-injection", "anti-corruption-layer"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

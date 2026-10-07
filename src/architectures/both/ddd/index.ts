@@ -133,6 +133,10 @@ export const architecture: ArchitectureDefinition = {
         why: "The ACL also acts as a facade: the application service calls one simple translate() instead of understanding anything about how Shipping expects its events shaped.",
       },
       {
+        slug: "anti-corruption-layer",
+        why: "OrderingToShippingAcl here is a minimal, single-event instance of the general pattern: the standalone Anti-Corruption Layer example shows the fuller case, including normalizing an upstream system's unmapped codes and malformed data to a safe domain default instead of just reshaping a well-formed event.",
+      },
+      {
         slug: "strategy",
         why: 'Domain policies like "an order needs at least one line to be placed" are passed into the aggregate as interchangeable strategy objects instead of being hardcoded inside it. With an isSatisfiedBy() signature, such a policy is also Evans and Fowler\'s Specification pattern.',
       },

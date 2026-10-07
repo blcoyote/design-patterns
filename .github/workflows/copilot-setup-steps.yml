@@ -32,3 +32,6 @@ jobs:
 
       - name: Install beads (bd) issue tracker
         run: curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash
+
+      - name: Bootstrap beads issue database
+        run: bd bootstrap --yes

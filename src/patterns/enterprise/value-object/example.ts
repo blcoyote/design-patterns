@@ -1,31 +1,36 @@
 // [money]
 // A value object: it has no identity, only its amount and currency. It cannot
-// change after creation, so it is safe to share and to use as a map key.
+// change after creation, so it is safe to share.
 class Money {
   // The amount is a whole number of cents, so there is no floating-point rounding.
+  // The upper bound keeps every amount exact and keeps a sum of two amounts from overflowing.
+  static readonly MAX_CENTS = 1_000_000_000_000_000;
+
   private constructor(
     readonly amount: number,
     readonly currency: string,
   ) {}
 
   // [moneyCreate]
-  // The only way in, so an invalid Money can never exist.
+  // The only way in, so an invalid Money cannot be created.
   static of(amount: number, currency: string): Money {
-    if (!Number.isInteger(amount) || amount < 0) {
-      throw new Error("amount must be a non-negative whole number of cents");
+    if (!Number.isSafeInteger(amount) || amount < 0 || amount > Money.MAX_CENTS) {
+      throw new Error("amount must be a whole number of cents from 0 to 1000000000000000");
     }
+    // Checks the shape only. A real system would check a list of ISO 4217 codes.
     if (!/^[A-Z]{3}$/.test(currency)) throw new Error(`invalid currency ${currency}`);
     return new Money(amount, currency);
   }
   // [/moneyCreate]
 
   // [moneyAdd]
-  // Returns a new Money. Neither operand changes.
+  // Returns a new Money. Neither operand changes. The sum goes back through
+  // the factory, so it is checked like any other amount.
   add(other: Money): Money {
     if (other.currency !== this.currency) {
       throw new Error(`cannot add ${other.currency} to ${this.currency}`);
     }
-    return new Money(this.amount + other.amount, this.currency);
+    return Money.of(this.amount + other.amount, this.currency);
   }
   // [/moneyAdd]
 
@@ -104,7 +109,7 @@ try {
 } catch (e) {
   console.log(`rejected: ${e instanceof Error ? e.message : String(e)}`);
 }
-// rejected: amount must be a non-negative whole number of cents
+// rejected: amount must be a whole number of cents from 0 to 1000000000000000
 try {
   price.add(Money.of(100, "USD"));
 } catch (e) {
@@ -117,7 +122,9 @@ const customerId = CustomerId.of("c-1");
 const order = new Order(orderId, customerId, total);
 console.log(`order ${order.id} for ${order.customer}, total ${order.total}`);
 // order o-1 for c-1, total 12.50 EUR
+// [idSwap]
 // new Order(customerId, orderId, total); // does not compile: CustomerId is not an OrderId
+// [/idSwap]
 console.log(`same id: ${order.id.equals(OrderId.of("o-1"))}`);
 // same id: true
 // [/client]

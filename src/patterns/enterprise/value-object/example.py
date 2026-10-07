@@ -4,8 +4,12 @@ from dataclasses import dataclass
 
 # [money]
 # A value object: it has no identity, only its amount and currency. frozen=True
-# makes it immutable after creation, so it is safe to share and to use as a dict key.
+# makes it immutable after creation, so it is safe to share.
 # The amount is a whole number of cents, so there is no floating-point rounding.
+# The upper bound keeps the amount in the same range as the other languages.
+MAX_CENTS = 1_000_000_000_000_000
+
+
 @dataclass(frozen=True, eq=False)
 class Money:
     amount: int
@@ -13,16 +17,19 @@ class Money:
 
     # [moneyCreate]
     # Python cannot hide the constructor, so the check lives here and runs on
-    # every construction: an invalid Money can never exist.
+    # every construction: an invalid Money cannot be created. Annotations are
+    # not checked at runtime, so the type is tested explicitly (bool is an int).
     def __post_init__(self) -> None:
-        if self.amount < 0:
-            raise ValueError('amount must be a non-negative whole number of cents')
+        if isinstance(self.amount, bool) or not isinstance(self.amount, int) or not 0 <= self.amount <= MAX_CENTS:
+            raise ValueError('amount must be a whole number of cents from 0 to 1000000000000000')
+        # Checks the shape only. A real system would check a list of ISO 4217 codes.
         if re.fullmatch(r'[A-Z]{3}', self.currency) is None:
             raise ValueError(f'invalid currency {self.currency}')
     # [/moneyCreate]
 
     # [moneyAdd]
-    # Returns a new Money. Neither operand changes.
+    # Returns a new Money. Neither operand changes. The sum goes through the
+    # constructor, so it is checked like any other amount.
     def add(self, other: 'Money') -> 'Money':
         if other.currency != self.currency:
             raise ValueError(f'cannot add {other.currency} to {self.currency}')
@@ -98,7 +105,7 @@ try:
     Money(-5, 'EUR')
 except ValueError as e:
     print(f'rejected: {e}')
-# rejected: amount must be a non-negative whole number of cents
+# rejected: amount must be a whole number of cents from 0 to 1000000000000000
 try:
     price.add(Money(100, 'USD'))
 except ValueError as e:
@@ -110,7 +117,9 @@ customer_id = CustomerId('c-1')
 order = Order(order_id, customer_id, total)
 print(f'order {order.id} for {order.customer}, total {order.total}')
 # order o-1 for c-1, total 12.50 EUR
+# [idSwap]
 # Order(customer_id, order_id, total)  # mypy error: CustomerId is not an OrderId
+# [/idSwap]
 print(f"same id: {str(order.id == OrderId('o-1')).lower()}")
 # same id: true
 # [/client]

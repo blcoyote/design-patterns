@@ -11,17 +11,24 @@ import (
 // never changes after creation. (Unexported fields only guard other packages;
 // inside this package the discipline is by convention.)
 // The amount is a whole number of cents, so there is no floating-point rounding.
+// The upper bound keeps a sum of two amounts from overflowing.
+//
+// Go limit: every type has a zero value, so Money{} (empty currency) can exist
+// without going through NewMoney. Only NewMoney's results are known to be valid.
+const maxCents int64 = 1_000_000_000_000_000
+
 type Money struct {
-	amount   int
+	amount   int64
 	currency string
 }
 
 // [moneyCreate]
-// The only way in, so an invalid Money can never exist.
-func NewMoney(amount int, currency string) (Money, error) {
-	if amount < 0 {
-		return Money{}, errors.New("amount must be a non-negative whole number of cents")
+// The only way in, so an invalid Money cannot be created through it.
+func NewMoney(amount int64, currency string) (Money, error) {
+	if amount < 0 || amount > maxCents {
+		return Money{}, errors.New("amount must be a whole number of cents from 0 to 1000000000000000")
 	}
+	// Checks the shape only. A real system would check a list of ISO 4217 codes.
 	if len(currency) != 3 {
 		return Money{}, fmt.Errorf("invalid currency %s", currency)
 	}
@@ -36,12 +43,13 @@ func NewMoney(amount int, currency string) (Money, error) {
 // [/moneyCreate]
 
 // [moneyAdd]
-// Returns a new Money. Neither operand changes.
+// Returns a new Money. Neither operand changes. The sum goes back through
+// NewMoney, so it is checked like any other amount.
 func (m Money) Add(other Money) (Money, error) {
 	if other.currency != m.currency {
 		return Money{}, fmt.Errorf("cannot add %s to %s", other.currency, m.currency)
 	}
-	return Money{m.amount + other.amount, m.currency}, nil
+	return NewMoney(m.amount+other.amount, m.currency)
 }
 
 // [/moneyAdd]
@@ -112,7 +120,7 @@ func main() {
 	if _, err := NewMoney(-5, "EUR"); err != nil {
 		fmt.Printf("rejected: %s\n", err)
 	}
-	// rejected: amount must be a non-negative whole number of cents
+	// rejected: amount must be a whole number of cents from 0 to 1000000000000000
 	usd, _ := NewMoney(100, "USD")
 	if _, err := price.Add(usd); err != nil {
 		fmt.Printf("rejected: %s\n", err)
@@ -124,7 +132,9 @@ func main() {
 	order := Order{ID: orderID, Customer: customerID, Total: total}
 	fmt.Printf("order %s for %s, total %s\n", order.ID, order.Customer, order.Total)
 	// order o-1 for c-1, total 12.50 EUR
+	// [idSwap]
 	// Order{ID: customerID, ...} // does not compile: CustomerID is not an OrderID
+	// [/idSwap]
 	again, _ := NewOrderID("o-1")
 	fmt.Printf("same id: %t\n", order.ID == again)
 	// same id: true

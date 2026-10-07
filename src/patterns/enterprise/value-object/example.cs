@@ -17,7 +17,7 @@ catch (ArgumentException e)
 {
     Console.WriteLine($"rejected: {e.Message}");
 }
-// rejected: amount must be a non-negative whole number of cents
+// rejected: amount must be a whole number of cents from 0 to 1000000000000000
 try
 {
     price.Add(Money.Of(100, "USD"));
@@ -33,7 +33,9 @@ var customerId = CustomerId.Of("c-1");
 var order = new Order(orderId, customerId, total);
 Console.WriteLine($"order {order.Id} for {order.Customer}, total {order.Total}");
 // order o-1 for c-1, total 12.50 EUR
+// [idSwap]
 // new Order(customerId, orderId, total); // does not compile: CustomerId is not an OrderId
+// [/idSwap]
 Console.WriteLine($"same id: {order.Id.Equals(OrderId.Of("o-1")).ToString().ToLowerInvariant()}");
 // same id: true
 // [/client]
@@ -42,23 +44,27 @@ Console.WriteLine($"same id: {order.Id.Equals(OrderId.Of("o-1")).ToString().ToLo
 // A value object: it has no identity, only its amount and currency. It is
 // sealed and its properties are get-only, so it cannot change after creation.
 // The amount is a whole number of cents, so there is no floating-point rounding.
+// The upper bound keeps a sum of two amounts from overflowing.
 sealed class Money : IEquatable<Money>
 {
-    public int Amount { get; }
+    public const long MaxCents = 1_000_000_000_000_000;
+
+    public long Amount { get; }
     public string Currency { get; }
 
-    private Money(int amount, string currency)
+    private Money(long amount, string currency)
     {
         Amount = amount;
         Currency = currency;
     }
 
     // [moneyCreate]
-    // The only way in, so an invalid Money can never exist.
-    public static Money Of(int amount, string currency)
+    // The only way in, so an invalid Money cannot be created.
+    public static Money Of(long amount, string currency)
     {
-        if (amount < 0)
-            throw new ArgumentException("amount must be a non-negative whole number of cents");
+        if (amount < 0 || amount > MaxCents)
+            throw new ArgumentException("amount must be a whole number of cents from 0 to 1000000000000000");
+        // Checks the shape only. A real system would check a list of ISO 4217 codes.
         if (currency.Length != 3 || !currency.All(c => c is >= 'A' and <= 'Z'))
             throw new ArgumentException($"invalid currency {currency}");
         return new Money(amount, currency);
@@ -66,12 +72,13 @@ sealed class Money : IEquatable<Money>
     // [/moneyCreate]
 
     // [moneyAdd]
-    // Returns a new Money. Neither operand changes.
+    // Returns a new Money. Neither operand changes. The sum goes back through
+    // the factory, so it is checked like any other amount.
     public Money Add(Money other)
     {
         if (other.Currency != Currency)
             throw new ArgumentException($"cannot add {other.Currency} to {Currency}");
-        return new Money(Amount + other.Amount, Currency);
+        return Of(Amount + other.Amount, Currency);
     }
     // [/moneyAdd]
 

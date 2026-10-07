@@ -14,9 +14,9 @@ export const pattern: PatternDefinition = {
   intent:
     "Replace bare strings and numbers with small types that carry their own rules. A value object has no identity, cannot change once created, can only be created in a valid state, and is equal to any other instance with the same values. A strongly typed id is a value object that wraps an identifier so different kinds of id cannot be mixed up.",
   problem:
-    "An order total is stored as a plain number and a currency as a plain string. Nothing stops a negative amount, a made-up currency code or adding euros to dollars, and every caller has to repeat the checks. Two equal prices held in different variables compare as unequal when compared by reference. The order id and the customer id are both strings, so passing them to a function in the wrong order compiles and runs, and quietly looks up the wrong record.",
+    "An order total is stored as a plain number and a currency as a plain string. Nothing stops a negative amount, a malformed currency code or adding euros to dollars, and every caller has to repeat the checks. Two equal prices held in different variables compare as unequal when compared by reference. The order id and the customer id are both strings, so passing them to a function in the wrong order compiles and runs, and quietly looks up the wrong record.",
   solution:
-    "Make Money a type. It is created only through a factory that rejects a negative amount or a bad currency, its fields cannot change, and add() returns a new Money after checking that the currencies match. equals() compares amount and currency, so two Money instances holding 12.50 EUR are interchangeable. OrderId and CustomerId are likewise separate types wrapping a string, so the compiler or type checker rejects one where the other is expected. Order, by contrast, is an entity: it is identified by its OrderId, and its total is a Money.",
+    "Make Money a type. It is created through a validating factory (a constructor in Python) that rejects a negative or out-of-range amount and a malformed currency code, its fields cannot change, and adding two amounts returns a new Money after checking that the currencies match and that the sum is valid. Equality compares amount and currency, so two Money instances holding 12.50 EUR are interchangeable. OrderId and CustomerId are likewise separate types wrapping a string, so the compiler or type checker rejects one where the other is expected. Order, by contrast, is an entity: it is identified by its OrderId, and its total is a Money.",
   analogy:
     "A banknote: it does not matter which €10 note you hold, since any other one is worth the same. A passport is the opposite, an entity: two people with the same name and birthday are still different people, and the passport number is what tells them apart.",
   whenToUse: [
@@ -25,15 +25,16 @@ export const pattern: PatternDefinition = {
     "Identifiers of different kinds are easy to confuse, and mixing them up would cause a bug that is hard to spot.",
   ],
   pros: [
-    "Rules live in one place, so an invalid value cannot be constructed and callers never re-check it.",
-    "Immutability makes values safe to share, cache and use as keys, with no defensive copying.",
-    "Operations are named in the domain's language: total.add(shipping) instead of arithmetic on bare numbers.",
+    "Rules live in one place, so an invalid value cannot be created through the factory and callers never re-check it.",
+    "Immutability makes values safe to share and cache, with no defensive copying.",
+    "Operations are named in the domain's language: adding shipping to a price instead of arithmetic on bare numbers.",
     "Strongly typed ids turn a whole class of argument-swap bugs into compile-time errors.",
   ],
   cons: [
     "More types and more boilerplate than a plain number or string, especially where the language lacks records or data classes.",
     "Every change produces a new object, which allocates, though small values are cheap.",
-    "The type-level guarantee depends on the language: Python only gets it from a type checker, and Go's unexported fields guard other packages but not the same package.",
+    "The type-level guarantee depends on the language: Python only gets it from a type checker, and in Go unexported fields guard other packages but not the same package, while the zero value of the type skips the factory entirely.",
+    "The validation here checks the shape of a currency code, not that it exists. A real system would check a list of ISO 4217 codes.",
     "Values have to be converted at the edges, for example when reading from a database or serialising to JSON.",
   ],
   realWorld: [
@@ -66,7 +67,7 @@ export const pattern: PatternDefinition = {
       y: 90,
       width: 170,
       description:
-        "An amount in cents and a currency. It is created only through Money.of, which rejects bad values, and it never changes: add() returns a new Money and equals() compares by value.",
+        "An amount in cents and a currency. It is created through a validating factory that rejects bad values, and it never changes: adding returns a new Money and equality compares by value.",
     },
     {
       id: "order",
@@ -108,7 +109,7 @@ export const pattern: PatternDefinition = {
       from: "client",
       to: "money",
       type: "calls",
-      label: "of / add / equals",
+      label: "create / add / compare",
       description:
         "The client creates Money through the factory, adds amounts and compares them. Every operation either returns a new Money or a plain answer.",
       code: "moneyCreate",
@@ -157,10 +158,10 @@ export const pattern: PatternDefinition = {
     {
       title: "Create a Money through its factory",
       description:
-        "Money.of(1000, EUR) checks that the amount is not negative and that the currency is three capital letters, then returns 10.00 EUR. The same goes for a 2.50 EUR shipping fee.",
+        "Creating a Money from 1000 cents and EUR checks that the amount is a whole number in range and that the currency is three capital letters, then returns 10.00 EUR. The same goes for a 2.50 EUR shipping fee.",
       highlight: ["client", "use", "money"],
       packets: [
-        { relation: "use", label: "Money.of(1000, EUR)" },
+        { relation: "use", label: "create 10.00 EUR" },
         { relation: "use", label: "10.00 EUR", reverse: true, after: 0 },
       ],
       notes: { money: "10.00 EUR" },
@@ -169,22 +170,22 @@ export const pattern: PatternDefinition = {
     {
       title: "Invalid values are rejected at the door",
       description:
-        "Money.of(-5, EUR) fails with 'amount must be a non-negative whole number of cents'. No invalid Money object exists anywhere, so nothing downstream needs to re-check.",
+        "Creating a Money from -5 cents fails with 'amount must be a whole number of cents from 0 to 1000000000000000'. The factory refuses to produce an invalid Money, so nothing downstream needs to re-check.",
       highlight: ["client", "use", "money"],
       packets: [
-        { relation: "use", label: "Money.of(-5, EUR)" },
+        { relation: "use", label: "create -5 cents" },
         { relation: "use", label: "rejected ✗", reverse: true, after: 0 },
       ],
       notes: { money: "rejected: negative" },
       code: "moneyCreate",
     },
     {
-      title: "add() returns a new Money",
+      title: "Adding returns a new Money",
       description:
-        "Adding the 2.50 EUR shipping to the 10.00 EUR price gives a new Money of 12.50 EUR. The price is still 10.00 EUR, because nothing was changed in place.",
+        "Adding the 2.50 EUR shipping to the 10.00 EUR price gives a new Money of 12.50 EUR. The price is still 10.00 EUR, because nothing was changed in place. The sum goes back through the same validation as any other amount.",
       highlight: ["client", "use", "money"],
       packets: [
-        { relation: "use", label: "add(2.50 EUR)" },
+        { relation: "use", label: "add 2.50 EUR" },
         { relation: "use", label: "12.50 EUR (new)", reverse: true, after: 0 },
       ],
       notes: { money: "price 10.00 · total 12.50" },
@@ -196,7 +197,7 @@ export const pattern: PatternDefinition = {
         "Adding 1.00 USD to a EUR amount fails with 'cannot add USD to EUR'. The rule is written once, inside Money, instead of at every call site.",
       highlight: ["client", "use", "money"],
       packets: [
-        { relation: "use", label: "add(1.00 USD)" },
+        { relation: "use", label: "add 1.00 USD" },
         { relation: "use", label: "rejected ✗", reverse: true, after: 0 },
       ],
       notes: { money: "rejected: USD ≠ EUR" },
@@ -205,10 +206,10 @@ export const pattern: PatternDefinition = {
     {
       title: "Equal by value, not by identity",
       description:
-        "A freshly created 12.50 EUR is a different object from the total, yet equals() says they are equal because the amount and currency match. They are interchangeable.",
+        "A freshly created 12.50 EUR is a different object from the total, yet comparing them says they are equal because the amount and currency match. They are interchangeable.",
       highlight: ["client", "use", "money"],
       packets: [
-        { relation: "use", label: "equals(12.50 EUR)" },
+        { relation: "use", label: "compare to 12.50 EUR" },
         { relation: "use", label: "true", reverse: true, after: 0 },
       ],
       notes: { money: "12.50 EUR = 12.50 EUR" },
@@ -229,7 +230,7 @@ export const pattern: PatternDefinition = {
         "Passing the CustomerId where the OrderId belongs is a type error, even though both wrap a string. In Python, a type checker such as mypy reports it. The mix-up is caught before the program runs.",
       highlight: ["order", "holdsId", "orderId", "holdsCustomer", "customerId"],
       notes: { order: "Order(c-1, o-1) ✗", orderId: "expects OrderId" },
-      code: "customerId",
+      code: "idSwap",
     },
     {
       title: "Values, not identities",

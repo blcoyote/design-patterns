@@ -171,7 +171,10 @@ export function EditHandles({
                 const step = e.altKey ? null : edit.snap;
                 const raw = { x: at.x - d.dx, y: at.y - d.dy };
                 const placed = clampToViewBox(
-                  step === null ? raw : { x: snap(raw.x, step), y: snap(raw.y, step) },
+                  // free placement still lands on whole units: the value is saved into index.ts
+                  step === null
+                    ? { x: Math.round(raw.x), y: Math.round(raw.y) }
+                    : { x: snap(raw.x, step), y: snap(raw.y, step) },
                   box,
                   viewBox,
                 );

@@ -24,7 +24,10 @@ export function ArchitectureIndexPage() {
         <p className="font-mono text-sm text-fg-subtle">// zoom out from objects to systems</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-6xl">
           {architectures.length} architectural patterns,{" "}
-          <span className="text-fg-muted">animated</span>.
+          <span className="bg-linear-to-r from-paradigm-oo-fg via-paradigm-both-fg to-paradigm-functional-fg bg-clip-text text-transparent">
+            animated
+          </span>
+          .
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-fg-soft">
           Architectural patterns show how a system is organized and how its major parts work

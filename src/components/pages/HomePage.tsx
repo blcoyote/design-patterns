@@ -32,7 +32,11 @@ export function HomePage() {
         <div>
           <p className="font-mono text-sm text-fg-subtle">// learn by watching objects talk</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-6xl">
-            The top design patterns, <span className="text-fg-muted">animated</span>.
+            The top design patterns,{" "}
+            <span className="bg-linear-to-r from-cat-creational-fg via-cat-structural-fg to-cat-behavioral-fg bg-clip-text text-transparent">
+              animated
+            </span>
+            .
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-soft">
             Each pattern comes with an interactive diagram. Press play to watch the messages flow,

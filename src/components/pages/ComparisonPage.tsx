@@ -154,7 +154,7 @@ export function ComparisonPage() {
                       <Link
                         key={`${ref.slug}-${ref.step}`}
                         to={`${resolved.href}?step=${ref.step}`}
-                        className="rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-line-strong transition hover:ring-line-emphasis"
+                        className="rounded-control px-3 py-1.5 text-sm font-medium ring-1 ring-line-strong transition hover:ring-line-emphasis"
                         style={{ color: resolved.color }}
                       >
                         See it animated: {title} →

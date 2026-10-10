@@ -4,6 +4,7 @@ import { comparisons } from "@/comparisons/registry";
 import { areaOf } from "@/lib/areas";
 import { patterns } from "@/patterns/registry";
 import { GitHubIcon, REPO_URL } from "./GitHubLink";
+import { ThemeToggle } from "./ThemeToggle";
 
 const COUNTS = {
   patterns: { count: patterns.length, unit: "patterns" },
@@ -17,14 +18,14 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
   const { count, unit } = COUNTS[area];
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line/80 bg-canvas/80 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-canvas">
       <div className="mx-auto flex h-14 max-w-384 items-center gap-2 px-4 sm:gap-3 sm:px-8">
         <button
           type="button"
           onClick={onMenu}
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
-          className="-ml-2 rounded-md p-2 text-fg-soft hover:bg-surface-raised lg:hidden"
+          className="-ml-2 rounded-control p-2 text-fg-soft hover:bg-surface-raised lg:hidden"
         >
           <svg viewBox="0 0 24 24" className="size-6 fill-current">
             <path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z" />
@@ -52,13 +53,16 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
         <span className="ml-auto hidden font-mono text-xs text-fg-subtle sm:block">
           {count} {unit}
         </span>
+        <div className="max-lg:hidden">
+          <ThemeToggle />
+        </div>
         <a
           href={REPO_URL}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="View source on GitHub"
           title="View source on GitHub"
-          className="hidden rounded-md p-2 text-fg-muted transition hover:bg-surface-raised hover:text-fg lg:block"
+          className="hidden rounded-control p-2 text-fg-muted transition hover:bg-surface-raised hover:text-fg lg:block"
         >
           <GitHubIcon className="size-5 fill-current" />
         </a>
@@ -80,7 +84,7 @@ function HeaderLink({
     <Link
       to={to}
       aria-current={active ? "page" : undefined}
-      className={`rounded-md px-1.5 py-2 text-sm font-medium whitespace-nowrap transition sm:px-3 sm:py-1.5 ${
+      className={`rounded-control px-1.5 py-2 text-sm font-medium whitespace-nowrap transition sm:px-3 sm:py-1.5 ${
         active ? "bg-surface-raised text-fg" : "text-fg-muted hover:bg-surface hover:text-fg-strong"
       }`}
     >

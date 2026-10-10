@@ -86,7 +86,7 @@ export function EventSourcingVisualization({
       <div className="border-t border-line p-3">
         <svg
           viewBox="0 0 760 190"
-          className="h-auto w-full select-none rounded-lg bg-canvas/40 ring-1 ring-line"
+          className="h-auto w-full select-none rounded-card bg-canvas/40 ring-1 ring-line"
           role="group"
           aria-label={`Event tape holding ${events.length} event${events.length === 1 ? "" : "s"}, balance ${balance}`}
         >

@@ -69,7 +69,7 @@ export function DiagramNode({
           initial={{ opacity: 0.7, scale: 1 }}
           animate={{ opacity: [0.7, 0, 0.7], scale: [1, 1.06, 1] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          filter="url(#glow)"
+          style={{ filter: "var(--diagram-glow)" }}
         />
       )}
       <rect

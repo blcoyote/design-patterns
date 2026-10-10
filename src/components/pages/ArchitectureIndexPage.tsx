@@ -24,10 +24,7 @@ export function ArchitectureIndexPage() {
         <p className="font-mono text-sm text-fg-subtle">// zoom out from objects to systems</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-6xl">
           {architectures.length} architectural patterns,{" "}
-          <span className="bg-linear-to-r from-paradigm-oo-fg via-paradigm-both-fg to-paradigm-functional-fg bg-clip-text text-transparent">
-            animated
-          </span>
-          .
+          <span className="text-fg-muted">animated</span>.
         </h1>
         <p className="mt-5 text-lg leading-relaxed text-fg-soft">
           Architectural patterns show how a system is organized and how its major parts work
@@ -38,13 +35,13 @@ export function ArchitectureIndexPage() {
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             to={`/architecture/${architectures[0]?.slug ?? ""}`}
-            className="rounded-lg bg-inverse px-5 py-2.5 text-sm font-semibold text-on-inverse transition hover:bg-inverse-hover"
+            className="rounded-control bg-inverse px-5 py-2.5 text-sm font-semibold text-on-inverse transition hover:bg-inverse-hover"
           >
             Start with {architectures[0]?.name}
           </Link>
           <Link
             to="/"
-            className="rounded-lg px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-line-strong hover:bg-surface"
+            className="rounded-control px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-line-strong hover:bg-surface"
           >
             ← Back to design patterns
           </Link>
@@ -82,7 +79,6 @@ export function ArchitectureIndexPage() {
               <ExplorableCard
                 key={a.slug}
                 to={`/architecture/${a.slug}`}
-                accentColor={meta.color}
                 label={meta.label}
                 labelClass={`text-xs font-medium ${meta.text}`}
                 used={used.has(a.slug)}

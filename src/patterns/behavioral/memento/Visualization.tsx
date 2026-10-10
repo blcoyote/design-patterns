@@ -202,7 +202,7 @@ export function MementoVisualization({
       <div className="border-t border-line p-3">
         <svg
           viewBox="0 0 760 190"
-          className="h-auto w-full select-none rounded-lg bg-canvas/40 ring-1 ring-line"
+          className="h-auto w-full select-none rounded-card bg-canvas/40 ring-1 ring-line"
           role="group"
           aria-label={`Editor content ${truncate(live.content)}, history shelf holding ${live.shelf.length} snapshot${live.shelf.length === 1 ? "" : "s"}`}
         >
@@ -357,7 +357,7 @@ export function MementoVisualization({
             e.stopPropagation();
             doType();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
         >
           type()
         </button>
@@ -368,7 +368,7 @@ export function MementoVisualization({
             e.stopPropagation();
             doSave();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus"
           style={{
             color: "var(--color-fg-on-accent)",
             backgroundColor: color,
@@ -385,7 +385,7 @@ export function MementoVisualization({
             e.stopPropagation();
             doUndo();
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             live.shelf.length === 0
               ? "cursor-not-allowed text-fg-faint ring-line ring-dashed"
               : "text-fg-strong ring-line-strong hover:bg-surface-raised"

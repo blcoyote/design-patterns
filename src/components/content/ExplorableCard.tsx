@@ -5,7 +5,6 @@ import { UsedBadge } from "@/components/content/UsedInThisSite";
 
 export function ExplorableCard({
   to,
-  accentColor,
   label,
   labelClass,
   used,
@@ -15,7 +14,6 @@ export function ExplorableCard({
   index,
 }: {
   to: string;
-  accentColor: string;
   label: string;
   labelClass: string;
   used: boolean;
@@ -33,13 +31,8 @@ export function ExplorableCard({
     >
       <Link
         to={to}
-        className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-surface/50 p-5 ring-1 ring-line transition hover:-translate-y-0.5 hover:bg-surface hover:ring-line-bold"
+        className="group flex h-full flex-col rounded-card bg-card p-5 shadow-card ring-1 ring-card-outline transition hover:bg-surface hover:shadow-raised hover:ring-line-bold"
       >
-        <span
-          className="absolute -top-16 -right-16 size-40 rounded-full opacity-0 blur-3xl transition group-hover:opacity-30"
-          style={{ backgroundColor: accentColor }}
-          aria-hidden
-        />
         <span className="flex items-center gap-2">
           <span className={labelClass}>{label}</span>
           {used && <UsedBadge />}

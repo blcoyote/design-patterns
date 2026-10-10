@@ -109,6 +109,12 @@ function declaredColourTokens(block: string): string[] {
   return [...block.matchAll(/(--color-[a-z0-9-]+)\s*:/g)].map((m) => m[1]);
 }
 
+/** Non-colour theme tokens: shape, elevation and diagram effects. */
+const SHAPE_TOKEN = /(--(?:radius|shadow|diagram)-[a-z0-9-]+)\s*:/g;
+function declaredShapeTokens(block: string): string[] {
+  return [...block.matchAll(SHAPE_TOKEN)].map((m) => m[1]);
+}
+
 /** Body of every `header { … }` block (no nested braces in tokens.css, so a lazy match works). */
 function blocksOf(header: RegExp): string[] {
   return [...tokensCss.matchAll(new RegExp(`${header.source}\\s*\\{([^}]*)\\}`, "g"))].map(
@@ -117,6 +123,7 @@ function blocksOf(header: RegExp): string[] {
 }
 
 const defaultTokens = blocksOf(/@theme static/).flatMap(declaredColourTokens);
+const defaultShapeTokens = blocksOf(/@theme static/).flatMap(declaredShapeTokens);
 const themeBlocks = new Map(
   [...tokensCss.matchAll(/\[data-theme="([^"]+)"\]\s*\{([^}]*)\}/g)].map((m) => [m[1], m[2]]),
 );
@@ -125,6 +132,20 @@ describe("tokens.css", () => {
   it("declares the default theme's colour tokens", () => {
     expect(defaultTokens.length).toBeGreaterThan(40);
     expect(new Set(defaultTokens).size).toBe(defaultTokens.length); // no token declared twice
+  });
+
+  it("declares the shape, elevation and diagram tokens once each", () => {
+    expect(defaultShapeTokens).toEqual(
+      expect.arrayContaining([
+        "--radius-control",
+        "--radius-card",
+        "--radius-panel",
+        "--shadow-card",
+        "--shadow-raised",
+        "--diagram-glow",
+      ]),
+    );
+    expect(new Set(defaultShapeTokens).size).toBe(defaultShapeTokens.length);
   });
 
   it("every var(--color-…) inside tokens.css is a declared token or a Tailwind palette colour", () => {
@@ -172,6 +193,15 @@ describe("themes", () => {
       const defined = new Set(declaredColourTokens(block ?? ""));
       expect(defaultTokens.filter((token) => !defined.has(token))).toEqual([]);
       expect([...defined].filter((token) => !defaultTokens.includes(token))).toEqual([]);
+    },
+  );
+
+  it.each(alternates.map((theme) => [theme.id] as const))(
+    "%s sets every radius, shadow and diagram token, and no others",
+    (id) => {
+      const defined = new Set(declaredShapeTokens(themeBlocks.get(id) ?? ""));
+      expect(defaultShapeTokens.filter((token) => !defined.has(token))).toEqual([]);
+      expect([...defined].filter((token) => !defaultShapeTokens.includes(token))).toEqual([]);
     },
   );
 });

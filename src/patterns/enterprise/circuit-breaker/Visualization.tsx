@@ -307,7 +307,7 @@ export function CircuitBreakerVisualization({
             strokeWidth={5}
             strokeLinecap="round"
             opacity={0.85}
-            filter="url(#glow)"
+            style={{ filter: "var(--diagram-glow)" }}
             initial={false}
             animate={{ d: connector.d }}
             transition={springTransition}
@@ -405,7 +405,7 @@ export function CircuitBreakerVisualization({
             setHealthy(true);
             onSelect("service");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             healthy
               ? "text-fg-on-accent ring-transparent"
               : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
@@ -423,7 +423,7 @@ export function CircuitBreakerVisualization({
             setHealthy(false);
             onSelect("service");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             !healthy
               ? "text-fg-on-accent ring-transparent"
               : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
@@ -440,7 +440,7 @@ export function CircuitBreakerVisualization({
             e.stopPropagation();
             sendRequest();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
           style={{ boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` }}
         >
           Send request →

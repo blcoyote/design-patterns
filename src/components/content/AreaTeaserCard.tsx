@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 
 const ACCENT_CLASS = {
-  architecture: "bg-linear-to-r from-paradigm-oo/10 via-paradigm-both/10 to-paradigm-functional/10",
-  comparison: "bg-linear-to-r from-compare/10 via-fg-subtle/10 to-fg-subtle/10",
+  architecture: "bg-paradigm-both/10",
+  comparison: "bg-compare/10",
 } as const;
 
 export function AreaTeaserCard({
@@ -23,7 +23,7 @@ export function AreaTeaserCard({
   return (
     <Link
       to={to}
-      className={`group flex items-center justify-between gap-4 rounded-2xl ${ACCENT_CLASS[variant]} p-5 ring-1 ring-line transition hover:ring-line-bold`}
+      className={`group flex items-center justify-between gap-4 rounded-card ${ACCENT_CLASS[variant]} p-5 shadow-card ring-1 ring-card-outline transition hover:shadow-raised hover:ring-line-bold`}
     >
       <div>
         <p className="text-xs font-mono uppercase tracking-wider text-fg-subtle">{eyebrow}</p>

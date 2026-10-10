@@ -81,7 +81,9 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
   };
 
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-code-bg ring-1 ring-line ${className}`}>
+    <div
+      className={`relative overflow-hidden rounded-card bg-code-bg ring-1 ring-card-outline ${className}`}
+    >
       <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2 text-xs text-fg-muted sm:px-4">
         {sources.length > 1 ? (
           <div

@@ -36,7 +36,7 @@ export function DetailPanel({ pattern, selection, color, onSelect, resolvePatter
       : [];
 
   return (
-    <div className="min-h-44 rounded-xl bg-surface/70 p-5 ring-1 ring-line">
+    <div className="min-h-44 rounded-card bg-card p-5 shadow-card ring-1 ring-card-outline">
       {!selection ? (
         <motion.div
           key="hint"

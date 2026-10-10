@@ -9,7 +9,10 @@ export interface ThemeDefinition {
  * tokens.css that re-points tokens (and sets its own `color-scheme`), plus an entry
  * here. The first entry is the default and is the one `:root` defines.
  */
-export const themes = [{ id: "dark", label: "Dark" }] as const satisfies readonly ThemeDefinition[];
+export const themes = [
+  { id: "light", label: "Light" },
+  { id: "dark", label: "Dark" },
+] as const satisfies readonly ThemeDefinition[];
 
 export type ThemeId = (typeof themes)[number]["id"];
 

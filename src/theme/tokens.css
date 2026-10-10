@@ -11,30 +11,188 @@
  *      fill-diagram-node) and never a palette class or a hex literal.
  *   3. Accents: one pair per category / paradigm (cat-*, paradigm-*).
  *
- * The values below are the dark theme and live on :root, so they are the default.
- * A theme is one more block that re-points tokens and sets its own colour scheme, e.g.
+ * The values in the @theme block are the light theme and live on :root, so they are the
+ * default (the app also sets data-theme="light" explicitly). A theme is one more block that
+ * re-points every token and sets its own colour scheme, e.g.
  *
- *     [data-theme="light"] { color-scheme: light; --color-canvas: var(--color-white); … }
+ *     [data-theme="dark"] { color-scheme: dark; --color-canvas: var(--color-slate-950); … }
  *
  * plus an entry in themes.ts. `static` keeps every token in the output even when only
  * JS or an inline style reads it (`var(--color-…)`), which Tailwind would otherwise
  * drop as unused.
  */
-/* The default theme's colour scheme: native controls and scrollbars follow it. */
+/* The default (light) theme's colour scheme: native controls and scrollbars follow it. */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 @theme static {
+  /* Shape: corner radii. Utilities rounded-control / rounded-card / rounded-panel. */
+  /* Buttons, inputs, chips. */
+  --radius-control: 9999px;
+  /* Cards and list rows. */
+  --radius-card: 0.75rem;
+  /* Large containers: diagram frames, code panels, modals. */
+  --radius-panel: 1rem;
+
+  /* Elevation: utilities shadow-card / shadow-raised. Light uses Material level 1 / 2;
+     dark uses borders, not shadows. */
+  /* Resting card. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.08), 0 1px 3px 1px rgb(0 0 0 / 0.04);
+  /* Hovered / raised card, popovers. */
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.08), 0 2px 6px 2px rgb(0 0 0 / 0.05);
+
+  /* Diagram effects (not colours; read via `var(--diagram-glow)` in a style filter).
+     A theme sets `none` to drop the SVG glow. */
+  --diagram-glow: none;
+
+  /* Typography. Fonts are bundled via @fontsource. */
+  --font-sans:
+    "Roboto Flex Variable", "Roboto Flex", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Surfaces: backgrounds, lowest to highest. */
+  --color-canvas: #fafaf8;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f1f1ee;
+  --color-surface-strong: #e6e5e1;
+  --color-card: #ffffff;
+  --color-card-outline: transparent;
+  --color-scrim: var(--color-black);
+
+  --color-line: #e3e2de;
+  --color-line-strong: #d2d1cc;
+  --color-line-bold: #b6b5af;
+  --color-line-emphasis: #8f8e88;
+
+  --color-fg: #1b1c1a;
+  --color-fg-strong: #1b1c1a;
+  --color-fg-body: #2f302d;
+  --color-fg-soft: #454641;
+  --color-fg-muted: #5d5e5a;
+  --color-fg-subtle: #71726c;
+  /* Decorative only (fails 4.5:1): never for text that has to be read. */
+  --color-fg-faint: #9a9a94;
+  /* White on a filled accent: every fill below is >= 4.5:1 (emerald/amber/sky/lime fills use their 700 shade; red 6.4, rose 6.1, purple 7.1, indigo 8.1, primary 7.0). */
+  --color-fg-on-accent: #ffffff;
+
+  --color-inverse: #2a5d84;
+  --color-inverse-hover: #1f4a6b;
+  --color-on-inverse: #ffffff;
+
+  --color-focus: #2a5d84;
+  --color-selected: var(--color-fg);
+
+  --color-ok: var(--color-emerald-700);
+  --color-ok-fg: var(--color-emerald-700);
+  --color-warn: var(--color-amber-700);
+  --color-warn-fg: var(--color-amber-700);
+  --color-danger: var(--color-red-600);
+  --color-danger-fg: var(--color-red-700);
+  --color-danger-surface: var(--color-red-50);
+  --color-negative: var(--color-rose-600);
+  --color-negative-fg: var(--color-rose-700);
+  --color-warn-strong: var(--color-amber-700);
+  --color-danger-strong: var(--color-rose-600);
+  --color-danger-fg-soft: var(--color-red-600);
+  --color-info: var(--color-indigo-600);
+
+  --color-tree-oak: var(--color-green-600);
+  --color-tree-pine: var(--color-teal-700);
+
+  --color-diagram-grid: #ecebe7;
+  --color-diagram-node: #ffffff;
+  --color-diagram-node-stroke: #d2d1cc;
+  --color-diagram-edge: #a3a29c;
+  --color-diagram-label-bg: #ffffff;
+  --color-diagram-label-stroke: #e3e2de;
+  --color-diagram-label-text: #5d5e5a;
+  --color-diagram-label-text-active: #1b1c1a;
+  --color-diagram-text: #2f302d;
+  --color-diagram-text-active: #1b1c1a;
+  --color-diagram-packet: #1b1c1a;
+
+  --color-xref: var(--color-sky-700);
+  --color-xref-fg: var(--color-sky-700);
+  --color-used: var(--color-emerald-700);
+  --color-used-fg: var(--color-emerald-700);
+  --color-compare: var(--color-amber-700);
+  --color-compare-fg: var(--color-amber-700);
+
+  /* Syntax: every token is >= 4.5:1 on code-bg. */
+  --color-code-bg: #f5f5f2;
+  --color-code-fg: #2f302d;
+  --color-syntax-comment: #6b6c66;
+  --color-syntax-string: #2e7d32;
+  --color-syntax-number: #b4501f;
+  --color-syntax-function: #1f5fa8;
+  --color-syntax-punctuation: #7b3fa0;
+  --color-syntax-class-name: #8a5a00;
+  --color-syntax-keyword: #0b6e66;
+  --color-syntax-boolean: #c62847;
+  --color-syntax-property: #1a6482;
+  --color-syntax-namespace: #4a5c66;
+  --color-syntax-changed: #1f5fa8;
+  --color-syntax-deleted: rgb(198 40 71 / 0.56);
+
+  --color-cat-creational: var(--color-emerald-700);
+  --color-cat-creational-fg: var(--color-emerald-700);
+  --color-cat-structural: var(--color-sky-700);
+  --color-cat-structural-fg: var(--color-sky-700);
+  --color-cat-behavioral: var(--color-purple-600);
+  --color-cat-behavioral-fg: var(--color-purple-700);
+  --color-cat-enterprise: var(--color-amber-700);
+  --color-cat-enterprise-fg: var(--color-amber-700);
+
+  --color-paradigm-oo: var(--color-rose-600);
+  --color-paradigm-oo-fg: var(--color-rose-700);
+  --color-paradigm-functional: var(--color-lime-700);
+  --color-paradigm-functional-fg: var(--color-lime-700);
+  --color-paradigm-both: var(--color-indigo-600);
+  --color-paradigm-both-fg: var(--color-indigo-700);
+}
+
+/* Dark theme: slate surfaces with borders instead of shadows, white as the inverse call to
+   action, and the glowing diagram scenes. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Shape: corner radii. Utilities rounded-control / rounded-card / rounded-panel. */
+  /* Buttons, inputs, chips. */
+  --radius-control: 0.5rem;
+  /* Cards and list rows. */
+  --radius-card: 0.75rem;
+  /* Large containers: diagram frames, code panels, modals. */
+  --radius-panel: 1rem;
+
+  /* Elevation: utilities shadow-card / shadow-raised. Dark uses borders, not shadows. */
+  /* Resting card. */
+  --shadow-card: none;
+  /* Hovered / raised card, popovers. */
+  --shadow-raised: none;
+
+  /* Diagram effects (not colours; read via `var(--diagram-glow)` in a style filter).
+     A theme sets `none` to drop the SVG glow. */
+  --diagram-glow: url(#glow);
+
   /* Typography. */
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans:
+    "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Surfaces: backgrounds, lowest to highest. */
   --color-canvas: var(--color-slate-950);
   --color-surface: var(--color-slate-900);
   --color-surface-raised: var(--color-slate-800);
   --color-surface-strong: var(--color-slate-700);
+  /* Card fill (pattern / architecture / comparison cards, panels): surface at 50%, so the
+     canvas shows through slightly in dark. */
+  --color-card: color-mix(in srgb, var(--color-surface) 50%, transparent);
+  /* Outline of a card; same as `line` in dark, a theme may set it apart. */
+  --color-card-outline: var(--color-line);
   /* Dimming layer behind a modal / drawer. */
   --color-scrim: var(--color-black);
 

@@ -226,7 +226,7 @@ export function SingletonVisualization({
                   fill={alpha(color, 13)}
                   stroke={color}
                   strokeWidth={2}
-                  filter="url(#glow)"
+                  style={{ filter: "var(--diagram-glow)" }}
                 />
                 <text
                   y={-3}

@@ -362,7 +362,7 @@ export function NullObjectVisualization({
         strokeWidth={5}
         strokeLinecap="round"
         opacity={0.85}
-        filter="url(#glow)"
+        style={{ filter: "var(--diagram-glow)" }}
         initial={false}
         animate={{ d: connector.d }}
         transition={springTransition}
@@ -415,7 +415,7 @@ export function NullObjectVisualization({
         </div>
         <svg
           viewBox="0 0 760 170"
-          className="h-auto w-full select-none rounded-lg bg-canvas/40 ring-1 ring-line"
+          className="h-auto w-full select-none rounded-card bg-canvas/40 ring-1 ring-line"
         >
           <defs>
             <marker
@@ -529,7 +529,7 @@ export function NullObjectVisualization({
                   e.stopPropagation();
                   pick(m);
                 }}
-                className={`rounded-lg px-3 py-1.5 text-sm font-semibold capitalize ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+                className={`rounded-control px-3 py-1.5 text-sm font-semibold capitalize ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                   isActive
                     ? "text-fg-on-accent ring-transparent"
                     : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"

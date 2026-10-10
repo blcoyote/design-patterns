@@ -13,7 +13,7 @@ export function NotFound() {
       </p>
       <Link
         to="/"
-        className="mt-6 inline-block rounded-lg bg-surface-raised px-4 py-2 text-sm text-fg hover:bg-surface-strong"
+        className="mt-6 inline-block rounded-control bg-surface-raised px-4 py-2 text-sm text-fg hover:bg-surface-strong"
       >
         Back to all patterns
       </Link>

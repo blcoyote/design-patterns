@@ -9,6 +9,7 @@ import { usedSlugs } from "@/lib/selfUsage";
 import { categories } from "@/patterns/categories";
 import { byCategory } from "@/patterns/registry";
 import { GitHubIcon, REPO_URL } from "./GitHubLink";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { pathname } = useLocation();
@@ -71,7 +72,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${emptyLabel}…`}
-            className="w-full rounded-lg bg-surface py-2 pr-3 pl-9 text-sm text-fg-body ring-1 ring-line placeholder:text-fg-subtle focus:ring-line-bold focus:outline-none"
+            className="w-full rounded-control bg-surface py-2 pr-3 pl-9 text-sm text-fg-body ring-1 ring-line placeholder:text-fg-subtle focus:ring-line-bold focus:outline-none"
           />
         </label>
 
@@ -140,6 +141,9 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
         )}
 
         <div className="mt-8 space-y-1 border-t border-line pt-4">
+          <div className="-mx-3 mb-2 lg:hidden">
+            <ThemeToggle labelled />
+          </div>
           {area !== "patterns" && (
             <Link
               to="/"
@@ -197,7 +201,7 @@ function SidebarItem({
       to={to}
       onClick={onSelect}
       className={({ isActive }) =>
-        `flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition ${
+        `flex items-center gap-1.5 rounded-control px-3 py-1.5 text-sm transition ${
           isActive
             ? "bg-surface-raised font-medium text-fg"
             : "text-fg-muted hover:bg-surface hover:text-fg-strong"

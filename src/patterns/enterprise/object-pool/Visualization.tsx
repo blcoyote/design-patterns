@@ -276,7 +276,7 @@ export function ObjectPoolVisualization({
       />
 
       <div className="flex flex-wrap items-stretch gap-3 border-t border-line p-3">
-        <div className="min-w-[320px] flex-1 rounded-lg bg-canvas/40 p-3 ring-1 ring-line">
+        <div className="min-w-[320px] flex-1 rounded-card bg-canvas/40 p-3 ring-1 ring-line">
           <div className="mb-2 text-xs font-mono uppercase tracking-wider text-fg-subtle">
             pool · max size {MAX_SIZE}
           </div>
@@ -291,7 +291,7 @@ export function ObjectPoolVisualization({
                   e.stopPropagation();
                   onSelect("connection");
                 }}
-                className="flex h-20 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-xs font-mono outline-none focus-visible:ring-2 focus-visible:ring-focus"
+                className="flex h-20 flex-1 flex-col items-center justify-center gap-1 rounded-control text-xs font-mono outline-none focus-visible:ring-2 focus-visible:ring-focus"
                 style={{
                   background:
                     slot.state === "busy" ? alpha(color, 13) : alpha("var(--color-surface)", 40),
@@ -350,7 +350,7 @@ export function ObjectPoolVisualization({
           </div>
         </div>
 
-        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-lg bg-canvas/40 p-3 ring-1 ring-line">
+        <div className="flex min-w-50 flex-col justify-between gap-2 rounded-card bg-canvas/40 p-3 ring-1 ring-line">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-mono uppercase tracking-wider text-fg-subtle">
               In use
@@ -379,7 +379,7 @@ export function ObjectPoolVisualization({
                 e.stopPropagation();
                 acquire();
               }}
-              className="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-on-accent transition focus-visible:outline-2 focus-visible:outline-focus"
+              className="flex-1 rounded-control px-3 py-1.5 text-sm font-semibold text-fg-on-accent transition focus-visible:outline-2 focus-visible:outline-focus"
               style={{ backgroundColor: color }}
             >
               acquire()
@@ -391,7 +391,7 @@ export function ObjectPoolVisualization({
                 e.stopPropagation();
                 release();
               }}
-              className="flex-1 rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex-1 rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-40"
             >
               release()
             </button>

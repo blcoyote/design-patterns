@@ -76,7 +76,7 @@ export function DiagramEdge({
           strokeLinecap="round"
           strokeDasharray="4 14"
           className="flow-dash"
-          filter="url(#glow)"
+          style={{ filter: "var(--diagram-glow)" }}
           pointerEvents="none"
         />
       )}

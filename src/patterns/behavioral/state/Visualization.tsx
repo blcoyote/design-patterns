@@ -162,7 +162,7 @@ export function StateVisualization({
         strokeWidth={5}
         strokeLinecap="round"
         opacity={0.85}
-        filter="url(#glow)"
+        style={{ filter: "var(--diagram-glow)" }}
         initial={false}
         animate={{ d: connector.d }}
         transition={springTransition}
@@ -222,7 +222,7 @@ export function StateVisualization({
                 e.stopPropagation();
                 fire(event);
               }}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+              className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isValid
                   ? "text-fg-strong ring-line-strong hover:bg-surface-raised"
                   : "text-fg-subtle ring-line ring-dashed hover:bg-surface"

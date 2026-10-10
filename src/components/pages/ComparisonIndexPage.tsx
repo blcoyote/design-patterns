@@ -31,7 +31,7 @@ export function ComparisonIndexPage() {
               <li key={c.slug}>
                 <Link
                   to={`/compare/${c.slug}`}
-                  className="group flex h-full flex-col rounded-2xl bg-surface/50 p-5 ring-1 ring-line transition hover:-translate-y-0.5 hover:bg-surface hover:ring-line-bold"
+                  className="group flex h-full flex-col rounded-card bg-card p-5 shadow-card ring-1 ring-card-outline transition hover:bg-surface hover:shadow-raised hover:ring-line-bold"
                 >
                   <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
                     {subjects.map((s, i) => (

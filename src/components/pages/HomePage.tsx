@@ -32,11 +32,7 @@ export function HomePage() {
         <div>
           <p className="font-mono text-sm text-fg-subtle">// learn by watching objects talk</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-fg sm:text-6xl">
-            The top design patterns,{" "}
-            <span className="bg-linear-to-r from-cat-creational-fg via-cat-structural-fg to-cat-behavioral-fg bg-clip-text text-transparent">
-              animated
-            </span>
-            .
+            The top design patterns, <span className="text-fg-muted">animated</span>.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-fg-soft">
             Each pattern comes with an interactive diagram. Press play to watch the messages flow,
@@ -46,13 +42,13 @@ export function HomePage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               to={`/patterns/${patterns[0]?.slug ?? ""}`}
-              className="rounded-lg bg-inverse px-5 py-2.5 text-sm font-semibold text-on-inverse transition hover:bg-inverse-hover"
+              className="rounded-control bg-inverse px-5 py-2.5 text-sm font-semibold text-on-inverse transition hover:bg-inverse-hover"
             >
               Start with {patterns[0]?.name}
             </Link>
             <a
               href="#catalogue"
-              className="rounded-lg px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-line-strong hover:bg-surface"
+              className="rounded-control px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-line-strong hover:bg-surface"
             >
               Browse all
             </a>
@@ -127,7 +123,6 @@ export function HomePage() {
               <ExplorableCard
                 key={p.slug}
                 to={`/patterns/${p.slug}`}
-                accentColor={cat.color}
                 label={cat.label}
                 labelClass={`text-xs font-medium ${cat.text}`}
                 used={used.has(p.slug)}

@@ -233,11 +233,12 @@ Every colour decision lives in [`src/theme/tokens.css`](src/theme/tokens.css) an
 
 Each `--color-<name>` becomes Tailwind utilities (`bg-surface`, `text-fg-muted`, `fill-diagram-node`, `ring-line`, with `/NN` opacity). In code, read a token as `"var(--color-<name>)"` and make a transparent tint with `alpha(color, percent)` from `src/theme/alpha.ts`; it is `color-mix()` underneath, so it works for hex and `var()` alike. `@theme static` keeps every token in the build even when only JS reads it.
 
-Colour is not the only thing a theme can change. Three more token families sit in the same `@theme static` block and must be defined by every alternate theme (the guardrail test checks both directions, no missing and no extra):
+Colour is not the only thing a theme can change. Four more token families sit in the same `@theme static` block and must be defined by every alternate theme (the guardrail test checks both directions, no missing and no extra):
 
 - **Shape:** `--radius-control` (buttons, inputs, chips), `--radius-card`, `--radius-panel` (large frames), used as `rounded-control` / `rounded-card` / `rounded-panel`.
 - **Elevation:** `--shadow-card` (resting) and `--shadow-raised` (hover, popovers), used as `shadow-card` / `shadow-raised`. Dark sets `none`.
-- **Diagram effects:** `--diagram-glow`, a filter reference (`url(#glow)`, or `none`) read in code as `var(--diagram-glow)`; it is not a Tailwind namespace.
+- **Diagram effects:** `--diagram-glow`, a filter reference (`url(#glow)`, or `none`) read in code as `var(--diagram-glow)`; it is not a Tailwind namespace. The `--diagram-dim-*` opacities set how far dimmed nodes, edges and notes fade.
+- **Code-block effects:** `--code-dim`, the opacity of code lines outside the highlighted region.
 
 Card surfaces have their own colour roles, `--color-card` and `--color-card-outline`, so a theme can restyle cards without touching the page surfaces.
 
@@ -249,7 +250,7 @@ Card surfaces have their own colour roles, `--color-card` and `--color-card-outl
 [data-theme="dark"] {
   color-scheme: dark;
   --color-canvas: var(--color-slate-950);
-  /* … every --color-*, --radius-*, --shadow-* and --diagram-* token the default theme declares … */
+  /* … every --color-*, --radius-*, --shadow-*, --diagram-* and --code-* token the default theme declares … */
 }
 ```
 

@@ -439,7 +439,7 @@ export function VisitorVisualization({
           className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             activeVisitor === "area"
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={activeVisitor === "area" ? { backgroundColor: color } : undefined}
         >
@@ -455,7 +455,7 @@ export function VisitorVisualization({
           className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             activeVisitor === "json"
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={activeVisitor === "json" ? { backgroundColor: color } : undefined}
         >
@@ -468,7 +468,7 @@ export function VisitorVisualization({
               e.stopPropagation();
               setLog([]);
             }}
-            className="ml-auto rounded-control px-2.5 py-1.5 text-xs font-semibold text-fg-subtle ring-1 ring-line transition hover:bg-surface hover:text-fg-soft"
+            className="ml-auto rounded-control px-2.5 py-1.5 text-xs font-semibold text-fg-subtle ring-1 ring-control-outline transition hover:bg-surface hover:text-fg-soft"
           >
             Clear log
           </button>

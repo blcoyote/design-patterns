@@ -109,8 +109,8 @@ function declaredColourTokens(block: string): string[] {
   return [...block.matchAll(/(--color-[a-z0-9-]+)\s*:/g)].map((m) => m[1]);
 }
 
-/** Non-colour theme tokens: shape, elevation and diagram effects. */
-const SHAPE_TOKEN = /(--(?:radius|shadow|diagram)-[a-z0-9-]+)\s*:/g;
+/** Non-colour theme tokens: shape, elevation, diagram and code-block effects. */
+const SHAPE_TOKEN = /(--(?:radius|shadow|diagram|code)-[a-z0-9-]+)\s*:/g;
 function declaredShapeTokens(block: string): string[] {
   return [...block.matchAll(SHAPE_TOKEN)].map((m) => m[1]);
 }
@@ -143,6 +143,7 @@ describe("tokens.css", () => {
         "--shadow-card",
         "--shadow-raised",
         "--diagram-glow",
+        "--code-dim",
       ]),
     );
     expect(new Set(defaultShapeTokens).size).toBe(defaultShapeTokens.length);

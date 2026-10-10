@@ -331,7 +331,7 @@ export function ObjectPoolVisualization({
               waiting
             </span>
             <div className="flex min-h-7 flex-1 flex-wrap items-center gap-1.5 rounded bg-surface/60 px-2 py-1">
-              {queue.length === 0 && <span className="text-xs text-fg-faint">— none —</span>}
+              {queue.length === 0 && <span className="text-xs text-fg-muted">— none —</span>}
               <AnimatePresence>
                 {queue.map((owner, i) => (
                   <motion.span
@@ -370,7 +370,7 @@ export function ObjectPoolVisualization({
             <span className="font-mono text-sm font-bold text-fg-body">{stats.waiting}</span>
           </div>
           <div className="mt-1 flex items-center gap-2 border-t border-line pt-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-fg-faint">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-fg-muted">
               Try it
             </span>
             <button
@@ -391,7 +391,7 @@ export function ObjectPoolVisualization({
                 e.stopPropagation();
                 release();
               }}
-              className="flex-1 rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex-1 rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-control-outline transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-40"
             >
               release()
             </button>

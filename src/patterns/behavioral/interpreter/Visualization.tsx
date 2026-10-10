@@ -337,7 +337,7 @@ export function InterpreterVisualization({
               e.stopPropagation();
               tryValue(x);
             }}
-            className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+            className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-control-outline transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
             style={
               liveOverride?.x === x
                 ? { boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` }

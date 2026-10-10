@@ -56,7 +56,7 @@ export function DetailPanel({ pattern, selection, color, onSelect, resolvePatter
                 key={p.id}
                 type="button"
                 onClick={() => onSelect(p.id)}
-                className="rounded-full px-3 py-1 text-xs text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg"
+                className="rounded-full px-3 py-1 text-xs text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg"
               >
                 {p.label}
               </button>

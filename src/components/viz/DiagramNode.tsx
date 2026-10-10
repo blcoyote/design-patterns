@@ -43,7 +43,7 @@ export function DiagramNode({
     <motion.g
       role="button"
       tabIndex={0}
-      aria-label={`${p.label} — ${p.role}`}
+      aria-label={[stereotype, p.label, p.role, note].filter(Boolean).join(" ")}
       aria-pressed={selected}
       className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
       onClick={(e) => {
@@ -99,6 +99,7 @@ export function DiagramNode({
             {stereotype}
           </text>
         )}
+        {/* whitespace between the <text> nodes keeps textContent word-separated, so it matches the aria-label */}{" "}
         <text
           y={stereotype ? 6 : -2}
           textAnchor="middle"
@@ -108,7 +109,7 @@ export function DiagramNode({
           }
         >
           {p.label}
-        </text>
+        </text>{" "}
         <text
           y={stereotype ? 22 : 16}
           textAnchor="middle"
@@ -117,8 +118,7 @@ export function DiagramNode({
           {p.role}
         </text>
       </g>
-
-      {/* the note pill dims by its own token: it is solid accent with white text, so fading it washes out the text */}
+      {/* the note pill dims by its own token: it is solid accent with white text, so fading it washes out the text */}{" "}
       <AnimatePresence>
         {note && (
           <motion.g

@@ -60,7 +60,7 @@ export function ComparisonPage() {
             <Link
               key={s.slug}
               to={s.href}
-              className="rounded-full px-3 py-1 text-sm font-semibold ring-1 ring-line-strong transition hover:ring-line-emphasis"
+              className="rounded-full px-3 py-1 text-sm font-semibold ring-1 ring-control-outline transition hover:ring-fg-muted"
               style={{ color: s.color }}
             >
               {s.name}
@@ -154,7 +154,7 @@ export function ComparisonPage() {
                       <Link
                         key={`${ref.slug}-${ref.step}`}
                         to={`${resolved.href}?step=${ref.step}`}
-                        className="rounded-control px-3 py-1.5 text-sm font-medium ring-1 ring-line-strong transition hover:ring-line-emphasis"
+                        className="rounded-control px-3 py-1.5 text-sm font-medium ring-1 ring-control-outline transition hover:ring-fg-muted"
                         style={{ color: resolved.color }}
                       >
                         See it animated: {title} →

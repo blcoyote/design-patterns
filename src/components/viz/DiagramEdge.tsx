@@ -43,7 +43,8 @@ export function DiagramEdge({
     <motion.g
       role="button"
       tabIndex={0}
-      aria-label={`${r.label ?? r.type} arrow`}
+      aria-label={label ?? `${r.type} arrow`}
+      aria-description={`${r.type} relation`}
       aria-pressed={selected}
       className="cursor-pointer outline-none group transition-opacity duration-[400ms]"
       onClick={(e) => {

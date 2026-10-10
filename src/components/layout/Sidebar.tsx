@@ -72,7 +72,7 @@ export function Sidebar({ open, onClose }: { open: boolean; onClose: () => void 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${emptyLabel}…`}
-            className="w-full rounded-control bg-surface py-2 pr-3 pl-9 text-sm text-fg-body ring-1 ring-line placeholder:text-fg-subtle focus:ring-line-bold focus:outline-none"
+            className="w-full rounded-control bg-surface py-2 pr-3 pl-9 text-sm text-fg-body ring-1 ring-control-outline placeholder:text-fg-subtle focus:ring-2 focus:ring-focus focus:outline-none"
           />
         </label>
 

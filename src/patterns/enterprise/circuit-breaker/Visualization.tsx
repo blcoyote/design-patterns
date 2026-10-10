@@ -410,7 +410,7 @@ export function CircuitBreakerVisualization({
           className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             healthy
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={healthy ? { backgroundColor: color } : undefined}
         >
@@ -428,7 +428,7 @@ export function CircuitBreakerVisualization({
           className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             !healthy
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={!healthy ? { backgroundColor: "var(--color-danger)" } : undefined}
         >
@@ -442,7 +442,7 @@ export function CircuitBreakerVisualization({
             e.stopPropagation();
             sendRequest();
           }}
-          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-control-outline transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
           style={{ boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` }}
         >
           Send request →

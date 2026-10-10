@@ -25,7 +25,7 @@ function IconButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="grid size-10 place-items-center sm:size-9 rounded-control text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+      className="grid size-10 place-items-center sm:size-9 rounded-control text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
     >
       {children}
     </button>
@@ -74,7 +74,7 @@ export function StepPlayer({ steps, player, color }: Props) {
         </IconButton>
 
         <div
-          className="ml-auto flex items-center gap-1 rounded-control p-1 ring-1 ring-line-strong"
+          className="ml-auto flex items-center gap-1 rounded-control p-1 ring-1 ring-control-outline"
           role="group"
           aria-label="Playback speed"
         >

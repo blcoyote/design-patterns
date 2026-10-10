@@ -224,8 +224,8 @@ export function StateVisualization({
               }}
               className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isValid
-                  ? "text-fg-strong ring-line-strong hover:bg-surface-raised"
-                  : "text-fg-subtle ring-line ring-dashed hover:bg-surface"
+                  ? "text-fg-strong ring-control-outline hover:bg-surface-raised"
+                  : "text-fg-subtle ring-control-outline ring-dashed hover:bg-surface"
               }`}
               style={isValid ? { boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` } : undefined}
             >

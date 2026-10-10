@@ -221,7 +221,7 @@ export function DependencyInjectionVisualization({
               className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                 isActive
                   ? "text-fg-on-accent ring-transparent"
-                  : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+                  : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
               }`}
               style={isActive ? { backgroundColor: color } : undefined}
             >
@@ -274,7 +274,7 @@ export function DependencyInjectionVisualization({
                 className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
                   isActive
                     ? "text-fg-on-accent ring-transparent"
-                    : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+                    : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
                 }`}
                 style={isActive ? { backgroundColor: color } : undefined}
               >

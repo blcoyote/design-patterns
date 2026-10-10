@@ -357,7 +357,7 @@ export function MementoVisualization({
             e.stopPropagation();
             doType();
           }}
-          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-control-outline transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
         >
           type()
         </button>
@@ -388,7 +388,7 @@ export function MementoVisualization({
           className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             live.shelf.length === 0
               ? "cursor-not-allowed text-fg-faint ring-line ring-dashed"
-              : "text-fg-strong ring-line-strong hover:bg-surface-raised"
+              : "text-fg-strong ring-control-outline hover:bg-surface-raised"
           }`}
         >
           undo()

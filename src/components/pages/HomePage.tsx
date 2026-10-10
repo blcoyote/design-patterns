@@ -48,7 +48,7 @@ export function HomePage() {
             </Link>
             <a
               href="#catalogue"
-              className="rounded-control px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-line-strong hover:bg-surface"
+              className="rounded-control px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-control-outline hover:bg-surface"
             >
               Browse all
             </a>

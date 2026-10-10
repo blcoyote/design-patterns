@@ -113,7 +113,7 @@ export function FlyweightVisualization({
       <div className="flex flex-wrap items-stretch gap-3 border-t border-line p-3">
         <svg
           viewBox={`0 0 ${PLOT.width} ${PLOT.height}`}
-          className="h-auto min-w-65 flex-1 cursor-pointer rounded-card bg-canvas/40 outline-none ring-1 ring-line"
+          className="h-auto min-w-65 flex-1 cursor-pointer rounded-card bg-canvas/40 outline-none ring-1 ring-control-outline"
           role="button"
           tabIndex={0}
           aria-label={`Rendered forest — ${instanceCount.toLocaleString()} Tree instances sharing ${typeCount} TreeType objects`}

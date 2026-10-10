@@ -125,6 +125,13 @@
   --color-diagram-text-active: #1b1c1a;
   --color-diagram-packet: #1b1c1a;
 
+  /* Dev-only layout editor (/dev/layout): box outline on hover / selection, the same while
+     dragging, and the "x, y" readout chip. */
+  --color-editor-handle: #1f6fb5;
+  --color-editor-handle-active: #c2410c;
+  --color-editor-readout-bg: #1b1c1a;
+  --color-editor-readout-fg: #ffffff;
+
   --color-xref: var(--color-sky-700);
   --color-xref-fg: var(--color-sky-700);
   --color-used: var(--color-emerald-700);
@@ -281,6 +288,12 @@
   --color-diagram-text: #dcdad5;
   --color-diagram-text-active: #f4f3f0;
   --color-diagram-packet: #ffffff;
+
+  /* Dev-only layout editor (/dev/layout): see the light theme. */
+  --color-editor-handle: #6cbfee;
+  --color-editor-handle-active: #f5a56b;
+  --color-editor-readout-bg: #f4f3f0;
+  --color-editor-readout-fg: #10120f;
 
   /* Feature accents for the boxes that link areas together. */
   --color-xref: #6cbfee;

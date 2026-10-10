@@ -20,6 +20,8 @@ export interface DiagramNodeProps {
   note?: string;
   /** Place the note badge above the node instead of below. */
   noteAbove?: boolean;
+  /** Follow `participant.x` / `y` immediately instead of easing, e.g. while a layout editor drags it. */
+  instant?: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -31,6 +33,7 @@ export function DiagramNode({
   selected,
   note,
   noteAbove,
+  instant,
   onSelect,
 }: DiagramNodeProps) {
   const w = p.width ?? NODE_WIDTH;
@@ -53,7 +56,7 @@ export function DiagramNode({
       onKeyDown={onActivate(select)}
       initial={false}
       animate={{ x: p.x, y: p.y }}
-      transition={{ duration: 0.4 }}
+      transition={{ duration: instant ? 0 : 0.4 }}
       whileHover={{ scale: 1.04 }}
     >
       <g

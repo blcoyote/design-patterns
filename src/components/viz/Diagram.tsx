@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import {
   DEFAULT_VIEWBOX,
   NODE_HEIGHT,
@@ -8,7 +8,9 @@ import {
 } from "@/lib/geometry";
 import type { Packet as PacketDef, Participant, Relation } from "@/types/pattern";
 import { DiagramEdge, EdgeMarkers } from "./DiagramEdge";
+import { useDiagramEdit } from "./DiagramEditContext";
 import { DiagramNode } from "./DiagramNode";
+import { EditHandles } from "./EditHandles";
 import { PacketLayer } from "./PacketLayer";
 
 export { DEFAULT_VIEWBOX };
@@ -51,6 +53,11 @@ export function Diagram({
   overlay,
   ariaLabel = "Pattern diagram",
 }: DiagramProps) {
+  // Only the dev-only layout editor provides this; without it the diagram renders as always.
+  const edit = useDiagramEdit();
+  const register = edit?.register;
+  useEffect(() => register?.(), [register]);
+
   const byId = new Map(participants.map((p) => [p.id, p]));
   const geometry = new Map<string, EdgeGeometry>();
   for (const r of relations) {
@@ -68,7 +75,7 @@ export function Diagram({
       className="h-auto w-full select-none"
       role="group"
       aria-label={ariaLabel}
-      onClick={() => onSelect(null)}
+      onClick={() => (edit ? edit.onSelect(null) : onSelect(null))}
     >
       <defs>
         <EdgeMarkers color={color} />
@@ -106,6 +113,7 @@ export function Diagram({
           selected={selectedId === p.id}
           note={notes[p.id]}
           noteAbove={p.y + NODE_HEIGHT / 2 + 30 > viewHeight}
+          instant={edit !== null}
           onSelect={onSelect}
         />
       ))}
@@ -118,6 +126,14 @@ export function Diagram({
         speed={packetSpeed}
       />
       {overlay}
+      {edit && (
+        <EditHandles
+          edit={edit}
+          participants={participants}
+          geometry={geometry}
+          viewBox={viewBox}
+        />
+      )}
     </svg>
   );
 }

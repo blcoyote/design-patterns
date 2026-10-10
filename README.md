@@ -81,7 +81,10 @@ src/
     content/CrossReferenceBox.tsx # "commonly used with" links between patterns and architectures
     content/ComparisonTeaser.tsx # "often confused with…" links from a pattern/architecture to a comparison
     content/ScenarioQuiz.tsx # the "which should I choose?" quiz at the end of a comparison
+    viz/DiagramEditContext.tsx # dev-only: lets <Diagram> draw layout-editor handles (inert without a provider)
+    viz/EditHandles.tsx      # the drag / bend / width handles and lint outlines drawn inside a <Diagram>
     pages/ layout/ content/
+    pages/dev/               # dev-only layout editor: index + editor page, toolbar, lint panel, change list
   theme/
     tokens.css               # every colour decision: primitives, semantic roles, accents, one block per theme
     themes.ts                # the list of themes (id + label) and the localStorage key
@@ -89,15 +92,26 @@ src/
     codeTheme.ts             # the Prism theme for code blocks, read from --color-code-* / --color-syntax-*
     applyTheme.ts            # sets data-theme on <html> and syncs <meta name="theme-color">
   hooks/useTheme.ts          # active theme, persisted; initTheme() runs once at startup
+  hooks/useLayoutHistory.ts  # undo/redo stack of the layout editor (one drag = one step)
   lib/preferenceStore.ts     # localStorage-backed preference shared via useSyncExternalStore (code language, theme)
   lib/codeRegions.ts         # `// [id]` … `// [/id]` code region markers
   lib/crossRefs.ts           # the only module importing both registries — see "Architecture" below
+  lib/layoutEdit.ts          # layout overrides: apply, diff, snap, inverse bend maths (dev editor)
+  lib/layoutLint.ts          # pure layout checks: overlaps, out-of-bounds, label collisions (dev editor)
+  lib/layoutChanges.ts       # human-readable change list (dev editor)
+  lib/layoutDraft.ts         # localStorage drafts of unsaved edits (dev editor)
+  lib/layoutSave.ts          # client of the dev-server save endpoint (dev editor)
+vite-plugins/
+  layoutPatch.ts             # rewrites x/y/width/bend literals in an index.ts (pure text in, text out)
+  layoutWriter.ts            # dev-server-only POST /__dev/layout: patch + prettier + atomic write
 ```
+
+Unit tests sit next to the code they cover (`*.test.ts`), including the layout editor's `src/lib/layout*.test.ts` and `vite-plugins/layout*.test.ts`.
 
 ## Adding a pattern
 
 1. Copy `src/patterns/_template/` to `src/patterns/<category>/<slug>/` and set `slug` to the folder name. Pick a `category` (`creational`, `structural`, `behavioral` or `enterprise`) that matches the folder it lives in; new categories go in `Category` (`src/types/pattern.ts`) and `src/patterns/categories.ts`.
-2. Fill in the text fields, the `participants` (boxes) and `relations` (arrows). Coordinates are box centres in an 800 × 460 viewBox.
+2. Fill in the text fields, the `participants` (boxes) and `relations` (arrows). Coordinates are box centres in an 800 × 460 viewBox; you can tune `x`, `y`, `width` and a relation's `bend` by dragging in the [layout editor](#editing-diagram-layouts-dev-only) instead of typing numbers.
 3. Write the animated scenario in `steps`. Each step can
    - `highlight` participant/relation ids,
    - send `packets` along relations (`reverse: true` for return values), chained with `after` (see [Animating steps](#animating-steps)),
@@ -145,6 +159,52 @@ Rules of thumb:
 - Don't use `after` for more than one story per step — split a long scenario into several steps instead.
 
 The step player waits for the animation: each step stays on screen for at least 3.2 s, or longer if its packets need it — every packet runs at least once and then settles for 0.8 s before the next step starts (`stepDuration`). Both scale with the speed control. A chained step loops after a short pause; independent packets loop continuously.
+
+## Editing diagram layouts (dev only)
+
+Layouts are hand-typed numbers, so there is a drag-and-drop editor for them. It exists only under `npm run dev`: the route, the header link ("Layout editor") and the save endpoint are all guarded by `import.meta.env.DEV` or `apply: "serve"`, so `npm run build` contains none of the editor's pages, drag handles, save code or endpoint. (`<Diagram>` loads its handle layer lazily, only in dev. The only traces left in a build are a `useContext` lookup in `<Diagram>` that always finds no editor, and a few `editor-*` colour tokens in the stylesheet.)
+
+Open `http://localhost:5173/#/dev/layout` for the list of every pattern and architecture, or go straight to `/#/dev/layout/patterns/<slug>` or `/#/dev/layout/architecture/<slug>`. The page shows the real scene (the generic diagram or the pattern's own `Visualization.tsx`) with a step selector, so you can check each step's boxes, arrows and packets while you edit.
+
+### Editing
+
+- **Move a box**: drag it. Positions snap to a grid of 10 units; hold **Alt** to bypass snapping (free placement still lands on whole units). The snap step can be changed in the toolbar (off, 5, 10 or 20). A box can be dragged mostly off the canvas but never lost: at least 24 units of it (or half its size, if smaller) stay inside the viewBox, and the live lint reports `box-outside` for any box that is partly outside.
+- **Bend an arrow**: drag the round handle at the midpoint of an arrow; this edits the relation's `bend`. Double-click it, or press **Enter** (or Space) while it is focused, to straighten it (`bend: 0`).
+- **Resize a box**: select the box, then drag the handle on its right edge; this edits `width`.
+- **Keyboard**: Tab to a box, bend or width handle and use the arrow keys to nudge by 1 unit (**Shift** = 10); on a width handle Right/Up widen and Left/Down narrow by that amount. Each key press is one undo step. **Escape** deselects.
+- **Undo / redo**: Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl+Y, or the toolbar buttons. One drag is one undo step. **Reset all** drops every change.
+- **Show packets** hides the animated packets while you work on the boxes and arrows.
+- **Changes** lists every changed participant and relation (old to new value) with a per-row **Revert**.
+- **Drafts**: unsaved edits are kept in `localStorage` per pattern, so a reload does not lose them. Nothing is written to source until you save.
+
+### Saving
+
+- **Save to source** (dev server only) POSTs the changes to `POST /__dev/layout` (`vite-plugins/layoutWriter.ts`). The server rewrites only the numeric `x`, `y`, `width` and `bend` literals inside the `participants` and `relations` arrays of that folder's `index.ts` (`vite-plugins/layoutPatch.ts`), formats the file with prettier and writes it atomically; Vite then hot-updates the page. Comments, strings, ids, steps and everything else stay byte-for-byte as they were. A missing `x`/`y`/`width`/`bend` is inserted, `bend: 0` removes the property, and anything the patcher cannot place is an error rather than a guess. The endpoint rejects cross-site requests and is not part of `vite build` or `vite preview`.
+- **Copy JSON** copies the changes as JSON (`{ participants: { id: { x, y, width } }, relations: { id: { bend } } }`). It always works and is the fallback when saving is not available (for example against a preview build); if the clipboard is blocked the JSON is shown in a text box to copy by hand.
+
+After saving, review `git diff` (only layout lines should change) and run `npm test`: the registry validation still applies to the new numbers.
+
+### Layout lint
+
+A live check runs on every edit (`src/lib/layoutLint.ts`, listed under the diagram; click a finding to select what it names). Affected boxes, labels and arrows are outlined in the diagram. Rules:
+
+- `box-overlap` (error): two boxes overlap.
+- `box-outside` (error): a box is partly outside the viewBox.
+- `box-gap` (warning): boxes are less than 20 units apart.
+- `note-outside` (warning): the widest step note under a box would leave the viewBox.
+- `label-overlap` / `label-box` (warning): an arrow label sits on another label or on a box.
+- `edge-crossing` (warning): two arrows cross away from a box they share.
+- `edge-through-box` (warning): an arrow runs through a box that is not one of its endpoints.
+
+### Custom scenes: what follows the editor
+
+The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of all 31 custom scenes (bead `blcoyote-ideal-train-2yu.9`) found:
+
+- **10 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight and event-sourcing. Generic scenes (for example observer) follow too.
+- **17 follow partially**: boxes, arrows and packets move, but background bands, regions and overlays that are constants in the scene (the CQRS write/read bands, the DDD bounded contexts, the hexagon, the layered bands, the MVU cycle, the iterator song strip, ...) stay where they were, so a moved box can end up outside its band. Middleware's reorder step also writes to the wrong participant. They are iterator, builder, singleton, dependency-injection, middleware, pub-sub, cqrs, ddd, event-driven, microservices, functional-core, mvu, pipes-and-filters, hexagonal, layered, mvc and vertical-slice.
+- **4 render their own `<svg>` without `<Diagram>`** (interpreter, visitor, composite, decorator), so they get no handles; the editor page says so in a notice. Decorator additionally ignores its participants' coordinates entirely.
+
+Follow-up work is tracked in beads: `blcoyote-ideal-train-2yu.12` (bands), `.13` (regions), `.14` (radial backdrops), `.15` (paths, rows and lanes), `.16` (anchored overlays), `.17` (middleware reorder step), `.18` (shared edit layer for own-svg scenes) and `.19` (decorator); the unrelated badge-at-origin rendering bug is `blcoyote-ideal-train-w9j`. New scenes should derive backdrops from participant positions (via `boxOf`) rather than constants, so the editor keeps working for them.
 
 ## Architecture
 

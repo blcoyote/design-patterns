@@ -1,3 +1,5 @@
+/** Default diagram viewBox, shared by `Diagram` and the layout editor maths. */
+export const DEFAULT_VIEWBOX = "0 0 800 460";
 export const NODE_HEIGHT = 64;
 export const NODE_WIDTH = 150;
 
@@ -75,4 +77,19 @@ export function samplePath(edge: EdgeGeometry, samples = 24, reverse = false): P
     pointOnQuad(edge.start, edge.control, edge.end, i / samples),
   );
   return reverse ? pts.reverse() : pts;
+}
+
+/**
+ * Signed distance of `p` from the chord a→b, measured along the chord's unit
+ * perpendicular `(-dy, dx) / len`: the same direction `edgeBetween` pushes its
+ * control point for a positive bend. Returns 0 when a and b coincide.
+ */
+export function perpendicularOffset(a: Point, b: Point, p: Point): number {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy);
+  if (len === 0) return 0;
+  const mx = (a.x + b.x) / 2;
+  const my = (a.y + b.y) / 2;
+  return ((p.x - mx) * -dy + (p.y - my) * dx) / len;
 }

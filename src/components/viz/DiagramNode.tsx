@@ -45,7 +45,7 @@ export function DiagramNode({
       tabIndex={0}
       aria-label={[stereotype, p.label, p.role, note].filter(Boolean).join(" ")}
       aria-pressed={selected}
-      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
+      className="cursor-pointer outline-none [&:focus-visible>g>rect.frame]:stroke-focus"
       onClick={(e) => {
         e.stopPropagation();
         select();

@@ -261,7 +261,7 @@ export const themes = [
 ] as const satisfies readonly ThemeDefinition[];
 ```
 
-The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. Light is the default theme and dark is the alternate; the switcher lives in the header (and in the mobile drawer). Fonts are bundled via `@fontsource` (Roboto Flex for light, Inter for dark, JetBrains Mono for code), so nothing loads from a CDN.
+The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. Light is the default theme and dark is the alternate; the switcher lives in the header (and in the mobile drawer). Fonts are bundled via `@fontsource` (Roboto Flex for text in both themes, JetBrains Mono for code), so nothing loads from a CDN.
 
 `npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color()`, `color-mix()` or Tailwind palette class outside `src/theme/` (scanning `src/`, `index.html` and `public/`), every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the light value).
 

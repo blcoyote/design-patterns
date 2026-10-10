@@ -23,7 +23,9 @@ export type LayoutHistoryAction =
   | { type: "undo" }
   | { type: "redo" }
   | { type: "reset" }
-  | { type: "revert"; target: ChangeTarget };
+  | { type: "revert"; target: ChangeTarget }
+  /** `saved` (the overrides as they were when the save started) are now in the source file. */
+  | { type: "saved"; saved: LayoutOverrides };
 
 export function initialHistory(present: LayoutOverrides = emptyLayout()): LayoutHistoryState {
   return { past: [], present, future: [], gestureBase: null };
@@ -113,6 +115,12 @@ export function layoutHistoryReducer(
           : { ...present, relations: without(present.relations) };
       return commit(state, present, next);
     }
+    case "saved":
+      // Edits made while the save was in flight stay (as the same overrides: re-applying values
+      // equal to the saved ones changes nothing); otherwise the file now holds them all, so
+      // history starts over.
+      if (state.gestureBase || !layoutsEqual(state.present, action.saved)) return state;
+      return initialHistory();
   }
 }
 
@@ -129,6 +137,8 @@ export interface LayoutHistory {
   redo: () => void;
   reset: () => void;
   revert: (target: ChangeTarget) => void;
+  /** Call once `saved` (the overrides at the time of the save) is written: clears overrides and history if nothing changed since. */
+  markSaved: (saved: LayoutOverrides) => void;
 }
 
 /** Undo/redo history of a `LayoutOverrides`, seeded by `initial` (read once). */
@@ -148,6 +158,7 @@ export function useLayoutHistory(initial: () => LayoutOverrides): LayoutHistory 
       redo: () => dispatch({ type: "redo" }),
       reset: () => dispatch({ type: "reset" }),
       revert: (target: ChangeTarget) => dispatch({ type: "revert", target }),
+      markSaved: (saved: LayoutOverrides) => dispatch({ type: "saved", saved }),
     }),
     [],
   );

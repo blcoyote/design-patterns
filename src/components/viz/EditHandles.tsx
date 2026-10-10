@@ -2,6 +2,7 @@ import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { onActivate } from "@/lib/a11y";
 import { NODE_HEIGHT, boxOf, type EdgeGeometry, type Point } from "@/lib/geometry";
 import { bendForPoint, clampToViewBox, clampWidth, snap } from "@/lib/layoutEdit";
+import { labelRect, relationLabel } from "@/lib/layoutLint";
 import type { Participant, Relation } from "@/types/pattern";
 import type { DiagramEditContextValue } from "./DiagramEditContext";
 
@@ -91,6 +92,14 @@ export function EditHandles({
 
   return (
     <g data-editor="handles">
+      {edit.warnings && (
+        <WarningOutlines
+          warnings={edit.warnings}
+          participants={participants}
+          relations={relations}
+          geometry={geometry}
+        />
+      )}
       {participants.map((p) => {
         const box = boxOf(p);
         const isSelected = edit.selectedId === p.id;
@@ -203,6 +212,79 @@ export function EditHandles({
         />
       )}
       {readoutFor && !resizing && <Readout participant={readoutFor} viewBox={viewBox} />}
+    </g>
+  );
+}
+
+/** Outlines (drawn beneath the handles, never hit-tested) around what the layout lint flagged. */
+function WarningOutlines({
+  warnings,
+  participants,
+  relations,
+  geometry,
+}: {
+  warnings: NonNullable<DiagramEditContextValue["warnings"]>;
+  participants: Participant[];
+  relations: Relation[];
+  geometry: Map<string, EdgeGeometry>;
+}) {
+  return (
+    <g data-editor="warnings" pointerEvents="none">
+      {relations.map((r) => {
+        const g = geometry.get(r.id);
+        if (!g) return null;
+        const label = relationLabel(r);
+        const rect = label === undefined ? null : labelRect(label, g.mid);
+        return (
+          <g key={r.id}>
+            {warnings.edges.has(r.id) && (
+              <path
+                data-editor="warning-edge"
+                data-id={r.id}
+                d={g.d}
+                fill="none"
+                strokeWidth={4}
+                strokeLinecap="round"
+                className="stroke-editor-warn opacity-60"
+              />
+            )}
+            {rect && warnings.labels.has(r.id) && (
+              <rect
+                data-editor="warning-label"
+                data-id={r.id}
+                x={rect.x - rect.width / 2 - 3}
+                y={rect.y - rect.height / 2 - 3}
+                width={rect.width + 6}
+                height={rect.height + 6}
+                rx={8}
+                fill="none"
+                strokeWidth={2}
+                className="stroke-editor-warn"
+              />
+            )}
+          </g>
+        );
+      })}
+      {participants
+        .filter((p) => warnings.participants.has(p.id))
+        .map((p) => {
+          const box = boxOf(p);
+          return (
+            <rect
+              key={p.id}
+              data-editor="warning-box"
+              data-id={p.id}
+              x={p.x - box.width / 2 - 8}
+              y={p.y - box.height / 2 - 8}
+              width={box.width + 16}
+              height={box.height + 16}
+              rx={18}
+              fill="none"
+              strokeWidth={2.5}
+              className="stroke-editor-warn"
+            />
+          );
+        })}
     </g>
   );
 }

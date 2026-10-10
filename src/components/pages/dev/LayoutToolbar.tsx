@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { SaveResult } from "@/lib/layoutSave";
 
 const buttonClass =
   "rounded-control px-3 py-2 text-sm text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg disabled:opacity-40 disabled:hover:bg-transparent";
@@ -19,9 +20,17 @@ interface LayoutToolbarProps {
   onShowPacketsChange: (show: boolean) => void;
   /** The text Copy JSON puts on the clipboard (the diff as JSON). */
   json: string;
+  /** Writes the current changes into the definition's index.ts (dev server only). */
+  onSave: () => Promise<SaveResult>;
 }
 
 type CopyState = "idle" | "copied" | "failed";
+
+type SaveState =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved"; file: string }
+  | { kind: "error"; message: string };
 
 /** Editor controls: snap step, undo/redo, reset, packet toggle and Copy JSON. */
 export function LayoutToolbar({
@@ -36,8 +45,18 @@ export function LayoutToolbar({
   showPackets,
   onShowPacketsChange,
   json,
+  onSave,
 }: LayoutToolbarProps) {
   const [copy, setCopy] = useState<CopyState>("idle");
+  const [save, setSave] = useState<SaveState>({ kind: "idle" });
+
+  const saveToSource = async () => {
+    setSave({ kind: "saving" });
+    const result = await onSave();
+    setSave(
+      result.ok ? { kind: "saved", file: result.file } : { kind: "error", message: result.error },
+    );
+  };
 
   const copyJson = async () => {
     try {
@@ -104,11 +123,26 @@ export function LayoutToolbar({
         >
           Copy JSON
         </button>
+        <button
+          type="button"
+          className={buttonClass}
+          disabled={!hasChanges || !import.meta.env.DEV || save.kind === "saving"}
+          onClick={() => void saveToSource()}
+          title="Write these changes into the pattern's index.ts (dev server only)"
+        >
+          {save.kind === "saving" ? "Saving…" : "Save to source"}
+        </button>
         <span role="status" className="text-sm text-fg-muted">
           {copy === "copied" && "Copied to clipboard."}
           {copy === "failed" && "Clipboard unavailable: copy the JSON below by hand."}
+          {save.kind === "saved" && !hasChanges && `Saved to ${save.file}.`}
         </span>
       </div>
+      {save.kind === "error" && (
+        <p role="alert" className="text-sm text-danger-fg">
+          Could not save: {save.message}
+        </p>
+      )}
       {copy === "failed" && (
         <textarea
           readOnly

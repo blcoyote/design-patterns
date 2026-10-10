@@ -10,12 +10,15 @@ import { GenericVisualization } from "@/components/viz/GenericVisualization";
 import { useHistoryShortcuts, useLayoutHistory } from "@/hooks/useLayoutHistory";
 import { describeChanges } from "@/lib/layoutChanges";
 import { loadLayoutDraft, saveLayoutDraft } from "@/lib/layoutDraft";
-import { applyLayout, diffLayout, isEmpty } from "@/lib/layoutEdit";
+import { applyLayout, diffLayout, emptyLayout, isEmpty } from "@/lib/layoutEdit";
+import { lintLayout, warningTargets, type LayoutWarning } from "@/lib/layoutLint";
+import { saveLayoutToSource } from "@/lib/layoutSave";
 import { categories } from "@/patterns/categories";
 import { getPattern } from "@/patterns/registry";
 import type { ExplorableDefinition } from "@/types/pattern";
 import { NotFound } from "../NotFound";
 import { LayoutChangeList } from "./LayoutChangeList";
+import { LayoutLintPanel } from "./LayoutLintPanel";
 import { LayoutToolbar } from "./LayoutToolbar";
 
 const buttonClass =
@@ -74,10 +77,19 @@ function LayoutScene({
   const { overrides, update } = history;
   const [diagrams, setDiagrams] = useState(0);
   const [settled, setSettled] = useState(false);
-  const definition = useMemo(() => applyLayout(original, overrides), [original, overrides]);
-  const diff = useMemo(() => diffLayout(original, definition), [original, definition]);
-  const changes = useMemo(() => describeChanges(original, diff), [original, diff]);
+  // After a save the file on disk holds `saved.definition` before Vite hot-updates the registry;
+  // until `original` is a new object that is the baseline, so the page never flashes the old layout.
+  const [saved, setSaved] = useState<{
+    for: ExplorableDefinition;
+    definition: ExplorableDefinition;
+  } | null>(null);
+  const baseline = saved?.for === original ? saved.definition : original;
+  const definition = useMemo(() => applyLayout(baseline, overrides), [baseline, overrides]);
+  const diff = useMemo(() => diffLayout(baseline, definition), [baseline, definition]);
+  const changes = useMemo(() => describeChanges(baseline, diff), [baseline, diff]);
   const hasChanges = !isEmpty(diff);
+  const warnings = useMemo(() => lintLayout(definition), [definition]);
+  const warningIds = useMemo(() => warningTargets(warnings), [warnings]);
   const liveStep = definition.steps[stepIndex] ?? null;
   const step = useMemo(
     () => (showPackets || !liveStep ? liveStep : { ...liveStep, packets: [] }),
@@ -89,6 +101,17 @@ function LayoutScene({
 
   useHistoryShortcuts(history.undo, history.redo);
 
+  const saveToSource = async () => {
+    const result = await saveLayoutToSource(area, slug, diff);
+    if (result.ok) {
+      // drop the stored draft now: a reload racing the effect below must not re-apply it
+      saveLayoutDraft(area, slug, emptyLayout());
+      setSaved({ for: original, definition });
+      history.markSaved(overrides);
+    }
+    return result;
+  };
+
   // Keep the draft in localStorage (removed again when nothing differs from the source).
   useEffect(() => saveLayoutDraft(area, slug, diff), [area, slug, diff]);
 
@@ -97,6 +120,12 @@ function LayoutScene({
     const timer = window.setTimeout(() => setSettled(true), 0);
     return () => window.clearTimeout(timer);
   }, []);
+
+  /** A box is selected for editing; a warning about edges only selects the first relation instead. */
+  const selectWarning = (w: LayoutWarning) => {
+    if (w.participantIds.length > 0) setEditedId(w.participantIds[0]);
+    else if (w.relationIds.length > 0) setSelectedId(w.relationIds[0]);
+  };
 
   const register = useCallback(() => {
     setDiagrams((n) => n + 1);
@@ -124,9 +153,10 @@ function LayoutScene({
       onGestureStart: history.gestureStart,
       onGestureEnd: history.gestureEnd,
       onSelect: setEditedId,
+      warnings: warningIds,
       register,
     }),
-    [snapStep, editedId, update, history.gestureStart, history.gestureEnd, register],
+    [snapStep, editedId, warningIds, update, history.gestureStart, history.gestureEnd, register],
   );
 
   return (
@@ -163,6 +193,7 @@ function LayoutScene({
           showPackets={showPackets}
           onShowPacketsChange={setShowPackets}
           json={JSON.stringify(diff, null, 2)}
+          onSave={saveToSource}
         />
 
         <div className="overflow-x-auto overflow-y-hidden rounded-card bg-diagram-canvas ring-1 ring-diagram-canvas-outline">
@@ -211,6 +242,8 @@ function LayoutScene({
             Next
           </button>
         </div>
+
+        <LayoutLintPanel warnings={warnings} onSelect={selectWarning} />
 
         <LayoutChangeList
           changes={changes}

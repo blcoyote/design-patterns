@@ -131,6 +131,8 @@
   --color-editor-handle-active: #c2410c;
   --color-editor-readout-bg: #1b1c1a;
   --color-editor-readout-fg: #ffffff;
+  /* Layout lint warning outline (boxes, labels, curves); distinct from the orange drag highlight. */
+  --color-editor-warn: #b3261e;
 
   --color-xref: var(--color-sky-700);
   --color-xref-fg: var(--color-sky-700);
@@ -294,6 +296,7 @@
   --color-editor-handle-active: #f5a56b;
   --color-editor-readout-bg: #f4f3f0;
   --color-editor-readout-fg: #10120f;
+  --color-editor-warn: #ff8a80;
 
   /* Feature accents for the boxes that link areas together. */
   --color-xref: #6cbfee;

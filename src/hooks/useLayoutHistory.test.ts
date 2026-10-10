@@ -134,6 +134,24 @@ describe("layoutHistoryReducer", () => {
     expect(run(s, { type: "revert", target: { kind: "relation", id: "zzz" } })).toBe(s);
   });
 
+  it("starts over once the saved overrides are in the source file", () => {
+    const s = run(initialHistory(), move("a", 10, 10), bend("r", 30));
+    const after = run(s, { type: "saved", saved: s.present });
+    expect(after).toEqual(initialHistory());
+  });
+
+  it("keeps edits made while the save was in flight", () => {
+    const s = run(initialHistory(), move("a", 10, 10));
+    const saving = s.present;
+    const edited = run(s, move("a", 20, 20));
+    expect(run(edited, { type: "saved", saved: saving })).toBe(edited);
+  });
+
+  it("ignores a save confirmation while a gesture is open", () => {
+    const s = run(initialHistory(), { type: "gestureStart" }, move("a", 10, 10));
+    expect(run(s, { type: "saved", saved: s.present })).toBe(s);
+  });
+
   it("seeds from a restored draft with empty history", () => {
     const draft: LayoutOverrides = { participants: { a: { x: 1 } }, relations: {} };
     const s = initialHistory(draft);

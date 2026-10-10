@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { WarningTargets } from "@/lib/layoutLint";
 
 /**
  * What `<Diagram>` needs from a layout editor. There is no provider outside the
@@ -24,6 +25,8 @@ export interface DiagramEditContextValue {
   onGestureEnd: () => void;
   /** Select a participant, or clear the selection with `null`. */
   onSelect: (id: string | null) => void;
+  /** Boxes, relation labels and curves to outline because the layout lint flagged them; none when omitted. */
+  warnings?: WarningTargets;
   /** Called by every mounted `<Diagram>`; returns the cleanup. Lets the page detect a scene without one. */
   register: () => () => void;
 }

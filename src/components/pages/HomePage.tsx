@@ -46,12 +46,14 @@ export function HomePage() {
             >
               Start with {patterns[0]?.name}
             </Link>
-            <a
-              href="#catalogue"
+            {/* A button, not href="#catalogue": with hash routing that hash is a route (→ 404). */}
+            <button
+              type="button"
+              onClick={() => document.getElementById("catalogue")?.scrollIntoView()}
               className="rounded-control px-5 py-2.5 text-sm font-semibold text-fg-body ring-1 ring-control-outline hover:bg-surface"
             >
               Browse all
-            </a>
+            </button>
           </div>
         </div>
         <HeroGraphic />

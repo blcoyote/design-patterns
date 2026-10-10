@@ -70,16 +70,17 @@
   --color-line: #e3e2de;
   --color-line-strong: #d2d1cc;
   --color-line-bold: #b6b5af;
-  --color-line-emphasis: #8f8e88;
+  --color-line-emphasis: #8a8983;
 
   --color-fg: #1b1c1a;
   --color-fg-strong: #1b1c1a;
   --color-fg-body: #2f302d;
   --color-fg-soft: #454641;
   --color-fg-muted: #5d5e5a;
-  --color-fg-subtle: #71726c;
-  /* Decorative only (fails 4.5:1): never for text that has to be read. */
-  --color-fg-faint: #9a9a94;
+  --color-fg-subtle: #676862;
+  /* Quietest text; still >= 4.5:1 on canvas, card, surface-raised and diagram-canvas, because it is used for
+     empty-state labels, line numbers and SVG zone captions. */
+  --color-fg-faint: #6c6d67;
   /* White on a filled accent: every fill below is >= 4.5:1 (emerald/amber/sky/lime fills use their 700 shade; red 6.4, rose 6.1, purple 7.1, indigo 8.1, primary 7.0). */
   --color-fg-on-accent: #ffffff;
 
@@ -91,9 +92,9 @@
   --color-selected: var(--color-fg);
 
   --color-ok: var(--color-emerald-700);
-  --color-ok-fg: var(--color-emerald-700);
+  --color-ok-fg: var(--color-emerald-800);
   --color-warn: var(--color-amber-700);
-  --color-warn-fg: var(--color-amber-700);
+  --color-warn-fg: var(--color-amber-800);
   --color-danger: var(--color-red-600);
   --color-danger-fg: var(--color-red-700);
   --color-danger-surface: var(--color-red-50);
@@ -101,7 +102,7 @@
   --color-negative-fg: var(--color-rose-700);
   --color-warn-strong: var(--color-amber-700);
   --color-danger-strong: var(--color-rose-600);
-  --color-danger-fg-soft: var(--color-red-600);
+  --color-danger-fg-soft: var(--color-red-700);
   --color-info: var(--color-indigo-600);
 
   --color-tree-oak: var(--color-green-600);
@@ -113,7 +114,7 @@
   --color-diagram-grid: #ecebe7;
   --color-diagram-node: #ffffff;
   --color-diagram-node-stroke: #d2d1cc;
-  --color-diagram-edge: #a3a29c;
+  --color-diagram-edge: #8a8983;
   --color-diagram-label-bg: #ffffff;
   --color-diagram-label-stroke: #e3e2de;
   --color-diagram-label-text: #5d5e5a;
@@ -125,9 +126,9 @@
   --color-xref: var(--color-sky-700);
   --color-xref-fg: var(--color-sky-700);
   --color-used: var(--color-emerald-700);
-  --color-used-fg: var(--color-emerald-700);
+  --color-used-fg: var(--color-emerald-800);
   --color-compare: var(--color-amber-700);
-  --color-compare-fg: var(--color-amber-700);
+  --color-compare-fg: var(--color-amber-800);
 
   /* Syntax: every token is >= 4.5:1 on code-bg. */
   --color-code-bg: #f5f5f2;
@@ -143,39 +144,39 @@
   --color-syntax-property: #1a6482;
   --color-syntax-namespace: #4a5c66;
   --color-syntax-changed: #1f5fa8;
-  --color-syntax-deleted: rgb(198 40 71 / 0.56);
+  --color-syntax-deleted: #c62847;
 
   --color-cat-creational: var(--color-emerald-700);
-  --color-cat-creational-fg: var(--color-emerald-700);
+  --color-cat-creational-fg: var(--color-emerald-800);
   --color-cat-structural: var(--color-sky-700);
   --color-cat-structural-fg: var(--color-sky-700);
   --color-cat-behavioral: var(--color-purple-600);
   --color-cat-behavioral-fg: var(--color-purple-700);
   --color-cat-enterprise: var(--color-amber-700);
-  --color-cat-enterprise-fg: var(--color-amber-700);
+  --color-cat-enterprise-fg: var(--color-amber-800);
 
-  --color-paradigm-oo: var(--color-rose-600);
+  --color-paradigm-oo: var(--color-rose-700);
   --color-paradigm-oo-fg: var(--color-rose-700);
   --color-paradigm-functional: var(--color-lime-700);
-  --color-paradigm-functional-fg: var(--color-lime-700);
+  --color-paradigm-functional-fg: var(--color-lime-800);
   --color-paradigm-both: var(--color-indigo-600);
   --color-paradigm-both-fg: var(--color-indigo-700);
 }
 
-/* Dark theme: slate surfaces with borders instead of shadows, white as the inverse call to
-   action, and the glowing diagram scenes. */
+/* Dark theme: Material tonal layers (elevation by lighter surface, no card borders, no
+   shadows), pill controls, a light-blue call to action, softened accents, no glow. */
 [data-theme="dark"] {
   color-scheme: dark;
 
   /* Shape: corner radii. Utilities rounded-control / rounded-card / rounded-panel. */
   /* Buttons, inputs, chips. */
-  --radius-control: 0.5rem;
+  --radius-control: 9999px;
   /* Cards and list rows. */
   --radius-card: 0.75rem;
   /* Large containers: diagram frames, code panels, modals. */
   --radius-panel: 1rem;
 
-  /* Elevation: utilities shadow-card / shadow-raised. Dark uses borders, not shadows. */
+  /* Elevation: utilities shadow-card / shadow-raised. Dark raises by tone, not by shadow. */
   /* Resting card. */
   --shadow-card: none;
   /* Hovered / raised card, popovers. */
@@ -183,132 +184,136 @@
 
   /* Diagram effects (not colours; read via `var(--diagram-glow)` in a style filter).
      A theme sets `none` to drop the SVG glow. */
-  --diagram-glow: url(#glow);
-  --diagram-dim-node: 0.35;
-  --diagram-dim-edge: 0.25;
-  --diagram-dim-note: 0.35;
+  --diagram-glow: none;
+  /* Opacity of inactive (dimmed) diagram nodes, edges and note pills. Dimmed labels stay >= 3:1. */
+  --diagram-dim-node: 0.4;
+  --diagram-dim-edge: 0.3;
+  --diagram-dim-note: 0.45;
 
-  /* Typography. */
+  /* Typography. Fonts are bundled via @fontsource. */
   --font-sans:
-    "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    "Roboto Flex Variable", "Roboto Flex", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
   --font-mono:
     "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Surfaces: backgrounds, lowest to highest. */
-  --color-canvas: var(--color-slate-950);
-  --color-surface: var(--color-slate-900);
-  --color-surface-raised: var(--color-slate-800);
-  --color-surface-strong: var(--color-slate-700);
-  /* Card fill (pattern / architecture / comparison cards, panels): surface at 50%, so the
-     canvas shows through slightly in dark. */
-  --color-card: color-mix(in srgb, var(--color-surface) 50%, transparent);
-  /* Outline of a card; same as `line` in dark, a theme may set it apart. */
-  --color-card-outline: var(--color-line);
+  --color-canvas: #121416;
+  --color-surface: #1b1e21;
+  --color-surface-raised: #23272b;
+  --color-surface-strong: #2c3136;
+  /* Card fill (pattern / architecture / comparison cards, panels): solid, one tone above the canvas. */
+  --color-card: #1b1e21;
+  /* Outline of a card: none, elevation is tonal. */
+  --color-card-outline: transparent;
   /* Dimming layer behind a modal / drawer. */
   --color-scrim: var(--color-black);
 
-  /* Lines: borders, rings, outlines, quietest to loudest. */
-  --color-line: var(--color-slate-800);
-  --color-line-strong: var(--color-slate-700);
-  --color-line-bold: var(--color-slate-600);
-  --color-line-emphasis: var(--color-slate-500);
+  /* Lines: dividers and rings, quietest to loudest. */
+  --color-line: #272b2f;
+  --color-line-strong: #353a3f;
+  --color-line-bold: #4a5056;
+  --color-line-emphasis: #6c737a;
 
-  /* Text and glyph fills, most to least prominent. */
-  --color-fg: var(--color-white);
-  --color-fg-strong: var(--color-slate-100);
-  --color-fg-body: var(--color-slate-200);
-  --color-fg-soft: var(--color-slate-300);
-  --color-fg-muted: var(--color-slate-400);
-  --color-fg-subtle: var(--color-slate-500);
-  --color-fg-faint: var(--color-slate-600);
-  /* Text on a filled accent / status colour. */
-  --color-fg-on-accent: var(--color-slate-950);
+  /* Text and glyph fills, most to least prominent (warm-neutral greys). */
+  --color-fg: #f4f3f0;
+  --color-fg-strong: #eceae6;
+  --color-fg-body: #dcdad5;
+  --color-fg-soft: #c7c5bf;
+  --color-fg-muted: #a9a8a2;
+  --color-fg-subtle: #92918b;
+  /* Decorative only (fails 4.5:1): never for text that has to be read. */
+  --color-fg-faint: #5f5f5a;
+  /* Text on a filled accent / status colour: >= 7.8:1 on every fill below. */
+  --color-fg-on-accent: #10120f;
 
-  /* Solid call-to-action: the inverse of the page. */
-  --color-inverse: var(--color-white);
-  --color-inverse-hover: var(--color-slate-200);
-  --color-on-inverse: var(--color-slate-950);
+  /* Solid call-to-action: a light tint of the primary blue. */
+  --color-inverse: #9ecaff;
+  --color-inverse-hover: #b8d8ff;
+  --color-on-inverse: #003258;
 
   /* Interaction states, shared by HTML and SVG. */
-  --color-focus: var(--color-fg);
+  --color-focus: #9ecaff;
   --color-selected: var(--color-fg);
 
   /* Status: pattern scenes reuse these for ok / warning / failure. */
-  --color-ok: #34d399;
-  --color-ok-fg: var(--color-emerald-300);
-  --color-warn: #fbbf24;
-  --color-warn-fg: var(--color-amber-300);
-  --color-danger: #f87171;
-  --color-danger-fg: var(--color-red-300);
-  --color-danger-surface: #450a0a;
+  --color-ok: #5fd0a0;
+  --color-ok-fg: #8fe0bd;
+  --color-warn: #f0bf5c;
+  --color-warn-fg: #f5d48a;
+  --color-danger: #f28b82;
+  --color-danger-fg: #f7aaa4;
+  --color-danger-surface: #3b1b1a;
   /* A downside / "poor fit" (cons list, quiz): rose, deliberately not the same hue as `danger`. */
-  --color-negative: var(--color-rose-400);
-  --color-negative-fg: var(--color-rose-300);
+  --color-negative: #f08ba0;
+  --color-negative-fg: #f5aab9;
   /* Louder variants for scenes that need a second tier (e.g. a runtime-specific failure). */
-  --color-warn-strong: #f59e0b;
-  --color-danger-strong: #f43f5e;
-  --color-danger-fg-soft: var(--color-red-200);
+  --color-warn-strong: #e0a43a;
+  --color-danger-strong: #ec6a7f;
+  --color-danger-fg-soft: #fbc5c0;
   /* A neutral second series next to the accent (e.g. a second topic in Pub/Sub). */
-  --color-info: #818cf8;
+  --color-info: #a0a8f5;
 
   /* Pattern-scene illustration colours (not UI chrome): Flyweight's trees. */
-  --color-tree-oak: #4ade80;
-  --color-tree-pine: #0d9488;
+  --color-tree-oak: #6fc77a;
+  --color-tree-pine: #2f9e94;
 
-  /* Diagram primitives (Diagram, DiagramNode, DiagramEdge, Packet and custom scenes). */
-  --color-diagram-canvas: var(--color-canvas);
-  --color-diagram-canvas-outline: var(--color-card-outline);
-  --color-diagram-grid: #1e293b;
-  --color-diagram-node: #0f172a;
-  --color-diagram-node-stroke: #334155;
-  --color-diagram-edge: #475569;
-  --color-diagram-label-bg: #020617;
-  --color-diagram-label-stroke: #1e293b;
-  --color-diagram-label-text: #94a3b8;
-  --color-diagram-label-text-active: #f1f5f9;
-  --color-diagram-text: #e2e8f0;
-  --color-diagram-text-active: #f8fafc;
+  /* Diagram primitives (Diagram, DiagramNode, DiagramEdge, Packet and custom scenes).
+     The viewport is inset, a tone below the card; nodes sit a tone above it. */
+  --color-diagram-canvas: #0e1012;
+  --color-diagram-canvas-outline: #2c3136;
+  --color-diagram-grid: #171a1d;
+  --color-diagram-node: #23272b;
+  --color-diagram-node-stroke: #454c53;
+  --color-diagram-edge: #6f7780;
+  --color-diagram-label-bg: #1b1e21;
+  --color-diagram-label-stroke: #2c3136;
+  --color-diagram-label-text: #a9a8a2;
+  --color-diagram-label-text-active: #f4f3f0;
+  --color-diagram-text: #dcdad5;
+  --color-diagram-text-active: #f4f3f0;
   --color-diagram-packet: #ffffff;
 
   /* Feature accents for the boxes that link areas together. */
-  --color-xref: var(--color-sky-400);
-  --color-xref-fg: var(--color-sky-300);
-  --color-used: #34d399;
-  --color-used-fg: var(--color-emerald-300);
-  --color-compare: var(--color-amber-400);
-  --color-compare-fg: var(--color-amber-300);
+  --color-xref: #6cbfee;
+  --color-xref-fg: #9ad3f5;
+  --color-used: #5fd0a0;
+  --color-used-fg: #8fe0bd;
+  --color-compare: #f0bf5c;
+  --color-compare-fg: #f5d48a;
 
-  /* Code blocks: editor surface plus syntax colours (seeded from Night Owl). A theme that
-     re-points these re-colours every CodeBlock; the Prism theme in codeTheme.ts reads them. */
-  --color-code-bg: #011627;
+  /* Code blocks: editor surface plus syntax colours (Night Owl-like hues, each >= 4.5:1 on
+     code-bg). A theme that re-points these re-colours every CodeBlock; the Prism theme in
+     codeTheme.ts reads them. */
+  --color-code-bg: #0f1a24;
   --color-code-fg: #d6deeb;
-  --color-syntax-comment: #637777;
+  --color-syntax-comment: #7d8f9c;
   --color-syntax-string: #addb67;
   --color-syntax-number: #f78c6c;
   --color-syntax-function: #82aaff;
   --color-syntax-punctuation: #c792ea;
   --color-syntax-class-name: #ffcb8b;
   --color-syntax-keyword: #7fdbca;
-  --color-syntax-boolean: #ff5874;
+  --color-syntax-boolean: #ff7a90;
   --color-syntax-property: #80cbc4;
   --color-syntax-namespace: #b2ccd6;
   --color-syntax-changed: #a2bffc;
   --color-syntax-deleted: rgb(239 83 80 / 0.56);
 
   /* Accents. `-fg` is the shade used for text and badges on a dark surface. */
-  --color-cat-creational: #34d399;
-  --color-cat-creational-fg: var(--color-emerald-300);
-  --color-cat-structural: #38bdf8;
-  --color-cat-structural-fg: var(--color-sky-300);
-  --color-cat-behavioral: #c084fc;
-  --color-cat-behavioral-fg: var(--color-purple-300);
-  --color-cat-enterprise: #fbbf24;
-  --color-cat-enterprise-fg: var(--color-amber-300);
+  --color-cat-creational: #5fd0a0;
+  --color-cat-creational-fg: #8fe0bd;
+  --color-cat-structural: #6cbfee;
+  --color-cat-structural-fg: #9ad3f5;
+  --color-cat-behavioral: #c4a0f0;
+  --color-cat-behavioral-fg: #d6bdf6;
+  --color-cat-enterprise: #f0bf5c;
+  --color-cat-enterprise-fg: #f5d48a;
 
-  --color-paradigm-oo: #fb7185;
-  --color-paradigm-oo-fg: var(--color-rose-300);
-  --color-paradigm-functional: #a3e635;
-  --color-paradigm-functional-fg: var(--color-lime-300);
-  --color-paradigm-both: #818cf8;
-  --color-paradigm-both-fg: var(--color-indigo-300);
+  --color-paradigm-oo: #f08ba0;
+  --color-paradigm-oo-fg: #f5aab9;
+  --color-paradigm-functional: #b5db62;
+  --color-paradigm-functional-fg: #cde88f;
+  --color-paradigm-both: #a0a8f5;
+  --color-paradigm-both-fg: #bcc2f8;
 }

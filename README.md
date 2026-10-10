@@ -162,16 +162,16 @@ The step player waits for the animation: each step stays on screen for at least 
 
 ## Editing diagram layouts (dev only)
 
-Layouts are hand-typed numbers, so there is a drag-and-drop editor for them. It exists only under `npm run dev`: the route, the header link ("Layout editor") and the save endpoint are all guarded by `import.meta.env.DEV` or `apply: "serve"`, so `npm run build` contains none of the editor: not the pages, the drag handles, the save code nor the endpoint. (`<Diagram>` loads its handle layer lazily, only in dev; the only trace in a build is a few `editor-*` colour tokens in the stylesheet.)
+Layouts are hand-typed numbers, so there is a drag-and-drop editor for them. It exists only under `npm run dev`: the route, the header link ("Layout editor") and the save endpoint are all guarded by `import.meta.env.DEV` or `apply: "serve"`, so `npm run build` contains none of the editor's pages, drag handles, save code or endpoint. (`<Diagram>` loads its handle layer lazily, only in dev. The only traces left in a build are a `useContext` lookup in `<Diagram>` that always finds no editor, and a few `editor-*` colour tokens in the stylesheet.)
 
 Open `http://localhost:5173/#/dev/layout` for the list of every pattern and architecture, or go straight to `/#/dev/layout/patterns/<slug>` or `/#/dev/layout/architecture/<slug>`. The page shows the real scene (the generic diagram or the pattern's own `Visualization.tsx`) with a step selector, so you can check each step's boxes, arrows and packets while you edit.
 
 ### Editing
 
-- **Move a box**: drag it. Positions snap to a grid of 10 units; hold **Alt** to bypass snapping (free placement still lands on whole units). The snap step can be changed in the toolbar (off, 5, 10 or 20). A box cannot leave the viewBox.
+- **Move a box**: drag it. Positions snap to a grid of 10 units; hold **Alt** to bypass snapping (free placement still lands on whole units). The snap step can be changed in the toolbar (off, 5, 10 or 20). A box can be dragged mostly off the canvas but never lost: at least 24 units of it (or half its size, if smaller) stay inside the viewBox, and the live lint reports `box-outside` for any box that is partly outside.
 - **Bend an arrow**: drag the round handle at the midpoint of an arrow; this edits the relation's `bend`. Double-click it, or press **Enter** (or Space) while it is focused, to straighten it (`bend: 0`).
 - **Resize a box**: select the box, then drag the handle on its right edge; this edits `width`.
-- **Keyboard**: Tab to a box or bend handle and use the arrow keys to nudge by 1 unit (**Shift** = 10). Each key press is one undo step. **Escape** deselects.
+- **Keyboard**: Tab to a box, bend or width handle and use the arrow keys to nudge by 1 unit (**Shift** = 10); on a width handle Right/Up widen and Left/Down narrow by that amount. Each key press is one undo step. **Escape** deselects.
 - **Undo / redo**: Ctrl/Cmd+Z, Ctrl/Cmd+Shift+Z or Ctrl+Y, or the toolbar buttons. One drag is one undo step. **Reset all** drops every change.
 - **Show packets** hides the animated packets while you work on the boxes and arrows.
 - **Changes** lists every changed participant and relation (old to new value) with a per-row **Revert**.

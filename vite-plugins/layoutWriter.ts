@@ -297,66 +297,86 @@ function header(req: IncomingMessage, name: string): string | undefined {
 }
 
 /**
+ * The `POST /__dev/layout` request handler, separate from the Vite plugin so it can be run on a
+ * plain HTTP server in tests. `root` is the project root; `logError` receives server-side faults.
+ * Calls `next()` for any other URL under the mount point.
+ */
+export function createLayoutHandler(
+  root: string,
+  logError: (message: string) => void,
+): (req: IncomingMessage, res: ServerResponse, next: () => void) => void {
+  // Serialises the file work (resolve, patch, write) of concurrent saves.
+  let queue: Promise<unknown> = Promise.resolve();
+
+  return (req, res, next) => {
+    if (req.url !== undefined && req.url !== "/" && !req.url.startsWith("/?")) {
+      next();
+      return;
+    }
+    const handle = async () => {
+      const gate = checkRequestFacts({
+        method: req.method,
+        host: header(req, "host"),
+        origin: header(req, "origin"),
+        secFetchSite: header(req, "sec-fetch-site"),
+        contentType: header(req, "content-type"),
+      });
+      if (!gate.ok) return respond(res, gate.status, { error: gate.error });
+
+      // The body is read and validated before joining the queue: a client that stalls
+      // mid-body must not hold up other saves, and only the file work needs serialising.
+      const text = await readBody(req);
+      if (!text.ok) return respond(res, text.status, { error: text.error });
+      const json = parseJsonBody(text.value);
+      if (!json.ok) return respond(res, json.status, { error: json.error });
+      const request = parseLayoutRequest(json.value);
+      if (!request.ok) return respond(res, request.status, { error: request.error });
+
+      const { area, slug, patch } = request.value;
+      const write = async () => {
+        const file = resolveDefinitionFile(root, area, slug);
+        if (!file.ok) return respond(res, file.status, { error: file.error });
+
+        const repoFile = relative(root, file.value).split(sep).join("/");
+        try {
+          await patchFile(file.value, patch);
+        } catch (error) {
+          // patchLayout throws "layout patch: …" for anything it cannot place; anything else
+          // (I/O, prettier) is a server problem
+          const message = error instanceof Error ? error.message : String(error);
+          if (message.startsWith("layout patch:")) return respond(res, 422, { error: message });
+          logError(`[layout-writer] ${repoFile}: ${message}`);
+          return respond(res, 500, { error: `could not write ${repoFile}: ${message}` });
+        }
+        respond(res, 200, { ok: true, file: repoFile });
+      };
+      // Saves are applied one at a time, so two quick requests can't interleave read and write.
+      const job = queue.then(write, write);
+      queue = job.catch(() => undefined);
+      await job;
+    };
+    handle().catch((error: unknown) => {
+      logError(`[layout-writer] ${String(error)}`);
+      if (!res.headersSent) respond(res, 500, { error: "internal error" });
+    });
+  };
+}
+
+/**
  * Dev-server only (`apply: "serve"`): `POST /__dev/layout` with `{ area, slug, patch }` rewrites
  * the layout literals in that pattern's or architecture's `index.ts` (see `patchLayout`),
  * prettier-formats the result with the repo config and writes it atomically. Vite's own file
  * watcher then hot-updates the page. Not part of `vite build` or `vite preview`.
  */
 export function layoutWriterPlugin(): Plugin {
-  // Saves are applied one at a time, so two quick requests can't interleave read and write.
-  let queue: Promise<unknown> = Promise.resolve();
-
   return {
     name: "layout-writer",
     apply: "serve",
     configureServer(server) {
-      const root = server.config.root;
-      server.middlewares.use(LAYOUT_ENDPOINT, (req, res, next) => {
-        if (req.url !== undefined && req.url !== "/" && !req.url.startsWith("/?")) {
-          next();
-          return;
-        }
-        const run = async () => {
-          const gate = checkRequestFacts({
-            method: req.method,
-            host: header(req, "host"),
-            origin: header(req, "origin"),
-            secFetchSite: header(req, "sec-fetch-site"),
-            contentType: header(req, "content-type"),
-          });
-          if (!gate.ok) return respond(res, gate.status, { error: gate.error });
-
-          const text = await readBody(req);
-          if (!text.ok) return respond(res, text.status, { error: text.error });
-          const json = parseJsonBody(text.value);
-          if (!json.ok) return respond(res, json.status, { error: json.error });
-          const request = parseLayoutRequest(json.value);
-          if (!request.ok) return respond(res, request.status, { error: request.error });
-
-          const { area, slug, patch } = request.value;
-          const file = resolveDefinitionFile(root, area, slug);
-          if (!file.ok) return respond(res, file.status, { error: file.error });
-
-          const repoFile = relative(root, file.value).split(sep).join("/");
-          try {
-            await patchFile(file.value, patch);
-          } catch (error) {
-            // patchLayout throws "layout patch: …" for anything it cannot place; anything else
-            // (I/O, prettier) is a server problem
-            const message = error instanceof Error ? error.message : String(error);
-            if (message.startsWith("layout patch:")) return respond(res, 422, { error: message });
-            server.config.logger.error(`[layout-writer] ${repoFile}: ${message}`);
-            return respond(res, 500, { error: `could not write ${repoFile}: ${message}` });
-          }
-          respond(res, 200, { ok: true, file: repoFile });
-        };
-        const job = queue.then(run, run);
-        queue = job.catch(() => undefined);
-        job.catch((error: unknown) => {
-          server.config.logger.error(`[layout-writer] ${String(error)}`);
-          if (!res.headersSent) respond(res, 500, { error: "internal error" });
-        });
-      });
+      server.middlewares.use(
+        LAYOUT_ENDPOINT,
+        createLayoutHandler(server.config.root, (message) => server.config.logger.error(message)),
+      );
     },
   };
 }

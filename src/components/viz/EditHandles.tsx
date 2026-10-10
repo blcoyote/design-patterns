@@ -459,9 +459,32 @@ function WidthHandle({
     <g data-editor="width-handle" data-id={p.id}>
       <g
         transform={`translate(${edgeX} ${p.y})`}
-        className="cursor-ew-resize"
+        className="group cursor-ew-resize outline-none"
         style={{ touchAction: "none" }}
+        tabIndex={0}
+        role="slider"
+        aria-label={`Width of ${p.label}`}
+        aria-orientation="horizontal"
+        aria-valuemin={clampWidth(0, viewBox)}
+        aria-valuemax={clampWidth(Infinity, viewBox)}
+        aria-valuenow={width}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            edit.onSelect(null);
+            return;
+          }
+          const nudge = nudgeOf(e);
+          if (!nudge) return;
+          // Right / Up widen, Left / Down narrow. Each key press is its own undo step.
+          e.preventDefault();
+          const next = clampWidth(
+            width + (nudge.dir.x + -nudge.dir.y > 0 ? 1 : -1) * nudge.step,
+            viewBox,
+          );
+          if (next !== width) edit.onResizeParticipant(p.id, next);
+        }}
         onPointerDown={(e) => {
           if (e.button !== 0 || !e.isPrimary) return;
           e.preventDefault();
@@ -486,8 +509,18 @@ function WidthHandle({
         onPointerUp={end}
         onPointerCancel={end}
       >
-        <title>Drag to resize the width</title>
+        <title>Drag or use arrow keys to resize the width</title>
         <rect x={-14} y={-20} width={28} height={40} fill="transparent" />
+        <rect
+          x={-9}
+          y={-17}
+          width={18}
+          height={34}
+          rx={6}
+          fill="none"
+          strokeWidth={2}
+          className="stroke-transparent group-focus-visible:stroke-editor-handle-active"
+        />
         <rect
           x={-5}
           y={-13}

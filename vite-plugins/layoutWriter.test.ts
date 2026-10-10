@@ -1,9 +1,13 @@
 import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { createServer, type Server } from "node:http";
+import { connect } from "node:net";
+import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   checkRequestFacts,
+  createLayoutHandler,
   MAX_BODY_BYTES,
   parseJsonBody,
   parseLayoutRequest,
@@ -289,5 +293,54 @@ describe("resolveDefinitionFile", () => {
     const result = failure(resolveDefinitionFile(root, "patterns", "evil"));
     expect(result.status).toBe(403);
     expect(result.error).toMatch(/outside src/);
+  });
+});
+
+describe("createLayoutHandler", () => {
+  let root: string;
+  let server: Server;
+  let port: number;
+
+  beforeAll(async () => {
+    root = mkdtempSync(join(tmpdir(), "layout-handler-"));
+    mkdirSync(join(root, "src", "patterns", "creational"), { recursive: true });
+    mkdirSync(join(root, "src", "architectures"), { recursive: true });
+    const handler = createLayoutHandler(root, () => undefined);
+    // like Vite's mount at /__dev/layout, the handler sees the URL without that prefix; a 599 means it called next()
+    server = createServer((req, res) => handler(req, res, () => res.writeHead(599).end()));
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    port = (server.address() as AddressInfo).port;
+  });
+
+  afterAll(async () => {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("answers a save while another request is stalled mid-body", async () => {
+    // Headers promise a body that never arrives: this request waits in readBody() forever.
+    const stalled = connect(port, "127.0.0.1");
+    stalled.write(
+      "POST / HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\n" +
+        "Content-Length: 200\r\n\r\n{",
+    );
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(valid),
+        signal: AbortSignal.timeout(3000),
+      });
+      // observer does not exist under the temp root: the handler itself answers 404 (not next())
+      expect(response.status).toBe(404);
+    } finally {
+      stalled.destroy();
+    }
+  });
+
+  it("rejects non-POST requests without touching the queue", async () => {
+    const response = await fetch(`http://127.0.0.1:${port}/`);
+    expect(response.status).toBe(405);
   });
 });

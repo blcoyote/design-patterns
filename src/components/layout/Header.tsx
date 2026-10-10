@@ -53,6 +53,14 @@ export function Header({ onMenu, menuOpen }: { onMenu: () => void; menuOpen: boo
         <span className="ml-auto hidden font-mono text-xs text-fg-subtle sm:block">
           {count} {unit}
         </span>
+        {import.meta.env.DEV && (
+          <Link
+            to="/dev/layout"
+            className="max-sm:ml-auto rounded-control px-2 py-1 font-mono text-xs text-fg-subtle ring-1 ring-control-outline hover:bg-surface hover:text-fg"
+          >
+            Layout editor
+          </Link>
+        )}
         <div className="max-lg:hidden">
           <ThemeToggle />
         </div>

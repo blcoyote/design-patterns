@@ -7,11 +7,16 @@ import {
   type DiagramEditContextValue,
 } from "@/components/viz/DiagramEditContext";
 import { GenericVisualization } from "@/components/viz/GenericVisualization";
-import { applyLayout, emptyLayout, type LayoutOverrides } from "@/lib/layoutEdit";
+import { useHistoryShortcuts, useLayoutHistory } from "@/hooks/useLayoutHistory";
+import { describeChanges } from "@/lib/layoutChanges";
+import { loadLayoutDraft, saveLayoutDraft } from "@/lib/layoutDraft";
+import { applyLayout, diffLayout, isEmpty } from "@/lib/layoutEdit";
 import { categories } from "@/patterns/categories";
 import { getPattern } from "@/patterns/registry";
 import type { ExplorableDefinition } from "@/types/pattern";
 import { NotFound } from "../NotFound";
+import { LayoutChangeList } from "./LayoutChangeList";
+import { LayoutToolbar } from "./LayoutToolbar";
 
 const buttonClass =
   "rounded-control px-3 py-2 text-sm text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg disabled:opacity-40 disabled:hover:bg-transparent";
@@ -34,33 +39,58 @@ function resolveSubject(area: string | undefined, slug: string | undefined) {
 export function LayoutEditorPage() {
   const { area, slug } = useParams();
   const subject = resolveSubject(area, slug);
-  if (!subject) return <NotFound />;
+  if (!subject || !area || !slug) return <NotFound />;
   return (
-    <LayoutScene key={`${area}:${slug}`} definition={subject.definition} color={subject.color} />
+    <LayoutScene
+      key={`${area}:${slug}`}
+      area={area}
+      slug={slug}
+      definition={subject.definition}
+      color={subject.color}
+    />
   );
 }
 
-/** Grid step boxes snap to while dragging; holding Alt turns it off. */
-const SNAP = 10;
+/** Grid step boxes start out snapping to; the toolbar can change it. */
+const DEFAULT_SNAP = 10;
 
 function LayoutScene({
+  area,
+  slug,
   definition: original,
   color,
 }: {
+  area: string;
+  slug: string;
   definition: ExplorableDefinition;
   color: string;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editedId, setEditedId] = useState<string | null>(null);
-  const [overrides, setOverrides] = useState<LayoutOverrides>(emptyLayout);
+  const [snapStep, setSnapStep] = useState<number | null>(DEFAULT_SNAP);
+  const [showPackets, setShowPackets] = useState(true);
+  const history = useLayoutHistory(() => loadLayoutDraft(area, slug, original));
+  const { overrides, update } = history;
   const [diagrams, setDiagrams] = useState(0);
   const [settled, setSettled] = useState(false);
   const definition = useMemo(() => applyLayout(original, overrides), [original, overrides]);
-  const step = definition.steps[stepIndex] ?? null;
+  const diff = useMemo(() => diffLayout(original, definition), [original, definition]);
+  const changes = useMemo(() => describeChanges(original, diff), [original, diff]);
+  const hasChanges = !isEmpty(diff);
+  const liveStep = definition.steps[stepIndex] ?? null;
+  const step = useMemo(
+    () => (showPackets || !liveStep ? liveStep : { ...liveStep, packets: [] }),
+    [showPackets, liveStep],
+  );
   const last = definition.steps.length - 1;
 
   const Visualization = definition.Visualization ?? GenericVisualization;
+
+  useHistoryShortcuts(history.undo, history.redo);
+
+  // Keep the draft in localStorage (removed again when nothing differs from the source).
+  useEffect(() => saveLayoutDraft(area, slug, diff), [area, slug, diff]);
 
   // Give the mounted <Diagram>s a tick to register before concluding the scene has none.
   useEffect(() => {
@@ -74,17 +104,29 @@ function LayoutScene({
   }, []);
   const edit = useMemo<DiagramEditContextValue>(
     () => ({
-      snap: SNAP,
+      snap: snapStep,
       selectedId: editedId,
       onMoveParticipant: (id, x, y) =>
-        setOverrides((o) => ({
+        update((o) => ({
           ...o,
           participants: { ...o.participants, [id]: { ...o.participants[id], x, y } },
         })),
+      onResizeParticipant: (id, width) =>
+        update((o) => ({
+          ...o,
+          participants: { ...o.participants, [id]: { ...o.participants[id], width } },
+        })),
+      onBendRelation: (id, bend) =>
+        update((o) => ({
+          ...o,
+          relations: { ...o.relations, [id]: { ...o.relations[id], bend } },
+        })),
+      onGestureStart: history.gestureStart,
+      onGestureEnd: history.gestureEnd,
       onSelect: setEditedId,
       register,
     }),
-    [editedId, register],
+    [snapStep, editedId, update, history.gestureStart, history.gestureEnd, register],
   );
 
   return (
@@ -95,7 +137,7 @@ function LayoutScene({
         </Link>
         <h1 className="text-2xl font-bold text-fg">{definition.name}</h1>
         <span className="font-mono text-xs text-fg-subtle">
-          drag a box to move it (snaps to {SNAP}, hold Alt for free)
+          drag to edit (hold Alt to bypass snapping), Ctrl/Cmd+Z to undo
         </span>
       </div>
 
@@ -109,6 +151,20 @@ function LayoutScene({
       )}
 
       <div className="space-y-4 rounded-panel bg-card p-3 shadow-card ring-1 ring-card-outline sm:p-6">
+        <LayoutToolbar
+          snap={snapStep}
+          onSnapChange={setSnapStep}
+          canUndo={history.canUndo}
+          canRedo={history.canRedo}
+          onUndo={history.undo}
+          onRedo={history.redo}
+          hasChanges={hasChanges}
+          onReset={history.reset}
+          showPackets={showPackets}
+          onShowPacketsChange={setShowPackets}
+          json={JSON.stringify(diff, null, 2)}
+        />
+
         <div className="overflow-x-auto overflow-y-hidden rounded-card bg-diagram-canvas ring-1 ring-diagram-canvas-outline">
           <div className="min-w-160">
             <DiagramEditContext value={edit}>
@@ -155,6 +211,11 @@ function LayoutScene({
             Next
           </button>
         </div>
+
+        <LayoutChangeList
+          changes={changes}
+          onRevert={({ kind, id }) => history.revert({ kind, id })}
+        />
       </div>
     </div>
   );

@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { NODE_HEIGHT, NODE_WIDTH, boxOf, edgeBetween, type Box } from "./geometry";
 import {
   applyLayout,
+  MIN_BOX_WIDTH,
   bendForPoint,
   clampToViewBox,
+  clampWidth,
   diffLayout,
   emptyLayout,
   isEmpty,
@@ -144,6 +146,19 @@ describe("clampToViewBox", () => {
     expect(clampToViewBox({ x: 5000, y: 100 }, size, "nonsense")).toEqual(
       clampToViewBox({ x: 5000, y: 100 }, size),
     );
+  });
+});
+
+describe("clampWidth", () => {
+  it("leaves a sensible width alone", () => {
+    expect(clampWidth(150)).toBe(150);
+  });
+
+  it("enforces the minimum and the viewBox width", () => {
+    expect(clampWidth(10)).toBe(MIN_BOX_WIDTH);
+    expect(clampWidth(-300)).toBe(80);
+    expect(clampWidth(5000)).toBe(800);
+    expect(clampWidth(5000, "0 0 400 300")).toBe(400);
   });
 });
 

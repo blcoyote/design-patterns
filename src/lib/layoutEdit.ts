@@ -108,6 +108,14 @@ export function clampToViewBox(
   };
 }
 
+/** Narrowest width a box can be resized to. */
+export const MIN_BOX_WIDTH = 80;
+
+/** Clamp a box width to `MIN_BOX_WIDTH` .. the viewBox width. */
+export function clampWidth(width: number, viewBox: string = DEFAULT_VIEWBOX): number {
+  return Math.min(parseViewBox(viewBox).width, Math.max(MIN_BOX_WIDTH, width));
+}
+
 /**
  * Overrides that turn `original` into `edited`, containing only values that
  * differ. Matching is by id against `original`. An absent `bend` equals 0 and

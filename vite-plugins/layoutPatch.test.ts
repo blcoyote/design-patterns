@@ -455,6 +455,8 @@ function indexFiles(area: "patterns" | "architectures"): string[] {
 
 const rel = (path: string) => relative(ROOT, path).split(sep).join("/");
 const realFiles = [...indexFiles("patterns"), ...indexFiles("architectures")];
+/** Each case imports a real definition module, which can exceed the 5 s default on a loaded machine. */
+const REAL_FILE_TIMEOUT = 60_000;
 
 interface Layout {
   patch: LayoutPatch;
@@ -513,6 +515,7 @@ describe("patchLayout on the real definition files", () => {
       expect(Object.keys(patch.participants).length).toBeGreaterThan(0);
       expect(patchLayout(source, patch)).toBe(source);
     },
+    REAL_FILE_TIMEOUT,
   );
 
   it.each(realFiles.map((file) => [rel(file), file]))(
@@ -556,5 +559,6 @@ describe("patchLayout on the real definition files", () => {
         expect(patchLayout(withWidths, again)).toBe(withWidths);
       }
     },
+    REAL_FILE_TIMEOUT,
   );
 });

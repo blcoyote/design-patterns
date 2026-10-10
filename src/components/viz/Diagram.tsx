@@ -130,6 +130,7 @@ export function Diagram({
         <EditHandles
           edit={edit}
           participants={participants}
+          relations={relations}
           geometry={geometry}
           viewBox={viewBox}
         />

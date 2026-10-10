@@ -36,7 +36,7 @@ export function DetailPanel({ pattern, selection, color, onSelect, resolvePatter
       : [];
 
   return (
-    <div className="min-h-44 rounded-xl bg-surface/70 p-5 ring-1 ring-line">
+    <div className="min-h-44 rounded-card bg-card p-5 shadow-card ring-1 ring-card-outline">
       {!selection ? (
         <motion.div
           key="hint"
@@ -56,7 +56,7 @@ export function DetailPanel({ pattern, selection, color, onSelect, resolvePatter
                 key={p.id}
                 type="button"
                 onClick={() => onSelect(p.id)}
-                className="rounded-full px-3 py-1 text-xs text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg"
+                className="rounded-full px-3 py-1 text-xs text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg"
               >
                 {p.label}
               </button>

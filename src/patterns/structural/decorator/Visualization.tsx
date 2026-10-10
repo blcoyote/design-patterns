@@ -166,7 +166,7 @@ function Layer({
           transition={
             reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
           }
-          filter="url(#glow)"
+          style={{ filter: "var(--diagram-glow)" }}
         />
       )}
       <rect

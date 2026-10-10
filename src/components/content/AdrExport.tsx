@@ -79,10 +79,10 @@ export function AdrExport({
           {subjects.map((s) => (
             <label
               key={s.slug}
-              className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-focus ${
+              className={`flex cursor-pointer items-center gap-2 rounded-control px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-focus ${
                 chosen === s.slug
-                  ? "bg-surface-raised text-fg ring-line-bold"
-                  : "text-fg-muted ring-line hover:text-fg"
+                  ? "bg-surface-raised text-fg ring-fg-muted"
+                  : "text-fg-muted ring-control-outline hover:text-fg"
               }`}
             >
               <input
@@ -97,10 +97,10 @@ export function AdrExport({
             </label>
           ))}
           <label
-            className={`flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-focus ${
+            className={`flex cursor-pointer items-center gap-2 rounded-control px-3 py-1.5 text-sm ring-1 transition focus-within:outline-2 focus-within:outline-focus ${
               chosen === NO_PATTERN
-                ? "bg-surface-raised text-fg ring-line-bold"
-                : "text-fg-muted ring-line hover:text-fg"
+                ? "bg-surface-raised text-fg ring-fg-muted"
+                : "text-fg-muted ring-control-outline hover:text-fg"
             }`}
           >
             <input
@@ -121,28 +121,28 @@ export function AdrExport({
           type="button"
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-fg-body ring-1 ring-line-strong hover:bg-surface"
+          className="rounded-control px-3 py-1.5 text-sm font-medium text-fg-body ring-1 ring-control-outline hover:bg-surface"
         >
           {open ? "Hide preview" : "Show preview"}
         </button>
         <button
           type="button"
           onClick={copy}
-          className="rounded-lg px-3 py-1.5 text-sm font-medium text-fg-body ring-1 ring-line-strong hover:bg-surface"
+          className="rounded-control px-3 py-1.5 text-sm font-medium text-fg-body ring-1 ring-control-outline hover:bg-surface"
         >
           {copied ? "Copied ✓" : "Copy"}
         </button>
         <button
           type="button"
           onClick={download}
-          className="rounded-lg bg-inverse px-3 py-1.5 text-sm font-semibold text-on-inverse hover:bg-inverse-hover"
+          className="rounded-control bg-inverse px-3 py-1.5 text-sm font-semibold text-on-inverse hover:bg-inverse-hover"
         >
           Download {filename}
         </button>
       </div>
 
       {open && (
-        <pre className="mt-4 max-h-128 overflow-auto rounded-xl bg-code-bg p-4 text-xs leading-relaxed whitespace-pre-wrap text-fg-soft ring-1 ring-line">
+        <pre className="mt-4 max-h-128 overflow-auto rounded-card bg-code-bg p-4 text-xs leading-relaxed whitespace-pre-wrap text-fg-soft ring-1 ring-card-outline">
           {adr}
         </pre>
       )}

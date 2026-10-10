@@ -25,7 +25,7 @@ function IconButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="grid size-10 place-items-center sm:size-9 rounded-lg text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+      className="grid size-10 place-items-center sm:size-9 rounded-control text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
     >
       {children}
     </button>
@@ -48,7 +48,7 @@ export function StepPlayer({ steps, player, color }: Props) {
           type="button"
           onClick={player.toggle}
           aria-label={player.playing ? "Pause" : "Play"}
-          className="flex h-10 items-center gap-2 sm:h-9 rounded-lg px-4 text-sm font-semibold text-fg-on-accent transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-focus"
+          className="flex h-10 items-center gap-2 sm:h-9 rounded-control px-4 text-sm font-semibold text-fg-on-accent transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-focus"
           style={{ backgroundColor: color }}
         >
           {player.playing ? (
@@ -74,7 +74,7 @@ export function StepPlayer({ steps, player, color }: Props) {
         </IconButton>
 
         <div
-          className="ml-auto flex items-center gap-1 rounded-lg p-1 ring-1 ring-line-strong"
+          className="ml-auto flex items-center gap-1 rounded-control p-1 ring-1 ring-control-outline"
           role="group"
           aria-label="Playback speed"
         >

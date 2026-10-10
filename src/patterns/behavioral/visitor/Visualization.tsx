@@ -196,7 +196,7 @@ function ShapeNode({
           transition={
             reduceMotion ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: "easeInOut" }
           }
-          filter="url(#glow)"
+          style={{ filter: "var(--diagram-glow)" }}
         />
       )}
       <rect
@@ -400,7 +400,7 @@ export function VisitorVisualization({
               strokeLinecap="round"
               strokeDasharray="1 7"
               opacity={0.8}
-              filter="url(#glow)"
+              style={{ filter: "var(--diagram-glow)" }}
               initial={false}
               animate={{ d: connector.d }}
               transition={springTransition}
@@ -436,10 +436,10 @@ export function VisitorVisualization({
             e.stopPropagation();
             run("area");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             activeVisitor === "area"
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={activeVisitor === "area" ? { backgroundColor: color } : undefined}
         >
@@ -452,10 +452,10 @@ export function VisitorVisualization({
             e.stopPropagation();
             run("json");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             activeVisitor === "json"
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={activeVisitor === "json" ? { backgroundColor: color } : undefined}
         >
@@ -468,7 +468,7 @@ export function VisitorVisualization({
               e.stopPropagation();
               setLog([]);
             }}
-            className="ml-auto rounded-lg px-2.5 py-1.5 text-xs font-semibold text-fg-subtle ring-1 ring-line transition hover:bg-surface hover:text-fg-soft"
+            className="ml-auto rounded-control px-2.5 py-1.5 text-xs font-semibold text-fg-subtle ring-1 ring-control-outline transition hover:bg-surface hover:text-fg-soft"
           >
             Clear log
           </button>
@@ -479,7 +479,7 @@ export function VisitorVisualization({
         <div className="mb-1.5 text-[11px] font-mono uppercase tracking-wider text-fg-subtle">
           Output (accumulates across runs)
         </div>
-        <div className="max-h-28 space-y-1 overflow-y-auto rounded-lg bg-surface/60 p-2 font-mono text-xs text-fg-soft">
+        <div className="max-h-28 space-y-1 overflow-y-auto rounded-control bg-surface/60 p-2 font-mono text-xs text-fg-soft">
           {log.length === 0 ? (
             <div className="text-fg-faint">
               Run a visitor above to see the same Circle + Rectangle produce a different result.

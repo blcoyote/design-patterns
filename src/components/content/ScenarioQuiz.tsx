@@ -47,10 +47,10 @@ export function ScenarioQuiz({
               type="button"
               aria-pressed={choice.id === picked}
               onClick={() => onPick(choice.id)}
-              className={`rounded-xl p-4 text-left ring-1 transition ${
+              className={`rounded-card p-4 text-left ring-1 transition ${
                 choice.id === picked
-                  ? "bg-surface ring-line-emphasis"
-                  : "ring-line hover:bg-surface/60 hover:ring-line-bold"
+                  ? "bg-surface ring-fg-muted"
+                  : "ring-control-outline hover:bg-surface hover:ring-fg-muted"
               }`}
             >
               <span className="block font-semibold text-fg">{choice.label}</span>

@@ -33,7 +33,7 @@ export function Packet({
 
   const body = (
     <>
-      <circle r={7} fill={color} filter="url(#glow)" />
+      <circle r={7} fill={color} style={{ filter: "var(--diagram-glow)" }} />
       <circle r={3} fill="var(--color-diagram-packet)" />
       {label && (
         <g transform="translate(0 -18)">

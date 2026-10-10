@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`min-w-0 rounded-2xl bg-surface/40 ring-1 ring-line ${className}`}>
+    <section
+      className={`min-w-0 rounded-panel bg-card shadow-card ring-1 ring-card-outline ${className}`}
+    >
       {children}
     </section>
   );

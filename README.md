@@ -233,28 +233,37 @@ Every colour decision lives in [`src/theme/tokens.css`](src/theme/tokens.css) an
 
 Each `--color-<name>` becomes Tailwind utilities (`bg-surface`, `text-fg-muted`, `fill-diagram-node`, `ring-line`, with `/NN` opacity). In code, read a token as `"var(--color-<name>)"` and make a transparent tint with `alpha(color, percent)` from `src/theme/alpha.ts`; it is `color-mix()` underneath, so it works for hex and `var()` alike. `@theme static` keeps every token in the build even when only JS reads it.
 
+Colour is not the only thing a theme can change. Four more token families sit in the same `@theme static` block and must be defined by every alternate theme (the guardrail test checks both directions, no missing and no extra):
+
+- **Shape:** `--radius-control` (buttons, inputs, chips), `--radius-card`, `--radius-panel` (large frames), used as `rounded-control` / `rounded-card` / `rounded-panel`.
+- **Elevation:** `--shadow-card` (resting) and `--shadow-raised` (hover, popovers), used as `shadow-card` / `shadow-raised`. Dark sets `none`.
+- **Diagram effects:** `--diagram-glow`, a filter reference (`url(#glow)`, or `none`) read in code as `var(--diagram-glow)`; it is not a Tailwind namespace. The `--diagram-dim-*` opacities set how far dimmed nodes, edges and notes fade.
+- **Code-block effects:** `--code-dim`, the opacity of code lines outside the highlighted region.
+
+Card surfaces have their own colour roles, `--color-card` and `--color-card-outline`, so a theme can restyle cards without touching the page surfaces.
+
 **Adding a token:** declare it in the `@theme static` block of `tokens.css` and give it a role comment. If a scene needs a colour no token covers, add a token for the role rather than a literal in the component.
 
 **Adding a theme** is a block in `tokens.css` plus one entry in `themes.ts`:
 
 ```css
-[data-theme="light"] {
-  color-scheme: light;
-  --color-canvas: var(--color-white);
-  /* … every --color-* token the default theme declares … */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: var(--color-slate-950);
+  /* … every --color-*, --radius-*, --shadow-*, --diagram-* and --code-* token the default theme declares … */
 }
 ```
 
 ```ts
 export const themes = [
-  { id: "dark", label: "Dark" },
   { id: "light", label: "Light" },
+  { id: "dark", label: "Dark" },
 ] as const satisfies readonly ThemeDefinition[];
 ```
 
-The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. There is no theme switcher in the UI yet; only the dark theme ships.
+The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. Light is the default theme and dark is the alternate; the switcher lives in the header (and in the mobile drawer). Fonts are bundled via `@fontsource` (Roboto Flex for text in both themes, JetBrains Mono for code), so nothing loads from a CDN.
 
-`npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color()`, `color-mix()` or Tailwind palette class outside `src/theme/` (scanning `src/`, `index.html` and `public/`), every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the dark value).
+`npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color()`, `color-mix()` or Tailwind palette class outside `src/theme/` (scanning `src/`, `index.html` and `public/`), every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the light value).
 
 ## Used in this site
 

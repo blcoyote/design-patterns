@@ -81,7 +81,7 @@ export function PatternPage() {
               <Link
                 key={r.slug}
                 to={`/patterns/${r.slug}`}
-                className="group rounded-xl px-4 py-3 ring-1 ring-line transition hover:bg-surface hover:ring-line-bold"
+                className="group rounded-card px-4 py-3 shadow-card ring-1 ring-card-outline transition hover:bg-surface hover:ring-line-bold"
               >
                 <span className={`text-xs ${categories[r.category].text}`}>
                   {categories[r.category].label}

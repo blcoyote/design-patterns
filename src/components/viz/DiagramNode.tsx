@@ -43,74 +43,82 @@ export function DiagramNode({
     <motion.g
       role="button"
       tabIndex={0}
-      aria-label={`${p.label} — ${p.role}`}
+      aria-label={[stereotype, p.label, p.role, note].filter(Boolean).join(" ")}
       aria-pressed={selected}
-      className="cursor-pointer outline-none [&:focus-visible>rect.frame]:stroke-focus"
+      className="cursor-pointer outline-none [&:focus-visible>g>rect.frame]:stroke-focus"
       onClick={(e) => {
         e.stopPropagation();
         select();
       }}
       onKeyDown={onActivate(select)}
       initial={false}
-      animate={{ opacity: dimmed ? 0.35 : 1, x: p.x, y: p.y }}
+      animate={{ x: p.x, y: p.y }}
       transition={{ duration: 0.4 }}
       whileHover={{ scale: 1.04 }}
     >
-      {active && (
-        <motion.rect
-          x={-w / 2 - 6}
-          y={-h / 2 - 6}
-          width={w + 12}
-          height={h + 12}
-          rx={16}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          initial={{ opacity: 0.7, scale: 1 }}
-          animate={{ opacity: [0.7, 0, 0.7], scale: [1, 1.06, 1] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          filter="url(#glow)"
+      <g
+        className="transition-opacity duration-[400ms]"
+        style={{ opacity: dimmed ? "var(--diagram-dim-node)" : 1 }}
+      >
+        {active && (
+          <motion.rect
+            x={-w / 2 - 6}
+            y={-h / 2 - 6}
+            width={w + 12}
+            height={h + 12}
+            rx={16}
+            fill="none"
+            stroke={color}
+            strokeWidth={2}
+            initial={{ opacity: 0.7, scale: 1 }}
+            animate={{ opacity: [0.7, 0, 0.7], scale: [1, 1.06, 1] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            style={{ filter: "var(--diagram-glow)" }}
+          />
+        )}
+        <rect
+          className="frame transition-colors duration-300"
+          x={-w / 2}
+          y={-h / 2}
+          width={w}
+          height={h}
+          rx={12}
+          fill={active ? alpha(color, 13) : "var(--color-diagram-node)"}
+          stroke={
+            selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-node-stroke)"
+          }
+          strokeWidth={selected ? 2.5 : 1.5}
+          strokeDasharray={isAbstract ? "6 4" : undefined}
         />
-      )}
-      <rect
-        className="frame transition-colors duration-300"
-        x={-w / 2}
-        y={-h / 2}
-        width={w}
-        height={h}
-        rx={12}
-        fill={active ? alpha(color, 13) : "var(--color-diagram-node)"}
-        stroke={
-          selected ? "var(--color-selected)" : active ? color : "var(--color-diagram-node-stroke)"
-        }
-        strokeWidth={selected ? 2.5 : 1.5}
-        strokeDasharray={isAbstract ? "6 4" : undefined}
-      />
-      {stereotype && (
+        {stereotype && (
+          <text
+            y={-h / 2 + 15}
+            textAnchor="middle"
+            className="fill-fg-muted text-[10px] font-mono select-none"
+          >
+            {stereotype}
+          </text>
+        )}
+        {/* whitespace between the <text> nodes keeps textContent word-separated, so it matches the aria-label */}{" "}
         <text
-          y={-h / 2 + 15}
+          y={stereotype ? 6 : -2}
           textAnchor="middle"
-          className="fill-fg-muted text-[10px] font-mono select-none"
+          className={`text-[14px] font-semibold select-none ${isAbstract ? "italic" : ""}`}
+          fill={
+            active || selected ? "var(--color-diagram-text-active)" : "var(--color-diagram-text)"
+          }
         >
-          {stereotype}
+          {p.label}
+        </text>{" "}
+        <text
+          y={stereotype ? 22 : 16}
+          textAnchor="middle"
+          className="fill-fg-muted text-[11px] select-none"
+        >
+          {p.role}
         </text>
-      )}
-      <text
-        y={stereotype ? 6 : -2}
-        textAnchor="middle"
-        className={`text-[14px] font-semibold select-none ${isAbstract ? "italic" : ""}`}
-        fill={active || selected ? "var(--color-diagram-text-active)" : "var(--color-diagram-text)"}
-      >
-        {p.label}
-      </text>
-      <text
-        y={stereotype ? 22 : 16}
-        textAnchor="middle"
-        className="fill-fg-muted text-[11px] select-none"
-      >
-        {p.role}
-      </text>
-
+      </g>
+      {/* the note pill dims by its own token: it is solid accent with white text, so fading it washes out the text */}{" "}
       <AnimatePresence>
         {note && (
           <motion.g
@@ -120,21 +128,26 @@ export function DiagramNode({
             exit={{ opacity: 0, scale: 0.6 }}
             transition={{ type: "spring", stiffness: 400, damping: 22 }}
           >
-            <rect
-              x={-(note.length * 3.6 + 12)}
-              y={-10}
-              width={note.length * 7.2 + 24}
-              height={20}
-              rx={10}
-              fill={color}
-            />
-            <text
-              y={4}
-              textAnchor="middle"
-              className="fill-fg-on-accent text-[11px] font-semibold font-mono select-none"
+            <g
+              className="transition-opacity duration-[400ms]"
+              style={{ opacity: dimmed ? "var(--diagram-dim-note)" : 1 }}
             >
-              {note}
-            </text>
+              <rect
+                x={-(note.length * 3.6 + 12)}
+                y={-10}
+                width={note.length * 7.2 + 24}
+                height={20}
+                rx={10}
+                fill={color}
+              />
+              <text
+                y={4}
+                textAnchor="middle"
+                className="fill-fg-on-accent text-[11px] font-semibold font-mono select-none"
+              >
+                {note}
+              </text>
+            </g>
           </motion.g>
         )}
       </AnimatePresence>

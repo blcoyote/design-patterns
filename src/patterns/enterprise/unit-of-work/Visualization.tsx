@@ -174,7 +174,7 @@ export function UnitOfWorkVisualization({
       <div className="grid gap-3 border-t border-line p-3 sm:grid-cols-[2fr_1fr_1.4fr]">
         <button
           type="button"
-          className="flex min-h-28 flex-col gap-2 rounded-lg bg-canvas/40 p-3 text-left ring-1 ring-line outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          className="flex min-h-28 flex-col gap-2 rounded-card bg-canvas/40 p-3 text-left ring-1 ring-control-outline outline-none focus-visible:ring-2 focus-visible:ring-focus"
           aria-pressed={selectedId === "unitOfWork"}
           aria-label="UnitOfWork pending changes"
           onClick={(e) => {
@@ -215,14 +215,14 @@ export function UnitOfWorkVisualization({
               })}
             </AnimatePresence>
             {scene.cards.length === 0 && (
-              <span className="text-xs text-fg-faint">— nothing pending —</span>
+              <span className="text-xs text-fg-muted">— nothing pending —</span>
             )}
           </div>
         </button>
 
         <button
           type="button"
-          className="flex min-h-28 flex-col items-center justify-center gap-1 rounded-lg bg-canvas/40 p-3 text-center ring-1 ring-line outline-none transition-shadow duration-300 focus-visible:ring-2 focus-visible:ring-focus"
+          className="flex min-h-28 flex-col items-center justify-center gap-1 rounded-card bg-canvas/40 p-3 text-center ring-1 ring-control-outline outline-none transition-shadow duration-300 focus-visible:ring-2 focus-visible:ring-focus"
           aria-pressed={selectedId === "unitOfWork"}
           aria-label="Current transaction phase"
           style={{ boxShadow: `inset 0 0 0 1.5px ${bandColor}` }}
@@ -241,7 +241,7 @@ export function UnitOfWorkVisualization({
 
         <button
           type="button"
-          className="flex min-h-28 flex-col gap-2 rounded-lg bg-canvas/40 p-3 text-left ring-1 ring-line outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          className="flex min-h-28 flex-col gap-2 rounded-card bg-canvas/40 p-3 text-left ring-1 ring-control-outline outline-none focus-visible:ring-2 focus-visible:ring-focus"
           aria-pressed={selectedId === "database"}
           aria-label="Database state"
           onClick={(e) => {
@@ -266,7 +266,7 @@ export function UnitOfWorkVisualization({
             e.stopPropagation();
             runTry("success");
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-on-accent ring-1 ring-transparent transition focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-on-accent ring-1 ring-transparent transition focus-visible:outline-2 focus-visible:outline-focus"
           style={{ backgroundColor: color }}
         >
           Commit succeeds
@@ -277,7 +277,7 @@ export function UnitOfWorkVisualization({
             e.stopPropagation();
             runTry("failure");
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-soft ring-1 ring-line-strong transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-soft ring-1 ring-control-outline transition hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
         >
           Commit fails → rollback
         </button>

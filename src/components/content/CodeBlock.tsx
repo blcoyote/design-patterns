@@ -37,6 +37,12 @@ const PRISM_LANGUAGE: Record<CodeLanguage, string> = {
   go: "go",
 };
 
+/** Text-safe variant of an accent token reference: prefers its -fg role, falls back to the accent. */
+function accentText(color: string): string {
+  const m = /^var\((--color-[\w-]+)\)$/.exec(color);
+  return m && !m[1].endsWith("-fg") ? `var(${m[1]}-fg, ${color})` : color;
+}
+
 export function CodeBlock({ sources, active, onActiveChange, color, className = "" }: Props) {
   const scroller = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Partial<Record<CodeLanguage, HTMLButtonElement | null>>>({});
@@ -81,7 +87,9 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
   };
 
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-code-bg ring-1 ring-line ${className}`}>
+    <div
+      className={`relative overflow-hidden rounded-card bg-code-bg ring-1 ring-card-outline ${className}`}
+    >
       <div className="flex items-center justify-between gap-2 border-b border-line px-3 py-2 text-xs text-fg-muted sm:px-4">
         {sources.length > 1 ? (
           <div
@@ -107,7 +115,7 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
                   onClick={() => onActiveChange(s.lang)}
                   className="shrink-0 rounded px-1 pb-1 font-mono transition-colors"
                   style={{
-                    color: selected ? color : undefined,
+                    color: selected ? accentText(color) : undefined,
                     boxShadow: selected ? `inset 0 -2px 0 0 ${color}` : undefined,
                   }}
                 >
@@ -134,7 +142,8 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
         id={panelId}
         role="tabpanel"
         aria-labelledby={tabId(current.lang)}
-        className="relative max-h-120 overflow-auto py-3"
+        className="relative max-h-120 overflow-auto py-3 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+        tabIndex={0}
       >
         <Highlight code={current.text} language={PRISM_LANGUAGE[current.lang]} theme={codeTheme}>
           {({ tokens, getLineProps, getTokenProps }) => (
@@ -150,15 +159,14 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
                     key={i}
                     data-line={n}
                     {...lineProps}
-                    className={`${lineClass} flex border-l-2 pr-6 transition-[background-color,opacity] duration-300 ${
-                      current.highlight && !on ? "opacity-45" : ""
-                    }`}
+                    className={`${lineClass} flex border-l-2 pr-6 transition-[background-color,opacity] duration-300`}
                     style={{
+                      opacity: current.highlight && !on ? "var(--code-dim)" : undefined,
                       borderColor: on ? color : "transparent",
-                      backgroundColor: on ? alpha(color, 12) : undefined,
+                      backgroundColor: on ? alpha(color, 8) : undefined,
                     }}
                   >
-                    <span className="w-10 shrink-0 pr-4 text-right text-fg-faint select-none">
+                    <span className="w-10 shrink-0 pr-4 text-right text-syntax-comment select-none">
                       {n}
                     </span>
                     <span>

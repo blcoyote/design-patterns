@@ -307,7 +307,7 @@ export function CircuitBreakerVisualization({
             strokeWidth={5}
             strokeLinecap="round"
             opacity={0.85}
-            filter="url(#glow)"
+            style={{ filter: "var(--diagram-glow)" }}
             initial={false}
             animate={{ d: connector.d }}
             transition={springTransition}
@@ -331,7 +331,7 @@ export function CircuitBreakerVisualization({
 
       {breakerP && (
         <g
-          transform={`translate(${breakerP.x - 70} ${breakerP.y + NODE_HEIGHT / 2 + 30})`}
+          transform={`translate(${breakerP.x - 70} ${breakerP.y + NODE_HEIGHT / 2 + 38})`}
           pointerEvents="none"
         >
           <rect x={0} y={0} width={140} height={8} rx={4} fill="var(--color-line)" />
@@ -340,7 +340,7 @@ export function CircuitBreakerVisualization({
             y={0}
             height={8}
             rx={4}
-            fill={failureCount >= FAILURE_THRESHOLD ? "var(--color-danger)" : color}
+            fill={failureCount >= FAILURE_THRESHOLD ? "var(--color-danger-fg)" : color}
             initial={false}
             animate={{ width: 140 * meterPct }}
             transition={
@@ -348,10 +348,12 @@ export function CircuitBreakerVisualization({
             }
           />
           <text
-            x={70}
-            y={22}
-            textAnchor="middle"
-            className="fill-fg-muted text-[10px] font-mono select-none"
+            x={-8}
+            y={8}
+            textAnchor="end"
+            className="fill-fg-soft stroke-diagram-label-bg text-[11px] font-mono select-none"
+            strokeWidth={3}
+            paintOrder="stroke"
           >
             {`failures ${Math.min(failureCount, FAILURE_THRESHOLD)}/${FAILURE_THRESHOLD}`}
           </text>
@@ -405,10 +407,10 @@ export function CircuitBreakerVisualization({
             setHealthy(true);
             onSelect("service");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             healthy
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={healthy ? { backgroundColor: color } : undefined}
         >
@@ -423,10 +425,10 @@ export function CircuitBreakerVisualization({
             setHealthy(false);
             onSelect("service");
           }}
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
+          className={`rounded-control px-3 py-1.5 text-sm font-semibold ring-1 transition focus-visible:outline-2 focus-visible:outline-focus ${
             !healthy
               ? "text-fg-on-accent ring-transparent"
-              : "text-fg-soft ring-line-strong hover:bg-surface-raised hover:text-fg"
+              : "text-fg-soft ring-control-outline hover:bg-surface-raised hover:text-fg"
           }`}
           style={!healthy ? { backgroundColor: "var(--color-danger)" } : undefined}
         >
@@ -440,7 +442,7 @@ export function CircuitBreakerVisualization({
             e.stopPropagation();
             sendRequest();
           }}
-          className="rounded-lg px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-line-strong transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
+          className="rounded-control px-3 py-1.5 text-sm font-semibold text-fg-strong ring-1 ring-control-outline transition hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-focus"
           style={{ boxShadow: `inset 0 0 0 1px ${alpha(color, 33)}` }}
         >
           Send request →

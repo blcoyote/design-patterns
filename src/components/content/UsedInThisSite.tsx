@@ -15,7 +15,7 @@ export function UsedInThisSite({ usages }: Props) {
   if (usages.length === 0) return null;
 
   return (
-    <section className="rounded-2xl bg-surface/60 p-6 ring-1 ring-inset ring-used/20">
+    <section className="rounded-panel bg-card shadow-card p-6 ring-1 ring-inset ring-used/20">
       <h2 className="flex items-center gap-2 text-xs font-semibold tracking-wider text-used-fg uppercase">
         <UsedIcon className="size-3.5" />
         Used in this site

@@ -63,9 +63,9 @@ export function PatternExplorer({
       aria-label="Interactive visualisation"
       className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
     >
-      <div className="min-w-0 space-y-5 rounded-2xl bg-surface/40 p-3 ring-1 ring-line sm:p-6">
+      <div className="min-w-0 space-y-5 rounded-panel bg-card p-3 shadow-card ring-1 ring-card-outline sm:p-6">
         {/* diagrams are drawn on an ~800px canvas; below that width they scroll sideways instead of shrinking the text to nothing */}
-        <div className="overflow-x-auto overflow-y-hidden rounded-xl bg-canvas ring-1 ring-line">
+        <div className="overflow-x-auto overflow-y-hidden rounded-card bg-diagram-canvas ring-1 ring-diagram-canvas-outline">
           <div className="min-w-160">
             <Visualization
               pattern={pattern}

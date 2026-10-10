@@ -43,17 +43,17 @@ export function DiagramEdge({
     <motion.g
       role="button"
       tabIndex={0}
-      aria-label={`${r.label ?? r.type} arrow`}
+      aria-label={label ?? `${r.type} arrow`}
+      aria-description={`${r.type} relation`}
       aria-pressed={selected}
-      className="cursor-pointer outline-none group"
+      className="cursor-pointer outline-none group transition-opacity duration-[400ms]"
       onClick={(e) => {
         e.stopPropagation();
         select();
       }}
       onKeyDown={onActivate(select)}
       initial={false}
-      animate={{ opacity: dimmed ? 0.25 : 1 }}
-      transition={{ duration: 0.4 }}
+      style={{ opacity: dimmed ? "var(--diagram-dim-edge)" : 1 }}
     >
       {/* wide invisible hit area */}
       <path d={g.d} fill="none" stroke="transparent" strokeWidth={16} />
@@ -76,7 +76,7 @@ export function DiagramEdge({
           strokeLinecap="round"
           strokeDasharray="4 14"
           className="flow-dash"
-          filter="url(#glow)"
+          style={{ filter: "var(--diagram-glow)" }}
           pointerEvents="none"
         />
       )}
@@ -142,7 +142,7 @@ export function EdgeMarkers({ color }: { color: string }) {
           >
             <path
               d="M 1 1 L 11 6 L 1 11 z"
-              fill="var(--color-canvas)"
+              fill="var(--color-diagram-canvas)"
               stroke={colors[s]}
               strokeWidth="1.5"
             />

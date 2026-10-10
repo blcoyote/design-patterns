@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import {
   DEFAULT_VIEWBOX,
   NODE_HEIGHT,
@@ -10,10 +10,14 @@ import type { Packet as PacketDef, Participant, Relation } from "@/types/pattern
 import { DiagramEdge, EdgeMarkers } from "./DiagramEdge";
 import { useDiagramEdit } from "./DiagramEditContext";
 import { DiagramNode } from "./DiagramNode";
-import { EditHandles } from "./EditHandles";
 import { PacketLayer } from "./PacketLayer";
 
 export { DEFAULT_VIEWBOX };
+
+// Dev-only: behind import.meta.env.DEV the bundler drops the dynamic import, so production builds contain no editor handles.
+const EditHandles = import.meta.env.DEV
+  ? lazy(() => import("./EditHandles").then((m) => ({ default: m.EditHandles })))
+  : null;
 
 export interface DiagramProps {
   participants: Participant[];
@@ -126,14 +130,16 @@ export function Diagram({
         speed={packetSpeed}
       />
       {overlay}
-      {edit && (
-        <EditHandles
-          edit={edit}
-          participants={participants}
-          relations={relations}
-          geometry={geometry}
-          viewBox={viewBox}
-        />
+      {edit && EditHandles && (
+        <Suspense fallback={null}>
+          <EditHandles
+            edit={edit}
+            participants={participants}
+            relations={relations}
+            geometry={geometry}
+            viewBox={viewBox}
+          />
+        </Suspense>
       )}
     </svg>
   );

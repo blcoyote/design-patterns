@@ -1,11 +1,17 @@
 import type { ReactNode } from "react";
-import { NODE_HEIGHT, boxOf, edgeBetween, type EdgeGeometry } from "@/lib/geometry";
+import {
+  DEFAULT_VIEWBOX,
+  NODE_HEIGHT,
+  boxOf,
+  edgeBetween,
+  type EdgeGeometry,
+} from "@/lib/geometry";
 import type { Packet as PacketDef, Participant, Relation } from "@/types/pattern";
 import { DiagramEdge, EdgeMarkers } from "./DiagramEdge";
 import { DiagramNode } from "./DiagramNode";
 import { PacketLayer } from "./PacketLayer";
 
-export const DEFAULT_VIEWBOX = "0 0 800 460";
+export { DEFAULT_VIEWBOX };
 
 export interface DiagramProps {
   participants: Participant[];

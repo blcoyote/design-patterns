@@ -65,7 +65,7 @@ export function PatternExplorer({
     >
       <div className="min-w-0 space-y-5 rounded-panel bg-card p-3 shadow-card ring-1 ring-card-outline sm:p-6">
         {/* diagrams are drawn on an ~800px canvas; below that width they scroll sideways instead of shrinking the text to nothing */}
-        <div className="overflow-x-auto overflow-y-hidden rounded-card bg-canvas ring-1 ring-card-outline">
+        <div className="overflow-x-auto overflow-y-hidden rounded-card bg-diagram-canvas ring-1 ring-diagram-canvas-outline">
           <div className="min-w-160">
             <Visualization
               pattern={pattern}

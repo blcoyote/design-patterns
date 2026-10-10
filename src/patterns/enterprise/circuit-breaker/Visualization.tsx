@@ -331,7 +331,7 @@ export function CircuitBreakerVisualization({
 
       {breakerP && (
         <g
-          transform={`translate(${breakerP.x - 70} ${breakerP.y + NODE_HEIGHT / 2 + 30})`}
+          transform={`translate(${breakerP.x - 70} ${breakerP.y + NODE_HEIGHT / 2 + 38})`}
           pointerEvents="none"
         >
           <rect x={0} y={0} width={140} height={8} rx={4} fill="var(--color-line)" />
@@ -340,7 +340,7 @@ export function CircuitBreakerVisualization({
             y={0}
             height={8}
             rx={4}
-            fill={failureCount >= FAILURE_THRESHOLD ? "var(--color-danger)" : color}
+            fill={failureCount >= FAILURE_THRESHOLD ? "var(--color-danger-fg)" : color}
             initial={false}
             animate={{ width: 140 * meterPct }}
             transition={
@@ -348,10 +348,12 @@ export function CircuitBreakerVisualization({
             }
           />
           <text
-            x={70}
-            y={22}
-            textAnchor="middle"
-            className="fill-fg-muted text-[10px] font-mono select-none"
+            x={-8}
+            y={8}
+            textAnchor="end"
+            className="fill-fg-soft stroke-diagram-label-bg text-[11px] font-mono select-none"
+            strokeWidth={3}
+            paintOrder="stroke"
           >
             {`failures ${Math.min(failureCount, FAILURE_THRESHOLD)}/${FAILURE_THRESHOLD}`}
           </text>

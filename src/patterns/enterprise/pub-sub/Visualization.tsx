@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Diagram } from "@/components/viz/Diagram";
+import { alpha } from "@/theme/alpha";
 import type { Packet, Step, VisualizationProps } from "@/types/pattern";
 
 /**
@@ -149,15 +150,16 @@ export function PubSubVisualization({
               width={720}
               height={56}
               rx={28}
-              fill={laneColor[topic]}
-              opacity={isActive ? 0.14 : 0.06}
+              fill={alpha(laneColor[topic], isActive ? 16 : 8)}
+              stroke={alpha(laneColor[topic], isActive ? 55 : 30)}
+              strokeWidth={1}
               className="transition-opacity duration-300"
             />
             <text
               x={52}
               y={LANE_Y[topic] - 36}
-              className="font-mono text-[10px] tracking-wider uppercase select-none"
-              fill={isActive ? laneColor[topic] : "var(--color-fg-subtle)"}
+              className="font-mono text-[11px] font-semibold tracking-wider uppercase select-none"
+              fill={isActive ? laneColor[topic] : "var(--color-fg-muted)"}
             >
               topic: {topic}
             </text>

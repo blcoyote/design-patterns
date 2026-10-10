@@ -45,6 +45,11 @@
   /* Diagram effects (not colours; read via `var(--diagram-glow)` in a style filter).
      A theme sets `none` to drop the SVG glow. */
   --diagram-glow: none;
+  /* Opacity of inactive (dimmed) diagram nodes, edges and note pills. Read via
+     `var(--diagram-dim-node)` in an inline style. Light canvases need a higher floor to stay readable. */
+  --diagram-dim-node: 0.65;
+  --diagram-dim-edge: 0.65;
+  --diagram-dim-note: 1;
 
   /* Typography. Fonts are bundled via @fontsource. */
   --font-sans:
@@ -102,6 +107,9 @@
   --color-tree-oak: var(--color-green-600);
   --color-tree-pine: var(--color-teal-700);
 
+  /* The diagram viewport: a step darker than the card so it reads as a frame. */
+  --color-diagram-canvas: #f1f1ee;
+  --color-diagram-canvas-outline: #d2d1cc;
   --color-diagram-grid: #ecebe7;
   --color-diagram-node: #ffffff;
   --color-diagram-node-stroke: #d2d1cc;
@@ -176,6 +184,9 @@
   /* Diagram effects (not colours; read via `var(--diagram-glow)` in a style filter).
      A theme sets `none` to drop the SVG glow. */
   --diagram-glow: url(#glow);
+  --diagram-dim-node: 0.35;
+  --diagram-dim-edge: 0.25;
+  --diagram-dim-note: 0.35;
 
   /* Typography. */
   --font-sans:
@@ -245,6 +256,8 @@
   --color-tree-pine: #0d9488;
 
   /* Diagram primitives (Diagram, DiagramNode, DiagramEdge, Packet and custom scenes). */
+  --color-diagram-canvas: var(--color-canvas);
+  --color-diagram-canvas-outline: var(--color-card-outline);
   --color-diagram-grid: #1e293b;
   --color-diagram-node: #0f172a;
   --color-diagram-node-stroke: #334155;

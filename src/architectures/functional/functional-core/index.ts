@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "functional-core",
   name: "Functional Core, Imperative Shell",
   paradigm: "functional",
-  order: 6,
+  order: 7,
   summary:
     "Keep all the decisions in pure functions on plain data, and push every side effect out to a thin shell.",
   intent:
@@ -122,6 +122,10 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "pipes-and-filters",
         why: "A pipes-and-filters pipeline is a functional core taken to its logical extreme: every stage (parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines) is a pure function with no I/O, and the only impure code is the trace logging wrapped around the stages and the final loop that drives the pipeline and prints its output — the imperative shell.",
+      },
+      {
+        slug: "functional-ddd",
+        why: "Functional DDD applies the same split inside a bounded context: placeOrderWorkflow is a pure core over immutable domain types, and the place-order handler is the imperative shell that loads, saves and publishes. The difference is what the core is made of, with smart constructors, type-state and errors as values instead of an effect list.",
       },
     ],
   },

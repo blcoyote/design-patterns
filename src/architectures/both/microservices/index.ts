@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "microservices",
   name: "Microservices",
   paradigm: "both",
-  order: 9,
+  order: 10,
   summary:
     "Split a system into independently deployable services, each owning its own data, that talk only through explicit client and message interfaces.",
   intent:

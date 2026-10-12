@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "mvc",
   name: "Model-View-Controller",
   paradigm: "oo",
-  order: 7,
+  order: 8,
   summary:
     "Split an app into state (Model), presentation (View) and input handling (Controller), with the View watching the Model for changes.",
   intent:

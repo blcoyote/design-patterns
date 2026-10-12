@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "vertical-slice",
   name: "Vertical Slice Architecture",
   paradigm: "oo",
-  order: 8,
+  order: 9,
   summary: "Organize code by feature, so each request keeps its handler and data access together.",
   intent:
     "Keep each request’s handler, data access, and validation together instead of spreading them across shared technical layers. This makes each feature easier to find and change.",

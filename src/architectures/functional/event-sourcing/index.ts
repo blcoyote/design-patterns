@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "event-sourcing",
   name: "Event Sourcing",
   paradigm: "functional",
-  order: 5,
+  order: 6,
   summary:
     "Keep a log of every change and rebuild current state from it instead of overwriting it.",
   intent:
@@ -117,6 +117,10 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "ddd",
         why: "A DDD aggregate's history is a natural event stream: the domain events it already raises to express what happened are exactly what Event Sourcing appends and replays.",
+      },
+      {
+        slug: "functional-ddd",
+        why: "Functional DDD models the same domain with immutable data and pure functions: place returns its OrderPlaced event next to the new order instead of collecting it on an aggregate. Those returned events are what this page's event store would append, and decide and evolve (the Decider) are one way to restructure that workflow around them.",
       },
       {
         slug: "cqrs",

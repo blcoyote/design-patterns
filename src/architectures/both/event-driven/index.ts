@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "event-driven",
   name: "Event-Driven Architecture",
   paradigm: "both",
-  order: 10,
+  order: 11,
   summary:
     "Producers publish facts to a broker; independent consumers react to the ones they care about, with no central coordinator.",
   intent:
@@ -155,6 +155,10 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "ddd",
         why: "A bounded context's domain events become integration events the moment they cross its boundary onto a broker like this one, for other bounded contexts to subscribe to.",
+      },
+      {
+        slug: "functional-ddd",
+        why: "Functional DDD is one way to build the producing side: its pure workflow returns OrderPlaced as a value, a pure ACL function translates it, and the shell publishes the result. The domain code never touches the broker; only the publish function handed to the shell does.",
       },
       {
         slug: "pipes-and-filters",

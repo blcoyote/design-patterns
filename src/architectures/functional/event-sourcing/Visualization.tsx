@@ -10,6 +10,11 @@ import { alpha } from "@/theme/alpha";
  * event blocks, a "fold" cursor that sweeps across them to rebuild state, a pending event that
  * appears near decide() before it is appended, a new block that slides onto the end of the
  * tape, and a snapshot flag that lands on the tape once one has been taken.
+ *
+ * Layout, top to bottom: the tape (with the fold cursor above it), a row for the pending event
+ * and the snapshot flag, then the folded-state and projection readouts. Every animated group sits
+ * inside a plain positioned <g> and animates only its offset: motion writes its x/y/scale as a CSS
+ * transform, which would otherwise replace the SVG transform attribute that positions it.
  */
 
 const SEED_EVENTS = ['AccountOpened("Ada")', "Deposited(100)"];
@@ -18,8 +23,16 @@ const APPENDED_EVENT = "Withdrawn(30)";
 const BLOCK_W = 150;
 const BLOCK_H = 48;
 const BLOCK_GAP = 16;
-const TAPE_Y = 90;
-const TAPE_START_X = 90;
+const VIEW_W = 760;
+const VIEW_H = 246;
+const HEADER_Y = 22;
+const TAPE_Y = 100;
+/** Room for the 3 events plus the "next…" slot, centred in the viewBox. */
+const TAPE_START_X = (VIEW_W - (4 * BLOCK_W + 3 * BLOCK_GAP)) / 2;
+const MARKER_ROW_Y = TAPE_Y + BLOCK_H / 2 + 32;
+const READOUT_Y = 208;
+const READOUT_W = 200;
+const READOUT_H = 44;
 
 function blockX(index: number) {
   return TAPE_START_X + index * (BLOCK_W + BLOCK_GAP) + BLOCK_W / 2;
@@ -85,14 +98,14 @@ export function EventSourcingVisualization({
 
       <div className="border-t border-line p-3">
         <svg
-          viewBox="0 0 760 190"
+          viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           className="h-auto w-full select-none rounded-card bg-canvas/40 ring-1 ring-line"
           role="group"
           aria-label={`Event tape holding ${events.length} event${events.length === 1 ? "" : "s"}, balance ${balance}`}
         >
           <text
             x={TAPE_START_X}
-            y={30}
+            y={HEADER_Y}
             className="fill-fg-subtle text-[10px] font-mono uppercase tracking-wider select-none"
           >
             EventStore stream — append-only
@@ -112,44 +125,42 @@ export function EventSourcingVisualization({
               {events.map((label, i) => {
                 const isNew = i === events.length - 1 && isAppending;
                 return (
-                  <motion.g
-                    key={label}
-                    transform={`translate(${blockX(i)} ${TAPE_Y})`}
-                    initial={
-                      isNew && !reduceMotion ? { x: blockX(i) + 160, opacity: 0 } : { opacity: 1 }
-                    }
-                    animate={{ x: blockX(i), opacity: 1 }}
-                    transition={
-                      reduceMotion
-                        ? { duration: 0 }
-                        : { type: "spring", stiffness: 220, damping: 22 }
-                    }
-                  >
-                    <rect
-                      x={-BLOCK_W / 2}
-                      y={-BLOCK_H / 2}
-                      width={BLOCK_W}
-                      height={BLOCK_H}
-                      rx={8}
-                      fill={isNew ? alpha(color, 13) : "var(--color-diagram-node)"}
-                      stroke={isNew ? color : "var(--color-line-bold)"}
-                      strokeWidth={isNew ? 2.5 : 1.5}
-                    />
-                    <text
-                      y={-4}
-                      textAnchor="middle"
-                      className="fill-fg-strong text-[11px] font-mono select-none"
+                  <g key={label} transform={`translate(${blockX(i)} ${TAPE_Y})`}>
+                    <motion.g
+                      initial={isNew && !reduceMotion ? { x: 160, opacity: 0 } : { opacity: 1 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: "spring", stiffness: 220, damping: 22 }
+                      }
                     >
-                      {label}
-                    </text>
-                    <text
-                      y={13}
-                      textAnchor="middle"
-                      className="fill-fg-subtle text-[9px] font-mono select-none"
-                    >
-                      v{i + 1}
-                    </text>
-                  </motion.g>
+                      <rect
+                        x={-BLOCK_W / 2}
+                        y={-BLOCK_H / 2}
+                        width={BLOCK_W}
+                        height={BLOCK_H}
+                        rx={8}
+                        fill={isNew ? alpha(color, 13) : "var(--color-diagram-node)"}
+                        stroke={isNew ? color : "var(--color-line-bold)"}
+                        strokeWidth={isNew ? 2.5 : 1.5}
+                      />
+                      <text
+                        y={-4}
+                        textAnchor="middle"
+                        className="fill-fg-strong text-[11px] font-mono select-none"
+                      >
+                        {label}
+                      </text>
+                      <text
+                        y={13}
+                        textAnchor="middle"
+                        className="fill-fg-subtle text-[9px] font-mono select-none"
+                      >
+                        v{i + 1}
+                      </text>
+                    </motion.g>
+                  </g>
                 );
               })}
             </AnimatePresence>
@@ -198,81 +209,94 @@ export function EventSourcingVisualization({
           {/* Pending event: decide() has produced it, but it is not on the tape yet. */}
           <AnimatePresence>
             {isPending && (
-              <motion.g
-                key="pending"
-                transform={`translate(${blockX(events.length)} ${TAPE_Y + 60})`}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="cursor-pointer"
-                role="button"
-                tabIndex={0}
-                aria-label="Pending event, not yet appended"
-                onClick={select("decide")}
-                onKeyDown={onActivate(() => onSelect("decide"))}
-              >
-                <rect
-                  x={-BLOCK_W / 2}
-                  y={-18}
-                  width={BLOCK_W}
-                  height={36}
-                  rx={8}
-                  fill="none"
-                  stroke={color}
-                  strokeDasharray="4 4"
-                  strokeWidth={2}
-                />
-                <text
-                  y={5}
-                  textAnchor="middle"
-                  className="fill-fg-soft text-[10px] font-mono select-none"
+              <g key="pending" transform={`translate(${blockX(events.length)} ${MARKER_ROW_Y})`}>
+                <motion.g
+                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Pending event, not yet appended"
+                  onClick={select("decide")}
+                  onKeyDown={onActivate(() => onSelect("decide"))}
                 >
-                  {APPENDED_EVENT} (pending)
-                </text>
-              </motion.g>
+                  <rect
+                    x={-BLOCK_W / 2}
+                    y={-22}
+                    width={BLOCK_W}
+                    height={44}
+                    rx={8}
+                    fill="none"
+                    stroke={color}
+                    strokeDasharray="4 4"
+                    strokeWidth={2}
+                  />
+                  <text
+                    y={-3}
+                    textAnchor="middle"
+                    className="fill-fg-soft text-[11px] font-mono select-none"
+                  >
+                    {APPENDED_EVENT}
+                  </text>
+                  <text
+                    y={12}
+                    textAnchor="middle"
+                    className="fill-fg-subtle text-[9px] font-mono select-none"
+                  >
+                    pending, not appended
+                  </text>
+                </motion.g>
+              </g>
             )}
           </AnimatePresence>
 
           {/* Snapshot flag, once one has been taken. */}
           <AnimatePresence>
             {hasSnapshot && (
-              <motion.g
+              <g
                 key="snapshot-flag"
-                transform={`translate(${blockX(events.length - 1)} ${TAPE_Y + 48})`}
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="cursor-pointer"
-                role="button"
-                tabIndex={0}
-                aria-label="Snapshot cached at this version"
-                onClick={select("snapshot")}
-                onKeyDown={onActivate(() => onSelect("snapshot"))}
+                transform={`translate(${blockX(events.length - 1)} ${MARKER_ROW_Y})`}
               >
-                <rect
-                  x={-58}
-                  y={-14}
-                  width={116}
-                  height={28}
-                  rx={14}
-                  fill={selectedId === "snapshot" ? alpha(color, 20) : "var(--color-diagram-node)"}
-                  stroke={color}
-                  strokeWidth={1.5}
-                />
-                <text
-                  y={4}
-                  textAnchor="middle"
-                  className="text-[10px] font-bold font-mono select-none"
-                  fill={color}
+                <motion.g
+                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="cursor-pointer"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Snapshot cached at this version"
+                  onClick={select("snapshot")}
+                  onKeyDown={onActivate(() => onSelect("snapshot"))}
                 >
-                  snapshot @ v{events.length}
-                </text>
-              </motion.g>
+                  <rect
+                    x={-58}
+                    y={-14}
+                    width={116}
+                    height={28}
+                    rx={14}
+                    fill={
+                      selectedId === "snapshot" ? alpha(color, 20) : "var(--color-diagram-node)"
+                    }
+                    stroke={color}
+                    strokeWidth={1.5}
+                  />
+                  <text
+                    y={4}
+                    textAnchor="middle"
+                    className="text-[10px] font-bold font-mono select-none"
+                    fill={color}
+                  >
+                    snapshot @ v{events.length}
+                  </text>
+                </motion.g>
+              </g>
             )}
           </AnimatePresence>
 
           {/* Running state + projection readout. */}
-          <g transform="translate(600, 40)">
+          <g>
             <g
+              transform={`translate(${(blockX(0) + blockX(1)) / 2} ${READOUT_Y})`}
               className="cursor-pointer"
               role="button"
               tabIndex={0}
@@ -281,10 +305,10 @@ export function EventSourcingVisualization({
               onKeyDown={onActivate(() => onSelect("fold"))}
             >
               <rect
-                x={-90}
-                y={-20}
-                width={180}
-                height={34}
+                x={-READOUT_W / 2}
+                y={-READOUT_H / 2}
+                width={READOUT_W}
+                height={READOUT_H}
                 rx={8}
                 fill="var(--color-diagram-node)"
                 stroke={
@@ -293,14 +317,14 @@ export function EventSourcingVisualization({
                 strokeWidth={isReplaying || selectedId === "fold" ? 2.5 : 1.5}
               />
               <text
-                y={1}
+                y={-4}
                 textAnchor="middle"
                 className="fill-fg-subtle text-[9px] font-mono uppercase tracking-wider select-none"
               >
                 state (folded)
               </text>
               <text
-                y={13}
+                y={12}
                 textAnchor="middle"
                 className="fill-fg-strong text-[11px] font-mono select-none"
               >
@@ -315,27 +339,27 @@ export function EventSourcingVisualization({
               aria-label={`Projection has seen ${projectionCount} withdrawal${projectionCount === 1 ? "" : "s"}`}
               onClick={select("projection")}
               onKeyDown={onActivate(() => onSelect("projection"))}
-              transform="translate(0, 48)"
+              transform={`translate(${(blockX(2) + blockX(3)) / 2} ${READOUT_Y})`}
             >
               <rect
-                x={-90}
-                y={-20}
-                width={180}
-                height={34}
+                x={-READOUT_W / 2}
+                y={-READOUT_H / 2}
+                width={READOUT_W}
+                height={READOUT_H}
                 rx={8}
                 fill="var(--color-diagram-node)"
                 stroke={selectedId === "projection" ? color : "var(--color-diagram-node-stroke)"}
                 strokeWidth={selectedId === "projection" ? 2.5 : 1.5}
               />
               <text
-                y={1}
+                y={-4}
                 textAnchor="middle"
                 className="fill-fg-subtle text-[9px] font-mono uppercase tracking-wider select-none"
               >
                 projection
               </text>
               <text
-                y={13}
+                y={12}
                 textAnchor="middle"
                 className="fill-fg-strong text-[11px] font-mono select-none"
               >

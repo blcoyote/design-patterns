@@ -7,6 +7,7 @@ import { FilterChip } from "@/components/content/FilterChip";
 import { UsedBadge } from "@/components/content/UsedInThisSite";
 import { Seo } from "@/components/content/Seo";
 import { homeSeoPage } from "@/lib/seoPages";
+import { alpha } from "@/theme/alpha";
 import { comparisons } from "@/comparisons/registry";
 import { categories, categoryOrder } from "@/patterns/categories";
 import { patterns } from "@/patterns/registry";
@@ -151,6 +152,21 @@ export function HomePage() {
   );
 }
 
+/** Each message takes TRAVEL seconds along its edge, then waits PAUSE before the next trip. */
+const TRAVEL = 1.8;
+const PAUSE = 0.6;
+const CYCLE = TRAVEL + PAUSE;
+/** Messages on consecutive edges leave this far apart. */
+const STAGGER = 0.6;
+/**
+ * A box's glow over one CYCLE, starting when the message heading for it sets off: dark while
+ * the message travels, lighting up as it reaches the box (about two thirds of TRAVEL in, given
+ * the ease-in-out), brightest as it arrives, then fading out quickly (in about a third of a
+ * second) and staying dark until the next one.
+ */
+const GLOW_TIMES = [0, 0.48, 0.72, 0.86, 1];
+const GLOW_OPACITY = [0, 0, 1, 0, 0];
+
 /** Decorative animated graph: one hub per category exchanging messages. */
 function HeroGraphic() {
   const positions = [
@@ -167,6 +183,11 @@ function HeroGraphic() {
 
   return (
     <svg viewBox="0 0 400 300" className="mx-auto w-full max-w-md" aria-hidden>
+      <defs>
+        <filter id="hero-box-glow" x="-30%" y="-60%" width="160%" height="220%">
+          <feGaussianBlur stdDeviation="6" />
+        </filter>
+      </defs>
       {edges.map(([a, b], i) => {
         const A = nodes[a];
         const B = nodes[b];
@@ -189,40 +210,72 @@ function HeroGraphic() {
                 opacity: [0, 1, 1, 0],
               }}
               transition={{
-                duration: 1.8,
+                duration: TRAVEL,
                 repeat: Infinity,
-                delay: i * 0.6,
-                repeatDelay: 0.6,
+                delay: i * STAGGER,
+                repeatDelay: PAUSE,
                 ease: "easeInOut",
               }}
             />
           </g>
         );
       })}
-      {nodes.map((n, i) => (
-        <g key={n.id} transform={`translate(${n.x} ${n.y})`}>
-          <motion.rect
-            x="-58"
-            y="-24"
-            width="116"
-            height="48"
-            rx="12"
-            fill="var(--color-diagram-node)"
-            stroke={n.color}
-            strokeWidth="1.5"
-            animate={{ strokeOpacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.8 }}
-          />
-          <text
-            y="5"
-            textAnchor="middle"
-            className="text-[13px] font-semibold"
-            fill="var(--color-diagram-text)"
-          >
-            {n.label}
-          </text>
-        </g>
-      ))}
+      {nodes.map((n, i) => {
+        // The message arriving here travels on the edge from the previous box, so the box
+        // lights up on that edge's schedule.
+        const glow = {
+          duration: CYCLE,
+          repeat: Infinity,
+          delay: ((i - 1 + nodes.length) % nodes.length) * STAGGER,
+          times: GLOW_TIMES,
+          ease: "easeInOut",
+        } as const;
+        const box = { x: -58, y: -24, width: 116, height: 48, rx: 12 };
+        return (
+          <g key={n.id} transform={`translate(${n.x} ${n.y})`}>
+            {/* Soft halo around the box, behind it. */}
+            <motion.rect
+              {...box}
+              fill="none"
+              stroke={n.color}
+              strokeWidth="6"
+              filter="url(#hero-box-glow)"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: GLOW_OPACITY }}
+              transition={glow}
+            />
+            <rect {...box} fill="var(--color-diagram-node)" />
+            {/* The box itself lights up: its fill takes on the category colour. */}
+            <motion.rect
+              {...box}
+              fill={alpha(n.color, 22)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: GLOW_OPACITY }}
+              transition={glow}
+            />
+            <motion.rect
+              {...box}
+              fill="none"
+              stroke={n.color}
+              strokeWidth="1.5"
+              initial={{ strokeOpacity: 0.4 }}
+              animate={{
+                strokeOpacity: [0.4, 0.4, 1, 0.4, 0.4],
+                strokeWidth: [1.5, 1.5, 2.5, 1.5, 1.5],
+              }}
+              transition={glow}
+            />
+            <text
+              y="5"
+              textAnchor="middle"
+              className="text-[13px] font-semibold"
+              fill="var(--color-diagram-text)"
+            >
+              {n.label}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 }

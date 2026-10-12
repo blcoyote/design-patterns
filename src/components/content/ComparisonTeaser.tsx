@@ -22,7 +22,7 @@ export function ComparisonTeaser({ comparisons }: { comparisons: ComparisonDefin
           <li key={c.slug}>
             <Link
               to={`/compare/${c.slug}`}
-              className="block rounded-control p-3 ring-1 ring-card-outline transition hover:bg-surface hover:shadow-raised hover:ring-line-bold"
+              className="block rounded-card p-3 ring-1 ring-card-outline transition hover:bg-surface hover:shadow-raised hover:ring-line-bold"
             >
               <span className="text-sm font-semibold text-compare-fg">{c.title}</span>
               <span className="mt-1 block text-sm leading-relaxed text-fg-muted">{c.summary}</span>

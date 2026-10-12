@@ -1,7 +1,7 @@
 # design-patterns
 
 An interactive, animated guide to all 23 Gang of Four design patterns plus 11 common enterprise patterns, and a second
-area covering 18 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+area covering 19 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern and architecture has:
 
@@ -14,7 +14,7 @@ Every pattern and architecture has:
 | Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool, Plugin, Cache-Aside |
 
 Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, MVC, Vertical Slice, Domain-Driven Design (OO and Functional),
-CQRS, Microservices, Modular Monolith, Event-Driven, Actor Model, Serverless, Space-Based, Microkernel, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.
+CQRS, Microservices, Modular Monolith, Event-Driven, Actor Model, Serverless, Space-Based, Micro-frontends / BFF, Microkernel, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.
 
 ## Getting started
 
@@ -202,9 +202,9 @@ A live check runs on every edit (`src/lib/layoutLint.ts`, listed under the diagr
 
 ### Custom scenes: what follows the editor
 
-The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of the custom scenes (bead `blcoyote-ideal-train-2yu.9`, since extended with the new DDD, Modular Monolith, Microkernel, Actor Model, Serverless and Space-Based scenes) found 37 of them:
+The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of the custom scenes (bead `blcoyote-ideal-train-2yu.9`, since extended with the new DDD, Modular Monolith, Microkernel, Actor Model, Serverless, Space-Based and Micro-frontends scenes) found 38 of them:
 
-- **21 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight, event-sourcing, ddd, functional-ddd, modular-monolith, microkernel, actor-model, serverless, space-based, composite, interpreter, visitor and decorator (the DDD scenes, modular-monolith, microkernel, actor-model, serverless and space-based draw their bounded-context, module, core/plug-in, per-actor or platform regions with `BoundedContextUnderlay`; modular-monolith also derives its "One deployable · one process" outline from participant positions via `boxOf`). Generic scenes (for example observer) follow too.
+- **22 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight, event-sourcing, ddd, functional-ddd, modular-monolith, microkernel, actor-model, serverless, space-based, micro-frontends, composite, interpreter, visitor and decorator (the DDD scenes, modular-monolith, microkernel, actor-model, serverless, space-based and micro-frontends draw their bounded-context, module, core/plug-in, per-actor, platform or team regions with `BoundedContextUnderlay`; modular-monolith also derives its "One deployable · one process" outline from participant positions via `boxOf`). Generic scenes (for example observer) follow too.
 - **16 follow partially**: boxes, arrows and packets move, but background bands, regions and overlays that are constants in the scene (the CQRS write/read bands, the hexagon, the layered bands, the MVU cycle, the iterator song strip, ...) stay where they were, so a moved box can end up outside its band. Middleware's reorder step also writes to the wrong participant. They are iterator, builder, singleton, dependency-injection, middleware, pub-sub, cqrs, event-driven, microservices, functional-core, mvu, pipes-and-filters, hexagonal, layered, mvc and vertical-slice.
 - **4 render their own `<svg>` without `<Diagram>`** (interpreter, visitor, composite, decorator) and draw their handles with `<DiagramEditLayer>` instead. Decorator's three nested layers share one centre, keep their fixed sizes (no width handle) and move as one stack. The lint still measures them as default-sized boxes, so it reports them as overlapping.
 
@@ -217,11 +217,11 @@ CQRS — the same way the patterns above explain class-level ones: an animated, 
 TypeScript/C#/Python code, and the usual problem/solution/pros/cons sections, plus a glossary of key concepts and (for a
 few) named variants.
 
-The eighteen architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
+The nineteen architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
 
-| Object-oriented                                                                                                                                      | Functional                                                                                                                                     | OO + Functional                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice, Domain-Driven Design (OO), Microkernel (Plug-in Architecture) | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture), Domain-Driven Design (Functional) | CQRS, Microservices, Event-Driven, Modular Monolith, Actor Model, Serverless (Functions as a Service), Space-Based Architecture |
+| Object-oriented                                                                                                                                      | Functional                                                                                                                                     | OO + Functional                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice, Domain-Driven Design (OO), Microkernel (Plug-in Architecture) | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture), Domain-Driven Design (Functional) | CQRS, Microservices, Event-Driven, Modular Monolith, Actor Model, Serverless (Functions as a Service), Space-Based Architecture, Micro-frontends with Backends-for-Frontends |
 
 ### Cross-reference model
 

@@ -193,7 +193,7 @@ export const architecture: ArchitectureDefinition = {
       label: "Client",
       role: "Client",
       kind: "client",
-      x: 160,
+      x: 150,
       y: 40,
       description:
         "A caller outside the Ordering bounded context — a UI, another service, anything that wants an order placed. It never reaches past the application service.",
@@ -203,7 +203,7 @@ export const architecture: ArchitectureDefinition = {
       label: "OrderApplicationService",
       role: "Application service",
       kind: "class",
-      x: 160,
+      x: 150,
       y: 165,
       width: 180,
       description:
@@ -215,8 +215,8 @@ export const architecture: ArchitectureDefinition = {
       label: "OrderRepository",
       role: "Repository",
       kind: "interface",
-      x: 160,
-      y: 275,
+      x: 490,
+      y: 165,
       width: 180,
       description:
         "Loads and saves the Order aggregate as a whole, so nothing above it ever has to know whether that means a SQL table, a document store, or something else.",
@@ -227,8 +227,8 @@ export const architecture: ArchitectureDefinition = {
       label: "Money",
       role: "Value object",
       kind: "object",
-      x: 160,
-      y: 385,
+      x: 220,
+      y: 430,
       width: 150,
       description:
         "Immutable and compared by value, not identity: two Money instances with the same amount and currency are equal, and every operation returns a new instance.",
@@ -239,8 +239,8 @@ export const architecture: ArchitectureDefinition = {
       label: "Order",
       role: "Aggregate root",
       kind: "object",
-      x: 380,
-      y: 215,
+      x: 220,
+      y: 300,
       width: 190,
       description:
         "The aggregate root: the only object outside this cluster that code is allowed to reference. It guards its own invariant — no new lines once it has been placed — regardless of who is calling.",
@@ -251,11 +251,11 @@ export const architecture: ArchitectureDefinition = {
       label: "OrderLine",
       role: "Value object",
       kind: "object",
-      x: 380,
-      y: 325,
+      x: 440,
+      y: 300,
       width: 160,
       description:
-        "Part of the Order aggregate, reachable only through it. A value object: it has no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.",
+        "Part of the Order aggregate once added. Lines are built outside and handed to Order.addLine, but Order keeps its list to itself (private in TypeScript and C#, unexported in Go, underscore-prefixed by convention in Python), so only Order can change which lines it holds. A value object: it has no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.",
       patterns: ["value-object"],
     },
     {
@@ -263,8 +263,8 @@ export const architecture: ArchitectureDefinition = {
       label: "OrderPlaced",
       role: "Domain event",
       kind: "object",
-      x: 380,
-      y: 440,
+      x: 450,
+      y: 430,
       width: 170,
       description:
         "Raised by Order the moment it is placed, and collected by the application service. The aggregate itself has no idea who — if anyone — is listening.",
@@ -274,8 +274,8 @@ export const architecture: ArchitectureDefinition = {
       label: "ACL",
       role: "Anti-Corruption Layer",
       kind: "class",
-      x: 550,
-      y: 440,
+      x: 669,
+      y: 300,
       width: 120,
       description:
         "Sits on the seam between the two contexts and, conceptually owned by the downstream Shipping context, translates Ordering's OrderPlaced into Shipping's own ShipmentRequested, so Ordering's model never leaks into Shipping.",
@@ -286,8 +286,8 @@ export const architecture: ArchitectureDefinition = {
       label: "ShippingService",
       role: "Shipping bounded context",
       kind: "class",
-      x: 740,
-      y: 325,
+      x: 800,
+      y: 430,
       width: 190,
       description:
         'Lives entirely inside the Shipping bounded context. It has never heard of an "Order" — only of a ShipmentRequested, the vocabulary its own context understands.',
@@ -350,7 +350,7 @@ export const architecture: ArchitectureDefinition = {
       to: "orderLine",
       type: "holds",
       description:
-        "Order holds its OrderLines directly. Nothing outside the aggregate is allowed to reach an OrderLine except through Order itself.",
+        "Order holds its OrderLines directly. Lines enter only through Order.addLine, and Order never exposes its list, so the set of lines can only change through the root.",
     },
     {
       id: "raise",
@@ -479,7 +479,7 @@ export const architecture: ArchitectureDefinition = {
         { relation: "cross", label: "OrderPlaced" },
         { relation: "translate", label: "ShipmentRequested", after: 0 },
       ],
-      notes: { acl: "translates", shipping: "ShipmentRequested received" },
+      notes: { acl: "translates", shipping: "ShipmentRequested" },
       code: "acl",
     },
     {

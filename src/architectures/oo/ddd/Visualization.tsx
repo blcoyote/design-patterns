@@ -6,9 +6,11 @@ import type { VisualizationProps } from "@/types/pattern";
  * DDD swaps the generic diagram's plain background for two dashed bounded-context
  * regions — Ordering and Shipping — so the central idea (two separate models, never
  * sharing a database, joined only at an explicit seam) reads before a single step
- * plays. The ACL participant is positioned to straddle that seam in index.ts; this
- * underlay derives the regions and seam from the participants' positions, so they
- * follow the boxes.
+ * plays. A lighter inner region marks the Order aggregate — the root and the OrderLines it
+ * holds — the consistency boundary: lines are built outside and handed in, but only Order
+ * can add them, and it never hands its list back out.
+ * The ACL participant is positioned to straddle the seam in index.ts; this underlay
+ * derives the regions and seam from the participants' positions, so they follow the boxes.
  */
 export function DddVisualization({
   pattern,
@@ -27,6 +29,7 @@ export function DddVisualization({
           label: "Ordering context",
           members: ["appService", "orderRepo", "money", "order", "orderLine", "orderPlaced"],
         },
+        { label: "Order aggregate", members: ["order", "orderLine"], inner: true },
         { label: "Shipping context", members: ["shipping"] },
       ]}
       seams={[["Ordering context", "Shipping context"]]}

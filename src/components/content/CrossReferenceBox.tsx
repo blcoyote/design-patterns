@@ -42,7 +42,7 @@ function RefGroup({ label, refs }: { label: string; refs: ResolvedRef[] }) {
           <li key={ref.slug}>
             <Link
               to={ref.href}
-              className="block rounded-control p-3 ring-1 ring-card-outline transition hover:bg-surface hover:shadow-raised hover:ring-line-bold"
+              className="block rounded-card p-3 ring-1 ring-card-outline transition hover:bg-surface hover:shadow-raised hover:ring-line-bold"
             >
               <span className="text-sm font-semibold" style={{ color: ref.color }}>
                 {ref.name}

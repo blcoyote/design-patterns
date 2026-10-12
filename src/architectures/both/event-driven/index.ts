@@ -141,6 +141,10 @@ export const architecture: ArchitectureDefinition = {
     ],
     architectures: [
       {
+        slug: "serverless",
+        why: "A consumer can run as a function that the platform invokes whenever a message is waiting, which is the job drain does here. The Serverless page does this for one function: createOrder enqueues an order-placed message and Platform.drainQueues invokes sendReceipt, but that queue is point-to-point, a message taken by one function, not a topic fanned out to every subscriber like EventBroker. A function keeps no state that must last, so AnalyticsConsumer's in-memory count would restart after a cold start and would have to live in a store.",
+      },
+      {
         slug: "event-sourcing",
         why: "Event Sourcing uses events as the durable source of truth that state is rebuilt from; here, OrderPlaced and StockReserved are integration messages used once and then forgotten — easy to confuse, genuinely different jobs.",
       },

@@ -136,6 +136,10 @@ export const architecture: ArchitectureDefinition = {
     ],
     architectures: [
       {
+        slug: "serverless",
+        why: "A service does not have to be a long-running process. One that only reacts to events, like ShippingService reacting to OrderPlaced, could run as a queue-triggered function that the platform starts when a message arrives and drops when it is idle, as sendReceipt does on the Serverless page. Instance memory then cannot be trusted: ShippingService's received list and OrderService's order counter would have to move into a managed store, and a cold start adds delay to a call that today is a plain method call.",
+      },
+      {
         slug: "ddd",
         why: "Bounded contexts are a natural starting point for service boundaries — Orders, Inventory and Payments here each keep their own model and their own data — though one context can also span several services.",
       },

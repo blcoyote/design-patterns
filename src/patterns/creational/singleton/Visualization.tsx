@@ -8,7 +8,7 @@ import { useCodeLanguage } from "@/hooks/useCodeLanguage";
 import type { VisualizationProps } from "@/types/pattern";
 import { alpha } from "@/theme/alpha";
 
-const CHIP = { x: 590, y: 185 };
+const CHIP = { x: 400, y: 200 };
 
 /** Singleton: a live instance counter, a language-aware construction attempt, and a single
  * shared "instance" chip that both clients converge on once it is created. */
@@ -185,65 +185,69 @@ export function SingletonVisualization({
             />
           ))}
 
-          {/* The one shared instance, materialising on first getInstance() call. */}
+          {/* The one shared instance, materialising on first getInstance() call.
+              Position lives on this static <g>: Framer drives `scale`/`opacity` on the
+              nested motion.g via its own transform, which would otherwise clobber a
+              translate passed directly as that element's `transform` prop. */}
           <AnimatePresence>
             {created && (
-              <motion.g
-                transform={`translate(${CHIP.x} ${CHIP.y})`}
-                role="button"
-                tabIndex={0}
-                aria-label="Shared AppConfig instance #1"
-                aria-pressed={selectedId === "config"}
-                className="cursor-pointer outline-none"
-                onClick={select("config")}
-                onKeyDown={onActivate(() => onSelect("config"))}
-                initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.3 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.3 }}
-                transition={{ type: "spring", stiffness: 320, damping: 20 }}
-              >
-                {showConverge && (
-                  <motion.circle
-                    r={34}
-                    fill="none"
+              <g transform={`translate(${CHIP.x} ${CHIP.y})`}>
+                <motion.g
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Shared AppConfig instance #1"
+                  aria-pressed={selectedId === "config"}
+                  className="cursor-pointer outline-none"
+                  onClick={select("config")}
+                  onKeyDown={onActivate(() => onSelect("config"))}
+                  initial={reduceMotion ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.3 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.3 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 20 }}
+                >
+                  {showConverge && (
+                    <motion.circle
+                      r={34}
+                      fill="none"
+                      stroke={color}
+                      strokeWidth={1.5}
+                      initial={{ opacity: 0.6, scale: 1 }}
+                      animate={
+                        reduceMotion
+                          ? { opacity: 0.4 }
+                          : { opacity: [0.6, 0, 0.6], scale: [1, 1.3, 1] }
+                      }
+                      transition={{
+                        duration: 1.6,
+                        repeat: reduceMotion ? 0 : Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  )}
+                  <circle
+                    r={26}
+                    fill={alpha(color, 13)}
                     stroke={color}
-                    strokeWidth={1.5}
-                    initial={{ opacity: 0.6, scale: 1 }}
-                    animate={
-                      reduceMotion
-                        ? { opacity: 0.4 }
-                        : { opacity: [0.6, 0, 0.6], scale: [1, 1.3, 1] }
-                    }
-                    transition={{
-                      duration: 1.6,
-                      repeat: reduceMotion ? 0 : Infinity,
-                      ease: "easeInOut",
-                    }}
+                    strokeWidth={2}
+                    style={{ filter: "var(--diagram-glow)" }}
                   />
-                )}
-                <circle
-                  r={26}
-                  fill={alpha(color, 13)}
-                  stroke={color}
-                  strokeWidth={2}
-                  style={{ filter: "var(--diagram-glow)" }}
-                />
-                <text
-                  y={-3}
-                  textAnchor="middle"
-                  className="fill-fg-strong text-[11px] font-bold select-none"
-                >
-                  instance
-                </text>
-                <text
-                  y={11}
-                  textAnchor="middle"
-                  className="text-[10px] font-mono select-none"
-                  fill={color}
-                >
-                  #1
-                </text>
-              </motion.g>
+                  <text
+                    y={-3}
+                    textAnchor="middle"
+                    className="fill-fg-strong text-[11px] font-bold select-none"
+                  >
+                    instance
+                  </text>
+                  <text
+                    y={11}
+                    textAnchor="middle"
+                    className="text-[10px] font-mono select-none"
+                    fill={color}
+                  >
+                    #1
+                  </text>
+                </motion.g>
+              </g>
             )}
           </AnimatePresence>
         </g>

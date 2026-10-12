@@ -145,6 +145,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "microservices",
         why: "Each microservice is internally a hexagon of its own — its core stays framework-free, while HTTP controllers and repository adapters are what expose it to, and connect it from, other services.",
       },
+      {
+        slug: "microkernel",
+        why: "Both put a stable core behind interfaces it owns, but Microkernel adds a registry of extension points that plug-ins fill. A hexagon's adapters (Postgres, in-memory) are chosen at wiring time and connect a technology. Microkernel's plug-ins (ca-rules, ny-rules) add business rules, are version-checked by the core, and can be installed while it runs. This example has no registry or version check: PlaceOrderService is given its adapter once, at construction.",
+      },
     ],
   },
 

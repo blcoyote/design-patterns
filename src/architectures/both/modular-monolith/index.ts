@@ -130,6 +130,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "hexagonal",
         why: "Both keep a module's inside behind a small boundary: CatalogApi, OrderingApi and ShippingApi play the part an inbound port plays on the Hexagonal page, and each module's store is private. This example does not structure a module as ports and adapters, but a module could be built as a hexagon inside, with its own core and driven adapters.",
       },
+      {
+        slug: "microkernel",
+        why: "A module is a natural home for the Microkernel shape. Ordering could be a small core that takes its region-specific rules as plug-ins, installed through a versioned contract it checks, as ClaimsCore does with apiVersion. This example has no plug-ins: every module is started by the ModuleHost, and the host checks only declared dependencies, not versions.",
+      },
     ],
   },
 

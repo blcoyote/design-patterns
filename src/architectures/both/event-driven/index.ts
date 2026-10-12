@@ -168,6 +168,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "pipes-and-filters",
         why: "A consumer that needs to transform a stream of events — parse, validate, enrich, format — is often built as a pipes-and-filters pipeline downstream of the broker, with each filter a pure stage over the incoming messages.",
       },
+      {
+        slug: "microkernel",
+        why: "The Microkernel page uses event-driven delivery for one of its two extension points: audit-log subscribes with addClaimListener, and ClaimsCore calls every listener with each decision. That is an in-process, synchronous callback list, not a broker with topics and a queue like EventBroker here, and its other extension point (claim rules per region) is a lookup, not an event.",
+      },
     ],
   },
 

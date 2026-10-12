@@ -24,6 +24,9 @@ fi
 
 # Never deletes data: clones from the remote only when no database exists yet.
 bd bootstrap --yes >&2 || echo "beads-setup: bd bootstrap failed" >&2
+# Local-only settings a fresh clone lacks; bd warns on every command without them.
+git config beads.role maintainer
+[ -d .beads ] && chmod 700 .beads
 # Fetch issues changed on other workstations or sessions.
 bd dolt pull >&2 || echo "beads-setup: bd dolt pull failed" >&2
 exit 0

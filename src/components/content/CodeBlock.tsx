@@ -132,10 +132,15 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
         <button
           type="button"
           onClick={copy}
-          className="shrink-0 rounded px-2 py-1 hover:bg-surface-raised hover:text-fg"
+          aria-label={copied ? "Copied" : "Copy code"}
+          title={copied ? "Copied" : "Copy code"}
+          className="shrink-0 rounded-control p-1.5 hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
         >
-          {copied ? "Copied ✓" : "Copy"}
+          <CopyIcon copied={copied} />
         </button>
+        <span aria-live="polite" className="sr-only">
+          {copied ? "Code copied to clipboard" : ""}
+        </span>
       </div>
       <div
         ref={scroller}
@@ -182,5 +187,32 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
         </Highlight>
       </div>
     </div>
+  );
+}
+
+/** Two overlapping sheets (copy), or a check mark once the code is on the clipboard. */
+function CopyIcon({ copied }: { copied: boolean }) {
+  const common = {
+    viewBox: "0 0 24 24",
+    className: "size-4",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+  } as const;
+  if (copied) {
+    return (
+      <svg {...common}>
+        <path d="M20 6 9 17l-5-5" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...common}>
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
   );
 }

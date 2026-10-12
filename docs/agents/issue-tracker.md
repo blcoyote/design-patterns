@@ -8,7 +8,7 @@ Issues for this repo live in beads, a Dolt-backed tracker driven by the `bd` CLI
 - Specs are `epic` issues; implementation tickets are children created with `--parent <epic-id>`.
 - Triage state is a `bd` label (see `triage-labels.md`).
 - Never run `bd edit` (it opens `$EDITOR`); use `bd update <id> --description/--notes/--design`.
-- Sync with `bd dolt pull` at session start and `bd dolt push` after creating or closing issues. Don't commit or push to git unless asked.
+- Sync with `bd dolt pull` at session start and `bd dolt push` after creating, updating, or closing issues. Don't commit or push to git unless asked.
 
 ## When a skill says "publish to the issue tracker"
 

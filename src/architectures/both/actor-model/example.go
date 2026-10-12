@@ -43,9 +43,15 @@ func (GetBalance) isMessage() {}
 func (Reply) isMessage()      {}
 func (Failed) isMessage()     {}
 
-// formatCents formats 7500 as "75.00" with integer arithmetic only (no floats, no thousands separator).
+// formatCents formats 7500 as "75.00" and -2500 as "-25.00" with integer arithmetic only (no floats, no thousands separator).
 func formatCents(cents int) string {
-	return fmt.Sprintf("%d.%02d", cents/100, cents%100)
+	sign := ""
+	absolute := cents
+	if cents < 0 {
+		sign = "-"
+		absolute = -cents
+	}
+	return fmt.Sprintf("%s%d.%02d", sign, absolute/100, absolute%100)
 }
 
 // [/messages]
@@ -195,7 +201,7 @@ func (s *ActorSystem) cellOf(name ActorRef) *cell {
 // [account]
 // AccountActor owns a balance that nothing else can touch: the only way to read or change it is
 // a message. It never prints; it answers by telling ReplyTo. It also does no defensive handling
-// of a bad deposit: it returns an error and lets the supervisor deal with it ("let it crash").
+// of a bad amount (a deposit or withdrawal of 0 or less): it returns an error and lets the supervisor deal with it ("let it crash").
 type AccountActor struct {
 	balanceCents int
 }
@@ -209,6 +215,9 @@ func (a *AccountActor) Receive(message Message, ctx ActorContext) error {
 		a.balanceCents += m.AmountCents
 		ctx.Tell(m.ReplyTo, Reply{Text: fmt.Sprintf("deposit %s ok, balance %s", formatCents(m.AmountCents), formatCents(a.balanceCents))})
 	case Withdraw:
+		if m.AmountCents <= 0 {
+			return fmt.Errorf("invalid amount %s", formatCents(m.AmountCents))
+		}
 		// Not enough money is a business outcome, so it is a normal reply and not a crash.
 		if m.AmountCents > a.balanceCents {
 			ctx.Tell(m.ReplyTo, Reply{Text: fmt.Sprintf("withdraw %s rejected, balance %s", formatCents(m.AmountCents), formatCents(a.balanceCents))})

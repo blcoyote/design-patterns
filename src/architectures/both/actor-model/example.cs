@@ -47,14 +47,16 @@ sealed record Reply(string Text) : Message;
 /// Sent by the system (never by an actor) to a parent when one of its children crashes.
 sealed record Failed(string Child, string Reason) : Message;
 
-/// Formats 7500 as "75.00" with integer arithmetic only (no floats, no thousands separator).
+/// Formats 7500 as "75.00" and -2500 as "-25.00" with integer arithmetic only (no floats, no thousands separator).
 static class Money
 {
     public static string FormatCents(long cents)
     {
-        long whole = cents / 100;
-        long fraction = cents % 100;
-        return $"{whole.ToString(CultureInfo.InvariantCulture)}.{fraction.ToString("D2", CultureInfo.InvariantCulture)}";
+        long absolute = Math.Abs(cents);
+        long whole = absolute / 100;
+        long fraction = absolute % 100;
+        string sign = cents < 0 ? "-" : "";
+        return $"{sign}{whole.ToString(CultureInfo.InvariantCulture)}.{fraction.ToString("D2", CultureInfo.InvariantCulture)}";
     }
 }
 // [/messages]
@@ -220,7 +222,7 @@ class ActorSystem
 /// <summary>
 /// Owns a balance that nothing else can touch: the only way to read or change it is a message.
 /// It never prints; it answers by telling ReplyTo. It also does no defensive handling of a bad
-/// deposit: it throws and lets the supervisor deal with it ("let it crash").
+/// amount (a deposit or withdrawal of 0 or less): it throws and lets the supervisor deal with it ("let it crash").
 /// </summary>
 sealed class AccountActor : IActor
 {
@@ -240,6 +242,10 @@ sealed class AccountActor : IActor
                     $"deposit {Money.FormatCents(deposit.AmountCents)} ok, balance {Money.FormatCents(_balanceCents)}"));
                 return;
             case Withdraw withdraw:
+                if (withdraw.AmountCents <= 0)
+                {
+                    throw new InvalidOperationException($"invalid amount {Money.FormatCents(withdraw.AmountCents)}");
+                }
                 // Not enough money is a business outcome, so it is a normal reply and not a crash.
                 if (withdraw.AmountCents > _balanceCents)
                 {

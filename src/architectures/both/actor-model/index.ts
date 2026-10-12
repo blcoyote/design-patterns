@@ -49,7 +49,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Actor",
       description:
-        "A unit that owns private state and handles one message per turn through a receive method. Here there are three: AccountActor (a private balance), TellerActor (prints the answers) and SupervisorActor (restarts failed children).",
+        "A unit behind its own mailbox that handles one message per turn through a receive method, and that may own private state. Here there are three: AccountActor (a private balance, the only one with state), TellerActor (prints the answers) and SupervisorActor (restarts failed children).",
     },
     {
       term: "Address (ActorRef)",
@@ -79,7 +79,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Let it crash",
       description:
-        "The account does not defend against a Deposit of 0.00: it throws, the failing message is dropped, and the supervisor restarts the actor with fresh state. Business outcomes such as an insufficient balance are not crashes: they are ordinary replies.",
+        "The account does not defend against a Deposit or Withdraw of 0.00 or less: it throws, the failing message is dropped, and the supervisor restarts the actor with fresh state. Business outcomes such as an insufficient balance are not crashes: they are ordinary replies.",
     },
   ],
   variants: [
@@ -110,7 +110,7 @@ export const architecture: ArchitectureDefinition = {
     architectures: [
       {
         slug: "event-driven",
-        why: "ActorSystem's mailboxes and EventBroker's queue are close relatives: tell and publish both only enqueue, and a single-threaded loop (run, drain) delivers the messages in FIFO order. The addressing differs. A tell names one receiver, so a Deposit is a command to AccountActor that carries a replyTo, while the broker fans an event out by topic to every subscriber, none of which the producer knows. Each actor also has its own mailbox and a supervisor that restarts it if it crashes; EventBroker has one shared queue and nothing that handles a failing consumer.",
+        why: "ActorSystem's mailboxes and EventBroker's queue are close relatives: tell and publish both only enqueue, and a single-threaded loop (run, drain) delivers the messages in FIFO order. The addressing differs. A tell names one receiver, so a Deposit is a command to AccountActor that carries a replyTo, while the broker fans an event out by topic to every subscriber, none of which the producer knows. Each actor also has its own mailbox, and the account has a supervisor that restarts it if it crashes (the teller and the supervisor are spawned without a parent); EventBroker has one shared queue and nothing that handles a failing consumer.",
       },
       {
         slug: "event-sourcing",
@@ -118,7 +118,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "mvu",
-        why: "Both are loops that feed one message at a time to the code that owns the state: ActorSystem.run gives an actor one message per turn, and Runtime.dispatch gives update one Msg. The shapes differ. MVU has a single Model for the whole app and a pure update that returns the next Model plus Cmds for the runtime to perform. Here there are several actors, each with private mutable state and its own mailbox, and receive performs its effects itself (tell, print) and may throw. dispatch also runs update at once, with no mailbox in between.",
+        why: "Both are loops that feed one message at a time to the code that owns the state: ActorSystem.run gives an actor one message per turn, and Runtime.dispatch gives update one Msg. The shapes differ. MVU has a single Model for the whole app and a pure update that returns the next Model plus Cmds for the runtime to perform. Here there are several actors, each with its own mailbox (only the account holds private mutable state, its balance), and receive performs its effects itself (tell, print) and may throw. dispatch also runs update at once, with no mailbox in between.",
       },
       {
         slug: "microservices",
@@ -200,7 +200,7 @@ export const architecture: ArchitectureDefinition = {
       y: 360,
       width: 180,
       description:
-        "Owns a balance that nothing else can touch: the only way to read or change it is a message. It answers by telling replyTo and never prints. An insufficient balance is a normal reply, but a Deposit of zero or less is not defended against: it crashes (a thrown exception in TypeScript, C# and Python, a returned error in Go) and leaves the decision to its supervisor.",
+        "Owns a balance that nothing else can touch: the only way to read or change it is a message. It answers by telling replyTo and never prints. An insufficient balance is a normal reply, but a Deposit or Withdraw of zero or less is not defended against: it crashes (a thrown exception in TypeScript, C# and Python, a returned error in Go) and leaves the decision to its supervisor.",
       code: "account",
     },
     {
@@ -313,7 +313,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "Three isolated actors, one scheduler",
       description:
-        "Each actor owns private state and has its own mailbox, and the dashed boxes mark that boundary: code outside reaches an actor only by putting a message in its mailbox. One scheduler decides who runs. The supervisor sits above the account as its parent, so supervision forms a tree.",
+        "Every actor is isolated behind its own mailbox, and the dashed boxes mark that boundary: code outside reaches an actor only by putting a message in its mailbox. The account is the one with private state, its balance. One scheduler decides who runs. The supervisor sits above the account as its parent, so supervision forms a tree.",
       highlight: [
         "client",
         "scheduler",

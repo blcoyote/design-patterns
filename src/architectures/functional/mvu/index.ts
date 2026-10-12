@@ -148,7 +148,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "actor-model",
-        why: "Runtime.dispatch hands one Msg at a time to update, much as an actor handles one message per receive. The differences are real: MVU has one immutable Model for the whole app and no mailbox (dispatch runs update at once, and a Cmd's result returns as a nested dispatch). In the Actor Model there are many actors, each with a private mutable state and a mailbox, and each performs its own effects by sending further messages.",
+        why: "Runtime.dispatch hands one Msg at a time to update, much as an actor handles one message per receive. The differences are real: MVU has one immutable Model for the whole app and no mailbox (dispatch runs update at once, and a Cmd's result returns as a nested dispatch). In the Actor Model there are many actors, each with its own mailbox (only the account holds private mutable state, its balance), and each performs its own effects by sending further messages.",
       },
     ],
   },

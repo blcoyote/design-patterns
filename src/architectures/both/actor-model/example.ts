@@ -15,11 +15,12 @@ type Message =
   /** Sent by the system (never by an actor) to a parent when one of its children crashes. */
   | { kind: "Failed"; child: ActorRef; reason: string };
 
-/** Formats 7500 as "75.00" with integer arithmetic only (no floats, no thousands separator). */
+/** Formats 7500 as "75.00" and -2500 as "-25.00" with integer arithmetic only (no floats, no thousands separator). */
 function formatCents(cents: number): string {
-  const whole = Math.floor(cents / 100);
-  const fraction = cents % 100;
-  return `${whole}.${String(fraction).padStart(2, "0")}`;
+  const absolute = Math.abs(cents);
+  const whole = Math.floor(absolute / 100);
+  const fraction = absolute % 100;
+  return `${cents < 0 ? "-" : ""}${whole}.${String(fraction).padStart(2, "0")}`;
 }
 // [/messages]
 
@@ -153,7 +154,7 @@ class ActorSystem {
 /**
  * Owns a balance that nothing else can touch: the only way to read or change it is a message.
  * It never prints; it answers by telling replyTo. It also does no defensive handling of a bad
- * deposit: it throws and lets the supervisor deal with it ("let it crash").
+ * amount (a deposit or withdrawal of 0 or less): it throws and lets the supervisor deal with it ("let it crash").
  */
 class AccountActor implements Actor {
   private balanceCents = 0;
@@ -172,6 +173,9 @@ class AccountActor implements Actor {
         return;
       }
       case "Withdraw": {
+        if (message.amountCents <= 0) {
+          throw new Error(`invalid amount ${formatCents(message.amountCents)}`);
+        }
         // Not enough money is a business outcome, so it is a normal reply and not a crash.
         if (message.amountCents > this.balanceCents) {
           ctx.tell(message.replyTo, {

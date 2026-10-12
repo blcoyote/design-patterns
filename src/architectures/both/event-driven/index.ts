@@ -174,7 +174,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "actor-model",
-        why: "Here a producer publishes an event to a topic and EventBroker delivers it to every subscriber the producer has never heard of. In the Actor Model a sender tells one named actor, so a Deposit is a command with a replyTo, not a fact for anyone to react to. The queueing is similar: publish only enqueues and drain delivers in FIFO order on one thread, as ActorSystem.tell and run do there. Each actor has its own mailbox and a supervisor, and this broker has neither.",
+        why: "Here a producer publishes an event to a topic and EventBroker delivers it to every subscriber the producer has never heard of. In the Actor Model a sender tells one named actor, so a Deposit is a command with a replyTo, not a fact for anyone to react to. The queueing is similar: publish only enqueues and drain delivers in FIFO order on one thread, as ActorSystem.tell and run do there. Each actor has its own mailbox, and the account has a supervisor (the teller and the supervisor are spawned without a parent), while this broker has one shared queue and no supervision.",
       },
     ],
   },

@@ -49,10 +49,12 @@ Message = Union[Deposit, Withdraw, GetBalance, Reply, Failed]
 
 
 def format_cents(cents: int) -> str:
-    """Formats 7500 as "75.00" with integer arithmetic only (no floats, no thousands separator)."""
-    whole = cents // 100
-    fraction = cents % 100
-    return f"{whole}.{fraction:02d}"
+    """Formats 7500 as "75.00" and -2500 as "-25.00" with integer arithmetic only (no floats, no thousands separator)."""
+    absolute = abs(cents)
+    whole = absolute // 100
+    fraction = absolute % 100
+    sign = "-" if cents < 0 else ""
+    return f"{sign}{whole}.{fraction:02d}"
 # [/messages]
 
 
@@ -189,7 +191,7 @@ class AccountActor:
     """
     Owns a balance that nothing else can touch: the only way to read or change it is a message.
     It never prints; it answers by telling reply_to. It also does no defensive handling of a bad
-    deposit: it raises and lets the supervisor deal with it ("let it crash").
+    amount (a deposit or withdrawal of 0 or less): it raises and lets the supervisor deal with it ("let it crash").
     """
 
     def __init__(self) -> None:
@@ -208,6 +210,8 @@ class AccountActor:
                     ),
                 )
             case Withdraw():
+                if message.amount_cents <= 0:
+                    raise ValueError(f"invalid amount {format_cents(message.amount_cents)}")
                 # Not enough money is a business outcome, so it is a normal reply and not a crash.
                 if message.amount_cents > self._balance_cents:
                     ctx.tell(

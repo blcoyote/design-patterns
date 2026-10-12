@@ -4,8 +4,9 @@ import type { VisualizationProps } from "@/types/pattern";
 
 /**
  * The Actor Model draws one dashed region per actor, wrapping the actor and its mailbox: that
- * boundary is the isolation, because nothing outside a region touches the state inside it and
- * every arrow that crosses a boundary is a message. The supervisor's region sits above the
+ * boundary is the isolation, because nothing outside a region touches the state inside it. Every
+ * arrow that crosses a boundary is a message put in a mailbox, except restart, which is the
+ * supervisor's direct ctx.restart call into the ActorSystem. The supervisor's region sits above the
  * account's so that supervision reads as a tree. Regions are derived from the participants'
  * positions, so they follow the boxes in the dev layout editor. A crashed (suspended) account
  * is shown by the step's notes and highlight, not by a separate shape.

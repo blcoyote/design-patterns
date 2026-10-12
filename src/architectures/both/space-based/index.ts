@@ -37,7 +37,7 @@ export const architecture: ArchitectureDefinition = {
     "The data must fit in memory. Here every running unit holds a full copy of the one show. A data set that is too big for that needs a partitioned grid, which is more complicated and not what this example does.",
     "The database is behind. After alice and bob the database still says seats left 3 while two seats are sold; anything that reads it directly sees old data until the drain. That is eventual consistency, and it is not suited to cases where every read must see the latest write.",
     "A queued change is only as safe as the pump. In this example the pump is also only memory, so if everything stopped before the drain the two queued writes would be lost and the next cold start would read seats left 3 from the database. Real products offer backups, persistent stores or a mirror service to reduce this, at a cost.",
-    "This simulation replicates every change to the other units immediately and handles one request at a time. Real grids usually replicate asynchronously, so for a moment two units can hold different values and both sell the last seat: a data collision. The example cannot show that, and handling collisions is a large part of the real work.",
+    "This simulation replicates every change to the other units immediately and handles one request at a time. Real grids serve requests concurrently and often replicate asynchronously, so two units can both sell the last seat (a data collision) unless the grid locks or version-checks that entry. The example cannot show that, and handling collisions is a large part of the real work.",
     "It is hard to run and to test: starting and stopping units, joining a grid while changes are in flight, and recovering after a failure are all things to design for. This example has none of it.",
   ],
   realWorld: [
@@ -85,7 +85,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Data collision",
       description:
-        "Two units change the same data in the window before their replicas meet, for example both selling the last seat. It can only happen when replication is asynchronous. This example copies each change at once and runs one request at a time, so it cannot show one.",
+        "Two units change the same data in the window before their replicas meet, for example both selling the last seat. It can happen whenever two units serve requests for the same data at the same time without a lock or version check, and asynchronous replication widens the window. This example runs one request at a time, so it cannot show one.",
     },
     {
       term: "Write-behind",
@@ -102,7 +102,7 @@ export const architecture: ArchitectureDefinition = {
     {
       name: "Asynchronous replication",
       description:
-        "Real grids often copy a change to the other members in the background instead of before answering. That is faster and is where data collisions come from. This simulation copies each change immediately.",
+        "Real grids often copy a change to the other members in the background instead of before answering. That is faster but widens the window in which data collisions can happen. This simulation copies each change immediately.",
     },
   ],
 
@@ -115,10 +115,6 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "outbox",
         why: "The data pump is a queue of changes that are applied to the database later, in order, like the backlog of an outbox. It is weaker than a real outbox: the change goes into an in-memory queue, not into the same database transaction as the data, so it would be lost if the process stopped before the drain, and the writer applies the changes to the database instead of publishing them to a broker.",
-      },
-      {
-        slug: "cache-aside",
-        why: "A contrast, not a use. A processing unit's replica looks like a cache, but it is not cache-aside: the unit does not check a cache and fall back to the database on a miss, and writes do not go to the database first with the cache invalidated. The replica is the working copy, writes reach the database later through the pump, and the database is read only on a cold start, by the data reader.",
       },
     ],
     architectures: [
@@ -173,7 +169,6 @@ export const architecture: ArchitectureDefinition = {
       width: 190,
       description:
         "The first unit started. It finds an empty grid, so the data reader fills it from the database. It answers requests from its own in-memory replica and never touches the database; the change from a purchase is copied by the grid to the other units. This is not cache-aside: its replica is the working copy, and there is no read of the database on a miss.",
-      patterns: ["cache-aside"],
       code: "processingUnit",
     },
     {
@@ -357,10 +352,10 @@ export const architecture: ArchitectureDefinition = {
     },
     {
       id: "drain",
-      from: "dataPump",
-      to: "dataWriter",
+      from: "dataWriter",
+      to: "dataPump",
       type: "calls",
-      label: "drain",
+      label: "take",
       description:
         "The data writer takes the oldest write from the pump, again and again, until the pump is empty. Nothing else takes from the pump.",
       code: "dataPump",
@@ -636,11 +631,11 @@ export const architecture: ArchitectureDefinition = {
         "main calls the data writer's drain. It takes the writes from the pump one at a time and applies each to the database in the order they were sent: seats left 2 (alice), 1 (bob) and 0 (carol). It prints '[writer] applied 3 writes; database: show-1 seats left: 0'. Only now does the database agree with the units. That is eventual consistency: the database was behind for the whole time between the first purchase and this drain, and nothing in this example decided when it would catch up other than this call.",
       highlight: ["dataPump", "drain", "dataWriter", "apply", "database"],
       packets: [
-        { relation: "drain", label: "take: 2 left" },
+        { relation: "drain", label: "take: 2 left", reverse: true },
         { relation: "apply", label: "apply: 2 left", after: 0 },
-        { relation: "drain", label: "take: 1 left", after: 1 },
+        { relation: "drain", label: "take: 1 left", reverse: true, after: 1 },
         { relation: "apply", label: "apply: 1 left", after: 2 },
-        { relation: "drain", label: "take: 0 left", after: 3 },
+        { relation: "drain", label: "take: 0 left", reverse: true, after: 3 },
         { relation: "apply", label: "apply: 0 left", after: 4 },
       ],
       notes: {

@@ -119,9 +119,11 @@ class DataReader {
  * the data pump; that forwarding is the write-behind. Real data grids (Hazelcast, Apache
  * Ignite, GigaSpaces) differ in the details; this simulation only shows the idea.
  *
- * This simulation copies a change to every other unit immediately, and runs one request at
- * a time. Real grids usually replicate asynchronously, so for a moment two units can hold
- * different values and both sell the last seat: a data collision. This simulation cannot show that.
+ * This simulation copies a change to every other unit immediately and runs one request at a
+ * time, so no two units ever act on the same seat at once. Real grids serve requests
+ * concurrently and often replicate asynchronously, so two units can both sell the last seat
+ * (a data collision) unless the grid locks or version-checks that entry. This simulation
+ * cannot show that.
  */
 class DataGrid {
   private readonly units: ProcessingUnit[] = [];

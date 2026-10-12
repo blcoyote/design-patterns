@@ -180,6 +180,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "actor-model",
         why: "Here a producer publishes an event to a topic and EventBroker delivers it to every subscriber the producer has never heard of. In the Actor Model a sender tells one named actor, so a Deposit is a command with a replyTo, not a fact for anyone to react to. The queueing is similar: publish only enqueues and drain delivers in FIFO order on one thread, as ActorSystem.tell and run do there. Each actor has its own mailbox, and the account has a supervisor (the teller and the supervisor are spawned without a parent), while this broker has one shared queue and no supervision.",
       },
+      {
+        slug: "space-based",
+        why: "A queue that is drained into a store later is a small piece of the same idea. On the Space-Based page DataPump is an in-memory first in first out queue of SeatWrite values that DataWriter.drain empties, as EventBroker.drain empties its queue here. It has one consumer, the writer, and no topics, and its units are kept alike by DataGrid.replicate calling each member directly, so it is a queue and not a broker like EventBroker. Its job is to keep the database out of the request path, not to let producers and consumers stay unaware of each other.",
+      },
     ],
   },
 

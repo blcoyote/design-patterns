@@ -163,6 +163,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "actor-model",
         why: "Orders, Inventory and Payments are separate deployables that call each other and wait for a result (getProduct, charge), guarded by a circuit breaker. In the Actor Model an actor is addressed by name and never called: the sender tells and carries on, and the answer comes back as a message to replyTo. That page's actors share one single-threaded scheduler, but real actor runtimes place actors on many machines, so actors can be the building block inside a service as well as between them.",
       },
+      {
+        slug: "space-based",
+        why: "Microservices split a system by job; space-based architecture scales one job by copying it. A hot part of a system, such as selling tickets in a spike, could be built as processing units kept in step by a data grid, with services around it for the rest. The ProcessingUnit copies on the Space-Based page all run the same code on the same replicated data and answer a buy without calling another service, where OrderService here waits on InventoryServiceClient and PaymentsService for every order. The Space-Based page shows the grid only, not services around it.",
+      },
     ],
   },
 

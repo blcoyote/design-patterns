@@ -94,7 +94,8 @@ class InProcessEventBus:
         self._handlers.append(handler)
 
     def publish(self, event: OrderPlaced) -> None:
-        for handler in self._handlers:
+        # Iterate a snapshot: a handler subscribed during publish first runs on the next publish.
+        for handler in list(self._handlers):
             handler(event)
 # [/eventBus]
 

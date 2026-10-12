@@ -110,7 +110,8 @@ class InProcessEventBus
 
     public void Publish(OrderPlaced @event)
     {
-        foreach (var handler in _handlers) handler(@event);
+        // Iterate a snapshot: a handler subscribed during Publish first runs on the next Publish.
+        foreach (var handler in _handlers.ToArray()) handler(@event);
     }
 }
 // [/eventBus]

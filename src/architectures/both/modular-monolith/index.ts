@@ -90,7 +90,7 @@ export const architecture: ArchitectureDefinition = {
     {
       name: "Modular monolith with an outbox",
       description:
-        "The publishing module saves its event into its own data in the same transaction as the change, and a relay then delivers it to the bus. The event cannot be lost between save and publish, which this example does not guard against: it publishes directly, with no outbox.",
+        "The publishing module saves its event into its own data in the same transaction as the change, and a relay then delivers it to the bus. With durable storage, the event can then no longer be lost between saving the change and publishing it. This example has no outbox and publishes directly; its stores are in memory, so here a crash would lose the order and the event alike.",
     },
   ],
 
@@ -110,7 +110,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "outbox",
-        why: "In this code placeOrder stores the order and then calls the bus's publish in the same call, with no outbox: if the process died between the two steps, the event would be lost. An outbox would write OrderPlaced into Ordering's own data in the same transaction as the order, and a relay would publish it afterwards, so the order and its event are saved together or not at all.",
+        why: "In this code placeOrder stores the order and then calls the bus's publish in the same call, with no outbox. The stores here are in memory, so a crash loses the order and the event alike; once Ordering saves orders durably, a crash between the two steps would keep the order but lose its event. An outbox would write OrderPlaced into Ordering's own data in the same transaction as the order, and a relay would publish it afterwards, so the order and its event are saved together or not at all.",
       },
     ],
     architectures: [

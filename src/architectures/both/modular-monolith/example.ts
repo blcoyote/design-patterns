@@ -81,7 +81,8 @@ class InProcessEventBus {
   }
 
   publish(event: OrderPlaced): void {
-    for (const handler of this.handlers) handler(event);
+    // Iterate a snapshot: a handler subscribed during publish first runs on the next publish.
+    for (const handler of [...this.handlers]) handler(event);
   }
 }
 // [/eventBus]

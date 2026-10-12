@@ -79,6 +79,8 @@ func (b *InProcessEventBus) Subscribe(handler OrderPlacedHandler) {
 }
 
 func (b *InProcessEventBus) Publish(event OrderPlaced) {
+	// range evaluates b.handlers once, so this iterates a snapshot: a handler subscribed
+	// during Publish first runs on the next Publish.
 	for _, handler := range b.handlers {
 		handler(event)
 	}

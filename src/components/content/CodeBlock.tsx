@@ -134,7 +134,7 @@ export function CodeBlock({ sources, active, onActiveChange, color, className = 
           onClick={copy}
           aria-label={copied ? "Copied" : "Copy code"}
           title={copied ? "Copied" : "Copy code"}
-          className="shrink-0 rounded p-1.5 hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
+          className="shrink-0 rounded-control p-1.5 hover:bg-surface-raised hover:text-fg focus-visible:outline-2 focus-visible:outline-focus"
         >
           <CopyIcon copied={copied} />
         </button>

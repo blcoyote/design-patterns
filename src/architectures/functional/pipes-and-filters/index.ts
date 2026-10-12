@@ -138,6 +138,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "event-driven",
         why: "Streaming implementations of this pattern (Kafka Streams, Rx, Akka Streams) commonly sit downstream of an event broker, turning each published event into one more element flowing through the same parse → validate → enrich → format pipeline.",
       },
+      {
+        slug: "ecs",
+        why: "An ECS tick runs its systems as fixed stages in order, like the stages of a pipeline, but the stages do not pass a message from one to the next: every system reads and writes the same component stores. On this page each filter takes the previous filter's output, and the filters do not read or write a shared store.",
+      },
     ],
   },
 

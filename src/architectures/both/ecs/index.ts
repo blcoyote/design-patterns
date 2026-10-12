@@ -121,7 +121,20 @@ export const architecture: ArchitectureDefinition = {
         why: "A query hides how the matching ids are found and hands a system the ids one after another, in ascending order, whether they came from a map, as here, or from a dense array or an archetype table in a real engine. It is a simple form of Iterator: the query returns a snapshot list that the system loops over, not a cursor object, and it is that snapshot that makes it safe for the death system to destroy entities while it loops.",
       },
     ],
-    architectures: [],
+    architectures: [
+      {
+        slug: "functional-core",
+        why: "Both put the logic in functions over plain data. The three systems are plain functions of the world and hold no state of their own, and the components are data with no methods. They are not a functional core, though: the movement, damage and death systems change the component stores in place, where a functional core would not mutate anything. A pure variant would have each system compute new component values and leave it to a shell around the loop to write them back into the stores.",
+      },
+      {
+        slug: "pipes-and-filters",
+        why: "Each tick runs the three systems as fixed stages in a set order, movement then damage then death, so a tick looks like a short pipeline. The stages do not pass a message from one to the next, though. Pipes and filters hands each filter the output of the one before it, and here every system reads and writes the same component stores, and the order matters only because of what is in them: a death system that ran before the damage system would remove the goblin one tick later.",
+      },
+      {
+        slug: "mvu",
+        why: "Both run one update loop that advances the state step by step. MVU has one Model and an update function that is driven by messages, one at a time. ECS has many component stores that the systems update once per tick, with no messages: tick takes no input and just runs every system over the world, in order.",
+      },
+    ],
   },
 
   viewBox: "0 0 1200 700",

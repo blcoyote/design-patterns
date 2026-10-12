@@ -127,6 +127,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "functional-ddd",
         why: "Functional DDD applies the same split inside a bounded context: placeOrderWorkflow is a pure core over immutable domain types, and the place-order handler is the imperative shell that loads, saves and publishes. The difference is what the core is made of, with smart constructors, type-state and errors as values instead of an effect list.",
       },
+      {
+        slug: "ecs",
+        why: "The systems of ECS are plain functions over data and hold no state of their own, which is the shape a functional core has, but they change the component stores in place. A functional core returns new values and leaves the writing to a shell, so a pure variant of ECS would have each system compute new component values and let a shell write them back into the stores.",
+      },
     ],
   },
 

@@ -123,7 +123,20 @@ export const architecture: ArchitectureDefinition = {
         why: "Both BFFs reshape what the services return into the model their client expects. CheckoutWebBff turns a price in cents and a stock count into a BuyBoxModel; MobileBff turns the same kind of answers into a MobileProductCard with a formatted price and an inStock flag, which toWire then writes as JSON. The services do not change to suit either client.",
       },
     ],
-    architectures: [],
+    architectures: [
+      {
+        slug: "microservices",
+        why: "Micro-frontends carry the split by team up into the UI, on top of services like these. On the Micro-frontends page CatalogService, PricingService, StockService and RecommendationService stand for shared backend services that every team's UI calls, and each team's backend-for-frontend reshapes their answers for its own client: CheckoutWebBff.buyBox for the web buy box and MobileBff.productCard for the mobile app. That is a different thing from ApiGateway here, which is one shared entry point that only forwards placeOrder to OrderService, where a BFF is one backend per client or experience. There is no gateway on the Micro-frontends page, and only the Checkout fragment has a BFF: the product and inspire fragments call their services directly.",
+      },
+      {
+        slug: "vertical-slice",
+        why: "Both cut by ownership instead of by technical layer: a team owns its fragment and the backend behind it, as a slice owns its request, handler and data access. The difference is the unit of release. PlaceOrder and GetOrder here are in one program: they share the Mediator, the pipeline and OrdersTable and are deployed together, while on the Micro-frontends page registry.deploy(new BuyBoxV2(...)) replaces one team's fragment and nothing else is redeployed. A fragment also renders HTML for a shell to compose, where a slice handles one request, and a team's BFF could itself be organised in slices, which neither page shows.",
+      },
+      {
+        slug: "mvc",
+        why: "Both separate presenting from the data behind it, but at different scale. On the MVC page one app has a TodoModel that TodoListView and RemainingCountView observe, with a TodoController for input. On the Micro-frontends page the views are small and owned by different teams: ProductFragment, BuyBoxV1, BuyBoxV2 and RecommendationsFragment, which Shell.renderPage composes into one page. They share no model and observe nothing: each fragment fetches what it needs when it is rendered (from a service, or from CheckoutWebBff for the buy box), and the example has no input handling and so no controller. A team could build the inside of its fragment as MVC, which that page does not show.",
+      },
+    ],
   },
 
   viewBox: "0 0 1200 800",

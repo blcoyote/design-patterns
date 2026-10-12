@@ -129,6 +129,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "ddd",
         why: "A slice can sit on top of a shared domain model for its invariants, or — as in this example — skip one entirely and talk straight to its own data access for a simple feature.",
       },
+      {
+        slug: "micro-frontends",
+        why: "Vertical slices cut one program by feature, and micro-frontends apply the same cut to a whole page and its backend, with each slice released on its own. On the Micro-frontends page a team owns a fragment plus the backend behind it (the Checkout team's buy box with CheckoutWebBff, the Mobile team's MobileBff), and FragmentRegistry.deploy replaces that one fragment without touching the others. PlaceOrder and GetOrder here are not released separately: they share the Mediator, the pipeline and OrdersTable in one deployable. A slice is also one request type, where a fragment renders a part of a page.",
+      },
     ],
   },
 

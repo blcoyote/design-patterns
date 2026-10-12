@@ -167,6 +167,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "space-based",
         why: "Microservices split a system by job; space-based architecture scales one job by copying it. A hot part of a system, such as selling tickets in a spike, could be built as processing units kept in step by a data grid, with services around it for the rest. The ProcessingUnit copies on the Space-Based page all run the same code on the same replicated data and answer a buy without calling another service, where OrderService here waits on InventoryServiceClient and PaymentsService for every order. The Space-Based page shows the grid only, not services around it.",
       },
+      {
+        slug: "micro-frontends",
+        why: "Microservices split the backend by job; micro-frontends split the page by team and give a team the UI and the backend that feeds it. On the Micro-frontends page the fragments and the Checkout web BFF and Mobile BFF sit on top of shared services such as PricingService and StockService, and CheckoutWebBff.buyBox and MobileBff.productCard each shape the answers for one client or experience. ApiGateway here is the other arrangement: one shared entry point for all clients, which only forwards placeOrder to OrderService. The services on this page own their data and call each other; the ones on that page are simple shared services that return constant data and count their calls, and no gateway stands in front of them.",
+      },
     ],
   },
 

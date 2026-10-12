@@ -117,6 +117,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "mvu",
         why: "Model-View-Update is the functional cousin: one pure update function replaces this example's Controller-plus-Command-plus-mutable-Model-plus-Observer wiring entirely.",
       },
+      {
+        slug: "micro-frontends",
+        why: "MVC organizes the inside of one app: TodoModel, two views that observe it and a TodoController are built and released together. Micro-frontends divide a page into views owned and released by different teams. On the Micro-frontends page ProductFragment, BuyBoxV1 and V2 and RecommendationsFragment are composed by Shell.renderPage, share no model and observe nothing, and the example has no input handling. Its BuyBoxModel is only a plain data shape returned by CheckoutWebBff.buyBox, not an observed Model. Each fragment could be an MVC app of its own, which that page does not show.",
+      },
     ],
   },
 

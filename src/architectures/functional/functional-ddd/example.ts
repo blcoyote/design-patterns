@@ -46,15 +46,18 @@ function formatMoney(m: Money): string {
 // [/money]
 
 // [orderLine]
-/** Value object as plain data, created only through createOrderLine. */
+// Value object as plain data, meant to be created only through createOrderLine. That is
+// a convention: OrderLine is a structural interface, so any code can still write
+// { sku, unitPrice, quantity: 0 } directly.
 interface OrderLine {
   readonly sku: string;
   readonly unitPrice: Money;
   readonly quantity: number;
 }
 
-// Smart constructor: the one place an OrderLine is built, so an invalid one is never
-// seen by the rest of the code. The failure comes back as a value, not an exception.
+// Smart constructor: the one place an OrderLine is meant to be built. As long as code goes
+// through it, an invalid line never reaches the rest of the model. The failure comes back
+// as a value, not an exception.
 function createOrderLine(sku: string, unitPrice: Money, quantity: number): Result<OrderLine> {
   if (quantity < 1) return err(`invalid line ${sku}: quantity must be at least 1`);
   return ok({ sku, unitPrice, quantity });

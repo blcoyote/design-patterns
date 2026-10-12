@@ -77,15 +77,20 @@ def format_money(m: Money) -> str:
 # [orderLine]
 @dataclass(frozen=True)
 class OrderLine:
-    """Value object as plain data, created only through create_order_line."""
+    """Value object as plain data, meant to be created only through create_order_line.
+
+    That is a convention: the dataclass constructor is public, so any code can still
+    write OrderLine(sku, unit_price, 0) directly.
+    """
 
     sku: str
     unit_price: Money
     quantity: int
 
 
-# Smart constructor: the one place an OrderLine is built, so an invalid one is never
-# seen by the rest of the code. The failure comes back as a value, not an exception.
+# Smart constructor: the one place an OrderLine is meant to be built. As long as code goes
+# through it, an invalid line never reaches the rest of the model. The failure comes back
+# as a value, not an exception.
 def create_order_line(sku: str, unit_price: Money, quantity: int) -> Result[OrderLine]:
     if quantity < 1:
         return err(f"invalid line {sku}: quantity must be at least 1")

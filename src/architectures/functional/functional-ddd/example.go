@@ -66,9 +66,9 @@ type OrderLine struct {
 	Quantity  int
 }
 
-// CreateOrderLine is the smart constructor: the one place an OrderLine is built, so an
-// invalid one is never seen by the rest of the code. The failure comes back as an
-// error value, not a panic.
+// CreateOrderLine is the smart constructor: the one place an OrderLine is meant to be
+// built. As long as code goes through it, an invalid line never reaches the rest of the
+// model. The failure comes back as an error value, not a panic.
 func CreateOrderLine(sku string, unitPrice Money, quantity int) (OrderLine, error) {
 	if quantity < 1 {
 		return OrderLine{}, DomainError{fmt.Sprintf("invalid line %s: quantity must be at least 1", sku)}

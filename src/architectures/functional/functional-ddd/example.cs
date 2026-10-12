@@ -106,8 +106,9 @@ sealed record OrderLine(string Sku, Money UnitPrice, int Quantity);
 
 static class OrderLines
 {
-    // Smart constructor: the one place a line is meant to be built, so an invalid one is
-    // never seen by the rest of the code. The failure comes back as a value, not an exception.
+    // Smart constructor: the one place a line is meant to be built. As long as code goes
+    // through it, an invalid line never reaches the rest of the model. The failure comes
+    // back as a value, not an exception.
     public static Result<OrderLine> Create(string sku, Money unitPrice, int quantity)
     {
         if (quantity < 1) return Result.Err<OrderLine>($"invalid line {sku}: quantity must be at least 1");

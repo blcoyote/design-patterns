@@ -2,6 +2,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 import { DEFAULT_VIEWBOX } from "@/components/viz/Diagram";
 import { DiagramEdge, EdgeMarkers } from "@/components/viz/DiagramEdge";
+import { useDiagramEdit } from "@/components/viz/DiagramEditContext";
+import { DiagramEditLayer } from "@/components/viz/DiagramEditLayer";
 import { PacketLayer } from "@/components/viz/PacketLayer";
 import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
@@ -77,6 +79,8 @@ interface ExprNodeProps {
   selected: boolean;
   note?: string;
   reduceMotion: boolean;
+  /** In the layout editor: no entrance, and the box follows a drag without easing. */
+  instant: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -89,6 +93,7 @@ function ExprNode({
   selected,
   note,
   reduceMotion,
+  instant,
   onSelect,
 }: ExprNodeProps) {
   const w = p.width ?? NODE_WIDTH;
@@ -111,10 +116,14 @@ function ExprNode({
         select();
       }}
       onKeyDown={onActivate(select)}
-      initial={reduceMotion ? false : { opacity: 0, scale: 0.6, x: p.x, y: p.y }}
+      initial={reduceMotion || instant ? false : { opacity: 0, scale: 0.6, x: p.x, y: p.y }}
       animate={{ opacity: dimmed ? 0.35 : 1, scale: 1, x: p.x, y: p.y }}
       transition={
-        reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 260, damping: 22 }
+        instant
+          ? { duration: 0 }
+          : reduceMotion
+            ? { duration: 0.3 }
+            : { type: "spring", stiffness: 260, damping: 22 }
       }
       whileHover={{ scale: 1.04 }}
     >
@@ -227,6 +236,7 @@ export function InterpreterVisualization({
   onSelect,
 }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion();
+  const edit = useDiagramEdit();
   // Tag the override with the step it was fired on, so it derives back to "no
   // override" as soon as the step player moves on — no effect/sync needed.
   const [override, setOverride] = useState<{
@@ -277,7 +287,7 @@ export function InterpreterVisualization({
         className="h-auto w-full select-none"
         role="group"
         aria-label={`${pattern.name} diagram`}
-        onClick={() => onSelect(null)}
+        onClick={() => (edit ? edit.onSelect(null) : onSelect(null))}
       >
         <defs>
           <EdgeMarkers color={color} />
@@ -310,6 +320,7 @@ export function InterpreterVisualization({
             {...stateFor(p.id)}
             note={notes[p.id]}
             reduceMotion={reduceMotion}
+            instant={edit !== null}
             onSelect={onSelect}
           />
         ))}
@@ -320,6 +331,12 @@ export function InterpreterVisualization({
           color={color}
           speed={speed}
           animationKey={animationKey}
+        />
+        <DiagramEditLayer
+          participants={pattern.participants}
+          relations={pattern.relations}
+          geometry={geometry}
+          viewBox={pattern.viewBox}
         />
       </svg>
 

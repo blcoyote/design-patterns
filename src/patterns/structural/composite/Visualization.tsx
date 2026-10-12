@@ -2,6 +2,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 import { DEFAULT_VIEWBOX } from "@/components/viz/Diagram";
 import { DiagramEdge, EdgeMarkers } from "@/components/viz/DiagramEdge";
+import { useDiagramEdit } from "@/components/viz/DiagramEditContext";
+import { DiagramEditLayer } from "@/components/viz/DiagramEditLayer";
 import { PacketLayer } from "@/components/viz/PacketLayer";
 import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
@@ -62,6 +64,8 @@ interface TreeNodeProps {
   icon?: "folder" | "file";
   delay: number;
   reduceMotion: boolean;
+  /** In the layout editor: no entrance, and the box follows a drag without easing. */
+  instant: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -76,6 +80,7 @@ function TreeNode({
   icon,
   delay,
   reduceMotion,
+  instant,
   onSelect,
 }: TreeNodeProps) {
   const w = p.width ?? NODE_WIDTH;
@@ -97,10 +102,14 @@ function TreeNode({
         select();
       }}
       onKeyDown={onActivate(select)}
-      initial={reduceMotion ? false : { opacity: 0, scale: 0.5, x: p.x, y: p.y }}
+      initial={reduceMotion || instant ? false : { opacity: 0, scale: 0.5, x: p.x, y: p.y }}
       animate={{ opacity: dimmed ? 0.35 : 1, scale: 1, x: p.x, y: p.y }}
       transition={
-        reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 260, damping: 22, delay }
+        instant
+          ? { duration: 0 }
+          : reduceMotion
+            ? { duration: 0.3 }
+            : { type: "spring", stiffness: 260, damping: 22, delay }
       }
       whileHover={{ scale: 1.04 }}
     >
@@ -213,6 +222,7 @@ export function CompositeVisualization({
   speed,
 }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion();
+  const edit = useDiagramEdit();
 
   const byId = useMemo(
     () => new Map(pattern.participants.map((p) => [p.id, p])),
@@ -247,7 +257,7 @@ export function CompositeVisualization({
       className="h-auto w-full select-none"
       role="group"
       aria-label={`${pattern.name} diagram`}
-      onClick={() => onSelect(null)}
+      onClick={() => (edit ? edit.onSelect(null) : onSelect(null))}
     >
       <defs>
         <EdgeMarkers color={color} />
@@ -282,6 +292,7 @@ export function CompositeVisualization({
           icon={ICON[p.id]}
           delay={reduceMotion ? 0 : (DEPTH[p.id] ?? 0) * 0.16}
           reduceMotion={reduceMotion}
+          instant={edit !== null}
           onSelect={onSelect}
         />
       ))}
@@ -292,6 +303,12 @@ export function CompositeVisualization({
         color={color}
         speed={speed}
         animationKey={stepIndex}
+      />
+      <DiagramEditLayer
+        participants={pattern.participants}
+        relations={pattern.relations}
+        geometry={geometry}
+        viewBox={pattern.viewBox}
       />
     </svg>
   );

@@ -2,6 +2,8 @@ import { motion, useReducedMotion } from "motion/react";
 import { useMemo, useState, type ReactElement } from "react";
 import { DEFAULT_VIEWBOX } from "@/components/viz/Diagram";
 import { DiagramEdge, EdgeMarkers } from "@/components/viz/DiagramEdge";
+import { useDiagramEdit } from "@/components/viz/DiagramEditContext";
+import { DiagramEditLayer } from "@/components/viz/DiagramEditLayer";
 import { PacketLayer } from "@/components/viz/PacketLayer";
 import { onActivate } from "@/lib/a11y";
 import { boxOf, edgeBetween, NODE_HEIGHT, NODE_WIDTH, type EdgeGeometry } from "@/lib/geometry";
@@ -142,6 +144,8 @@ interface ShapeNodeProps {
   selected: boolean;
   note?: string;
   reduceMotion: boolean;
+  /** In the layout editor: the box follows a drag without easing. */
+  instant: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -154,6 +158,7 @@ function ShapeNode({
   selected,
   note,
   reduceMotion,
+  instant,
   onSelect,
 }: ShapeNodeProps) {
   const w = p.width ?? NODE_WIDTH;
@@ -176,7 +181,7 @@ function ShapeNode({
       onKeyDown={onActivate(select)}
       initial={false}
       animate={{ opacity: dimmed ? 0.35 : 1, x: p.x, y: p.y }}
-      transition={reduceMotion ? { duration: 0 } : { duration: 0.4 }}
+      transition={reduceMotion || instant ? { duration: 0 } : { duration: 0.4 }}
       whileHover={reduceMotion ? undefined : { scale: 1.04 }}
     >
       {active && (
@@ -283,6 +288,7 @@ export function VisitorVisualization({
   onSelect,
 }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion();
+  const edit = useDiagramEdit();
 
   const [activeVisitor, setActiveVisitor] = useState<VisitorId>("area");
   const [log, setLog] = useState<{ visitor: VisitorId; result: string }[]>([]);
@@ -342,9 +348,10 @@ export function VisitorVisualization({
     visitorNode && concreteNode
       ? edgeBetween(boxOf(visitorNode), boxOf(concreteNode), VISITOR_BEND[activeVisitor])
       : null;
-  const springTransition = reduceMotion
-    ? { duration: 0 }
-    : { type: "spring" as const, stiffness: 220, damping: 24 };
+  const springTransition =
+    reduceMotion || edit
+      ? { duration: 0 }
+      : { type: "spring" as const, stiffness: 220, damping: 24 };
 
   return (
     <div>
@@ -353,7 +360,7 @@ export function VisitorVisualization({
         className="h-auto w-full select-none"
         role="group"
         aria-label={`${pattern.name} diagram`}
-        onClick={() => onSelect(null)}
+        onClick={() => (edit ? edit.onSelect(null) : onSelect(null))}
       >
         <defs>
           <EdgeMarkers color={color} />
@@ -386,6 +393,7 @@ export function VisitorVisualization({
             {...stateFor(p.id)}
             note={notes[p.id]}
             reduceMotion={reduceMotion}
+            instant={edit !== null}
             onSelect={onSelect}
           />
         ))}
@@ -422,6 +430,12 @@ export function VisitorVisualization({
           speed={speed}
           animationKey={animationKey}
           stagger={0.25}
+        />
+        <DiagramEditLayer
+          participants={pattern.participants}
+          relations={pattern.relations}
+          geometry={geometry}
+          viewBox={pattern.viewBox}
         />
       </svg>
 

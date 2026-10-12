@@ -115,7 +115,7 @@ function LayoutScene({
   // Keep the draft in localStorage (removed again when nothing differs from the source).
   useEffect(() => saveLayoutDraft(area, slug, diff), [area, slug, diff]);
 
-  // Give the mounted <Diagram>s a tick to register before concluding the scene has none.
+  // Give the mounted edit layers a tick to register before concluding the scene has none.
   useEffect(() => {
     const timer = window.setTimeout(() => setSettled(true), 0);
     return () => window.clearTimeout(timer);
@@ -176,7 +176,8 @@ function LayoutScene({
           role="status"
           className="rounded-control bg-surface px-3 py-2 text-sm text-warn-fg ring-1 ring-control-outline"
         >
-          This scene does not render a shared Diagram, so its boxes cannot be dragged here.
+          This scene renders neither a shared Diagram nor a DiagramEditLayer, so its boxes cannot be
+          dragged here.
         </p>
       )}
 

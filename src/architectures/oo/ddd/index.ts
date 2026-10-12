@@ -255,7 +255,7 @@ export const architecture: ArchitectureDefinition = {
       y: 300,
       width: 160,
       description:
-        "Part of the Order aggregate, reachable only through it. A value object: it has no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.",
+        "Part of the Order aggregate once added. Lines are built outside and handed to Order.addLine, but Order keeps its list to itself (private in TypeScript and C#, unexported in Go, underscore-prefixed by convention in Python), so only Order can change which lines it holds. A value object: it has no identity of its own and never changes after creation — two lines with the same sku, price and quantity are interchangeable.",
       patterns: ["value-object"],
     },
     {
@@ -286,7 +286,7 @@ export const architecture: ArchitectureDefinition = {
       label: "ShippingService",
       role: "Shipping bounded context",
       kind: "class",
-      x: 818,
+      x: 800,
       y: 430,
       width: 190,
       description:
@@ -350,7 +350,7 @@ export const architecture: ArchitectureDefinition = {
       to: "orderLine",
       type: "holds",
       description:
-        "Order holds its OrderLines directly. Nothing outside the aggregate is allowed to reach an OrderLine except through Order itself.",
+        "Order holds its OrderLines directly. Lines enter only through Order.addLine, and Order never exposes its list, so the set of lines can only change through the root.",
     },
     {
       id: "raise",

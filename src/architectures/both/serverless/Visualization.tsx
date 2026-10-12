@@ -3,8 +3,8 @@ import { Diagram } from "@/components/viz/Diagram";
 import type { VisualizationProps } from "@/types/pattern";
 
 /**
- * Two dashed regions carry the architectural point of Serverless: the functions on one side are
- * stateless and come and go as the platform decides, and the state they need lives on the other
+ * Two dashed regions carry the architectural point of Serverless: the function instances on one side
+ * are short-lived and come and go as the platform decides, and the state that must last lives on the other
  * side, in managed services that outlive every instance. The platform and the triggers sit outside
  * both regions because they are the runtime, not part of the application. Regions are derived from
  * the participants' positions, so they follow the boxes in the dev layout editor. A reclaimed
@@ -24,7 +24,7 @@ export function ServerlessVisualization({
       participants={pattern.participants}
       regions={[
         {
-          label: "Functions (stateless, scale to zero)",
+          label: "Functions (short-lived, scale to zero)",
           members: ["createOrder", "sendReceipt", "dailyReport"],
         },
         { label: "Managed services (state lives here)", members: ["store", "queue"] },

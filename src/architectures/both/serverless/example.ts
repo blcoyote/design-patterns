@@ -104,7 +104,8 @@ class OrderStore {
 }
 
 /**
- * Managed named queues, first in first out (like SQS, Service Bus or Pub/Sub). A message
+ * Managed named queues, standing in for SQS, Service Bus or Pub/Sub. These are first in first out; real
+ * services guarantee order only when configured for it (SQS FIFO queues, Service Bus sessions, Pub/Sub ordering keys). A message
  * waits here until the platform takes it and hands it to the subscribed function.
  */
 class MessageQueues {

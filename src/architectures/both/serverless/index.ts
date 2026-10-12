@@ -27,7 +27,7 @@ export const architecture: ArchitectureDefinition = {
     "The state already lives in managed services, or can: a hosted database and a managed queue take over what a long-running process would have kept in memory.",
   ],
   pros: [
-    "No servers to run and nothing paid while idle. In this example nothing exists between invocations: reclaimIdle drops createOrder's and sendReceipt's instances, and the platform creates new ones only when an event arrives.",
+    "No servers to run and nothing paid while idle. An idle instance is kept warm for a while and then reclaimed; in this example that happens when reclaimIdle runs and drops createOrder's and sendReceipt's warm instances, and the platform creates new ones only when the next event arrives.",
     "Scaling is the platform's job. It creates an instance when events arrive and removes it when they stop; real platforms also run many instances of one function side by side, which this single-instance simulation does not show.",
     "Each function is small and has one trigger. createOrder only answers POST /orders, sendReceipt only handles an order-placed message and dailyReport only runs on its schedule, so each can be read, deployed and changed on its own.",
     "Because functions keep no state that matters, any instance can serve any event. After the reclaim, a fresh createOrder instance still gives the next order the id order-3, because the counter lives in the store.",
@@ -213,7 +213,7 @@ export const architecture: ArchitectureDefinition = {
       y: 285,
       width: 150,
       description:
-        "A named first-in first-out queue (like SQS, Service Bus or Pub/Sub). A message waits here until the platform takes it and hands it to sendReceipt. It lives outside every function instance, so a reclaim does not touch it.",
+        "A named queue standing in for SQS, Service Bus or Pub/Sub. This one is first in first out; real services guarantee order only when configured for it (SQS FIFO queues, Service Bus sessions, Pub/Sub ordering keys). A message waits here until the platform takes it and hands it to sendReceipt. It lives outside every function instance, so a reclaim does not touch it.",
       code: "services",
     },
     {
@@ -314,9 +314,9 @@ export const architecture: ArchitectureDefinition = {
 
   steps: [
     {
-      title: "The platform runs stateless functions",
+      title: "The platform runs short-lived function instances",
       description:
-        "The platform and the triggers sit outside the application: the platform owns the instances and decides when a function runs. The three functions are stateless, and the state they need lives in managed services, the orders table and the queue, which outlive every instance. Nothing here is a server you run.",
+        "The platform and the triggers sit outside the application: the platform owns the instances and decides when a function runs. Function instances are short-lived: one may stay warm between calls (createOrder even counts its calls in memory), but nothing durable may live there. The state that must last lives in managed services, the orders table and the queue, which outlive every instance. Nothing here is a server you run.",
       highlight: ["platform", "createOrder", "sendReceipt", "dailyReport", "store", "queue"],
       notes: { platform: "owns instances and triggers", store: "state lives here" },
       code: "events",

@@ -112,7 +112,20 @@ export const architecture: ArchitectureDefinition = {
         why: "This is where an outbox would go, and it is not implemented. createOrder saves the order and then enqueues the message as two separate writes, so an instance that died between them would leave an order that nobody is told about. An outbox would write the message together with the order in the same transaction and have a relay publish it afterwards; in a real deployment the platform's transactional outputs can close the gap. This example does neither.",
       },
     ],
-    architectures: [],
+    architectures: [
+      {
+        slug: "event-driven",
+        why: "Every function here is started by an event, and the platform plays the broker's part: createOrder enqueues an order-placed message in MessageQueues and Platform.drainQueues hands it to sendReceipt, so the two never call each other and createOrder knows only the queue name. The routing differs from EventBroker. A message here is taken by one function and removed, where EventBroker fans an OrderPlaced out by topic to every subscriber. Only sendReceipt is queue-triggered; createOrder is triggered by an HTTP request and dailyReport by a schedule, which are not broker events.",
+      },
+      {
+        slug: "microservices",
+        why: "Both split a system into small units deployed on their own that cooperate through messages. createOrder and sendReceipt share only the OrderStore and the order-placed queue, much as OrderService and ShippingService share an OrderPlaced event. The unit differs. A microservice is a long-running service that you run and that keeps its own private store; these functions are started and dropped by the platform and all use one OrderStore. They also never call each other, where OrderService calls Inventory and Payments and needs InventoryServiceClient and a circuit breaker.",
+      },
+      {
+        slug: "pipes-and-filters",
+        why: "createOrder and sendReceipt are a two-stage pipeline: the first writes and enqueues, the order-placed queue is the pipe, and the second reads on its own invocation, each knowing only the queue name. It is not the stream of the Pipes and Filters page. There a lazy pipe() hands each record through all the stages inside one process, while here the pipe is a managed queue between separately triggered functions. Only an orderId travels in the message; sendReceipt reads the rest from OrderStore, and both stages write to it, which a pure filter such as addTax does not.",
+      },
+    ],
   },
 
   viewBox: "0 0 1120 740",

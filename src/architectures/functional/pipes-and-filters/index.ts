@@ -123,6 +123,10 @@ export const architecture: ArchitectureDefinition = {
     ],
     architectures: [
       {
+        slug: "serverless",
+        why: "A pipeline can also be deployed as functions joined by queues, so each stage scales on its own and an idle one costs nothing. The Serverless page has a two-stage chain of this kind: createOrder enqueues an order-placed message and sendReceipt handles it. That is not this page's pipe(). Each queue message becomes its own invocation, where here a lazy generator pulls one record at a time through every stage in one process, and a stage such as addTax, which is pure, would fit a function easily because it keeps nothing between records.",
+      },
+      {
         slug: "functional-core",
         why: "Every filter (parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines) is a pure function from one stream of values to another; the only impure code is the console.log calls inside logged() and the loop that drives the pipeline — the imperative shell around this pure core.",
       },

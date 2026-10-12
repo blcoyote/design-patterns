@@ -1,6 +1,6 @@
 import { useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import { onActivate } from "@/lib/a11y";
-import { NODE_HEIGHT, boxOf, type EdgeGeometry, type Point } from "@/lib/geometry";
+import { boxOf, type Box, type EdgeGeometry, type Point } from "@/lib/geometry";
 import { bendForPoint, clampToViewBox, clampWidth, snap } from "@/lib/layoutEdit";
 import { labelRect, relationLabel } from "@/lib/layoutLint";
 import type { Participant, Relation } from "@/types/pattern";
@@ -13,6 +13,17 @@ export interface EditHandlesProps {
   /** Edge geometry by relation id, as computed by `<Diagram>`; each bend handle sits on its curve's midpoint. */
   geometry: Map<string, EdgeGeometry>;
   viewBox: string;
+  /**
+   * Boxes the scene draws at a size of its own instead of `width` × `NODE_HEIGHT`: their handles
+   * match that size and offer no width handle (the scene would ignore a saved `width`).
+   */
+  fixedSizes?: Readonly<Record<string, Pick<Box, "width" | "height">>>;
+}
+
+/** The box a participant is drawn as: its fixed size if the scene sets one, else `boxOf`. */
+function boxFor(p: Participant, fixedSizes: EditHandlesProps["fixedSizes"]): Box {
+  const size = fixedSizes?.[p.id];
+  return size ? { x: p.x, y: p.y, ...size } : boxOf(p);
 }
 
 interface Drag {
@@ -63,7 +74,7 @@ function bendSign(dir: Point, from: Point, to: Point): 1 | -1 {
 const BEND_LIMIT = 600;
 
 /**
- * Editor layer drawn last inside a `<Diagram>`'s svg: one drag handle per
+ * Editor layer drawn last inside a diagram's svg (via `<DiagramEditLayer>`): one drag handle per
  * participant, then one bend handle per relation (on top, so a handle stays
  * reachable when a box outline covers the curve's midpoint).
  */
@@ -73,6 +84,7 @@ export function EditHandles({
   relations,
   geometry,
   viewBox,
+  fixedSizes,
 }: EditHandlesProps) {
   const drag = useRef<Drag | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -89,6 +101,7 @@ export function EditHandles({
 
   const readoutFor = participants.find((p) => p.id === (draggingId ?? edit.selectedId));
   const selected = participants.find((p) => p.id === edit.selectedId);
+  const box = (p: Participant) => boxFor(p, fixedSizes);
 
   return (
     <g data-editor="handles">
@@ -98,10 +111,11 @@ export function EditHandles({
           participants={participants}
           relations={relations}
           geometry={geometry}
+          box={box}
         />
       )}
       {participants.map((p) => {
-        const box = boxOf(p);
+        const pBox = box(p);
         const isSelected = edit.selectedId === p.id;
         const dragging = draggingId === p.id;
         return (
@@ -113,10 +127,10 @@ export function EditHandles({
             transform={`translate(${p.x} ${p.y})`}
           >
             <rect
-              x={-box.width / 2 - 4}
-              y={-box.height / 2 - 4}
-              width={box.width + 8}
-              height={box.height + 8}
+              x={-pBox.width / 2 - 4}
+              y={-pBox.height / 2 - 4}
+              width={pBox.width + 8}
+              height={pBox.height + 8}
               rx={14}
               fill="transparent"
               strokeWidth={dragging ? 2.5 : 2}
@@ -142,15 +156,18 @@ export function EditHandles({
                 }
                 const nudge = nudgeOf(e);
                 if (!nudge) return onActivate(() => edit.onSelect(p.id))(e);
-                // Page must not scroll; each key press is its own undo step (no gesture needed).
+                // Page must not scroll; each key press is its own undo step (a gesture, so a
+                // scene that moves several boxes together still records one).
                 e.preventDefault();
                 const placed = clampToViewBox(
                   { x: p.x + nudge.dir.x * nudge.step, y: p.y + nudge.dir.y * nudge.step },
-                  box,
+                  pBox,
                   viewBox,
                 );
-                if (placed.x !== p.x || placed.y !== p.y)
-                  edit.onMoveParticipant(p.id, placed.x, placed.y);
+                if (placed.x === p.x && placed.y === p.y) return;
+                edit.onGestureStart();
+                edit.onMoveParticipant(p.id, placed.x, placed.y);
+                edit.onGestureEnd();
               }}
               onPointerDown={(e) => {
                 if (e.button !== 0 || !e.isPrimary) return;
@@ -175,7 +192,7 @@ export function EditHandles({
                   step === null
                     ? { x: Math.round(raw.x), y: Math.round(raw.y) }
                     : { x: snap(raw.x, step), y: snap(raw.y, step) },
-                  box,
+                  pBox,
                   viewBox,
                 );
                 if (placed.x !== p.x || placed.y !== p.y)
@@ -199,13 +216,13 @@ export function EditHandles({
             edit={edit}
             relation={r}
             geometry={g}
-            from={from}
-            to={to}
+            from={box(from)}
+            to={box(to)}
             viewBox={viewBox}
           />
         );
       })}
-      {selected && (
+      {selected && !fixedSizes?.[selected.id] && (
         <WidthHandle
           key={selected.id}
           edit={edit}
@@ -214,7 +231,7 @@ export function EditHandles({
           onResizing={setResizing}
         />
       )}
-      {readoutFor && !resizing && <Readout participant={readoutFor} viewBox={viewBox} />}
+      {readoutFor && !resizing && <Readout box={box(readoutFor)} viewBox={viewBox} />}
     </g>
   );
 }
@@ -225,11 +242,13 @@ function WarningOutlines({
   participants,
   relations,
   geometry,
+  box,
 }: {
   warnings: NonNullable<DiagramEditContextValue["warnings"]>;
   participants: Participant[];
   relations: Relation[];
   geometry: Map<string, EdgeGeometry>;
+  box: (p: Participant) => Box;
 }) {
   return (
     <g data-editor="warnings" pointerEvents="none">
@@ -271,16 +290,16 @@ function WarningOutlines({
       {participants
         .filter((p) => warnings.participants.has(p.id))
         .map((p) => {
-          const box = boxOf(p);
+          const b = box(p);
           return (
             <rect
               key={p.id}
               data-editor="warning-box"
               data-id={p.id}
-              x={p.x - box.width / 2 - 8}
-              y={p.y - box.height / 2 - 8}
-              width={box.width + 16}
-              height={box.height + 16}
+              x={p.x - b.width / 2 - 8}
+              y={p.y - b.height / 2 - 8}
+              width={b.width + 16}
+              height={b.height + 16}
               rx={18}
               fill="none"
               strokeWidth={2.5}
@@ -303,8 +322,9 @@ interface BendHandleProps {
   edit: DiagramEditContextValue;
   relation: Relation;
   geometry: EdgeGeometry;
-  from: Participant;
-  to: Participant;
+  /** The endpoint boxes as drawn; the bend maths must use the same boxes as the curve. */
+  from: Box;
+  to: Box;
   viewBox: string;
 }
 
@@ -390,7 +410,7 @@ function BendHandle({ edit, relation, geometry, from, to, viewBox }: BendHandleP
           if (!d || d.pointerId !== e.pointerId) return;
           const at = toViewBox(e);
           if (!at) return;
-          const raw = bendForPoint(boxOf(from), boxOf(to), { x: at.x - d.dx, y: at.y - d.dy });
+          const raw = bendForPoint(from, to, { x: at.x - d.dx, y: at.y - d.dy });
           const step = e.altKey ? null : edit.snap;
           const next = step === null ? raw : snap(raw, step);
           if (next !== bend) edit.onBendRelation(relation.id, next);
@@ -539,13 +559,13 @@ function WidthHandle({
 }
 
 /** Small "x, y" label on the selected or dragged box; flips below the box near the top edge. */
-function Readout({ participant: p, viewBox }: { participant: Participant; viewBox: string }) {
+function Readout({ box, viewBox }: { box: Box; viewBox: string }) {
   return (
     <Chip
-      text={`${Math.round(p.x)}, ${Math.round(p.y)}`}
-      x={p.x}
-      y={p.y}
-      clearance={NODE_HEIGHT / 2}
+      text={`${Math.round(box.x)}, ${Math.round(box.y)}`}
+      x={box.x}
+      y={box.y}
+      clearance={box.height / 2}
       viewBox={viewBox}
     />
   );

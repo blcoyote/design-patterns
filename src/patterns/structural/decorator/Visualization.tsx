@@ -2,10 +2,12 @@ import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 import { DEFAULT_VIEWBOX } from "@/components/viz/Diagram";
 import { DiagramEdge, EdgeMarkers } from "@/components/viz/DiagramEdge";
+import { useDiagramEdit } from "@/components/viz/DiagramEditContext";
+import { DiagramEditLayer } from "@/components/viz/DiagramEditLayer";
 import { DiagramNode } from "@/components/viz/DiagramNode";
 import { onActivate } from "@/lib/a11y";
 import { PacketLayer } from "@/components/viz/PacketLayer";
-import { boxExit, edgeBetween, NODE_HEIGHT, NODE_WIDTH } from "@/lib/geometry";
+import { boxExit, boxOf, edgeBetween } from "@/lib/geometry";
 import type { Box, EdgeGeometry, Point } from "@/lib/geometry";
 import type { Participant, Relation, VisualizationProps } from "@/types/pattern";
 import { alpha } from "@/theme/alpha";
@@ -16,49 +18,30 @@ import { alpha } from "@/theme/alpha";
  * right shows the Coffee interface and the abstract CoffeeDecorator base.
  */
 
-// --- Layout (viewBox 800 × 460) -------------------------------------------
+// --- Layout ----------------------------------------------------------------
+// Every box sits at its participant's x/y from index.ts. The three layers share one
+// centre and have fixed sizes; the layout editor moves them as one stack.
 
-const CX = 250;
-const CY = 265;
-/** x of the vertical "delegation" line that threads through the tops of every layer. */
-const LINK_X = 300;
+/** How far right of a layer's centre the vertical "delegation" line threads through its top. */
+const LINK_OFFSET = 50;
 
-const CORE = { width: 130, height: 84 };
-const MILK = { width: 236, height: 172 };
-const SUGAR = { width: 344, height: 258 };
+const LAYER_SIZE = {
+  sugarDecorator: { width: 344, height: 258 },
+  milkDecorator: { width: 236, height: 172 },
+  simpleCoffee: { width: 130, height: 84 },
+} satisfies Record<string, Pick<Box, "width" | "height">>;
 
-const coreBox: Box = { x: CX, y: CY, width: CORE.width, height: CORE.height };
-const milkBox: Box = { x: CX, y: CY, width: MILK.width, height: MILK.height };
-const sugarBox: Box = {
-  x: CX,
-  y: CY,
-  width: SUGAR.width,
-  height: SUGAR.height,
-};
+/** The layers, outer to inner; the layout editor moves them together. */
+const STACK_GROUPS = [Object.keys(LAYER_SIZE)];
 
-const coreTop: Point = { x: LINK_X, y: CY - CORE.height / 2 };
-const milkTop: Point = { x: LINK_X, y: CY - MILK.height / 2 };
-const sugarTop: Point = { x: LINK_X, y: CY - SUGAR.height / 2 };
-const callEntry: Point = { x: LINK_X, y: sugarTop.y - 6 };
+const layerBox = (p: Participant, size: Pick<Box, "width" | "height">): Box => ({
+  x: p.x,
+  y: p.y,
+  ...size,
+});
 
-const clientBox: Box = {
-  x: 660,
-  y: 92,
-  width: NODE_WIDTH,
-  height: NODE_HEIGHT,
-};
-const coffeeBox: Box = {
-  x: 660,
-  y: 212,
-  width: NODE_WIDTH,
-  height: NODE_HEIGHT,
-};
-const coffeeDecoratorBox: Box = {
-  x: 660,
-  y: 400,
-  width: 170,
-  height: NODE_HEIGHT,
-};
+/** Where the delegation line meets the top edge of a layer. */
+const linkTop = (b: Box): Point => ({ x: b.x + LINK_OFFSET, y: b.y - b.height / 2 });
 
 /**
  * `control` stays the true midpoint so the path renders as a straight line; `mid`
@@ -78,17 +61,30 @@ function straightLink(p0: Point, p1: Point, labelOffsetX = 0): EdgeGeometry {
   };
 }
 
-function buildGeometry(relations: Relation[]): Record<string, EdgeGeometry> {
+interface SceneBoxes {
+  client: Box;
+  coffee: Box;
+  coffeeDecorator: Box;
+  sugar: Box;
+  milk: Box;
+  core: Box;
+}
+
+function buildGeometry(b: SceneBoxes, relations: Relation[]): Record<string, EdgeGeometry> {
   const bendOf = (id: string) => relations.find((r) => r.id === id)?.bend ?? 0;
+  const sugarTop = linkTop(b.sugar);
+  const milkTop = linkTop(b.milk);
+  const coreTop = linkTop(b.core);
+  const callEntry: Point = { x: sugarTop.x, y: sugarTop.y - 6 };
   return {
-    call: straightLink(boxExit(clientBox, callEntry), callEntry),
+    call: straightLink(boxExit(b.client, callEntry), callEntry),
     wrapsMilk: straightLink(sugarTop, milkTop, 48),
     wrapsCoffee: straightLink(milkTop, coreTop, 48),
-    sugarExtends: edgeBetween(sugarBox, coffeeDecoratorBox, bendOf("sugarExtends")),
-    milkExtends: edgeBetween(milkBox, coffeeDecoratorBox, bendOf("milkExtends")),
-    decoratorImpl: edgeBetween(coffeeDecoratorBox, coffeeBox, bendOf("decoratorImpl")),
-    simpleImpl: edgeBetween(coreBox, coffeeBox, bendOf("simpleImpl")),
-    wrappee: edgeBetween(coffeeDecoratorBox, coffeeBox, bendOf("wrappee")),
+    sugarExtends: edgeBetween(b.sugar, b.coffeeDecorator, bendOf("sugarExtends")),
+    milkExtends: edgeBetween(b.milk, b.coffeeDecorator, bendOf("milkExtends")),
+    decoratorImpl: edgeBetween(b.coffeeDecorator, b.coffee, bendOf("decoratorImpl")),
+    simpleImpl: edgeBetween(b.core, b.coffee, bendOf("simpleImpl")),
+    wrappee: edgeBetween(b.coffeeDecorator, b.coffee, bendOf("wrappee")),
   };
 }
 
@@ -111,6 +107,8 @@ interface LayerProps {
   note?: string;
   delay: number;
   reduceMotion: boolean;
+  /** In the layout editor: no entrance, and the layer follows a drag without easing. */
+  instant: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -125,6 +123,7 @@ function Layer({
   note,
   delay,
   reduceMotion,
+  instant,
   onSelect,
 }: LayerProps) {
   const w = box.width;
@@ -143,10 +142,14 @@ function Layer({
         select();
       }}
       onKeyDown={onActivate(select)}
-      initial={reduceMotion ? false : { opacity: 0, scale: 0.7, x: box.x, y: box.y }}
+      initial={reduceMotion || instant ? false : { opacity: 0, scale: 0.7, x: box.x, y: box.y }}
       animate={{ opacity: dimmed ? 0.35 : 1, scale: 1, x: box.x, y: box.y }}
       transition={
-        reduceMotion ? { duration: 0.3 } : { type: "spring", stiffness: 260, damping: 22, delay }
+        instant
+          ? { duration: 0 }
+          : reduceMotion
+            ? { duration: 0.3 }
+            : { type: "spring", stiffness: 260, damping: 22, delay }
       }
     >
       {active && (
@@ -226,7 +229,7 @@ export function DecoratorVisualization({
   onSelect,
 }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion();
-  const geometry = useMemo(() => buildGeometry(pattern.relations), [pattern.relations]);
+  const edit = useDiagramEdit();
   const byId = useMemo(
     () => new Map(pattern.participants.map((p) => [p.id, p])),
     [pattern.participants],
@@ -249,15 +252,43 @@ export function DecoratorVisualization({
   const milkDecorator = byId.get("milkDecorator");
   const sugarDecorator = byId.get("sugarDecorator");
 
-  if (!client || !coffee || !coffeeDecorator || !simpleCoffee || !milkDecorator || !sugarDecorator)
+  const boxes = useMemo<SceneBoxes | null>(
+    () =>
+      client && coffee && coffeeDecorator && sugarDecorator && milkDecorator && simpleCoffee
+        ? {
+            client: boxOf(client),
+            coffee: boxOf(coffee),
+            coffeeDecorator: boxOf(coffeeDecorator),
+            sugar: layerBox(sugarDecorator, LAYER_SIZE.sugarDecorator),
+            milk: layerBox(milkDecorator, LAYER_SIZE.milkDecorator),
+            core: layerBox(simpleCoffee, LAYER_SIZE.simpleCoffee),
+          }
+        : null,
+    [client, coffee, coffeeDecorator, sugarDecorator, milkDecorator, simpleCoffee],
+  );
+  const geometry = useMemo(
+    () => boxes && buildGeometry(boxes, pattern.relations),
+    [boxes, pattern.relations],
+  );
+
+  if (
+    !boxes ||
+    !geometry ||
+    !client ||
+    !coffee ||
+    !coffeeDecorator ||
+    !simpleCoffee ||
+    !milkDecorator ||
+    !sugarDecorator
+  )
     return null;
 
   // Painted outer-to-inner (sugar at the back, core on top) so the nesting reads correctly;
   // delayed inner-to-outer (core appears first) so the "build" narrative still makes sense.
   const layers: { participant: Participant; box: Box; delay: number }[] = [
-    { participant: sugarDecorator, box: sugarBox, delay: 0.24 },
-    { participant: milkDecorator, box: milkBox, delay: 0.12 },
-    { participant: simpleCoffee, box: coreBox, delay: 0 },
+    { participant: sugarDecorator, box: boxes.sugar, delay: 0.24 },
+    { participant: milkDecorator, box: boxes.milk, delay: 0.12 },
+    { participant: simpleCoffee, box: boxes.core, delay: 0 },
   ];
 
   const stateFor = (id: string) => ({
@@ -272,7 +303,7 @@ export function DecoratorVisualization({
       className="h-auto w-full select-none"
       role="group"
       aria-label={`${pattern.name} diagram`}
-      onClick={() => onSelect(null)}
+      onClick={() => (edit ? edit.onSelect(null) : onSelect(null))}
     >
       <defs>
         <EdgeMarkers color={color} />
@@ -312,6 +343,7 @@ export function DecoratorVisualization({
               note={notes[participant.id]}
               delay={delay}
               reduceMotion={reduceMotion}
+              instant={edit !== null}
               onSelect={onSelect}
             />
           );
@@ -335,28 +367,16 @@ export function DecoratorVisualization({
         );
       })}
 
-      <DiagramNode
-        participant={{ ...client, x: clientBox.x, y: clientBox.y }}
-        color={color}
-        {...stateFor("client")}
-        onSelect={onSelect}
-      />
-      <DiagramNode
-        participant={{ ...coffee, x: coffeeBox.x, y: coffeeBox.y }}
-        color={color}
-        {...stateFor("coffee")}
-        onSelect={onSelect}
-      />
-      <DiagramNode
-        participant={{
-          ...coffeeDecorator,
-          x: coffeeDecoratorBox.x,
-          y: coffeeDecoratorBox.y,
-        }}
-        color={color}
-        {...stateFor("coffeeDecorator")}
-        onSelect={onSelect}
-      />
+      {[client, coffee, coffeeDecorator].map((p) => (
+        <DiagramNode
+          key={p.id}
+          participant={p}
+          color={color}
+          {...stateFor(p.id)}
+          instant={edit !== null}
+          onSelect={onSelect}
+        />
+      ))}
 
       <PacketLayer
         packets={packets}
@@ -364,6 +384,21 @@ export function DecoratorVisualization({
         color={color}
         speed={speed}
         animationKey={stepIndex}
+      />
+      <DiagramEditLayer
+        participants={[
+          client,
+          coffee,
+          coffeeDecorator,
+          sugarDecorator,
+          milkDecorator,
+          simpleCoffee,
+        ]}
+        relations={LEGEND_RELATIONS.flatMap((id) => relById.get(id) ?? [])}
+        geometry={geometry}
+        viewBox={pattern.viewBox}
+        fixedSizes={LAYER_SIZE}
+        moveTogether={STACK_GROUPS}
       />
     </svg>
   );

@@ -59,8 +59,8 @@ export const pattern: PatternDefinition = {
       label: "Client",
       role: "Client",
       kind: "client",
-      x: 690,
-      y: 150,
+      x: 110,
+      y: 170,
       description:
         "Holds a reference typed only as FileSystemItem and calls getSize() on it once — it has no idea whether that hits one file or an entire tree.",
     },

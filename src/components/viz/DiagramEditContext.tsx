@@ -2,8 +2,8 @@ import { createContext, useContext } from "react";
 import type { WarningTargets } from "@/lib/layoutLint";
 
 /**
- * What `<Diagram>` needs from a layout editor. There is no provider outside the
- * dev-only layout editor, and then `<Diagram>` renders exactly as it always has.
+ * What `<Diagram>` and `<DiagramEditLayer>` need from a layout editor. There is no provider
+ * outside the dev-only layout editor, and then every diagram renders exactly as it always has.
  */
 export interface DiagramEditContextValue {
   /** Grid step in viewBox units that dragged boxes snap to; `null` disables snapping. Holding Alt also disables it. */
@@ -27,7 +27,7 @@ export interface DiagramEditContextValue {
   onSelect: (id: string | null) => void;
   /** Boxes, relation labels and curves to outline because the layout lint flagged them; none when omitted. */
   warnings?: WarningTargets;
-  /** Called by every mounted `<Diagram>`; returns the cleanup. Lets the page detect a scene without one. */
+  /** Called by every mounted `<DiagramEditLayer>`; returns the cleanup. Lets the page detect a scene without one. */
   register: () => () => void;
 }
 

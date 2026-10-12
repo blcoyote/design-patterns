@@ -41,14 +41,15 @@ export const pattern: PatternDefinition = {
     "HTTP middleware chains that wrap a request handler",
   ],
   related: ["adapter", "composite", "facade", "proxy", "strategy"],
+  // The three layers share one centre: the scene draws them nested, and the layout editor moves them together.
   participants: [
     {
       id: "coffee",
       label: "Coffee",
       role: "Component interface",
       kind: "interface",
-      x: 400,
-      y: 70,
+      x: 660,
+      y: 212,
       description:
         "Declares cost() and description(), implemented by both the base coffee and every decorator.",
     },
@@ -58,7 +59,7 @@ export const pattern: PatternDefinition = {
       role: "Client",
       kind: "client",
       x: 660,
-      y: 150,
+      y: 92,
       description:
         "Builds a stack of decorators around a base coffee, then calls cost() on the outermost one.",
     },
@@ -67,8 +68,8 @@ export const pattern: PatternDefinition = {
       label: "SugarDecorator",
       role: "Concrete Decorator",
       kind: "class",
-      x: 560,
-      y: 260,
+      x: 250,
+      y: 265,
       description: 'Adds $0.25 to the wrapped cost and "+ sugar" to the description, then returns.',
     },
     {
@@ -76,8 +77,8 @@ export const pattern: PatternDefinition = {
       label: "MilkDecorator",
       role: "Concrete Decorator",
       kind: "class",
-      x: 350,
-      y: 260,
+      x: 250,
+      y: 265,
       description: 'Adds $0.50 to the wrapped cost and "+ milk" to the description, then returns.',
     },
     {
@@ -85,8 +86,8 @@ export const pattern: PatternDefinition = {
       label: "SimpleCoffee",
       role: "Concrete Component",
       kind: "class",
-      x: 150,
-      y: 260,
+      x: 250,
+      y: 265,
       description: "The base object being decorated: a plain $2.00 coffee with no add-ons.",
     },
     {
@@ -94,8 +95,8 @@ export const pattern: PatternDefinition = {
       label: "CoffeeDecorator",
       role: "Base Decorator",
       kind: "class",
-      x: 450,
-      y: 380,
+      x: 660,
+      y: 400,
       width: 170,
       description:
         "Class-based tabs use an abstract base that implements Coffee and stores the wrapped instance. Go uses a concrete forwarding struct embedded by MilkDecorator and SugarDecorator.",

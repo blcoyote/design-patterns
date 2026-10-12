@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import {
   DEFAULT_VIEWBOX,
   NODE_HEIGHT,
@@ -9,15 +9,11 @@ import {
 import type { Packet as PacketDef, Participant, Relation } from "@/types/pattern";
 import { DiagramEdge, EdgeMarkers } from "./DiagramEdge";
 import { useDiagramEdit } from "./DiagramEditContext";
+import { DiagramEditLayer } from "./DiagramEditLayer";
 import { DiagramNode } from "./DiagramNode";
 import { PacketLayer } from "./PacketLayer";
 
 export { DEFAULT_VIEWBOX };
-
-// Dev-only: behind import.meta.env.DEV the bundler drops the dynamic import, so production builds contain no editor handles.
-const EditHandles = import.meta.env.DEV
-  ? lazy(() => import("./EditHandles").then((m) => ({ default: m.EditHandles })))
-  : null;
 
 export interface DiagramProps {
   participants: Participant[];
@@ -59,8 +55,6 @@ export function Diagram({
 }: DiagramProps) {
   // Only the dev-only layout editor provides this; without it the diagram renders as always.
   const edit = useDiagramEdit();
-  const register = edit?.register;
-  useEffect(() => register?.(), [register]);
 
   const byId = new Map(participants.map((p) => [p.id, p]));
   const geometry = new Map<string, EdgeGeometry>();
@@ -130,17 +124,12 @@ export function Diagram({
         speed={packetSpeed}
       />
       {overlay}
-      {edit && EditHandles && (
-        <Suspense fallback={null}>
-          <EditHandles
-            edit={edit}
-            participants={participants}
-            relations={relations}
-            geometry={geometry}
-            viewBox={viewBox}
-          />
-        </Suspense>
-      )}
+      <DiagramEditLayer
+        participants={participants}
+        relations={relations}
+        geometry={geometry}
+        viewBox={viewBox}
+      />
     </svg>
   );
 }

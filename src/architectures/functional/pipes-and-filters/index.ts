@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "pipes-and-filters",
   name: "Pipes and Filters",
   paradigm: "functional",
-  order: 11,
+  order: 12,
   summary:
     "Thread data through an ordered sequence of small, independent filters connected by pipes.",
   intent:
@@ -125,6 +125,10 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "functional-core",
         why: "Every filter (parseLines, validateLines, addLineTotal, applyDiscount, addTax, formatLines) is a pure function from one stream of values to another; the only impure code is the console.log calls inside logged() and the loop that drives the pipeline — the imperative shell around this pure core.",
+      },
+      {
+        slug: "functional-ddd",
+        why: "A Functional DDD workflow chains pure steps (createOrderLine, addLine, place) in the same one-output-feeds-the-next way as these filters, but on a single order, with errors as values that stop the chain at the first failure. Here a rejected line is data that flows through the remaining filters and is reported at the end.",
       },
       {
         slug: "event-driven",

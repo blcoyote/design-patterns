@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "mvu",
   name: "Model-View-Update (Elm Architecture)",
   paradigm: "functional",
-  order: 12,
+  order: 13,
   summary: "Keep app state immutable, update it with messages, and render the current state.",
   intent:
     "Represent an app with an immutable Model, a pure `update` function that maps each message to a new Model and any commands, and a pure `view` function. A small runtime dispatches messages, renders the new Model, and performs the returned commands.",

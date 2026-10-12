@@ -9,7 +9,7 @@ export const architecture: ArchitectureDefinition = {
   slug: "cqrs",
   name: "CQRS",
   paradigm: "both",
-  order: 4,
+  order: 5,
   summary: "Split writes and reads into separate models, each optimized for what it actually does.",
   intent:
     "Command Query Responsibility Segregation (CQRS) separates the model that changes data from the model that answers questions. Each side can be designed, scaled, and stored for its own job.",

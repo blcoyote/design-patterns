@@ -7,8 +7,8 @@ import { DddVisualization } from "./Visualization";
 
 export const architecture: ArchitectureDefinition = {
   slug: "ddd",
-  name: "Domain-Driven Design",
-  paradigm: "both",
+  name: "Domain-Driven Design (OO)",
+  paradigm: "oo",
   order: 3,
   summary:
     "Use the business’s language in the code, and give each business area a model that fits its needs.",
@@ -17,7 +17,7 @@ export const architecture: ArchitectureDefinition = {
   problem:
     "When teams share one model, the same word can mean different things to different parts of the business. Sales, Fulfillment, and Billing may each mean something different by “Order.” A single class then fills with optional fields and special cases. Business rules spread into validation code, and developers and domain experts can end up using different words for the same ideas.",
   solution:
-    "Split a large system into bounded contexts. Each context has its own model and business vocabulary; the same word can mean different things in different contexts. Inside a context, use aggregates to protect business rules, value objects for data without identity, and domain events to record what happened. When contexts need to communicate, translate between their models at the boundary instead of exposing one model to the other. These boundaries are DDD’s strategic design; aggregates, value objects, repositories, and domain events are tactical patterns that work in both object-oriented and functional code.",
+    "Split a large system into bounded contexts. Each context has its own model and business vocabulary; the same word can mean different things in different contexts. Inside a context, use aggregates to protect business rules, value objects for data without identity, and domain events to record what happened. When contexts need to communicate, translate between their models at the boundary instead of exposing one model to the other. These boundaries are DDD’s strategic design; aggregates, value objects, repositories, and domain events are its tactical patterns. This page shows them with objects: a mutable aggregate that guards its invariants and rejects invalid commands (an exception in TypeScript, C# and Python, a returned error in Go), and domain events collected on the aggregate. A functional version exists as a sibling page.",
   analogy:
     "A hospital has an Admissions department and a Billing department. Both talk about \"the patient\", but Admissions cares about allergies and next of kin while Billing cares about insurance codes and copays — neither needs the other's fields, and forcing one \"Patient\" record to serve both departments would bloat it for everyone. Paperwork that crosses from Admissions to Billing goes through an intake form that translates one department's concerns into the other's, instead of Billing reaching into Admissions' filing cabinet directly.",
   whenToUse: [
@@ -151,6 +151,10 @@ export const architecture: ArchitectureDefinition = {
     ],
     architectures: [
       {
+        slug: "functional-ddd",
+        why: "The functional version of the same Ordering and Shipping scenario: immutable data, a type for each lifecycle state, errors as values and domain events returned from a pure workflow instead of collected on a mutable aggregate. It shows which of this page’s ideas survive the move from objects to functions.",
+      },
+      {
         slug: "layered",
         why: "A single bounded context is still usually organized internally as layers — application service, aggregate, repository — layering just operates inside the context instead of across the whole system.",
       },
@@ -190,7 +194,7 @@ export const architecture: ArchitectureDefinition = {
       role: "Client",
       kind: "client",
       x: 160,
-      y: 55,
+      y: 40,
       description:
         "A caller outside the Ordering bounded context — a UI, another service, anything that wants an order placed. It never reaches past the application service.",
     },
@@ -481,7 +485,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "Afterwards, the aggregate still guards its invariant",
       description:
-        "placeOrder has already returned. Calling addLine() directly on the now-placed order throws anyway — the invariant lives inside the aggregate itself, so it holds no matter who calls it, or when, not only while the application service is orchestrating.",
+        "placeOrder has already returned. Calling addLine() directly on the now-placed order is still rejected (it throws in TypeScript, C# and Python and returns an error in Go) — the invariant lives inside the aggregate itself, so it holds no matter who calls it, or when, not only while the application service is orchestrating.",
       highlight: ["appService", "addLine", "order"],
       packets: [{ relation: "addLine", label: "addLine(item) ✗" }],
       notes: { order: "rejected — already placed" },

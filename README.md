@@ -78,6 +78,7 @@ src/
     _template/               # copy me to add a comparison (ignored by the registry)
   components/
     viz/                     # Diagram, DiagramNode, DiagramEdge, Packet, StepPlayer, DetailPanel, PatternExplorer
+    viz/BoundedContextUnderlay.tsx # dashed regions (with optional inner regions and seams) derived from participant positions
     content/CrossReferenceBox.tsx # "commonly used with" links between patterns and architectures
     content/ComparisonTeaser.tsx # "often confused with…" links from a pattern/architecture to a comparison
     content/ScenarioQuiz.tsx # the "which should I choose?" quiz at the end of a comparison
@@ -198,13 +199,13 @@ A live check runs on every edit (`src/lib/layoutLint.ts`, listed under the diagr
 
 ### Custom scenes: what follows the editor
 
-The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of all 31 custom scenes (bead `blcoyote-ideal-train-2yu.9`) found:
+The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of the custom scenes (bead `blcoyote-ideal-train-2yu.9`, since extended with the new DDD scenes) found 32 of them:
 
-- **10 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight and event-sourcing. Generic scenes (for example observer) follow too.
-- **17 follow partially**: boxes, arrows and packets move, but background bands, regions and overlays that are constants in the scene (the CQRS write/read bands, the DDD bounded contexts, the hexagon, the layered bands, the MVU cycle, the iterator song strip, ...) stay where they were, so a moved box can end up outside its band. Middleware's reorder step also writes to the wrong participant. They are iterator, builder, singleton, dependency-injection, middleware, pub-sub, cqrs, ddd, event-driven, microservices, functional-core, mvu, pipes-and-filters, hexagonal, layered, mvc and vertical-slice.
+- **12 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight, event-sourcing, ddd and functional-ddd (both DDD scenes draw their bounded-context regions with `BoundedContextUnderlay`). Generic scenes (for example observer) follow too.
+- **16 follow partially**: boxes, arrows and packets move, but background bands, regions and overlays that are constants in the scene (the CQRS write/read bands, the hexagon, the layered bands, the MVU cycle, the iterator song strip, ...) stay where they were, so a moved box can end up outside its band. Middleware's reorder step also writes to the wrong participant. They are iterator, builder, singleton, dependency-injection, middleware, pub-sub, cqrs, event-driven, microservices, functional-core, mvu, pipes-and-filters, hexagonal, layered, mvc and vertical-slice.
 - **4 render their own `<svg>` without `<Diagram>`** (interpreter, visitor, composite, decorator), so they get no handles; the editor page says so in a notice. Decorator additionally ignores its participants' coordinates entirely.
 
-Follow-up work is tracked in beads: `blcoyote-ideal-train-2yu.12` (bands), `.13` (regions), `.14` (radial backdrops), `.15` (paths, rows and lanes), `.16` (anchored overlays), `.17` (middleware reorder step), `.18` (shared edit layer for own-svg scenes) and `.19` (decorator); the unrelated badge-at-origin rendering bug is `blcoyote-ideal-train-w9j`. New scenes should derive backdrops from participant positions (via `boxOf`) rather than constants, so the editor keeps working for them.
+Follow-up work is tracked in beads: `blcoyote-ideal-train-2yu.12` (bands), `.13` (regions), `.14` (radial backdrops), `.15` (paths, rows and lanes), `.16` (anchored overlays), `.17` (middleware reorder step), `.18` (shared edit layer for own-svg scenes) and `.19` (decorator); the unrelated badge-at-origin rendering bug is `blcoyote-ideal-train-w9j`. New scenes should derive backdrops from participant positions (via `boxOf`) rather than constants, so the editor keeps working for them. For dashed regions that enclose several participants, use `<BoundedContextUnderlay>` from `src/components/viz/BoundedContextUnderlay.tsx`, which derives each region (and optional inner regions and seams) from participant positions.
 
 ## Architecture
 
@@ -213,11 +214,11 @@ CQRS — the same way the patterns above explain class-level ones: an animated, 
 TypeScript/C#/Python code, and the usual problem/solution/pros/cons sections, plus a glossary of key concepts and (for a
 few) named variants.
 
-The twelve architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
+The thirteen architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
 
-| Object-oriented                                                                       | Functional                                                                                                  | OO + Functional                                         |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture) | Domain-Driven Design, CQRS, Microservices, Event-Driven |
+| Object-oriented                                                                                                  | Functional                                                                                                                                     | OO + Functional                   |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice, Domain-Driven Design (OO) | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture), Domain-Driven Design (Functional) | CQRS, Microservices, Event-Driven |
 
 ### Cross-reference model
 

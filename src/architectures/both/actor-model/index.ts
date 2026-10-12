@@ -107,7 +107,24 @@ export const architecture: ArchitectureDefinition = {
         why: "Every message is a command object: Deposit, Withdraw and GetBalance carry what the sender wants and are queued in the account's mailbox, to be executed later by their receiver. In the first run the four queued messages stay unexecuted until the scheduler gives the account its turns. The textbook pattern has an explicit invoker and receiver; here the mailbox plus scheduler is the invoker and the actor is the receiver.",
       },
     ],
-    architectures: [],
+    architectures: [
+      {
+        slug: "event-driven",
+        why: "ActorSystem's mailboxes and EventBroker's queue are close relatives: tell and publish both only enqueue, and a single-threaded loop (run, drain) delivers the messages in FIFO order. The addressing differs. A tell names one receiver, so a Deposit is a command to AccountActor that carries a replyTo, while the broker fans an event out by topic to every subscriber, none of which the producer knows. Each actor also has its own mailbox and a supervisor that restarts it if it crashes; EventBroker has one shared queue and nothing that handles a failing consumer.",
+      },
+      {
+        slug: "event-sourcing",
+        why: "AccountActor keeps its balance only in memory, so after the crash and the restart it is 0.00, not the 75.00 it had. Event Sourcing is the usual cure: a persistent actor appends events such as Deposited and Withdrawn to a store and, after a restart, folds them again to get its balance back. This example persists nothing, and its messages are consumed from the mailbox and dropped, not kept as a durable log of what happened.",
+      },
+      {
+        slug: "mvu",
+        why: "Both are loops that feed one message at a time to the code that owns the state: ActorSystem.run gives an actor one message per turn, and Runtime.dispatch gives update one Msg. The shapes differ. MVU has a single Model for the whole app and a pure update that returns the next Model plus Cmds for the runtime to perform. Here there are several actors, each with private mutable state and its own mailbox, and receive performs its effects itself (tell, print) and may throw. dispatch also runs update at once, with no mailbox in between.",
+      },
+      {
+        slug: "microservices",
+        why: "Both split a system into parts that own their data and reach each other only through an explicit interface, but the interface differs. Orders calls Inventory and Payments and waits for a result (getProduct, charge), guarded by a circuit breaker that fails fast. Actors never call: they tell, and the answer comes back later as a message to replyTo, while a supervisor restarts a crashed actor instead of failing fast. The actors here share one process and one scheduler, where the services stand for separate deployables; runtimes such as Orleans and Akka Cluster do spread actors over machines.",
+      },
+    ],
   },
 
   viewBox: "0 0 1100 740",

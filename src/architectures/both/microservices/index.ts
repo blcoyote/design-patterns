@@ -155,6 +155,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "cqrs",
         why: "A service that only needs to answer queries can build its own read model from other services' events instead of calling them synchronously on every request.",
       },
+      {
+        slug: "actor-model",
+        why: "Orders, Inventory and Payments are separate deployables that call each other and wait for a result (getProduct, charge), guarded by a circuit breaker. In the Actor Model an actor is addressed by name and never called: the sender tells and carries on, and the answer comes back as a message to replyTo. That page's actors share one single-threaded scheduler, but real actor runtimes place actors on many machines, so actors can be the building block inside a service as well as between them.",
+      },
     ],
   },
 

@@ -169,7 +169,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "micro-frontends",
-        why: "Microservices split the backend by job; micro-frontends split the page by team and give a team the UI and the backend that feeds it. On the Micro-frontends page the fragments and the Checkout web BFF and Mobile BFF sit on top of shared services such as PricingService and StockService, and CheckoutWebBff.buyBox and MobileBff.productCard each shape the answers for one client or experience. ApiGateway here is the other arrangement: one shared entry point for all clients, which only forwards placeOrder to OrderService. The services on this page own their data and call each other; the ones on that page are simple shared services that return constant data and count their calls, and no gateway stands in front of them.",
+        why: "Microservices split the backend by job; micro-frontends split the page by team, and a team that needs data in its own shape can also own a backend-for-frontend. On the Micro-frontends page the fragments and the Checkout web BFF and Mobile BFF sit on top of shared services such as PricingService and StockService, and CheckoutWebBff.buyBox and MobileBff.productCard each shape the answers for one client or experience. ApiGateway here is the other arrangement: one shared entry point for all clients, which only forwards placeOrder to OrderService. The services on this page own their data and call each other; the ones on that page are simple shared services that return constant data and count their calls, and no gateway stands in front of them.",
       },
     ],
   },

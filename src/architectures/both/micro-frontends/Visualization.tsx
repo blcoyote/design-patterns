@@ -3,9 +3,9 @@ import { Diagram } from "@/components/viz/Diagram";
 import type { VisualizationProps } from "@/types/pattern";
 
 /**
- * The dashed regions are team ownership: each team owns a vertical slice, from the fragment the
- * user sees down to the backend-for-frontend behind it (the Checkout team owns two boxes, the
- * Product and Inspire teams only a fragment, the Mobile team only a BFF). The shell, the browser,
+ * The dashed regions are team ownership, and they are not all alike: the Checkout team owns a
+ * fragment and the backend-for-frontend behind it, the Product and Inspire teams own only a
+ * fragment that calls the shared services directly, and the Mobile team owns only a BFF. The shell, the browser,
  * the mobile app and the shared services belong to no team here, so they stay outside every region.
  * Regions are derived from the participants' positions, so they follow the boxes in the dev layout
  * editor. The v2 deploy and the failed recommendations are shown by each step's notes and

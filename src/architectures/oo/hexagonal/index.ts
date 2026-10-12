@@ -138,6 +138,10 @@ export const architecture: ArchitectureDefinition = {
         why: "The driving side splits cleanly along CQRS lines: a PlaceOrderUseCase port for commands and a separate query port for reads, each with its own adapters.",
       },
       {
+        slug: "modular-monolith",
+        why: "Each module of a modular monolith can be a hexagon of its own: its public API is the driving port other modules call, and its store is a driven adapter that no other module touches. The hexagons share one process and one deployment, so a call from one to another is in-process.",
+      },
+      {
         slug: "microservices",
         why: "Each microservice is internally a hexagon of its own — its core stays framework-free, while HTTP controllers and repository adapters are what expose it to, and connect it from, other services.",
       },

@@ -90,7 +90,7 @@ export const architecture: ArchitectureDefinition = {
     {
       name: "Modular monolith",
       description:
-        "A single deployable application internally split into modules with the same strict boundaries — no shared tables, calls only through an explicit interface — either as a destination in its own right or as a stepping stone before any module is pulled out into its own service.",
+        "One deployable application split into modules with the same strict boundaries, which can be a destination in its own right or a stepping stone before a module is pulled out into a service. See the Modular Monolith architecture page.",
     },
     {
       name: "Synchronous vs. asynchronous integration",
@@ -146,6 +146,10 @@ export const architecture: ArchitectureDefinition = {
       {
         slug: "event-driven",
         why: "OrderService publishing OrderPlaced instead of calling Shipping directly is the same integration style Event-Driven Architecture generalizes to an entire system.",
+      },
+      {
+        slug: "modular-monolith",
+        why: "Orders, Inventory and Payments here stand for separate deployables that cross the network, which is why Orders needs InventoryServiceClient and a circuit breaker. A modular monolith keeps the same boundaries inside one process, where calls between modules are in-process and need neither, and a module can be extracted into a service like these later.",
       },
       {
         slug: "cqrs",

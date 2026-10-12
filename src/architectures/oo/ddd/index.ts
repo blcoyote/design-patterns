@@ -182,6 +182,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "event-driven",
         why: "A bounded context's domain events become integration events the moment they cross its boundary onto a broker, for other bounded contexts to subscribe to independently.",
       },
+      {
+        slug: "modular-monolith",
+        why: "A bounded context can be a module of one deployable application instead of a service: Ordering and Shipping here could each be a module with a private store, a small public API and an event between them, and the ACL stays at their boundary. The Modular Monolith page shows that boundary enforced inside one process.",
+      },
     ],
   },
 

@@ -157,6 +157,10 @@ export const architecture: ArchitectureDefinition = {
         why: "A bounded context's domain events become integration events the moment they cross its boundary onto a broker like this one, for other bounded contexts to subscribe to.",
       },
       {
+        slug: "modular-monolith",
+        why: "Modules of one deployable can publish and subscribe to events like OrderPlaced too, on an in-process bus instead of a networked broker. Unlike the EventBroker here, that bus can be just a list of handlers called synchronously, so the publisher's call waits for them and a failing handler affects it.",
+      },
+      {
         slug: "functional-ddd",
         why: "Functional DDD is one way to build the producing side: its pure workflow returns OrderPlaced as a value, a pure ACL function translates it, and the shell publishes the result. The domain code never touches the broker; only the publish function handed to the shell does.",
       },

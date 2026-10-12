@@ -114,7 +114,20 @@ export const architecture: ArchitectureDefinition = {
         why: "During install the core builds a CoreApi for each plug-in and passes it into activate, so a plug-in receives the core services it uses (registerClaimRules, addClaimListener, log) from outside and never constructs or looks them up itself; audit-log logs through the core's log service. The injection is through a method parameter, not a constructor.",
       },
     ],
-    architectures: [],
+    architectures: [
+      {
+        slug: "modular-monolith",
+        why: "Both keep one process and let the parts meet only at a published contract: Plugin, CoreApi and ClaimRules here, the module APIs there. The shape differs. ClaimsCore is a core with a job of its own and plug-ins extend it through a registry of extension points, with an apiVersion check at install time and no plug-in referencing another, where Catalog, Ordering and Shipping are peer modules with private data that ModuleHost starts. A module could use the Microkernel shape inside to take regional variation as plug-ins.",
+      },
+      {
+        slug: "hexagonal",
+        why: "Both keep the core ignorant of what is outside it: ClaimsCore names no plug-in class, as the hexagon names no adapter. ClaimRules is an interface the core owns and calls, like a driven port, and CoreApi is what plug-ins call back into. The plug-ins differ from adapters: ca-rules, ny-rules and tx-rules add business rules instead of connecting a technology, the core checks their apiVersion, and tx-rules is installed while the core is already running, where Hexagonal wires adapters at composition time.",
+      },
+      {
+        slug: "event-driven",
+        why: "The listener extension point is event-driven in miniature: audit-log registers with addClaimListener, and ClaimsCore calls every listener with each decision without knowing what it does, as EventBroker's consumers are reached without the producer knowing them. There is no broker, topic or queue, though: listeners run synchronously on the core's call stack, from a snapshot of the list, so a failing listener affects process. The other extension point, claim rules per region, is a lookup, not an event.",
+      },
+    ],
   },
 
   viewBox: "0 0 1140 740",

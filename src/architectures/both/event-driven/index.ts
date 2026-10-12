@@ -172,6 +172,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "microkernel",
         why: "The Microkernel page uses event-driven delivery for one of its two extension points: audit-log subscribes with addClaimListener, and ClaimsCore calls every listener with each decision. That is an in-process, synchronous callback list, not a broker with topics and a queue like EventBroker here, and its other extension point (claim rules per region) is a lookup, not an event.",
       },
+      {
+        slug: "actor-model",
+        why: "Here a producer publishes an event to a topic and EventBroker delivers it to every subscriber the producer has never heard of. In the Actor Model a sender tells one named actor, so a Deposit is a command with a replyTo, not a fact for anyone to react to. The queueing is similar: publish only enqueues and drain delivers in FIFO order on one thread, as ActorSystem.tell and run do there. Each actor has its own mailbox, and the account has a supervisor (the teller and the supervisor are spawned without a parent), while this broker has one shared queue and no supervision.",
+      },
     ],
   },
 

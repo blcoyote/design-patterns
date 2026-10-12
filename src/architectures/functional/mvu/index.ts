@@ -146,6 +146,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "event-sourcing",
         why: "Both keep history, of different things: Runtime's history stores already-folded Models, so timeTravel is a lookup, while Event Sourcing stores events and rebuilds state by replaying them through evolve. Logging MVU's Msgs instead, and replaying them through update, would turn its history into an event log.",
       },
+      {
+        slug: "actor-model",
+        why: "Runtime.dispatch hands one Msg at a time to update, much as an actor handles one message per receive. The differences are real: MVU has one immutable Model for the whole app and no mailbox (dispatch runs update at once, and a Cmd's result returns as a nested dispatch). In the Actor Model there are many actors, each with its own mailbox (only the account holds private mutable state, its balance), and each performs its own effects by sending further messages.",
+      },
     ],
   },
 

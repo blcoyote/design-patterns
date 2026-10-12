@@ -138,6 +138,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "mvu",
         why: "An MVU runtime can keep every Model it has produced as a history list — the same idea as an event log, except each entry is already the folded state rather than the event that produced it, so time-travel is a lookup instead of a replay.",
       },
+      {
+        slug: "actor-model",
+        why: "Actors keep their state in memory, and in the Actor Model example a restart loses it: AccountActor goes from 75.00 back to 0.00. A persistent actor would append events like Deposited and Withdrawn to a store such as this one and fold them with evolve after a restart. An actor per stream also handles one command at a time, so two writers cannot interleave, which is the conflict expectedVersion guards against here.",
+      },
     ],
   },
 

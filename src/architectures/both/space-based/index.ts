@@ -121,7 +121,20 @@ export const architecture: ArchitectureDefinition = {
         why: "A contrast, not a use. A processing unit's replica looks like a cache, but it is not cache-aside: the unit does not check a cache and fall back to the database on a miss, and writes do not go to the database first with the cache invalidated. The replica is the working copy, writes reach the database later through the pump, and the database is read only on a cold start, by the data reader.",
       },
     ],
-    architectures: [],
+    architectures: [
+      {
+        slug: "event-driven",
+        why: "The data pump is an event queue in its smallest form, and not an EventBroker. DataPump is an in-memory first in first out queue of SeatWrite values that DataWriter.drain empties when it is called, as EventBroker.drain empties its queue. But it has one consumer, the writer, and no topics or subscribers, so it is a queue and not a broker. DataGrid.replicate does not use it either: it calls each member's put directly, in join order, instead of publishing to whoever subscribed. The pump serves to decouple the units from the speed of the database, where EventBroker decouples producers from consumers they have never heard of.",
+      },
+      {
+        slug: "microservices",
+        why: "Both run a system as several deployed pieces, but the pieces differ. A microservice does its own job: OrderService, InventoryService and PaymentsService are separate services that call each other, through InventoryServiceClient and a circuit breaker, and OrderService and InventoryService each keep their own private data. A ProcessingUnit is a copy of the same application: pu-1, pu-2 and pu-3 all hold show-1, and a buy is answered from the unit's own replica, which DataGrid.replicate then copies to the others. The styles can be combined, with units for one hot, spiky part of a system and services for the rest, but neither page shows that.",
+      },
+      {
+        slug: "serverless",
+        why: "Both start more copies of the same code when load grows, but they keep state in opposite places. On the Serverless page a function instance relies on nothing in its own memory: OrderStore and MessageQueues stand for managed services outside it, and reclaimIdle drops every warm instance. Here the state is in the units: a ProcessingUnit's memory is the working copy, DataGrid.replicate keeps the copies alike, and DeploymentManager.start gives a new unit a copy from a peer. A unit therefore has to stay running to hold the data and is not scaled to zero, and a change waiting in DataPump exists only in memory until DataWriter.drain applies it to the database.",
+      },
+    ],
   },
 
   viewBox: "0 0 1200 800",

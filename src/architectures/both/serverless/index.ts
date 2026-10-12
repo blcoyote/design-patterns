@@ -125,6 +125,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "pipes-and-filters",
         why: "createOrder and sendReceipt are a two-stage pipeline: the first writes and enqueues, the order-placed queue is the pipe, and the second reads on its own invocation, each knowing only the queue name. It is not the stream of the Pipes and Filters page. There a lazy pipe() hands each record through all the stages inside one process, while here the pipe is a managed queue between separately triggered functions. Only an orderId travels in the message; sendReceipt reads the rest from OrderStore, and both stages write to it, which a pure filter such as addTax does not.",
       },
+      {
+        slug: "space-based",
+        why: "Both start more copies of the same code when load grows, but they keep state in opposite places. A function instance here relies on nothing in its own memory: OrderStore and MessageQueues stand for managed services, and reclaimIdle drops every warm instance. On the Space-Based page the state is in the units: a ProcessingUnit's memory is the working copy, DataGrid.replicate keeps the copies alike and DeploymentManager.start gives a new unit a copy from a peer. A unit has to stay running to hold the data, so it is not scaled to zero, and a change waiting in DataPump exists only in memory until DataWriter.drain applies it.",
+      },
     ],
   },
 

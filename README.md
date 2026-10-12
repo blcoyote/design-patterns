@@ -1,7 +1,7 @@
 # design-patterns
 
 An interactive, animated guide to all 23 Gang of Four design patterns plus 11 common enterprise patterns, and a second
-area covering 12 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
+area covering 14 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern and architecture has:
 
@@ -13,8 +13,8 @@ Every pattern and architecture has:
 | --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool, Plugin, Cache-Aside |
 
-Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, MVC, Vertical Slice, Domain-Driven Design, CQRS,
-Microservices, Event-Driven, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.
+Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, MVC, Vertical Slice, Domain-Driven Design (OO and Functional),
+CQRS, Microservices, Modular Monolith, Event-Driven, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.
 
 ## Getting started
 
@@ -199,9 +199,9 @@ A live check runs on every edit (`src/lib/layoutLint.ts`, listed under the diagr
 
 ### Custom scenes: what follows the editor
 
-The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of the custom scenes (bead `blcoyote-ideal-train-2yu.9`, since extended with the new DDD scenes) found 32 of them:
+The editor edits `participants` and `relations`, and every scene reads those. A custom `Visualization.tsx` follows only as far as its drawing is derived from them. An audit of the custom scenes (bead `blcoyote-ideal-train-2yu.9`, since extended with the new DDD and Modular Monolith scenes) found 33 of them:
 
-- **12 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight, event-sourcing, ddd and functional-ddd (both DDD scenes draw their bounded-context regions with `BoundedContextUnderlay`). Generic scenes (for example observer) follow too.
+- **13 follow fully**: chain-of-responsibility, memento, state, strategy, circuit-breaker, null-object, object-pool, unit-of-work, flyweight, event-sourcing, ddd, functional-ddd and modular-monolith (the DDD scenes and modular-monolith draw their bounded-context or module regions with `BoundedContextUnderlay`; modular-monolith also derives its "One deployable · one process" outline from participant positions via `boxOf`). Generic scenes (for example observer) follow too.
 - **16 follow partially**: boxes, arrows and packets move, but background bands, regions and overlays that are constants in the scene (the CQRS write/read bands, the hexagon, the layered bands, the MVU cycle, the iterator song strip, ...) stay where they were, so a moved box can end up outside its band. Middleware's reorder step also writes to the wrong participant. They are iterator, builder, singleton, dependency-injection, middleware, pub-sub, cqrs, event-driven, microservices, functional-core, mvu, pipes-and-filters, hexagonal, layered, mvc and vertical-slice.
 - **4 render their own `<svg>` without `<Diagram>`** (interpreter, visitor, composite, decorator), so they get no handles; the editor page says so in a notice. Decorator additionally ignores its participants' coordinates entirely.
 
@@ -214,11 +214,11 @@ CQRS — the same way the patterns above explain class-level ones: an animated, 
 TypeScript/C#/Python code, and the usual problem/solution/pros/cons sections, plus a glossary of key concepts and (for a
 few) named variants.
 
-The thirteen architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
+The fourteen architectures, grouped by paradigm badge (`oo` | `functional` | `both`):
 
-| Object-oriented                                                                                                  | Functional                                                                                                                                     | OO + Functional                   |
-| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice, Domain-Driven Design (OO) | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture), Domain-Driven Design (Functional) | CQRS, Microservices, Event-Driven |
+| Object-oriented                                                                                                  | Functional                                                                                                                                     | OO + Functional                                     |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Layered (N-tier), Hexagonal (Ports & Adapters), Model-View-Controller, Vertical Slice, Domain-Driven Design (OO) | Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters, Model-View-Update (Elm Architecture), Domain-Driven Design (Functional) | CQRS, Microservices, Event-Driven, Modular Monolith |
 
 ### Cross-reference model
 

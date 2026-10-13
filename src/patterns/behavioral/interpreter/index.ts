@@ -50,8 +50,8 @@ export const pattern: PatternDefinition = {
       label: "Expression",
       role: "Abstract Expression",
       kind: "interface",
-      x: 510,
-      y: 36,
+      x: 290,
+      y: 390,
       width: 170,
       description:
         "Declares the one method every grammar rule must provide: interpret(context). Every class below — terminal or non-terminal — implements it, which is what lets Add and Multiply treat their children uniformly.",
@@ -73,7 +73,7 @@ export const pattern: PatternDefinition = {
       role: "Context",
       kind: "object",
       x: 110,
-      y: 370,
+      y: 390,
       description:
         "Holds the variable bindings available while interpreting — here just x: 5 — behind a single lookup(name) method. Only terminal expressions that need outside data (like VariableExpression) ever consult it.",
     },
@@ -82,7 +82,7 @@ export const pattern: PatternDefinition = {
       label: "Add",
       role: "Non-terminal · AddExpression",
       kind: "class",
-      x: 430,
+      x: 460,
       y: 110,
       description:
         "The root of the tree and a non-terminal expression. It doesn't know how to add anything itself — it asks its left and right children to interpret themselves, then sums the two results.",
@@ -92,8 +92,8 @@ export const pattern: PatternDefinition = {
       label: "Variable('x')",
       role: "Terminal · VariableExpression",
       kind: "class",
-      x: 270,
-      y: 260,
+      x: 260,
+      y: 220,
       description:
         "A terminal expression wrapping the name 'x'. It has no children, but unlike a literal it can't answer from itself — it asks the Context to look up the current value bound to 'x'.",
       code: "variable",
@@ -103,8 +103,8 @@ export const pattern: PatternDefinition = {
       label: "Multiply",
       role: "Non-terminal · MultiplyExpression",
       kind: "class",
-      x: 590,
-      y: 260,
+      x: 650,
+      y: 210,
       description:
         "A non-terminal expression nested inside Add's right branch. Like Add, it has no value of its own: it delegates to its own left and right children and multiplies what comes back.",
     },
@@ -113,8 +113,8 @@ export const pattern: PatternDefinition = {
       label: "Number(2)",
       role: "Terminal · NumberExpression",
       kind: "class",
-      x: 470,
-      y: 400,
+      x: 530,
+      y: 340,
       description:
         "A terminal expression wrapping the literal value 2. It has no children and no dependency on the Context — interpret() just returns 2 immediately.",
       code: "number",
@@ -124,8 +124,8 @@ export const pattern: PatternDefinition = {
       label: "Number(3)",
       role: "Terminal · NumberExpression",
       kind: "class",
-      x: 680,
-      y: 400,
+      x: 530,
+      y: 430,
       description:
         "A terminal expression wrapping the literal value 3, structurally identical to Number(2) — it returns its own stored value with no delegation at all.",
       code: "number",
@@ -138,7 +138,6 @@ export const pattern: PatternDefinition = {
       to: "expression",
       type: "implements",
       description: "AddExpression implements Expression.",
-      bend: -20,
     },
     {
       id: "multiplyImpl",
@@ -155,7 +154,6 @@ export const pattern: PatternDefinition = {
       type: "implements",
       description:
         "VariableExpression implements Expression, just like every other node in the tree.",
-      bend: -40,
     },
     {
       id: "numberTwoImpl",
@@ -171,7 +169,7 @@ export const pattern: PatternDefinition = {
       to: "expression",
       type: "implements",
       description: "NumberExpression implements Expression.",
-      bend: 30,
+      bend: -20,
     },
     {
       id: "newContext",
@@ -199,6 +197,7 @@ export const pattern: PatternDefinition = {
       to: "variableX",
       type: "holds",
       label: "left",
+      bend: 10,
       description:
         "Add holds its left operand — the Variable('x') expression — and will ask it to interpret itself first.",
       code: "build",
@@ -219,6 +218,7 @@ export const pattern: PatternDefinition = {
       to: "numberTwo",
       type: "holds",
       label: "left",
+      bend: -50,
       description: "Multiply holds its left operand, the literal Number(2).",
       code: "build",
     },
@@ -228,6 +228,7 @@ export const pattern: PatternDefinition = {
       to: "numberThree",
       type: "holds",
       label: "right",
+      bend: -70,
       description: "Multiply holds its right operand, the literal Number(3).",
       code: "build",
     },
@@ -239,7 +240,7 @@ export const pattern: PatternDefinition = {
       label: 'lookup("x")',
       description:
         "VariableExpression has no value of its own, so interpreting it means asking the shared Context to look up 'x'.",
-      bend: 30,
+      bend: 10,
       code: "variable",
     },
   ],

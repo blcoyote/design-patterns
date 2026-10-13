@@ -51,6 +51,7 @@ export const pattern: PatternDefinition = {
     "circuit-breaker",
     "cache-aside",
     "api-gateway",
+    "sidecar",
   ],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)

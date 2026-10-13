@@ -48,7 +48,7 @@ export const pattern: PatternDefinition = {
     "YARP, a reverse proxy library for .NET that is used to build gateways",
     "Gateways built on NGINX or Envoy",
   ],
-  related: ["facade", "proxy", "middleware", "circuit-breaker"],
+  related: ["facade", "proxy", "middleware", "circuit-breaker", "sidecar"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

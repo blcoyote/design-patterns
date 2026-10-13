@@ -28,7 +28,7 @@ export const pattern: PatternDefinition = {
     "Risk is spread out: each cutover moves one feature, and a rollback is another call to the facade instead of a restore of the whole system.",
     "The new system goes live early and grows feature by feature, so it can be checked against real traffic long before the legacy system is gone.",
     "Clients never change their requests. The facade keeps the same request interface while the implementation behind it is swapped.",
-    "The legacy system shrinks feature by feature and is never edited during the migration, and there is a clear end: when no feature is routed to it, it can be retired.",
+    "The share of features routed to the legacy system shrinks one feature at a time, while its code is never edited during the migration, and there is a clear end: when no feature is routed to it, it can be retired.",
   ],
   cons: [
     "Moving the data is usually the hard part. Real migrations need dual writes, change data capture or sync jobs to keep the old and the new store consistent. Here a single copy step stands in for all of that.",
@@ -74,7 +74,7 @@ export const pattern: PatternDefinition = {
     {
       id: "legacy",
       label: "LegacyMonolith",
-      role: "Legacy system (shrinking)",
+      role: "Legacy system (fewer routes)",
       kind: "class",
       x: 620,
       y: 90,
@@ -124,7 +124,7 @@ export const pattern: PatternDefinition = {
       label: "legacy route",
       code: "facade",
       description:
-        "When the route table names legacy for the requested feature, the facade passes the request to LegacyMonolith and returns its reply unchanged.",
+        "When the route table names legacy for the requested feature, the facade passes the request to LegacyMonolith and returns that reply's status and body together with a served-by value of legacy.",
     },
     {
       id: "modern-route",
@@ -134,7 +134,7 @@ export const pattern: PatternDefinition = {
       label: "modern route",
       code: "facade",
       description:
-        "When the route table names modern for the requested feature, the facade passes the request to ModernService instead and returns its reply unchanged.",
+        "When the route table names modern for the requested feature, the facade passes the request to ModernService instead and returns that reply's status and body together with a served-by value of modern.",
     },
     {
       id: "read-orders",

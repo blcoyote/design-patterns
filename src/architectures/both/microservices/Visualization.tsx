@@ -7,12 +7,12 @@ const PAYMENTS_BOX = { x: 830, y: 180, width: 230, height: 330, label: "Payments
 
 /**
  * Microservices swaps the generic diagram's plain background for three dashed service
- * boundaries — Orders, Inventory, Payments — each with its own small "DB" box, so the
- * central idea (independently owned data, crossed only through an explicit client or
- * message interface) reads before a single step plays. Orders keeps its own store of
- * the orders it has recorded, just like Inventory and Payments keep their own catalog
- * and ledger. The broker and its subscriber sit outside any boundary, since neither
- * owns the kind of private store the three services do.
+ * boundaries — Orders, Inventory, Payments — so the central idea (independently owned
+ * data, crossed only through an explicit client or message interface) reads before a
+ * single step plays. Orders and Inventory get a small "DB" box for the store each keeps
+ * in the example (the orders it has recorded, the product catalog). Payments gets none,
+ * because the example's Payments service keeps no data of its own. The broker and its
+ * subscriber sit outside any boundary, since neither owns a private store.
  */
 function ServiceBox({
   x,
@@ -89,7 +89,7 @@ export function MicroservicesVisualization({
     <g>
       <ServiceBox {...ORDERS_BOX} showDb={true} />
       <ServiceBox {...INVENTORY_BOX} showDb={true} />
-      <ServiceBox {...PAYMENTS_BOX} showDb={true} />
+      <ServiceBox {...PAYMENTS_BOX} showDb={false} />
     </g>
   );
 

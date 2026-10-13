@@ -128,7 +128,7 @@ class CircuitBreaker:
 
 # [payments]
 class PaymentsService:
-    """The Payments microservice: stands in for a separate process with its own private store."""
+    """The Payments microservice: stands in for a separate process. In this example it keeps no data of its own, only a call counter and a down flag; a real Payments service would own its store, as the others here do."""
 
     def __init__(self) -> None:
         self._down = False

@@ -257,7 +257,7 @@ export const architecture: ArchitectureDefinition = {
       y: 260,
       width: 170,
       description:
-        "Stands in for a separate process, reachable only through charge(). In this scenario it is down, so every charge it receives fails.",
+        "Stands in for a separate process, reachable only through its charge call. It is healthy for the first order; then the scenario takes it down, and every charge that reaches it while it is down fails. It keeps no data of its own in this example, so its box has no DB.",
     },
     {
       id: "broker",

@@ -240,7 +240,7 @@ func describe(world *World) string {
 func main() {
 	world := NewWorld()
 
-	// Four entities, each with a different set of components.
+	// Four entities. The hero and the goblin have the same set of components; the tree and the fire each have a different one.
 	hero := world.Spawn()
 	world.Names[hero] = &Name{Value: "hero"}
 	world.Positions[hero] = &Position{X: 0}

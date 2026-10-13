@@ -156,7 +156,7 @@ function describe(world: World): string {
 // [usage]
 const world = new World();
 
-// Four entities, each with a different set of components.
+// Four entities. The hero and the goblin have the same set of components; the tree and the fire each have a different one.
 const hero = world.spawn();
 world.names.set(hero, { value: "hero" });
 world.positions.set(hero, { x: 0 });

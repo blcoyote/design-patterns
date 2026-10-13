@@ -15,7 +15,7 @@ export const architecture: ArchitectureDefinition = {
   intent:
     "Entity-Component-System is a way to organise a program as data and the functions that run over it, mostly in games and simulations. An entity is only an id. A component is a small piece of plain data (a position, a velocity, a health value) attached to an id. A system is a function that asks the world for every id that has a certain set of components and then reads or changes those components. Nothing in it is a Hero or a Goblin: what an entity is and does follows from which components it has at the moment. It is a data-oriented style: not classic object orientation (there are no entity classes and no inheritance, and the data has no methods) and not pure functional programming either (the systems here change component data in place). That is why its paradigm badge says both.",
   problem:
-    "A game has a hero that moves and can be hurt, a goblin that does the same, a tree that does neither and a fire that hurts whatever stands in it. With classes you start a hierarchy: Entity, then Creature, then Hero and Goblin, with the tree and the fire somewhere else. Then you want a burning tree that moves, or a creature that cannot be hurt, and the hierarchy has no place for it. You end up with deep inheritance, duplicated code, or one giant base class where most fields do not apply. Each new combination of abilities needs a new class, and the behaviour for one ability (moving, say) is scattered over every class that has it.",
+    "A game has a hero that moves and can be hurt, a goblin that does the same, a tree that does neither and a fire that hurts anything with health that stands in it. With classes you start a hierarchy: Entity, then Creature, then Hero and Goblin, with the tree and the fire somewhere else. Then you want a burning tree that moves, or a creature that cannot be hurt, and the hierarchy has no place for it. You end up with deep inheritance, duplicated code, or one giant base class where most fields do not apply. Each new combination of abilities needs a new class, and the behaviour for one ability (moving, say) is scattered over every class that has it.",
   solution:
     "Split what a thing is from what it can do. An entity is only an id from a counter. Each kind of data is a component type with one store that maps entity ids to that data: names, positions, velocities, healths and hazards in this example. To give an entity an ability you add a component to it, and to take one away you remove it. Behaviour lives in systems: the movement system moves every id that has a Position and a Velocity, the damage system hurts every id that has a Position and a Health when a hazard stands at the same x, and the death system destroys every id whose hp has dropped to zero or below. A system finds its entities with a query, which returns the ids that are present in all the stores it names, in ascending id order. A game loop runs the systems in a fixed order once per tick. In this example the world is one 'track' with four entities, run for four ticks, in one process on one thread.",
   analogy:
@@ -28,8 +28,8 @@ export const architecture: ArchitectureDefinition = {
     "Do NOT use it for a small application with a few kinds of things, or for business and CRUD software: a Customer or an Order with its rules in one class is simpler to read and to test, and the indirection of ids, stores and queries costs more than it gives. Also avoid it when you need to see what a thing is by reading one class: an entity has no class, so 'what is id 3?' is answered only by looking in the stores.",
   ],
   pros: [
-    "Abilities are combined at runtime without new classes. The four entities have four different sets of components (hero: name, position, velocity, health; goblin: the same; tree: name and position; fire: name, position, hazard), and there is no Hero, Goblin or Tree type anywhere.",
-    "Adding a behaviour to a thing is adding data. In tick 4 the tree gets a Velocity and is moved by the same movement system that moves the hero; nothing about the tree's type changed because it has none.",
+    "Abilities are combined at runtime without new classes. The four entities have three different sets of components (hero and goblin: name, position, velocity, health; tree: name and position; fire: name, position, hazard), and there is no Hero, Goblin or Tree type anywhere.",
+    "Adding a behaviour to a thing is adding data. Before tick 4 the tree gets a Velocity, and in tick 4 it is moved by the same movement system that moves the hero; nothing about the tree's type changed because it has none.",
     "Each system is small and does one thing, and its query names the components it needs. The movement system never reads Health, the damage system never reads Velocity, and an entity with no Health, like the tree standing on the fire in tick 4, is not in its query result, so it is skipped without a special case.",
     "Order and effect are easy to see. The loop is a list of three functions, so the order of a tick is one line of code, and each query states in one line which components its system needs.",
     "It opens the door to memory-friendly layouts and parallel scheduling. Real engines store each component type densely so that a system walks through memory in order, and can run systems at the same time when the components they touch do not overlap. This example shows neither (see the cons), but the shape of the code is what makes them possible.",
@@ -58,7 +58,7 @@ export const architecture: ArchitectureDefinition = {
     {
       term: "Component",
       description:
-        "A small piece of plain data with no methods: Name, Position (an integer x on a one-dimensional track), Velocity (dx), Health (hp) and Hazard (damage). An entity has the components that are stored under its id, and different entities have different sets: the tree has a Name and a Position, the fire a Name, a Position and a Hazard. Components are mutable, because the systems change them in place.",
+        "A small piece of plain data with no methods: Name, Position (an integer x on a one-dimensional track), Velocity (dx), Health (hp) and Hazard (damage). An entity has the components that are stored under its id, and entities can have different sets: the tree has a Name and a Position, the fire a Name, a Position and a Hazard. Components are mutable, because the systems change them in place.",
     },
     {
       term: "System",
@@ -233,7 +233,7 @@ export const architecture: ArchitectureDefinition = {
       y: 540,
       width: 170,
       description:
-        "Entity id to Hazard (damage per tick). Only the fire has one: damage 2. The damage system reads it to find out what hurts whatever stands at the same x.",
+        "Entity id to Hazard (damage per tick). Only the fire has one: damage 2. The damage system reads it to find out what hurts an entity with a Health at the same x.",
       code: "world",
     },
     {
@@ -380,9 +380,9 @@ export const architecture: ArchitectureDefinition = {
       code: "components",
     },
     {
-      title: "Spawn: four ids, four different sets of components",
+      title: "Spawn: four ids, three different sets of components",
       description:
-        "The usage code asks the world for four ids, which come from a counter: 1, 2, 3 and 4. It gives the hero (1) a Name, a Position 0, a Velocity +1 and a Health 10; the goblin (2) a Name, a Position 5, a Velocity -1 and a Health 2; the tree (3) a Name and a Position 2 only; and the fire (4) a Name, a Position 3 and a Hazard 2. The entities have different sets of components, which is the point: nothing says that id 3 is a tree except the Name stored under it and the components it lacks. The stores now hold 4 names, 4 positions, 2 velocities, 2 healths and 1 hazard.",
+        "The usage code asks the world for four ids, which come from a counter: 1, 2, 3 and 4. It gives the hero (1) a Name, a Position 0, a Velocity +1 and a Health 10; the goblin (2) a Name, a Position 5, a Velocity -1 and a Health 2; the tree (3) a Name and a Position 2 only; and the fire (4) a Name, a Position 3 and a Hazard 2. The hero and the goblin have the same set of components and the tree and the fire each have a different one, which is the point: nothing says that id 3 is a tree except the Name stored under it and the components it lacks. The stores now hold 4 names, 4 positions, 2 velocities, 2 healths and 1 hazard.",
       highlight: ["world", "names", "positions", "velocities", "healths", "hazards"],
       notes: {
         world: "ids 1, 2, 3, 4",
@@ -595,7 +595,7 @@ export const architecture: ArchitectureDefinition = {
     {
       title: "Final counts: the stores differ in size",
       description:
-        "The usage code prints 'components: position 3, velocity 2, health 1, hazard 1, name 3'. The stores hold different numbers of entries because the entities have different sets of components: three of them have a Position (the hero, the tree and the fire), the hero and the tree have a Velocity, only the hero has a Health, only the fire has a Hazard and three have a Name. The goblin is in none, because destroy removed it from every store. Real engines would keep each of these stores in a dense or sparse layout built for fast iteration; here each is one map.",
+        "The usage code prints 'components: position 3, velocity 2, health 1, hazard 1, name 3'. The stores hold different numbers of entries because not all entities have the same set of components: three of them have a Position (the hero, the tree and the fire), the hero and the tree have a Velocity, only the hero has a Health, only the fire has a Hazard and three have a Name. The goblin is in none, because destroy removed it from every store. Real engines would keep each of these stores in a dense or sparse layout built for fast iteration; here each is one map.",
       highlight: ["world", "positions", "velocities", "hazards", "healths", "names"],
       notes: {
         positions: "3",

@@ -6,7 +6,7 @@ using System.Linq;
 // [usage]
 var world = new World();
 
-// Four entities, each with a different set of components.
+// Four entities. The hero and the goblin have the same set of components; the tree and the fire each have a different one.
 var hero = world.Spawn();
 world.Names[hero] = new Name { Value = "hero" };
 world.Positions[hero] = new Position { X = 0 };

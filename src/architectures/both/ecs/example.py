@@ -173,7 +173,7 @@ def describe(world: World) -> str:
 # [usage]
 world = World()
 
-# Four entities, each with a different set of components.
+# Four entities. The hero and the goblin have the same set of components; the tree and the fire each have a different one.
 hero = world.spawn()
 world.names[hero] = Name("hero")
 world.positions[hero] = Position(0)

@@ -133,6 +133,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "saga",
         why: "OrderService.placeOrder here only guards the one call to PaymentsService with a circuit breaker; nothing undoes an earlier step if a later one fails. Saga formalizes that: an orchestrator pairs each cross-service step with a compensating action, so if charging fails after stock was reserved, the reservation is explicitly released instead of left dangling.",
       },
+      {
+        slug: "api-gateway",
+        why: "ApiGateway is the single entry point the client calls, and it forwards placeOrder to OrderService without any business logic of its own. The cross-cutting checks a gateway usually adds, such as authentication and rate limiting, are shown on the API Gateway pattern page, not in this example.",
+      },
     ],
     architectures: [
       {
@@ -192,7 +196,7 @@ export const architecture: ArchitectureDefinition = {
       width: 170,
       description:
         "The one entry point clients see. It forwards placeOrder straight to the Orders service and has no business logic of its own — it does not even assign order ids.",
-      patterns: ["facade"],
+      patterns: ["facade", "api-gateway"],
     },
     {
       id: "orders",

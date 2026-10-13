@@ -44,7 +44,7 @@ export const pattern: PatternDefinition = {
     "Change data capture and sync jobs, which keep the data of the old and the new system aligned while a feature moves.",
     "The Azure Architecture Center describes it as a cloud design pattern named Strangler Fig.",
   ],
-  related: ["facade", "proxy", "anti-corruption-layer", "adapter"],
+  related: ["facade", "proxy", "anti-corruption-layer", "adapter", "api-gateway"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

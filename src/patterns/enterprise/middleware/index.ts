@@ -45,7 +45,13 @@ export const pattern: PatternDefinition = {
     "Django and Rails (Rack) middleware",
     "Redux middleware and message-handler middleware in Wolverine and MassTransit",
   ],
-  related: ["chain-of-responsibility", "decorator", "circuit-breaker", "cache-aside"],
+  related: [
+    "chain-of-responsibility",
+    "decorator",
+    "circuit-breaker",
+    "cache-aside",
+    "api-gateway",
+  ],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

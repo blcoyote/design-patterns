@@ -39,7 +39,7 @@ export const pattern: PatternDefinition = {
     "CDN edge caches acting as caching proxies in front of an origin server",
     "gRPC and REST client stubs acting as remote proxies for a networked service",
   ],
-  related: ["decorator", "adapter", "facade", "flyweight", "strangler-fig"],
+  related: ["decorator", "adapter", "facade", "flyweight", "strangler-fig", "sidecar"],
   participants: [
     {
       id: "videoService",

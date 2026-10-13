@@ -15,7 +15,7 @@ export const comparison: ComparisonDefinition = {
   title: "Serverless vs Microservices",
   order: 7,
   summary:
-    "Both break a system into small deployable parts. The deciding question is who runs the process: a platform that starts functions when events arrive, or services you deploy and keep running.",
+    "They answer different questions, so one system can use both: Microservices decides how a system is split, Serverless decides who runs each part. The choice here is how a part runs: as a function a platform starts when events arrive, or as a service you deploy and keep running, as in the Microservices example.",
   subjects: [
     { kind: "architecture", slug: "serverless" },
     { kind: "architecture", slug: "microservices" },
@@ -162,7 +162,7 @@ export const comparison: ComparisonDefinition = {
       "Keep a single deployable application and call between modules in-process; the Modular Monolith page describes keeping the boundaries without the network. A recurring job can be an ordinary scheduled task inside the same application.",
   },
   overlap:
-    "These two are not rivals, because they answer different questions: Microservices is about how a system is split into deployable parts, while Serverless is about who runs the process and how long it lives. A service does not have to be a long-running process. A part that only reacts to events, such as Shipping reacting to OrderPlaced, could run as a queue-triggered function. Its state would then have to move into a managed store and a cold start would add delay to a call that is a plain method call in the Microservices example. In the other direction, a set of functions that share one store and queue, as in the Serverless example, is not by itself a set of microservices: those functions do not own private stores, and a microservice is a long-running service that you run.",
+    "These two are not rivals, because they answer different questions: Microservices is about how a system is split into deployable parts, while Serverless is about who runs the process and how long it lives. A service does not have to be a long-running process. A part that only reacts to events, such as Shipping reacting to OrderPlaced, could run as a queue-triggered function. Its state would then have to move into a managed store and a cold start would add delay to a call that is a plain method call in the Microservices example. In the other direction, a set of functions that share one store and queue, as in the Serverless example, is not by itself a set of microservices: those functions are not split around business capabilities that each own their data. What makes a set of parts microservices is those independently owned boundaries, not whether each part runs as a function or as a long-running process.",
   scenario: {
     prompt:
       "After an order is placed, a shop has to send a receipt. The work reads the order, sends the message and marks the order receipted, and it needs nothing from any other service. Orders come in bursts around lunch and promotions, and nothing arrives overnight. Which fits best?",

@@ -116,7 +116,7 @@ export const architecture: ArchitectureDefinition = {
     architectures: [
       {
         slug: "microservices",
-        why: "Catalog, Ordering and Shipping keep the boundaries that Orders, Inventory and Payments have on the Microservices page (private data, access only through an API, OrderPlaced as the only coupling), but Ordering reaches CatalogApi with an ordinary in-process call. There is no InventoryServiceClient-style proxy, cache or circuit breaker, because this call cannot fail like a network call. Extracting a module into a service later turns that call into the remote one.",
+        why: "Catalog, Ordering and Shipping keep the boundaries that Orders, Inventory and Payments have on the Microservices page (each owns whatever data it keeps, access only through an API, OrderPlaced as the only coupling), but Ordering reaches CatalogApi with an ordinary in-process call. There is no InventoryServiceClient-style proxy, cache or circuit breaker, because this call cannot fail like a network call. Extracting a module into a service later turns that call into the remote one.",
       },
       {
         slug: "ddd",

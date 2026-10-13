@@ -135,7 +135,7 @@ func (b *CircuitBreaker) Call(fn func() (string, error)) (string, error) {
 // [/breaker]
 
 // [payments]
-// PaymentsService is the Payments microservice: it stands in for a separate process. In this example it keeps no data of its own, only a call counter and a down flag; a real Payments service would own its store, as the others here do.
+// PaymentsService is the Payments microservice: it stands in for a separate process. In this example it keeps no data of its own, only a call counter and a down flag; a real Payments service would own whatever data it persists, as Orders and Inventory own theirs here.
 type PaymentsService struct {
 	Calls int
 	down  bool

@@ -145,7 +145,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "ddd",
-        why: "Bounded contexts are a natural starting point for service boundaries — Orders, Inventory and Payments here each keep their own model and their own data — though one context can also span several services.",
+        why: "Bounded contexts are a natural starting point for service boundaries — Orders and Inventory here each keep their own model and their own data (Payments keeps none in this example) — though one context can also span several services.",
       },
       {
         slug: "hexagonal",

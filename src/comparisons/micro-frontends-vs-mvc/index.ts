@@ -21,7 +21,7 @@ export const comparison: ComparisonDefinition = {
     { kind: "architecture", slug: "mvc" },
   ],
   problem:
-    "A product page has several parts: the product name, a buy box and a list of recommendations. Several teams want to change their part, and the question is where to draw the line: inside one frontend app that is organised into Models, Views and Controllers, or between parts of the page that separate teams own, release and can have fail without taking the rest of the page down.",
+    "A product page has several parts: the product name, a buy box and a list of recommendations. Several teams want to change their part, and the question is where to draw the line: inside one frontend app that is organised into Models, Views and Controllers, or between parts of the page that separate teams own and release, where one part can fail without taking the rest of the page down.",
   constraints: [
     "Do several teams need to release their part of the page on their own schedule, or can the whole frontend ship together?",
     "If one part of the page fails, must the rest of the page still be served?",

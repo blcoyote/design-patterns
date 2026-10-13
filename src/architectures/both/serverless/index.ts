@@ -119,7 +119,7 @@ export const architecture: ArchitectureDefinition = {
       },
       {
         slug: "microservices",
-        why: "Both split a system into small units deployed on their own that cooperate through messages. createOrder and sendReceipt share only the OrderStore and the order-placed queue, much as OrderService and ShippingService share an OrderPlaced event. The unit differs. A microservice is a long-running service that you run and that keeps its own private store; these functions are started and dropped by the platform and all use one OrderStore. They also never call each other, where OrderService calls Inventory and Payments and needs InventoryServiceClient and a circuit breaker.",
+        why: "Both split a system into small units deployed on their own that cooperate through messages. createOrder and sendReceipt share only the OrderStore and the order-placed queue, much as OrderService and ShippingService share an OrderPlaced event. The unit differs. The microservices in that example are long-running services that you run, and Orders and Inventory each keep a private store; these functions are started and dropped by the platform and all use one OrderStore. They also never call each other, where OrderService calls Inventory and Payments and needs InventoryServiceClient and a circuit breaker.",
       },
       {
         slug: "pipes-and-filters",

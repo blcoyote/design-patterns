@@ -157,7 +157,7 @@ class CircuitBreaker
 // [/breaker]
 
 // [payments]
-/// The Payments microservice: stands in for a separate process with its own private store.
+/// The Payments microservice: stands in for a separate process. In this example it keeps no data of its own, only a call counter and a down flag; a real Payments service would own whatever data it persists, as Orders and Inventory own theirs here.
 class PaymentsService
 {
     private bool _down;

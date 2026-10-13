@@ -53,12 +53,13 @@ func (s *InventoryService) FailNextCall() {
 
 func (s *InventoryService) Handle(request HttpRequest) HttpResponse {
 	s.Calls++
-	if _, ok := request.Headers["x-client-identity"]; !ok {
-		return HttpResponse{Status: 401, Body: "no client identity"}
-	}
 	if s.failNext {
+		// Checked first, so the armed failure really is the very next call.
 		s.failNext = false
 		return HttpResponse{Status: 503, Body: "busy"}
+	}
+	if _, ok := request.Headers["x-client-identity"]; !ok {
+		return HttpResponse{Status: 401, Body: "no client identity"}
 	}
 	sku := request.Path[len("/stock/"):]
 	return HttpResponse{Status: 200, Body: fmt.Sprintf("%s: 3 in stock", sku)}

@@ -71,14 +71,15 @@ class InventoryService : IService
     public HttpResponse Handle(HttpRequest request)
     {
         Calls++;
+        if (_failNext)
+        {
+            // Checked first, so the armed failure really is the very next call.
+            _failNext = false;
+            return new HttpResponse(503, "busy");
+        }
         if (!request.Headers.ContainsKey("x-client-identity"))
         {
             return new HttpResponse(401, "no client identity");
-        }
-        if (_failNext)
-        {
-            _failNext = false;
-            return new HttpResponse(503, "busy");
         }
         var sku = request.Path["/stock/".Length..];
         return new HttpResponse(200, $"{sku}: 3 in stock");

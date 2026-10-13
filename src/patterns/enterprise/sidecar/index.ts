@@ -11,9 +11,9 @@ export const pattern: PatternDefinition = {
   category: "enterprise",
   order: 21,
   summary:
-    "Run a helper next to each service instance that handles its outbound calls (identity, retries, metrics), so those concerns live outside the service's own code and can be changed without changing it.",
+    "Deploy a helper process next to each service instance to take on cross-cutting work (here: its outbound calls, with identity, retries and metrics), so that work lives outside the service's own code and can be changed without changing it.",
   intent:
-    "Deploy a helper alongside each instance of a service and let it carry that instance's outbound calls. The helper adds the service's identity, retries transient failures and counts requests, so these concerns live outside the service's own code and can be changed without changing, rebuilding or redeploying the service.",
+    "Deploy a helper alongside each instance of a service, as a separate process or container on the same host, and let it take on cross-cutting work that would otherwise live in the service: proxying, identity, telemetry, log shipping or configuration. That work can then be changed without changing, rebuilding or redeploying the service. In this example the helper carries the instance's outbound calls (it adds the service's identity, retries transient failures and counts requests), which is the outbound-only form also known as Ambassador.",
   problem:
     "Services that call other services usually need the same plumbing: presenting an identity, retrying a call that failed for a moment, counting requests. Written into each service, that code is repeated for each service and for each language in use, drifts apart between copies, and can only be changed by changing and redeploying the services themselves.",
   solution:
@@ -109,7 +109,7 @@ export const pattern: PatternDefinition = {
       width: 140,
       code: "inventory",
       description:
-        'The service being called. It counts the call first thing, so its counter includes rejected calls. Then it checks, in this order: a missing x-client-identity header gets 401 "no client identity"; a scripted failure, armed for exactly the next call, gets 503 "busy"; anything else gets 200 and "sku-1: 3 in stock". It only checks that the header is present, not who sent it, so this is not real authentication.',
+        'The service being called. It counts the call first thing, so its counter includes rejected calls. Then it checks, in this order: a scripted failure, armed for exactly the next call, gets 503 "busy"; a missing x-client-identity header gets 401 "no client identity"; anything else gets 200 and "sku-1: 3 in stock". It only checks that the header is present, not who sent it, so this is not real authentication.',
     },
   ],
   relations: [

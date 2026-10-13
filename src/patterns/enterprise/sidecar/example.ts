@@ -40,12 +40,13 @@ class InventoryService implements Service {
 
   handle(request: HttpRequest): HttpResponse {
     this.calls++;
-    if (!("x-client-identity" in request.headers)) {
-      return { status: 401, body: "no client identity" };
-    }
     if (this.failNext) {
+      // Checked first, so the armed failure really is the very next call.
       this.failNext = false;
       return { status: 503, body: "busy" };
+    }
+    if (!("x-client-identity" in request.headers)) {
+      return { status: 401, body: "no client identity" };
     }
     const sku = request.path.slice("/stock/".length);
     return { status: 200, body: `${sku}: 3 in stock` };

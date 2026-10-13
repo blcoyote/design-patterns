@@ -49,11 +49,12 @@ class InventoryService:
 
     def handle(self, request: HttpRequest) -> HttpResponse:
         self.calls += 1
-        if 'x-client-identity' not in request.headers:
-            return HttpResponse(401, 'no client identity')
         if self._fail_next:
+            # Checked first, so the armed failure really is the very next call.
             self._fail_next = False
             return HttpResponse(503, 'busy')
+        if 'x-client-identity' not in request.headers:
+            return HttpResponse(401, 'no client identity')
         sku = request.path[len('/stock/'):]
         return HttpResponse(200, f'{sku}: 3 in stock')
 # [/inventory]

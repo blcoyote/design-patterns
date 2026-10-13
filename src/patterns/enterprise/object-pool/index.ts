@@ -42,7 +42,7 @@ export const pattern: PatternDefinition = {
     "Game engines reusing bullet/particle/enemy objects instead of allocating and garbage-collecting them every frame.",
     "HTTP keep-alive / socket pools reused across outgoing requests to the same host.",
   ],
-  related: ["flyweight", "singleton", "factory-method", "prototype"],
+  related: ["flyweight", "singleton", "factory-method", "prototype", "bulkhead"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

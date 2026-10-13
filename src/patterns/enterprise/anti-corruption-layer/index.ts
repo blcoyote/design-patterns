@@ -40,7 +40,7 @@ export const pattern: PatternDefinition = {
     "A bounded context translating another team's domain events (and their quirks) into its own event shapes before publishing them internally.",
     "Strangler Fig migrations, where new code talks to the old system only through a translation layer while the old system is incrementally replaced underneath it.",
   ],
-  related: ["adapter", "facade", "repository"],
+  related: ["adapter", "facade", "repository", "strangler-fig"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

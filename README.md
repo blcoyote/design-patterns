@@ -1,6 +1,6 @@
 # design-patterns
 
-An interactive, animated guide to all 23 Gang of Four design patterns plus 11 common enterprise patterns, and a second
+An interactive, animated guide to all 23 Gang of Four design patterns plus 18 enterprise patterns, and a second
 area covering 18 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern and architecture has:
@@ -9,9 +9,9 @@ Every pattern and architecture has:
 - **clickable parts** — click any class or arrow to see its role, its connections, and the exact lines of code that implement it
 - TypeScript, C#, Python and Go examples, problem/solution/analogy, when to use it, pros & cons, real-world uses and related patterns
 
-| Creational                                                      | Structural                                                      | Behavioral                                                                                                                      | Enterprise                                                                                                              |
-| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Repository, Unit of Work, Pub/Sub, Circuit Breaker, Null Object, Object Pool, Plugin, Cache-Aside |
+| Creational                                                      | Structural                                                      | Behavioral                                                                                                                      | Enterprise                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Singleton, Factory Method, Builder, Abstract Factory, Prototype | Adapter, Decorator, Facade, Proxy, Composite, Bridge, Flyweight | Observer, Strategy, Command, Iterator, State, Template Method, Chain of Responsibility, Mediator, Memento, Visitor, Interpreter | Dependency Injection, Plugin, Null Object, Value Object, Repository, Unit of Work, Cache-Aside, DataLoader (Batching), Projection (Materialized View), Pub/Sub (Event Bus), Transactional Outbox, Idempotent Consumer (Inbox), Saga, Anti-Corruption Layer, Middleware (Pipeline), Circuit Breaker, Object Pool, Strangler Fig |
 
 Separately, **Architecture** (`/architecture`) covers Layered, Hexagonal, MVC, Vertical Slice, Domain-Driven Design (OO and Functional),
 CQRS, Microservices, Modular Monolith, Event-Driven, Actor Model, Serverless, Space-Based, Microkernel, Event Sourcing, Functional Core / Imperative Shell, Pipes and Filters and Model-View-Update — see [Architecture](#architecture) below.

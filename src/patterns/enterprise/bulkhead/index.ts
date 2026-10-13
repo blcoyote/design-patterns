@@ -40,7 +40,7 @@ export const pattern: PatternDefinition = {
   ],
   realWorld: [
     "Resilience4j has a Bulkhead module for the JVM, in a semaphore-based variant and a thread-pool-based variant.",
-    "Polly for .NET offers bulkhead and concurrency-limiter policies.",
+    "Polly for .NET: v7 has a BulkheadPolicy; v8 has no bulkhead strategy and limits concurrency with AddConcurrencyLimiter from its rate-limiter package (Polly.RateLimiting).",
     "Netflix Hystrix isolated each dependency's calls in its own thread pool. It is now in maintenance mode, and Netflix points new work to Resilience4j.",
     "A dedicated thread pool or connection pool per dependency is the same idea built from plain parts, and so is a semaphore or concurrency limit per dependency.",
     'Michael Nygard\'s book "Release It!" describes Bulkheads together with timeouts and Circuit Breakers as stability patterns.',

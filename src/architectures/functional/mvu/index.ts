@@ -150,6 +150,10 @@ export const architecture: ArchitectureDefinition = {
         slug: "actor-model",
         why: "Runtime.dispatch hands one Msg at a time to update, much as an actor handles one message per receive. The differences are real: MVU has one immutable Model for the whole app and no mailbox (dispatch runs update at once, and a Cmd's result returns as a nested dispatch). In the Actor Model there are many actors, each with its own mailbox (only the account holds private mutable state, its balance), and each performs its own effects by sending further messages.",
       },
+      {
+        slug: "ecs",
+        why: "An ECS tick is one update loop that advances the state each time, as MVU's dispatch does. The difference is what drives it and what it updates: MVU has one Model and an update that is called with one message at a time, where ECS has many component stores that its systems update once per tick, with no messages.",
+      },
     ],
   },
 

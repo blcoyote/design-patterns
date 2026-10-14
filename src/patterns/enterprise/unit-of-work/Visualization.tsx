@@ -86,7 +86,7 @@ export function UnitOfWorkVisualization({
   stepIndex,
   selectedId,
   onSelect,
-  speed,
+  speed = 1,
 }: VisualizationProps) {
   const reduceMotion = !!useReducedMotion();
 
@@ -130,7 +130,10 @@ export function UnitOfWorkVisualization({
     }
     setTryRun({ forStep: stepIndex, outcome, phase: "begin" });
     timers.current.push(
-      window.setTimeout(() => setTryRun({ forStep: stepIndex, outcome, phase: "flushing" }), 700),
+      window.setTimeout(
+        () => setTryRun({ forStep: stepIndex, outcome, phase: "flushing" }),
+        700 / speed,
+      ),
     );
     timers.current.push(
       window.setTimeout(
@@ -140,7 +143,7 @@ export function UnitOfWorkVisualization({
             outcome,
             phase: outcome === "success" ? "committed" : "rolledback",
           }),
-        1600,
+        1600 / speed,
       ),
     );
   }

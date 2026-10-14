@@ -49,7 +49,7 @@ class ReportGeneratorBefore:
             # checker (mypy, pyright) would flag this given the `Logger | None`
             # annotation and force a guard here too — exactly the clutter Null
             # Object removes — but nothing stops the code from running, so it crashes.
-            self._logger.warn(f"report has {len(result.warnings)} warnings")
+            self._logger.warn(f"report warnings: {len(result.warnings)}")
         # [/forgotten]
 
         return result
@@ -116,7 +116,7 @@ class ReportGenerator:
         result = build_report(data)
         self._logger.info("report ready")
         if len(result.warnings) > 0:
-            self._logger.warn(f"report has {len(result.warnings)} warnings")
+            self._logger.warn(f"report warnings: {len(result.warnings)}")
         return result
     # [/generate]
 # [/reportGenerator]

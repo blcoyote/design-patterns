@@ -56,7 +56,7 @@ func (g *ReportGeneratorBefore) Generate(data ReportData) Report {
 		// this without complaint (it has no nullable types for the compiler
 		// to check), and it panics at runtime. Every call site needs its own
 		// guard — exactly the clutter Null Object removes.
-		g.logger.Warn(fmt.Sprintf("report has %d warnings", len(result.Warnings)))
+		g.logger.Warn(fmt.Sprintf("report warnings: %d", len(result.Warnings)))
 	}
 	// [/forgotten]
 
@@ -137,7 +137,7 @@ func (g *ReportGenerator) Generate(data ReportData) Report {
 	result := buildReport(data)
 	g.logger.Info("report ready")
 	if len(result.Warnings) > 0 {
-		g.logger.Warn(fmt.Sprintf("report has %d warnings", len(result.Warnings)))
+		g.logger.Warn(fmt.Sprintf("report warnings: %d", len(result.Warnings)))
 	}
 	return result
 }

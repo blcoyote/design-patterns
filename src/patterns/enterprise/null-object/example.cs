@@ -74,7 +74,7 @@ class ReportGeneratorBefore(ILogger? logger)
             // so it is easy to miss, and it still throws a NullReferenceException at
             // runtime. The only fix is a guard at every call site, exactly the clutter
             // Null Object removes.
-            logger.Warn($"report has {result.Warnings.Count} warnings");
+            logger.Warn($"report warnings: {result.Warnings.Count}");
         }
         // [/forgotten]
 
@@ -129,7 +129,7 @@ class ReportGenerator
         _logger.Info("report ready");
         if (result.Warnings.Count > 0)
         {
-            _logger.Warn($"report has {result.Warnings.Count} warnings");
+            _logger.Warn($"report warnings: {result.Warnings.Count}");
         }
         return result;
     }

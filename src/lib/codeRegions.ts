@@ -5,7 +5,7 @@ export interface ParsedCode {
   regions: Record<string, [number, number]>;
 }
 
-// `//` for TypeScript/C#, `#` for Python
+// `//` for TypeScript/C#/Go, `#` for Python
 const OPEN = /^\s*(?:\/\/|#) \[([\w-]+)\]\s*$/;
 const CLOSE = /^\s*(?:\/\/|#) \[\/([\w-]+)\]\s*$/;
 

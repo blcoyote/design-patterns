@@ -39,7 +39,7 @@ class ReportGeneratorBefore {
       // strict TS instead refuses to compile it, forcing a guard (or "!"/"?.")
       // at every single call site — exactly the clutter Null Object removes.
       // @ts-expect-error — strict null checks catch what a guard would miss at runtime
-      this.logger.warn(`report has ${result.warnings.length} warnings`);
+      this.logger.warn(`report warnings: ${result.warnings.length}`);
     }
     // [/forgotten]
 
@@ -103,7 +103,7 @@ class ReportGenerator {
     const result = buildReport(data);
     this.logger.info("report ready");
     if (result.warnings.length > 0) {
-      this.logger.warn(`report has ${result.warnings.length} warnings`);
+      this.logger.warn(`report warnings: ${result.warnings.length}`);
     }
     return result;
   }

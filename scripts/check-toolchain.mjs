@@ -16,14 +16,23 @@ export function checkToolchain({ userAgent, nodeVersion, enginesNode }) {
   }
 
   // Only ">=N" (optionally ">=N.x.y") is understood; any other range is skipped rather than guessed.
-  const required = /^>=(\d+)(?:\.[\dx]+){0,2}$/.exec(enginesNode ?? "");
-  if (required && Number.parseInt(nodeVersion, 10) < Number(required[1])) {
+  // Every component is compared, with "x" or a missing component counting as 0.
+  const required = /^>=(\d+(?:\.[\dx]+){0,2})$/.exec(enginesNode ?? "");
+  if (required && isOlder(nodeVersion, required[1])) {
     warnings.push(
       `This repo expects Node ${enginesNode} (engines.node in package.json), but this is Node ${nodeVersion}. Run \`nvm use\` to pick up the version pinned in .nvmrc.`,
     );
   }
 
   return { errors, warnings };
+}
+
+function isOlder(version, floor) {
+  const parts = (value) => [0, 1, 2].map((i) => Number.parseInt(value.split(".")[i], 10) || 0);
+  const have = parts(version);
+  const need = parts(floor);
+  const differs = have.findIndex((part, i) => part !== need[i]);
+  return differs !== -1 && have[differs] < need[differs];
 }
 
 // import.meta.url is already a realpath; argv[1] is not, so resolve it before comparing

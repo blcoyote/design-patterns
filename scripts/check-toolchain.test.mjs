@@ -50,6 +50,25 @@ describe("checkToolchain", () => {
     ).toHaveLength(1);
   });
 
+  it.each([
+    ["26.0.0", ">=26.1.0"],
+    ["26.1.0", ">=26.1.1"],
+    ["26.11.1", ">=26.12"],
+  ])("warns on Node %s below the same-major floor %s", (nodeVersion, enginesNode) => {
+    expect(
+      checkToolchain({ userAgent: pnpmAgent, nodeVersion, enginesNode }).warnings,
+    ).toHaveLength(1);
+  });
+
+  it.each([
+    ["26.1.0", ">=26.1.0"],
+    ["26.2.0", ">=26.1.5"],
+    ["26.11.1", ">=26.x"],
+    ["27.0.0", ">=26.12.3"],
+  ])("does not warn on Node %s with %s", (nodeVersion, enginesNode) => {
+    expect(checkToolchain({ userAgent: pnpmAgent, nodeVersion, enginesNode }).warnings).toEqual([]);
+  });
+
   it.each([undefined, "^26", "26", ">=26 <28", ">26"])(
     "skips the Node check for engines.node %j",
     (enginesNode) => {

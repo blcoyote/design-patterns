@@ -40,7 +40,7 @@ Description text in `index.ts` must hold for every tab: name all four mechanisms
 
 ## Verification the author should have run
 
-`npm test`, `npx tsc -b`, `npm run lint`, every `example.py` with `python3 -W error`, every `example.go` with `go run`, and any touched C# file compiled and run. Ask for the results if a PR changes examples and does not report them.
+`pnpm test`, `pnpm exec tsc -b`, `pnpm lint`, every `example.py` with `python3 -W error`, every `example.go` with `go run`, and any touched C# file compiled and run. Ask for the results if a PR changes examples and does not report them.
 
 ## Review style
 

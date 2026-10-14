@@ -19,16 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: pnpm/action-setup@v6
+
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
-      - run: npm run lint
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
       - name: Type-check
-        run: npx tsc -b
-      - run: npm test
+        run: pnpm exec tsc -b
+      - run: pnpm test
 
   build:
     name: Build
@@ -36,13 +38,15 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - uses: pnpm/action-setup@v6
+
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
 
-      - run: npm ci
-      - run: npm run build
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
 
       - uses: actions/upload-artifact@v7
         with:

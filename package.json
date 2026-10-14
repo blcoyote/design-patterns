@@ -11,7 +11,7 @@
     "format:check": "prettier --check .",
     "lint": "oxlint",
     "preview": "vite preview",
-    "preinstall": "npx -y only-allow pnpm",
+    "preinstall": "node scripts/only-allow-pnpm.mjs",
     "prepare": "husky",
     "test": "vitest run"
   },

@@ -26,7 +26,7 @@ pnpm test     # validates every pattern definition
 pnpm lint
 ```
 
-The repo uses [pnpm](https://pnpm.io/) (the version is pinned in `package.json` via `packageManager`).
+The repo uses Node 26 (pinned in `.nvmrc`; run `nvm use`) and [pnpm](https://pnpm.io/) (the version is pinned in `package.json` via `packageManager`).
 
 The build uses relative paths and hash routing, so `dist/` can be served from any static host (GitHub Pages, S3, …).
 

@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=26"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/generate-share-pages.mjs",
@@ -11,14 +14,14 @@
     "format:check": "prettier --check .",
     "lint": "oxlint",
     "preview": "vite preview",
-    "preinstall": "node scripts/only-allow-pnpm.mjs",
+    "preinstall": "node scripts/check-toolchain.mjs",
     "prepare": "husky",
     "test": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "5.3.0",
     "@fontsource-variable/roboto-flex": "5.3.0",
-    "motion": "^14.0.0",
+    "motion": "^14.2.0",
     "prism-react-renderer": "^2.4.1",
     "prismjs": "^1.30.0",
     "react": "^19.3.0",
@@ -27,18 +30,18 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^24.19.1",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^6.1.2",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "oxlint": "^1.86.0",
-    "prettier": "^3.9.9",
+    "oxlint": "^1.88.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
-    "vite": "^8.3.2",
-    "vitest": "^5.0.3"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,html,md,yml,yaml}": "prettier --write"

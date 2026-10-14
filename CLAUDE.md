@@ -20,16 +20,16 @@ Follow these every time. If a task seems to need a different route, stop and ask
 - The registry auto-discovers folders. Never hand-register a pattern, and never special-case a slug in shared components.
 - New patterns start from `src/patterns/_template/` (see README → "Adding a pattern").
 - Shared behaviour goes in `src/components`, `src/hooks` or `src/lib`, never inside a pattern folder.
-- Colour is decided in `src/theme/tokens.css` and nowhere else. Use semantic token utilities in classNames (`bg-surface`, `text-fg-muted`, `fill-diagram-node`), `"var(--color-…)"` for values computed in code, and `alpha(color, pct)` for transparency (never `${color}22`). No hex, `rgb()` or Tailwind palette classes outside `src/theme/`; `npm test` enforces it (the only exemption is standalone image assets such as `public/favicon.svg`, listed in the guardrail test). If a role has no token, add one rather than a literal. A theme is a `[data-theme]` block plus a `themes.ts` entry (README → "Theming").
-- Architectures follow the same rules in `src/architectures/<paradigm>/<slug>/` (`ArchitectureDefinition`, template in `src/architectures/_template/`). Only architectures declare cross-references (`commonlyUsedWith`); design-pattern → architecture links are derived in `src/lib/crossRefs.ts`, and architecture ↔ architecture links must be declared on both sides (`npm test` enforces this).
+- Colour is decided in `src/theme/tokens.css` and nowhere else. Use semantic token utilities in classNames (`bg-surface`, `text-fg-muted`, `fill-diagram-node`), `"var(--color-…)"` for values computed in code, and `alpha(color, pct)` for transparency (never `${color}22`). No hex, `rgb()` or Tailwind palette classes outside `src/theme/`; `pnpm test` enforces it (the only exemption is standalone image assets such as `public/favicon.svg`, listed in the guardrail test). If a role has no token, add one rather than a literal. A theme is a `[data-theme]` block plus a `themes.ts` entry (README → "Theming").
+- Architectures follow the same rules in `src/architectures/<paradigm>/<slug>/` (`ArchitectureDefinition`, template in `src/architectures/_template/`). Only architectures declare cross-references (`commonlyUsedWith`); design-pattern → architecture links are derived in `src/lib/crossRefs.ts`, and architecture ↔ architecture links must be declared on both sides (`pnpm test` enforces this).
 - Comparisons (`src/comparisons/<slug>/`, `ComparisonDefinition`, template in `src/comparisons/_template/`) follow the same data/registry rules, one level deep (no category/paradigm folder). A comparison has no code or diagram of its own — it only references region ids and step indices that already exist on the patterns/architectures it compares, resolved through `crossRefs.ts`'s `resolveSubject` so `comparisons/registry.ts` never imports either registry directly.
-- Diagram layout (`x`, `y`, `width`, `bend`) may be tuned in the dev layout editor (`/#/dev/layout`, README → "Editing diagram layouts") and saved to source; the result must still pass `npm test`.
+- Diagram layout (`x`, `y`, `width`, `bend`) may be tuned in the dev layout editor (`/#/dev/layout`, README → "Editing diagram layouts") and saved to source; the result must still pass `pnpm test`.
 - When this site's own code uses a pattern it teaches, tag the usage with `// @pattern <slug>: <explanation>` directly above the code (see "Used in this site" in the README) instead of listing files anywhere.
 
 ### 2. Four languages, one set of regions
 
 - `example.ts` → `code`, `example.cs` → `csharp`, `example.py` → `python`, `example.go` → `go`, all imported with `?raw`.
-- Region markers go on their own lines: `// [id]` … `// [/id]` in TS/C#/Go, `# [id]` … `# [/id]` in Python. Every file must use **exactly the same set of region ids** (`npm test` enforces this).
+- Region markers go on their own lines: `// [id]` … `// [/id]` in TS/C#/Go, `# [id]` … `# [/id]` in Python. Every file must use **exactly the same set of region ids** (`pnpm test` enforces this).
 - Steps, participants and relations point at region ids. Check that each region wraps the code that the step's text describes, in **all four** files.
 - Layout conventions:
   - **TS:** usage goes at the bottom.
@@ -56,15 +56,15 @@ Follow these every time. If a task seems to need a different route, stop and ask
 Run all of these. Report the actual results, including failures:
 
 ```bash
-npm test                     # registry validation, marker/region parity
-npx tsc -b                   # type-check
-npm run lint
+pnpm test                    # registry validation, marker/region parity
+pnpm exec tsc -b             # type-check
+pnpm lint
 for f in src/patterns/*/*/example.py src/architectures/*/*/example.py; do PYTHONDONTWRITEBYTECODE=1 python3 -W error "$f" >/dev/null || echo "FAIL $f"; done
 for f in src/patterns/*/*/example.go src/architectures/*/*/example.go; do go run "$f" >/dev/null || echo "FAIL $f"; done
 ```
 
 - Compile and run any C# file you touched (e.g. copy it into a scratch `dotnet new console` project as `Program.cs`). Check the output matches the comments.
-- For TS examples you touched, type-check the file on its own (`npx tsc --ignoreConfig --strict --noEmit --moduleDetection force --target es2022 --module esnext --lib es2022,dom <file>`), since `example.ts` files are excluded from the app tsconfig.
+- For TS examples you touched, type-check the file on its own (`pnpm exec tsc --ignoreConfig --strict --noEmit --moduleDetection force --target es2022 --module esnext --lib es2022,dom <file>`), since `example.ts` files are excluded from the app tsconfig.
 - For UI changes, check in the browser preview: the `dev-alt` config in `.claude/launch.json` runs on port 5180. Click through the steps and tabs.
 - Shut down every dev server you started (`preview_stop`) as soon as you're done with it, so a stale server doesn't hold the port for the next session or agent.
 

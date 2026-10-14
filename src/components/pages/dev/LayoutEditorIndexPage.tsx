@@ -16,7 +16,7 @@ export function LayoutEditorIndexPage() {
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-fg">Diagram layout editor</h1>
         <p className="mt-3 text-fg-soft">
           Pick a pattern or architecture to open its diagram in the real scene. This page is only
-          registered under <code className="font-mono">npm run dev</code>.
+          registered under <code className="font-mono">pnpm dev</code>.
         </p>
       </section>
 

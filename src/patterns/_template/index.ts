@@ -75,7 +75,7 @@ export const pattern: PatternDefinition = {
   code: tsExample,
 
   // Required: a C# example shown as a second tab next to TypeScript. Must use
-  // the SAME region ids as example.ts (`npm test` checks this).
+  // the SAME region ids as example.ts (`pnpm test` checks this).
   // NOTE: C# top-level statements must appear before any type declarations
   // in the file, so usage code goes FIRST in example.cs even though TS puts it last.
   csharp: csExample,

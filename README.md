@@ -19,12 +19,14 @@ CQRS, Microservices, Modular Monolith, Event-Driven, Actor Model, Serverless, Sp
 ## Getting started
 
 ```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # type-check + production build into dist/
-npm test         # validates every pattern definition
-npm run lint
+pnpm install
+pnpm dev      # http://localhost:5173
+pnpm build    # type-check + production build into dist/
+pnpm test     # validates every pattern definition
+pnpm lint
 ```
+
+The repo uses [pnpm](https://pnpm.io/) (the version is pinned in `package.json` via `packageManager`).
 
 The build uses relative paths and hash routing, so `dist/` can be served from any static host (GitHub Pages, S3, …).
 
@@ -120,10 +122,10 @@ Unit tests sit next to the code they cover (`*.test.ts`), including the layout e
    - show small `notes` badges under participants,
    - highlight a `code` region.
 4. Put the TypeScript example in `example.ts` (imported with `?raw` as `code`; excluded from `tsc` and lint). Mark regions with `// [id]` and `// [/id]` on their own lines. They are stripped before display. A participant highlights the region with the same id unless you set `code`.
-5. Add `example.cs` (imported with `?raw` as `csharp`) with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as the TypeScript file — `npm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
+5. Add `example.cs` (imported with `?raw` as `csharp`) with an equivalent C# example, shown as a second tab next to TypeScript. Use the exact same region ids as the TypeScript file — `pnpm test` checks that the set of region ids matches between the two, so steps/participants/relations highlight correctly whichever language is active.
 6. Add `example.py` (imported with `?raw` as `python`) with an equivalent Python example, shown as another tab. Use the same region ids, written as Python comments: `# [id]` and `# [/id]`. Usage code goes at the bottom, as in TypeScript, and the file should run as-is with `python3 example.py`.
-7. Add `example.go` (imported with `?raw` as `go`) with the equivalent Go example, shown as another tab. Use the same region ids, `package main`, and a `func main()` usage block at the bottom. `npm test` requires every pattern to ship this file.
-8. Run `npm test` — it reports unknown ids, missing code regions and broken `related` links.
+7. Add `example.go` (imported with `?raw` as `go`) with the equivalent Go example, shown as another tab. Use the same region ids, `package main`, and a `func main()` usage block at the bottom. `pnpm test` requires every pattern to ship this file.
+8. Run `pnpm test` — it reports unknown ids, missing code regions and broken `related` links.
 
 That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up automatically. No other file needs to change.
 
@@ -131,9 +133,9 @@ That's it: the sidebar, home grid and route (`#/patterns/<slug>`) pick it up aut
 
 The generic diagram covers most patterns. For a bespoke scene, add `Visualization.tsx` next to `index.ts` and set `Visualization` in the definition. It receives `VisualizationProps` (`pattern`, `color`, `step`, `stepIndex`, `speed`, `selectedId`, `onSelect`) — `color` is the category (or paradigm) accent colour, passed down by `PatternExplorer`. Call `onSelect(participantId)` when something is clicked so the detail panel and code highlighting keep working. You can reuse `<Diagram>` with `underlay`/`overlay` for extra animated elements — see `strategy`, `state`, `circuit-breaker` or `architectures/layered` for examples (`singleton`, `builder`, `flyweight`, `iterator`, `chain-of-responsibility`, `memento`, `dependency-injection`, `unit-of-work`, `pub-sub`, `null-object`, `object-pool` and `middleware` have custom scenes too).
 
-A scene that draws its own `<svg>` instead (`composite`, `interpreter`, `visitor`, `decorator`) must render `<DiagramEditLayer>` (`src/components/viz/DiagramEditLayer.tsx`) last inside it, with the participants, relations and edge geometry it actually draws, so the [layout editor](#editing-diagram-layouts-dev-only) can drag its boxes; `npm test` fails on a `Visualization.tsx` that renders neither `<Diagram>` nor the edit layer. Place every box from its participant's `x`/`y` (and `width`), never from constants in the scene, or a saved layout changes nothing. Pass only the relations whose curve uses `bend`, `fixedSizes` for boxes the scene sizes itself (Decorator's nested layers) and `moveTogether` for boxes that must stay together. While the editor is open (`useDiagramEdit()` is not `null`), skip entrance animations and easing so a box follows the pointer, and clear the editor's selection on a background click, as `<Diagram>` does.
+A scene that draws its own `<svg>` instead (`composite`, `interpreter`, `visitor`, `decorator`) must render `<DiagramEditLayer>` (`src/components/viz/DiagramEditLayer.tsx`) last inside it, with the participants, relations and edge geometry it actually draws, so the [layout editor](#editing-diagram-layouts-dev-only) can drag its boxes; `pnpm test` fails on a `Visualization.tsx` that renders neither `<Diagram>` nor the edit layer. Place every box from its participant's `x`/`y` (and `width`), never from constants in the scene, or a saved layout changes nothing. Pass only the relations whose curve uses `bend`, `fixedSizes` for boxes the scene sizes itself (Decorator's nested layers) and `moveTogether` for boxes that must stay together. While the editor is open (`useDiagramEdit()` is not `null`), skip entrance animations and easing so a box follows the pointer, and clear the editor's selection on a background click, as `<Diagram>` does.
 
-Colour in a scene comes from the theme tokens, never from a hex literal or a Tailwind palette class (see [Theming](#theming); `npm test` fails on a raw colour). In a `className` use the token utilities (`fill-diagram-node`, `stroke-diagram-edge`, `text-fg-muted`); for values computed in code write `"var(--color-ok)"`, and use `alpha(color, 13)` for a tint of the accent rather than appending hex digits.
+Colour in a scene comes from the theme tokens, never from a hex literal or a Tailwind palette class (see [Theming](#theming); `pnpm test` fails on a raw colour). In a `className` use the token utilities (`fill-diagram-node`, `stroke-diagram-edge`, `text-fg-muted`); for values computed in code write `"var(--color-ok)"`, and use `alpha(color, 13)` for a tint of the accent rather than appending hex digits.
 
 Every scene must animate packets through the shared timing, never its own `delay`s: pass `packetSpeed={speed}` to `<Diagram>`, or, in a fully custom SVG, render `<PacketLayer>` from `src/components/viz/PacketLayer.tsx` with `packets`, relation-keyed `geometry` (a Map or record), `color`, `speed` and `animationKey={stepIndex}`. Then `after`, the speed control and reduced motion all work, and the step player's timing matches what is on screen.
 
@@ -158,7 +160,7 @@ packets: [
 
 Rules of thumb:
 
-- Order packets the way the code runs them, and chain anything that is caused by an earlier packet: call → return, request → next hop in a pipeline, result bubbling back up. `npm test` rejects a packet that departs from where an earlier packet in the same step arrives unless it has `after`.
+- Order packets the way the code runs them, and chain anything that is caused by an earlier packet: call → return, request → next hop in a pipeline, result bubbling back up. `pnpm test` rejects a packet that departs from where an earlier packet in the same step arrives unless it has `after`.
 - If the step text says "first … then …", chain those packets even if they share a sender.
 - Don't use `after` for more than one story per step — split a long scenario into several steps instead.
 
@@ -166,7 +168,7 @@ The step player waits for the animation: each step stays on screen for at least 
 
 ## Editing diagram layouts (dev only)
 
-Layouts are hand-typed numbers, so there is a drag-and-drop editor for them. It exists only under `npm run dev`: the route, the header link ("Layout editor") and the save endpoint are all guarded by `import.meta.env.DEV` or `apply: "serve"`, so `npm run build` contains none of the editor's pages, drag handles, save code or endpoint. (`<DiagramEditLayer>` loads its handles lazily, only in dev. The only traces left in a build are `useContext` lookups in `<Diagram>`, `<DiagramEditLayer>` and the hand-drawn scenes that always find no editor, and a few `editor-*` colour tokens in the stylesheet.)
+Layouts are hand-typed numbers, so there is a drag-and-drop editor for them. It exists only under `pnpm dev`: the route, the header link ("Layout editor") and the save endpoint are all guarded by `import.meta.env.DEV` or `apply: "serve"`, so `pnpm build` contains none of the editor's pages, drag handles, save code or endpoint. (`<DiagramEditLayer>` loads its handles lazily, only in dev. The only traces left in a build are `useContext` lookups in `<Diagram>`, `<DiagramEditLayer>` and the hand-drawn scenes that always find no editor, and a few `editor-*` colour tokens in the stylesheet.)
 
 Open `http://localhost:5173/#/dev/layout` for the list of every pattern and architecture, or go straight to `/#/dev/layout/patterns/<slug>` or `/#/dev/layout/architecture/<slug>`. The page shows the real scene (the generic diagram or the pattern's own `Visualization.tsx`) with a step selector, so you can check each step's boxes, arrows and packets while you edit.
 
@@ -186,7 +188,7 @@ Open `http://localhost:5173/#/dev/layout` for the list of every pattern and arch
 - **Save to source** (dev server only) POSTs the changes to `POST /__dev/layout` (`vite-plugins/layoutWriter.ts`). The server rewrites only the numeric `x`, `y`, `width` and `bend` literals inside the `participants` and `relations` arrays of that folder's `index.ts` (`vite-plugins/layoutPatch.ts`), formats the file with prettier and writes it atomically; Vite then hot-updates the page. Comments, strings, ids, steps and everything else stay byte-for-byte as they were. A missing `x`/`y`/`width`/`bend` is inserted, `bend: 0` removes the property, and anything the patcher cannot place is an error rather than a guess. The endpoint rejects cross-site requests and is not part of `vite build` or `vite preview`.
 - **Copy JSON** copies the changes as JSON (`{ participants: { id: { x, y, width } }, relations: { id: { bend } } }`). It always works and is the fallback when saving is not available (for example against a preview build); if the clipboard is blocked the JSON is shown in a text box to copy by hand.
 
-After saving, review `git diff` (only layout lines should change) and run `npm test`: the registry validation still applies to the new numbers.
+After saving, review `git diff` (only layout lines should change) and run `pnpm test`: the registry validation still applies to the new numbers.
 
 ### Layout lint
 
@@ -248,7 +250,7 @@ the dependency one-directional everywhere else and avoids a circular import betw
    symmetrically with any sibling architecture you reference).
 4. Write the animated `steps`, and the TypeScript/C#/Python/Go examples in `example.ts`/`.cs`/`.py`/`.go` exactly as for a pattern —
    all four are required so the persisted language tab works on every architecture page.
-5. Run `npm test` — besides the usual diagram/region checks, it also verifies the cross-reference symmetry rule above.
+5. Run `pnpm test` — besides the usual diagram/region checks, it also verifies the cross-reference symmetry rule above.
 
 That's it: the sidebar (grouped by paradigm under `/architecture*`), the architecture index and the route
 (`#/architecture/<slug>`) pick it up automatically.
@@ -278,11 +280,11 @@ way `DetailPanel` takes a `resolvePattern` prop — `src/lib/crossRefs.ts` stays
 2. Re-read the `index.ts` and all four example files of every subject you reference — every claim in `dimensions`,
    `options[].changes` and `options[].chooseWhen` must be literally true of all four languages, not just the one you
    remember. Use neutral wording where languages differ (see the "Honest about the pattern" rule in CLAUDE.md).
-3. Point `options[].code` at existing region ids and `options[].steps` at existing 0-based step indices — `npm test`
+3. Point `options[].code` at existing region ids and `options[].steps` at existing 0-based step indices — `pnpm test`
    checks that every region and step reference resolves and is in range.
 4. Give the `scenario` exactly one choice with `verdict: 'best'`, unique choice `id`s, and a non-empty `explanation` for
-   every choice — `npm test` checks all three.
-5. Run `npm test` — it reports an unresolved subject, an unknown region, an out-of-range step, or a malformed scenario.
+   every choice — `pnpm test` checks all three.
+5. Run `pnpm test` — it reports an unresolved subject, an unknown region, an out-of-range step, or a malformed scenario.
 
 That's it: the sidebar (under `/compare*`), the comparison index, the route (`#/compare/<slug>`) and any "Often
 confused with…" box on the subjects' own pages pick it up automatically.
@@ -327,7 +329,7 @@ export const themes = [
 
 The first entry is the default and is defined by `:root`, so it has no block. `useTheme()` returns `[theme, setTheme]`, persisted in localStorage (and synced across tabs for as long as a component is subscribed); an inline script injected into `index.html` (generated from `themes.ts` by `vite-plugins/themeBootstrap.ts`) applies the stored theme before first paint so nothing flashes. Light is the default theme and dark is the alternate; the switcher lives in the header (and in the mobile drawer). Fonts are bundled via `@fontsource` (Roboto Flex for text in both themes, JetBrains Mono for code), so nothing loads from a CDN.
 
-`npm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color()`, `color-mix()` or Tailwind palette class outside `src/theme/` (scanning `src/`, `index.html` and `public/`), every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the light value).
+`pnpm test` enforces the rules (`vite-plugins/themeGuardrails.test.ts`): no hex, `rgb()`, `color()`, `color-mix()` or Tailwind palette class outside `src/theme/` (scanning `src/`, `index.html` and `public/`), every `var(--color-…)` names a declared token, and every alternate theme defines a `color-scheme` and **every** colour token the default does (a missing one would silently inherit the light value).
 
 ## Used in this site
 

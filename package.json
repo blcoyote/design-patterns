@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@12.11.2",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && node scripts/generate-share-pages.mjs",
@@ -10,6 +11,7 @@
     "format:check": "prettier --check .",
     "lint": "oxlint",
     "preview": "vite preview",
+    "preinstall": "npx -y only-allow pnpm",
     "prepare": "husky",
     "test": "vitest run"
   },

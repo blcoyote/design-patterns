@@ -24,7 +24,7 @@ export const pattern: PatternDefinition = {
     "Clients should know one address instead of the address and API of each of several services.",
     "Authentication, rate limiting or routing is needed in front of several services and should not be rebuilt in each of them.",
     "A screen needs data from several services, and one round trip to a gateway is cheaper than several to the services, as long as the gateway only composes the answers and holds no business rules.",
-    "Clients need clearly different shapes of response: consider a Backend-for-Frontend per client type instead of one shared gateway (see the Micro-frontends with Backends-for-Frontends architecture page).",
+    "Clients need clearly different shapes of response: consider a Backend for Frontend per client type instead of one shared gateway (see the Backend for Frontend pattern and the Micro-frontends with Backends-for-Frontends architecture page).",
   ],
   pros: [
     "Clients depend on one address and one set of routes. Services can be moved, split or renamed behind it by changing the route table.",
@@ -35,7 +35,7 @@ export const pattern: PatternDefinition = {
   cons: [
     "All client traffic passes through the gateway, so it is one more hop, one more thing to run and scale, and a single point of failure unless it is deployed redundantly.",
     "A gateway that aggregates and transforms can collect business logic, and then every team that changes a service has to change the gateway as well. Not every gateway aggregates. Keep aggregation light, like the GET /home handler here.",
-    "A shared gateway gives every client the same routes and the same response shapes, as in this example. A Backend-for-Frontend is one backend per client type instead. The two are often combined, and microservices.io lists BFF as a variation of the API gateway pattern. See the Micro-frontends with Backends-for-Frontends architecture page.",
+    "A shared gateway gives every client the same routes and the same response shapes, as in this example. A Backend-for-Frontend is one backend per client type instead. The two are often combined, and microservices.io lists BFF as a variation of the API gateway pattern. See the Backend for Frontend pattern.",
     "The rate limiter here is a fixed-window counter whose window is advanced by an explicit next-window call instead of a clock. Real limiters often use sliding windows or token buckets, and keep their counters in shared storage when the gateway runs as several instances.",
     "The services trust the user id the gateway hands them. Real systems pass a signed token (for example a JWT) or secure the gateway-to-service hop (for example with mTLS), so a caller that bypasses the gateway cannot claim to be someone else.",
     "The checks run in a fixed sequence inside the gateway's request handler. Real gateways usually build them as a configurable filter or plugin chain, which is the Middleware pattern.",
@@ -48,7 +48,7 @@ export const pattern: PatternDefinition = {
     "YARP, a reverse proxy library for .NET that is used to build gateways",
     "Gateways built on NGINX or Envoy",
   ],
-  related: ["facade", "proxy", "middleware", "circuit-breaker", "sidecar"],
+  related: ["facade", "proxy", "middleware", "circuit-breaker", "sidecar", "backend-for-frontend"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

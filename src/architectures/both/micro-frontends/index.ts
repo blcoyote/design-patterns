@@ -115,6 +115,10 @@ export const architecture: ArchitectureDefinition = {
   commonlyUsedWith: {
     designPatterns: [
       {
+        slug: "backend-for-frontend",
+        why: "CheckoutWebBff and MobileBff are each a backend for one client or experience: CheckoutWebBff.buyBox serves only the web buy box, and MobileBff.productCard serves only the mobile app, with its own field names and JSON. The Backend for Frontend pattern page shows the same idea on its own, with a web and a mobile BFF over shared services and the web BFF degrading when one of them fails.",
+      },
+      {
         slug: "facade",
         why: "Both BFFs put one simple call in front of several services. CheckoutWebBff.buyBox calls pricing and then stock, and MobileBff.productCard calls catalog, pricing and stock, so the buy box and the mobile app each make one call and know nothing about how many services stand behind it.",
       },

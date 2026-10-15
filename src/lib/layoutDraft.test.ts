@@ -65,7 +65,7 @@ describe("parseLayoutDraft", () => {
 describe("draft storage", () => {
   it("round-trips through localStorage under dev-layout:<area>/<slug>", () => {
     const store = fakeStorage();
-    vi.stubGlobal("localStorage", store);
+    vi.stubGlobal("window", { localStorage: store });
     saveLayoutDraft("patterns", "observer", { participants: { a: { x: 7 } }, relations: {} });
     expect([...store.data.keys()]).toEqual(["dev-layout:patterns/observer"]);
     expect(layoutDraftKey("patterns", "observer")).toBe("dev-layout:patterns/observer");
@@ -74,13 +74,13 @@ describe("draft storage", () => {
 
   it("removes the entry when saving an empty draft", () => {
     const store = fakeStorage({ "dev-layout:patterns/observer": "{}" });
-    vi.stubGlobal("localStorage", store);
+    vi.stubGlobal("window", { localStorage: store });
     saveLayoutDraft("patterns", "observer", { participants: {}, relations: {} });
     expect(store.data.size).toBe(0);
   });
 
   it("never throws when storage is missing or throws", () => {
-    // no localStorage global in the node test environment
+    // no window in the node test environment
     expect(loadLayoutDraft("patterns", "x", def)).toEqual({ participants: {}, relations: {} });
     expect(() =>
       saveLayoutDraft("patterns", "x", { participants: { a: { x: 1 } }, relations: {} }),
@@ -88,7 +88,9 @@ describe("draft storage", () => {
     const throwing = () => {
       throw new Error("blocked");
     };
-    vi.stubGlobal("localStorage", { getItem: throwing, setItem: throwing, removeItem: throwing });
+    vi.stubGlobal("window", {
+      localStorage: { getItem: throwing, setItem: throwing, removeItem: throwing },
+    });
     expect(loadLayoutDraft("patterns", "x", def)).toEqual({ participants: {}, relations: {} });
     expect(() =>
       saveLayoutDraft("patterns", "x", { participants: { a: { x: 1 } }, relations: {} }),

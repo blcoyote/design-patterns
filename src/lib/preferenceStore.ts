@@ -1,3 +1,5 @@
+import { browserStorage } from "@/lib/browserStorage";
+
 export interface PreferenceStore<T extends string> {
   subscribe: (listener: () => void) => () => void;
   getSnapshot: () => T;
@@ -27,7 +29,7 @@ export function createPreferenceStore<T extends string>({
 }: PreferenceStoreConfig<T>): PreferenceStore<T> {
   function readStored(): T {
     try {
-      const stored = localStorage.getItem(key);
+      const stored = browserStorage()?.getItem(key) ?? null;
       return options.find((option) => option === stored) ?? fallback;
     } catch {
       return fallback;
@@ -71,7 +73,7 @@ export function createPreferenceStore<T extends string>({
     if (cached === value) return;
     cached = value;
     try {
-      localStorage.setItem(key, value);
+      browserStorage()?.setItem(key, value);
     } catch {
       // storage unavailable (private mode, etc.) — keep the in-memory value only
     }

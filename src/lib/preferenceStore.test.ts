@@ -6,10 +6,11 @@ const options: readonly Mode[] = ["a", "b", "c"];
 
 function stubBrowser(initial: Record<string, string> = {}) {
   const data = new Map(Object.entries(initial));
-  const target = new EventTarget();
-  vi.stubGlobal("localStorage", {
-    getItem: (k: string) => data.get(k) ?? null,
-    setItem: (k: string, v: string) => void data.set(k, v),
+  const target = Object.assign(new EventTarget(), {
+    localStorage: {
+      getItem: (k: string) => data.get(k) ?? null,
+      setItem: (k: string, v: string) => void data.set(k, v),
+    },
   });
   vi.stubGlobal("window", target);
   return {
@@ -41,12 +42,14 @@ describe("createPreferenceStore", () => {
   });
 
   it("falls back when storage throws", () => {
-    vi.stubGlobal("localStorage", {
-      getItem: () => {
-        throw new Error("denied");
-      },
-      setItem: () => {
-        throw new Error("denied");
+    vi.stubGlobal("window", {
+      localStorage: {
+        getItem: () => {
+          throw new Error("denied");
+        },
+        setItem: () => {
+          throw new Error("denied");
+        },
       },
     });
     const store = createPreferenceStore<Mode>({ key: "k", options, fallback: "a" });

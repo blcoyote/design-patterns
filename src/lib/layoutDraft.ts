@@ -1,3 +1,4 @@
+import { browserStorage } from "@/lib/browserStorage";
 import { emptyLayout, isEmpty, type LayoutOverrides } from "@/lib/layoutEdit";
 import type { ExplorableDefinition } from "@/types/pattern";
 
@@ -55,15 +56,6 @@ export function parseLayoutDraft(
   return out;
 }
 
-/** localStorage, or `null` where it is missing or throws on access (private mode, blocked, tests). */
-function storage(): Storage | null {
-  try {
-    return localStorage;
-  } catch {
-    return null;
-  }
-}
-
 /** The stored draft for this subject, filtered to ids `definition` still has; empty when none. */
 export function loadLayoutDraft(
   area: string,
@@ -71,7 +63,10 @@ export function loadLayoutDraft(
   definition: Pick<ExplorableDefinition, "participants" | "relations">,
 ): LayoutOverrides {
   try {
-    return parseLayoutDraft(storage()?.getItem(layoutDraftKey(area, slug)) ?? null, definition);
+    return parseLayoutDraft(
+      browserStorage()?.getItem(layoutDraftKey(area, slug)) ?? null,
+      definition,
+    );
   } catch {
     return emptyLayout();
   }
@@ -80,7 +75,7 @@ export function loadLayoutDraft(
 /** Stores the draft, or removes the entry when there is nothing to keep. Never throws. */
 export function saveLayoutDraft(area: string, slug: string, overrides: LayoutOverrides): void {
   try {
-    const store = storage();
+    const store = browserStorage();
     if (!store) return;
     const key = layoutDraftKey(area, slug);
     if (isEmpty(overrides)) store.removeItem(key);

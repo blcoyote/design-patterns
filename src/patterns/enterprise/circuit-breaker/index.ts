@@ -40,7 +40,7 @@ export const pattern: PatternDefinition = {
     "Polly for .NET (v8 resilience pipelines via AddCircuitBreaker; v7 CircuitBreakerPolicy)",
     "Envoy and Istio outlier detection, which ejects unhealthy upstream hosts from the load-balancing pool",
   ],
-  related: ["state", "proxy", "decorator", "bulkhead"],
+  related: ["state", "proxy", "decorator", "bulkhead", "retry"],
 
   // Diagram (viewBox 800 × 460, x/y are box centres)
   participants: [

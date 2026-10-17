@@ -43,7 +43,7 @@ export const comparison: ComparisonDefinition = {
         retry:
           "A failed attempt that is classified as transient. In this example a status of 500 or above is retried and a status below 500 is final, so the 400 in call 3 is not retried.",
         "circuit-breaker":
-          "Failures: the failure count has reached the threshold of 3, and a success resets the count to zero. Every call that fails with an error is counted.",
+          "Failures: the failure count has reached the threshold of 3, and a success resets the count to zero. While Closed, each failed call is counted, up to the threshold; in Half-Open a failed trial reopens the breaker instead.",
       },
     },
     {
@@ -77,7 +77,7 @@ export const comparison: ComparisonDefinition = {
       label: "What it does not do",
       values: {
         retry:
-          "It has no memory between calls: call 2 makes its own 4 attempts, and a later call starts again at attempt 1. It has no per-attempt timeout, and repeating a call that is not idempotent can apply it twice. This example has no Circuit Breaker.",
+          "It has no memory of past failures between calls (the example’s scripted jitter list just continues): call 2 makes its own 4 attempts, and a later call starts again at attempt 1. It has no per-attempt timeout, and repeating a call that is not idempotent can apply it twice. This example has no Circuit Breaker.",
         "circuit-breaker":
           "It never repeats a failed call itself: the caller gets the error. It has no growing wait and no jitter. This example has no Retry.",
       },
@@ -136,7 +136,7 @@ export const comparison: ComparisonDefinition = {
     "These patterns are complementary and are often combined. The Retry page lists retries multiplying load (a retry storm) as a cost and recommends pairing them with a Circuit Breaker or a retry budget. Neither example contains the other pattern, so these examples show each one in isolation. How to combine them is a design choice, and the examples do not settle it. One consequence is worth knowing: an open breaker rejects calls at once, so a Retrier placed around a breaker would see those fast failures and has to decide whether “circuit open” is worth retrying. Resilience4j has a module for each pattern, and Polly for .NET v8 offers both as AddRetry and AddCircuitBreaker.",
   scenario: {
     prompt:
-      "Inventory restarts once a day and answers 503 for about a second. Last week it was down for 10 minutes, and every checkout hung while its calls kept being repeated. What should you add first?",
+      "Inventory restarts once a day and answers 503 for a few hundred milliseconds. Last week it was down for 10 minutes, and every checkout hung while its calls kept being repeated. What should you add first?",
     choices: [
       {
         id: "retry",
@@ -144,7 +144,7 @@ export const comparison: ComparisonDefinition = {
         label: "Retry with a limited number of attempts, a growing ceiling and jitter",
         verdict: "best",
         explanation:
-          "The daily blip is exactly what Retry hides: the call is repeated after a short wait and usually succeeds, and the jitter keeps many checkouts from retrying at the same instant. A 400 is returned at once, and after the last attempt the Retrier gives up, as call 2 does after waiting 260 ms. It does not answer the 10-minute outage by itself: every call would still make all its attempts. Add a Circuit Breaker for that once it matters.",
+          "The daily blip is exactly what Retry hides: the call is repeated after a short wait, and a blip of a few hundred milliseconds is over within the 700 ms the example policy can wait in total (at most 100 + 200 + 400), so a later attempt usually succeeds. The jitter keeps many checkouts from retrying at the same instant. A 400 is returned at once, and after the last attempt the Retrier gives up, as call 2 does after waiting 260 ms. It does not answer the 10-minute outage by itself: every call would still make all its attempts. Add a Circuit Breaker for that once it matters.",
       },
       {
         id: "circuit-breaker",

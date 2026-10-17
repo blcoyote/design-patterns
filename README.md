@@ -1,6 +1,6 @@
 # design-patterns
 
-An interactive, animated guide to all 23 Gang of Four design patterns plus 21 common enterprise patterns, and a second
+An interactive, animated guide to all 23 Gang of Four design patterns plus 23 common enterprise patterns, and a second
 area covering 20 software **architectures**, built with **React + TypeScript + Tailwind CSS v4** (Vite).
 
 Every pattern and architecture has:

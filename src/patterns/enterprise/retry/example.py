@@ -107,6 +107,7 @@ class Retrier:
                 return outcome(True, attempt, 200)
             except ApiError as err:
                 # [classify]
+                # This example treats every status below 500 as final; real policies also retry 408 and 429.
                 if err.status < 500:
                     print(f"attempt {attempt}: {err.status} -> not retryable")
                     return outcome(False, attempt, err.status)

@@ -11,13 +11,13 @@ export const pattern: PatternDefinition = {
   category: "enterprise",
   order: 23,
   summary:
-    "Call again after a transient failure, waiting a little longer each time, with a random share of the wait (jitter) so many clients do not retry in step.",
+    "Call again after a transient failure, letting the longest allowed wait grow each time, and taking a random share of it (jitter) so many clients do not retry in step.",
   intent:
-    "Hide short-lived failures from the caller by repeating the call a limited number of times, with a growing delay between attempts, and stop at once when the failure is not the kind that a repeat can fix.",
+    "Hide short-lived failures from the caller by repeating the call a limited number of times, waiting between attempts (the longest allowed wait, the ceiling, grows each time; the jittered wait actually used need not), and stop at once when the failure is not the kind that a repeat can fix.",
   problem:
     "A call to another service fails for a moment: a 503 while an instance restarts, a dropped connection, a brief overload. If every caller reports that failure upward, users see errors that would have gone away a fraction of a second later. If every caller retries at once and without limit, the retries pile onto a dependency that is already struggling, and all the clients that failed together retry together.",
   solution:
-    "Put a Retrier between the caller and the service. It runs the call and sorts the failure: a 4xx status is the caller's own mistake, so it is returned at once as not retryable; a 5xx status is treated as transient. After a transient failure the Retrier asks the RetryPolicy for a ceiling (here 100ms, 200ms, 400ms: the base doubled for each attempt, never above the cap), takes a share of that ceiling from the Jitter, and asks the Sleeper to wait that long. After the last allowed attempt it gives up and returns the final status. The result is an Outcome that says whether the call succeeded, how many attempts it took and how long it waited, so the caller handles one value in every language (the service reports its failure as a thrown error in TypeScript, C# and Python and as a returned error value in Go). The example is deliberately simplified. The jitter is scripted (50, 25, 75, 40, 90, 10 percent, in that order) so that every run prints the same lines, whereas a real client draws it at random; full jitter is a uniform pick between 0 and the ceiling, which spreads clients out. The sleeper is fake: it adds up the time instead of waiting. The cap of 400ms never lowers a ceiling in this script (the ceilings are 100, 200 and 400, and 400 equals the cap); with a fifth attempt it would hold the ceiling at 400. Per-attempt timeouts are not shown.",
+    "Put a Retrier between the caller and the service. It runs the call and sorts the failure: in this example's policy a status below 500 is returned at once as not retryable and a 5xx status is treated as transient. That is a simplification, not a general HTTP rule: 408 (request timeout) and 429 (too many requests) often deserve a retry, so real policies list the retryable statuses explicitly. After a transient failure the Retrier asks the RetryPolicy for a ceiling (here 100ms, 200ms, 400ms: the base doubled for each attempt, never above the cap), takes a share of that ceiling from the Jitter, and asks the Sleeper to wait that long. After the last allowed attempt it gives up and returns the final status. The result is an Outcome that says whether the call succeeded, how many attempts it took and how long it waited, so the caller handles one value in every language (the service reports its failure as a thrown error in TypeScript, C# and Python and as a returned error value in Go). The example is deliberately simplified. The jitter is scripted (50, 25, 75, 40, 90, 10 percent, in that order) so that every run prints the same lines, whereas a real client draws it at random; full jitter is a uniform pick between 0 and the ceiling, which spreads clients out. The sleeper is fake: it adds up the time instead of waiting. The cap of 400ms never lowers a ceiling in this script (the ceilings are 100, 200 and 400, and 400 equals the cap); with a fifth attempt it would hold the ceiling at 400. Per-attempt timeouts are not shown.",
   analogy:
     "Redialling a busy phone number. You do not hang up for good after the first busy tone, and you do not redial every second either: you wait a bit, try again, wait longer, and give up after a few tries. If the line says the number does not exist, you stop at once, because redialling cannot help.",
   whenToUse: [
@@ -36,7 +36,7 @@ export const pattern: PatternDefinition = {
     "Retries multiply load. If every layer in a call chain retries 3 times, one user request can become dozens of calls to the bottom service, and a dependency that is down is hit hardest at the worst moment (a retry storm). Pair retries with a Circuit Breaker, or limit them with a retry budget.",
     "Unsafe for non-idempotent calls without an idempotency key, because the first attempt may have worked even though the answer was lost.",
     "Adds latency to the unlucky calls: in this example call 1 waits 400ms and call 2 waits 260ms before the outcome is known.",
-    "Retrying a permanent failure only wastes time, so the classification of failures (here: status below 500 is not retryable) has to be right.",
+    "Retrying a permanent failure only wastes time, so the classification of failures (here: a status below 500 is not retryable, which would also reject a 429 that a real policy would retry) has to be right.",
     "This example shows no per-attempt timeout and a simple status-based classification. Real systems also retry on timeouts and connection errors, and some honour a Retry-After header.",
   ],
   realWorld: [
@@ -262,9 +262,19 @@ export const pattern: PatternDefinition = {
         { relation: "call", label: "execute(fn)" },
         { relation: "invoke", label: "get()", after: 0 },
         { relation: "invoke", label: "503", reverse: true, after: 1 },
-        { relation: "backoff", label: "ceilings 100, 200, 400", after: 2 },
-        { relation: "jitterPick", label: "40%, 90%, 10%", after: 3 },
-        { relation: "sleep", label: "40, 180, 40ms", after: 4 },
+        { relation: "backoff", label: "ceilingMs(1) = 100", after: 2 },
+        { relation: "jitterPick", label: "40%", after: 3 },
+        { relation: "sleep", label: "sleep(40)", after: 4 },
+        { relation: "invoke", label: "get()", after: 5 },
+        { relation: "invoke", label: "503", reverse: true, after: 6 },
+        { relation: "backoff", label: "ceilingMs(2) = 200", after: 7 },
+        { relation: "jitterPick", label: "90%", after: 8 },
+        { relation: "sleep", label: "sleep(180)", after: 9 },
+        { relation: "invoke", label: "get()", after: 10 },
+        { relation: "invoke", label: "503", reverse: true, after: 11 },
+        { relation: "backoff", label: "ceilingMs(3) = 400", after: 12 },
+        { relation: "jitterPick", label: "10%", after: 13 },
+        { relation: "sleep", label: "sleep(40)", after: 14 },
       ],
       notes: { retrier: "attempt 3/4", jitter: "40%, 90%, 10%" },
       code: "wait",
@@ -285,7 +295,7 @@ export const pattern: PatternDefinition = {
     {
       title: "Call 3: a 400 is not retried",
       description:
-        "The service answers 400. That status is below 500, so it is the caller's own mistake and no repeat can fix it: the Retrier returns at once (failed, 1 attempt, 0ms waited) and asks nobody for a ceiling or a jitter value.",
+        "The service answers 400. That status is below 500, so in this example's policy it is not retried (a 400 is a request that repeating will not fix): the Retrier returns at once (failed, 1 attempt, 0ms waited) and asks nobody for a ceiling or a jitter value.",
       highlight: ["call", "invoke", "service"],
       packets: [
         { relation: "call", label: "execute(fn)" },

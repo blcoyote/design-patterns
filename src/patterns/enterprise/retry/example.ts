@@ -97,6 +97,7 @@ class Retrier {
       } catch (err) {
         if (!(err instanceof ApiError)) throw err;
         // [classify]
+        // This example treats every status below 500 as final; real policies also retry 408 and 429.
         if (err.status < 500) {
           console.log(`attempt ${attempt}: ${err.status} -> not retryable`);
           return outcome(false, attempt, err.status);

@@ -104,6 +104,7 @@ class Retrier(RetryPolicy policy, ScriptedJitter jitter, FakeSleeper sleeper)
             catch (ApiException err)
             {
                 // [classify]
+                // This example treats every status below 500 as final; real policies also retry 408 and 429.
                 if (err.Status < 500)
                 {
                     Console.WriteLine($"attempt {attempt}: {err.Status} -> not retryable");

@@ -19,7 +19,7 @@ export const pattern: PatternDefinition = {
   solution:
     "Put a Retrier between the caller and the service. It runs the call and sorts the failure: in this example's policy a status below 500 is returned at once as not retryable and a 5xx status is treated as transient. That is a simplification, not a general HTTP rule: 408 (request timeout) and 429 (too many requests) often deserve a retry, so real policies list the retryable statuses explicitly. After a transient failure the Retrier asks the RetryPolicy for a ceiling (here 100ms, 200ms, 400ms: the base doubled for each attempt, never above the cap), takes a share of that ceiling from the Jitter, and asks the Sleeper to wait that long. After the last allowed attempt it gives up and returns the final status. The result is an Outcome that says whether the call succeeded, how many attempts it took and how long it waited, so the caller handles one value in every language (the service reports its failure as a thrown error in TypeScript, C# and Python and as a returned error value in Go). The example is deliberately simplified. The jitter is scripted (50, 25, 75, 40, 90, 10 percent, in that order) so that every run prints the same lines, whereas a real client draws it at random; full jitter is a uniform pick between 0 and the ceiling, which spreads clients out. The sleeper is fake: it adds up the time instead of waiting. The cap of 400ms never lowers a ceiling in this script (the ceilings are 100, 200 and 400, and 400 equals the cap); with a fifth attempt it would hold the ceiling at 400. Per-attempt timeouts are not shown.",
   analogy:
-    "Redialling a busy phone number. You do not hang up for good after the first busy tone, and you do not redial every second either: you wait a bit, try again, wait longer, and give up after a few tries. If the line says the number does not exist, you stop at once, because redialling cannot help.",
+    "Redialling a busy phone number. You do not hang up for good after the first busy tone, and you do not redial every second either: you wait a bit, try again, allow yourself a longer wait, and give up after a few tries. If the line says the number does not exist, you stop at once, because redialling cannot help.",
   whenToUse: [
     "Calls cross a network and fail for short moments: restarts, brief overload, dropped connections, rate limits that clear.",
     "The operation is idempotent, such as the GET in this example, so doing it twice has the same effect as doing it once. A retried non-idempotent call (a payment, say) can apply twice unless it carries an idempotency key.",
@@ -28,7 +28,7 @@ export const pattern: PatternDefinition = {
   ],
   pros: [
     "Hides most short-lived failures from callers without any change to the service.",
-    "Growing delays give a struggling dependency room to recover instead of hitting it again at once.",
+    "A ceiling that grows with each attempt, and a wait chosen within it, give a struggling dependency room to recover instead of being hit again at once.",
     "Jitter spreads out clients that failed together, so they do not all retry at the same instant.",
     "The policy is plain data (attempts, base, cap), so it is easy to tune per dependency, and the injected Sleeper and Jitter make the behaviour testable without real time or randomness.",
   ],
